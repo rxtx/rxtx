@@ -101,9 +101,9 @@
 extern int errno;
 #ifdef TRENT_IS_HERE
 #undef TIOCSERGETLSR
+#define DEBUG
 /*
 #define DONT_USE_OUTPUT_BUFFER_EMPTY_CODE
-#define DEBUG
 #define SIGNALS
 #define DEBUG_MW
 */
@@ -734,6 +734,8 @@ void *thread_write( void *arg )
 	t->tcdrain = 0;
 	report("thread_write: return(NULL)\n" );
 	pthread_exit( NULL );
+	/* -Wall ?fix */
+	return( NULL );
 }
 
 /*----------------------------------------------------------
@@ -912,21 +914,17 @@ int init_thread_write( struct event_info_struct *eis )
 {
 #ifndef TIOCSERGETLSR
 	struct tpid_info_struct *t = add_tpid( NULL);
-#ifdef SIGNALS
 	sigset_t newmask, oldmask;
-#endif /* SIGNALS */
 	jfieldID jeis;
 
 	report("init_thread_write:  start\n");
-#ifdef SIGNALS
-/*
 	sigemptyset(&newmask);
 	sigaddset(&newmask, SIGCHLD);
-	sigfillset(&newmask);
 	pthread_sigmask( SIG_BLOCK, &newmask, &oldmask );
+/*
+	sigfillset(&newmask);
 	sigprocmask( SIG_SETMASK, &newmask, &oldmask );
 */
-#endif /* SIGNALS */
 
 	eis->tpid = t;
 	t->mutex = malloc(sizeof(pthread_mutex_t));
@@ -2055,10 +2053,10 @@ system_wait
 void system_wait()
 {
 #if defined (__sun__ )
+/*
 	struct timespec retspec, tspec;
 	retspec.tv_sec = 0;
 	retspec.tv_nsec = 100000000;
-/*
 	do {
 		tspec = retspec;
 		nanosleep( &tspec, &retspec );
@@ -3378,7 +3376,7 @@ int check_group_uucp()
 			{
 				break;
 			}
-			*g->gr_mem++;
+			(void) *g->gr_mem++;
 		}
 		if( !*g->gr_mem )
 		{
