@@ -371,13 +371,44 @@ JNIEXPORT void JNICALL Java_javax_comm_RS485Port_writeByte( JNIEnv *env,
 {
 	unsigned char byte = (unsigned char)ji;
 	int fd = get_java_var( env, jobj,"fd","I" );
-	int result;
+	int result=0,count=0;
 
+	/* turn on the DTR */
+	ioctl(fd, TIOCMGET, &result);
+	result |= TIOCM_DTR;
+	ioctl(fd, TIOCMSET, &result);
+
+	/* send the data */
 	do {
 		result=write (fd, &byte, sizeof(unsigned char));
 	}  while (result < 0 && errno==EINTR);
-	if(result >= 0)
-		return;
+	if(result < 0) goto fail;
+	/* wait for the last bit to go 
+	 * see get_lsr_info in linux/driver/char/serial.c 
+	 * */
+	do
+	{
+		result=ioctl(fd, TIOCSERGETLSR);
+		/*  FIXME this should work but its a hack  */
+		if (result != TIOCSER_TEMT)
+		{
+			usleep(100);
+		}
+	} while(result != TIOCSER_TEMT);
+	/* shut down the DTR */
+	ioctl(fd, TIOCMGET, &result);
+	result &= ~TIOCM_DTR;
+	ioctl(fd, TIOCMSET, &result);
+
+	/* flush input (we dont want to get our own message */
+	do {
+		result=tcflush(fd, TCIFLUSH);
+	}  while (result && errno==EINTR && count <5);
+
+	if(result) goto fail;
+
+	return;
+fail:
 	throw_java_exception( env, IO_EXCEPTION, "writeByte",
 		strerror( errno ) );
 }
@@ -404,15 +435,50 @@ JNIEXPORT void JNICALL Java_javax_comm_RS485Port_writeArray( JNIEnv *env,
 	jbyte *body = (*env)->GetByteArrayElements( env, jbarray, 0 );
 	for( i = 0; i < count; i++ ) bytes[ i ] = body[ i + offset ];
 	(*env)->ReleaseByteArrayElements( env, jbarray, body, 0 );
+
+	/* turn on the DTR */
+	ioctl(fd, TIOCMGET, &result);
+	result |= TIOCM_DTR;
+	ioctl(fd, TIOCMSET, &result);
+
+	/* send the data */
 	do {
 		result=write (fd, bytes + total, count - total);
 		if(result >0){
 			total += result;
 		}
 	}  while ((total<count)||(result < 0 && errno==EINTR));
+	if (result < 0) goto fail;
+	/* wait for the last bit to go 
+	 * see get_lsr_info in linux/driver/char/serial.c 
+	 * */
+	do
+	{
+		result=ioctl(fd, TIOCSERGETLSR);
+		/*  FIXME this should work but its a hack  */
+		if (result != TIOCSER_TEMT)
+		{
+			usleep(100);
+		}
+	} while(result != TIOCSER_TEMT);
+	/* shut down the DTR */
+	ioctl(fd, TIOCMGET, &result);
+	result &= ~TIOCM_DTR;
+	ioctl(fd, TIOCMSET, &result);
+
+	/* flush input (we dont want to get our own message */
+	do {
+		result=tcflush(fd, TCIFLUSH);
+	}  while (result && errno==EINTR && count <5);
+
+	if(result) goto fail;
 	free( bytes );
-	if( result < 0 ) throw_java_exception( env, IO_EXCEPTION,
-		"writeArray", strerror( errno ) );
+	return;
+fail:
+	free( bytes );
+	throw_java_exception( env, IO_EXCEPTION, "writeArray", 
+		strerror( errno ) );
+
 }
 
 
