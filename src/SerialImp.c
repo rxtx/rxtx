@@ -2885,12 +2885,23 @@ JNIEXPORT void JNICALL RXTXPort(NativeEnableReceiveTimeoutThreshold)(
 {
 	int fd = get_java_var( env, jobj,"fd","I" );
 	struct termios ttyset;
+	int timeout;
+
+	if (vtime < 0){
+		timeout = 0; 
+	}
+	else if (vtime == 0){
+		timeout = 1;
+	}
+	else{
+		timeout = vtime;
+	}
 
 	ENTER( "RXTXPort:NativeEnableRecieveTimeoutThreshold" );
 	if( tcgetattr( fd, &ttyset ) < 0 ) goto fail;
 	/* TESTING ttyset.c_cc[ VMIN ] = threshold; */
 	ttyset.c_cc[ VMIN ] = 0;
-	ttyset.c_cc[ VTIME ] = vtime/100;
+	ttyset.c_cc[ VTIME ] = timeout/100;
 	if( tcsetattr( fd, TCSANOW, &ttyset ) < 0 ) goto fail;
 
 	LEAVE( "RXTXPort:NativeEnableRecieveTimeoutThreshold" );
@@ -3729,7 +3740,7 @@ RXTXCommDriver.nativeGetVersion
 JNIEXPORT jstring JNICALL RXTXCommDriver(nativeGetVersion) (JNIEnv *env,
 	jclass jclazz )
 {
-	return (*env)->NewStringUTF( env, "RXTX-2.1-5" );
+	return (*env)->NewStringUTF( env, "RXTX-2.1-6" );
 }
 
 /*----------------------------------------------------------
