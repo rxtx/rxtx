@@ -1,68 +1,47 @@
 #!/bin/sh
+
 # Don't use! :)
-# This script will eat itself if its in the same tree as rxtx.  Just put it
-# in some other location.
-#
-# Usage ../ChangePackage target package
-# Example ../ChangePackage gnu
-#
-# This would change all the files from javax to gnu.
-#
-# Bash was assumed when this script was writting.  With luck it will work
-# in other shells.
-#
-# More sanity checks could be made but just move the script to the
-# directory above rxtx-version,  then cd to .../rxtx-version.  Finally
-# call ../ChangePackage javax gnu or the reverse.
 
-if [ ! -n "$1" ]; then
-	echo "********************************************************";
-	echo "*";  
-	echo "*  usage ../ChangePackage target package [gnu or javax]";
-	echo "*";  
-	echo "*  BIG WARNING:";  
-	echo "*";  
-	echo "*  Running this script while is is in the rxtx tree";
-	echo "*  will ruin the script."
-	echo "*";  
-	echo "*  This script is not failsafe!";
-	echo "*";  
-	echo "*  more comments in the script";
-	echo "********************************************************";
-	exit;
-fi
+#
+# Sat, 03 May 2003 16:45:08 Modifications from Jörg Weule <weule@7b5.de>
+# Create a ed-cmd for the change of one pattern
+#
+case $1 in
+gnu)   X=g/javax_comm/s+javax_comm+gnu_io+g ;;
+javax) X=g/gnu_io/s+gnu_io+javax_comm+g ;;
+*) echo;echo;echo From the top rxtx directory run;echo;echo -e \\t./ChangePackage.sh gnu;echo -e \\t\\tor;echo -e \\t./ChangePackage.sh javax;echo;echo; exit 0 ;;
+esac
 
-switchit( )
-{
-	for i in `find . -name \* -type f`;do cat $i | \
-		sed s/$1/$2/g > tmpfile;mv tmpfile $i;done
-}
-fixperms( )
-{
-	chmod 755 acinclude.m4 aclocal.m4 autogen.sh config.guess config.sub \
-		configure install-sh ltconfig missing
-}
+#
+# ed will be used to keep the owner and mode of the files unchanged.
+# We have run the ed-script for the characters '.' '/' as well.
+# "tr _ $D" do the change.
+#
+find . -type f -a -print |
+   grep -v $0 |
+   (while read F ; do
+     ( echo $X;
+       echo $X| tr _ /;
+       echo $X| tr _ .;
+       echo w;
+       echo q
+     ) | ed $F 2>&1 >/dev/null
+    done )
 
-if [ $1 = "gnu" ]; then
-	switchit javax\\/comm gnu\\/io;
-	switchit javax_comm gnu_io;
-	switchit javax\\.comm gnu\\.io;
-	switchit CLASSTOP=javax CLASSTOP=gnu;
-	# this one will probably create problems
-	for i in `find . -name Makefile\*`;do \
-		cat $i | sed s/javax/gnu/g > tmpfile;
-		mv tmpfile $i;
-	done;
-elif [ $1 = "javax" ]; then
-	echo
-	switchit gnu\\/io javax\\/comm;
-	switchit gnu_io javax_comm;
-	switchit gnu\\.io javax\\.comm;
-	# this one will probably create problems
-	for i in `find . -name Makefile\*`;do
-		cat $i | sed s/gnu/javax/g > tmpfile;
-		mv tmpfile $i;
-	done;
-fi
-fixperms;
-
+#
+# Now we do little changes at the Makefiles. Hope that all we need.
+#
+find . -name Makefile\* -a -print |
+   (while read F  ; do cat <<EOF | ed $F
+g/RXTXcomm.jar gnu/s/RXTXcomm.jar gnu/RXTXcomm.jar javax/g
+g/CLASSTOP=gnu/s/gnu/javax/g
+g/CLASSTOP = gnu/s/gnu/javax/g
+g/gnu\\\\\\\\io/s/gnu\\\\\\\\io/javax\\\\\\\\comm/g
+g/gnu\\\\\\\\\\\\io/s/gnu\\\\\\\\\\\\io/javax\\\\\\\\\\\\comm/g
+g/mkdir gnu/s/mkdir gnu/makedir javax/g
+g/include gnu/s/include gnu/include javax/g
+g/gnu include/s/gnu include/javax include/g
+w
+q
+EOF
+   done)
