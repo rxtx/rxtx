@@ -105,13 +105,13 @@
 #include <math.h>
 
 extern int errno;
+#undef TIOCSERGETLSR
 #ifdef TRENT_IS_HERE
 #define DEBUG
 #define DEBUG_VERBOSE
 #define DEBUG_MW
 #define TRACE
 /*
-#undef TIOCSERGETLSR
 #define DEBUG_MW
 #define DONT_USE_OUTPUT_BUFFER_EMPTY_CODE
 notes:
@@ -744,7 +744,6 @@ void *thread_write( void *arg )
 	pthread_mutex_unlock( t->mutex_draining );
 	sprintf(msg, "thread_write[%i]: mutex_lock event\n", pid);
 	report( msg );
-	pthread_mutex_lock( t->mutex_event );
 	if( !t->closing )
 	{
 		result = write( eis->fd, t->buff, t->length );
@@ -777,33 +776,9 @@ void *thread_write( void *arg )
 	{
 		sprintf(msg, "thread_write[%i]: mutex_lock event\n", pid);
 		report( msg );
-		while( eis->output_buffer_empty_flag == 1 ) 
-		{
-			sprintf(msg, ">thread_write[%i]: cond_wait event\n", pid);
-			report( msg );
-			pthread_cond_wait( t->cpt_event, t->mutex_event );
-			sprintf(msg, "<thread_write[%i]: cond_wait event\n", pid);
-			report( msg );
-		}
-		if( eis ) 
-		{
-			sprintf(msg, "thread_write[%i]: setting OUTPUT_BUFFER_EMPTY\n", pid );
-			report( msg );
-			eis->output_buffer_empty_flag = 1;
-		}
-		else
-		{
-			pthread_cond_signal( t->cpt_draining );
-			sprintf(msg, "thread_write[%i]: mutex_unlock draining\n", pid);
-			report( msg );
-			pthread_mutex_unlock( t->mutex_draining );
-			pthread_mutex_unlock( t->mutex_closing );
-			pthread_mutex_unlock( t->mutex_event );
-			goto fail;
-		}
-		sprintf(msg, "thread_write[%i]: mutex_unlock event\n", pid);
+		sprintf(msg, "thread_write[%i]: setting OUTPUT_BUFFER_EMPTY\n", pid );
 		report( msg );
-		pthread_mutex_unlock( t->mutex_event );
+		eis->output_buffer_empty_flag = 1;
 	}
 	else
 	{
@@ -813,12 +788,6 @@ void *thread_write( void *arg )
 	t->tcdrain = 0;
 	sprintf(msg, "thread_write[%i]: pthread_exit(NULL)\n", pid );
 	report( msg );
-/*
-	sprintf(msg, "thread_write[%i]: cond_signal closing\n", pid);
-	report( msg );
-	pthread_cond_signal( t->cpt_closing );
-*/
-	
 	sprintf(msg, "thread_write[%i]: cond_signal draining\n", pid);
 	report( msg );
 	pthread_cond_signal( t->cpt_draining );
@@ -953,7 +922,6 @@ void finalize_thread_write( struct event_info_struct *eis )
 	eis->tpid->closing = 1;
 	eis->output_buffer_empty_flag = 0;
 	report("finalize_thread_write: cond_broadcast event\n");
-	pthread_cond_broadcast( eis->tpid->cpt_event );
 	report("entering finalize_thread_write\n");
 	report("finalize_thread_write: mutex_lock closing\n");
 	pthread_mutex_lock( eis->tpid->mutex_closing );
@@ -977,10 +945,8 @@ void finalize_thread_write( struct event_info_struct *eis )
 	if ( eis->tpid->cpt_writing && eis->tpid->cpt_closing )
 	{
 		pthread_cond_destroy( eis->tpid->cpt_writing );
-		pthread_cond_destroy( eis->tpid->cpt_event );
 		report(">finalize_thread_write: destroy cpt_writing/cpt_closing\n");
 		free( eis->tpid->cpt_writing );
-		free( eis->tpid->cpt_event );
 		report("finalize_thread_write: mutex_unlock closing\n");
 		pthread_mutex_unlock( eis->tpid->mutex_closing );
 		usleep(10000);
@@ -1084,22 +1050,18 @@ int init_thread_write( struct event_info_struct *eis )
 	t->mutex_writing = malloc(sizeof(pthread_mutex_t));
 	t->mutex_draining = malloc(sizeof(pthread_mutex_t));
 	t->mutex_closing = malloc(sizeof(pthread_mutex_t));
-	t->mutex_event = malloc(sizeof(pthread_mutex_t));
 	t->cpt_writing = malloc(sizeof(pthread_cond_t));
 	t->cpt_draining = malloc(sizeof(pthread_cond_t));
 	t->cpt_closing = malloc(sizeof(pthread_cond_t));
-	t->cpt_event = malloc(sizeof(pthread_cond_t));
 
 	report("init_thread_write: init mutex\n");
 	pthread_mutex_init( t->mutex_writing, NULL );
 	pthread_mutex_init( t->mutex_draining, NULL );
 	pthread_mutex_init( t->mutex_closing, NULL );
-	pthread_mutex_init( t->mutex_event, NULL );
 	report("init_thread_write: init cond\n");
 	pthread_cond_init( t->cpt_writing, NULL );
 	pthread_cond_init( t->cpt_draining, NULL );
 	pthread_cond_init( t->cpt_closing, NULL );
-	pthread_cond_init( t->cpt_event, NULL );
 	report("init_thread_write: get eis\n");
 	jeis  = (*eis->env)->GetFieldID( eis->env, eis->jclazz, "eis", "I" );
 	report("init_thread_write: set eis\n");
@@ -2156,14 +2118,9 @@ int check_line_status_register( struct event_info_struct *eis )
 	{
 		report("check_line_status_register: sending SPE_OUTPUT_BUFFER_EMPTY\n");
 		report("check_line_status_register: mutex_lock event\n");
-		pthread_mutex_lock( eis->tpid->mutex_event );
 		send_event( eis, SPE_OUTPUT_BUFFER_EMPTY, 1 );
 		//send_event( eis, SPE_DATA_AVAILABLE, 1 );
 		eis->output_buffer_empty_flag = 0;
-		report("check_line_status_register: cond_signal event\n");
-		pthread_cond_signal( eis->tpid->cpt_event );
-		report("check_line_status_register: mutex_unlock event\n");
-		pthread_mutex_unlock( eis->tpid->mutex_event );
 	}
 #endif /* TIOCSERGETLSR */
 	return( 0 );
