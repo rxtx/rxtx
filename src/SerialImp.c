@@ -146,13 +146,22 @@ int cfmakeraw ( struct termios *term )
 #endif /* __sun__  || __hpux__ */
 
 #ifdef DEBUG_TIMING
+struct timeval snow, enow, seloop, eeloop;
+#define report_time_eventLoop( ) { \
+	if ( seloop.tv_sec == eeloop.tv_sec && seloop.tv_usec == eeloop.tv_usec ) \
+	{ \
+		gettimeofday(&eeloop, NULL); \
+		seloop.tv_sec = eeloop.tv_sec; \
+		seloop.tv_usec = eeloop.tv_usec; \
+		mexPrintf("%8i sec : %8i usec\n", eeloop.tv_sec - seloop.tv_sec, eeloop.tv_usec - seloop.tv_usec); \
+	} \
+}
 #define report_time( ) \
 { \
 	struct timeval now; \
 	gettimeofday(&now, NULL); \
 	mexPrintf("%8s : %5i : %8i sec : %8i usec\n", __TIME__, __LINE__, now.tv_sec, now.tv_usec); \
 }
-struct timeval snow, enow;
 #define report_time_start( ) \
 { \
 	gettimeofday(&snow, NULL); \
@@ -220,6 +229,9 @@ JNIEXPORT void JNICALL RXTXPort(Initialize)(
 #ifdef DEBUG_MW
 	mexPrintf("RXTX Prerelease for testing  Sat Jan 26 15:32:04 MST 2002\n");
 #endif /* DEBUG_MW */
+#if DEBUG_TIMING
+	gettimeofday(&seloop, NULL);
+#endif /* DEBUG_TIMING */
 #if defined(DEBUG) && defined(__linux__)
 	/* Lets let people who upgraded kernels know they may have problems */
 	if (uname (&name) == -1)
@@ -264,6 +276,7 @@ JNIEXPORT jint JNICALL RXTXPort(open)(
 	const char *filename;
 	jclass jclazz = (*env)->GetObjectClass( env, jobj );
 	jfieldID jfid = (*env)->GetFieldID( env, jclazz, "pid", "I" );
+	report_time_start( );
 
 	if( !jfid ) {
 		(*env)->ExceptionDescribe( env );
@@ -334,6 +347,7 @@ JNIEXPORT jint JNICALL RXTXPort(open)(
 	sprintf( message, "open: fd returned is %i\n", fd );
 	report( message );
 	LEAVE( "RXTXPort:open" );
+	report_time_end( );
 	return (jint)fd;
 
 fail:
@@ -359,6 +373,7 @@ JNIEXPORT void JNICALL RXTXPort(nativeClose)( JNIEnv *env,
 	int fd = get_java_var( env, jobj,"fd","I" );
 	const char *filename = (*env)->GetStringUTFChars( env, jstr, 0 );
 	jclass jclazz = (*env)->GetObjectClass( env, jobj );
+	report_time_start( );
 	pid = get_java_var( env, jobj,"pid","I" );
 
 	report(">nativeClose pid\n");
@@ -393,6 +408,7 @@ JNIEXPORT void JNICALL RXTXPort(nativeClose)( JNIEnv *env,
 	report("nativeClose: release filename\n");
 	(*env)->ReleaseStringUTFChars( env, jstr, filename );
 	LEAVE( "RXTXPort:nativeClose" );
+	report_time_end( );
 	return;
 }
 
@@ -415,6 +431,7 @@ JNIEXPORT void JNICALL RXTXPort(nativeSetSerialPortParams)(
 #if defined(TIOCGSERIAL) && !defined( WIN32 )
 	struct serial_struct sstruct;
 #endif /* TIOCGSERIAL && !WIN32 */
+	report_time_start( );
 	if (cspeed == -1)
 	{
 		throw_java_exception( env, UNSUPPORTED_COMM_OPERATION,
@@ -541,6 +558,7 @@ JNIEXPORT void JNICALL RXTXPort(nativeSetSerialPortParams)(
 	}
 
 	LEAVE( "RXTXPort:nativeSetSerialPortParams" );
+	report_time_end( );
 	return;
 
 fail:
@@ -832,6 +850,7 @@ int init_threads( struct event_info_struct *eis )
 	jfieldID jeis;
 	pthread_t tid;
 
+	report_time_start( );
 	report("init_threads:  start\n");
 	sigemptyset(&newmask);
 	sigaddset(&newmask, SIGCHLD);
@@ -871,6 +890,7 @@ int init_threads( struct event_info_struct *eis )
 	pthread_detach( tid );
 #endif /* TIOCSERGETLSR */
 	report("init_threads:  stop\n");
+	report_time_end( );
 	return( 1 );
 }
 
@@ -1008,6 +1028,7 @@ JNIEXPORT void JNICALL RXTXPort(nativeDrain)( JNIEnv *env,
 	char message[80];
 
 	ENTER( "SerialImp.c:drain()" );
+	report_time_start( );
 	do {
 		report_verbose( "nativeDrain: trying tcdrain\n" );
 		result=tcdrain(fd);
@@ -1019,6 +1040,7 @@ JNIEXPORT void JNICALL RXTXPort(nativeDrain)( JNIEnv *env,
 	LEAVE( "RXTXPort:drain()" );
 	if( result ) throw_java_exception( env, IO_EXCEPTION, "nativeDrain",
 		strerror( errno ) );
+	report_time_end( );
 	return;
 }
 
@@ -1034,8 +1056,10 @@ JNIEXPORT void JNICALL RXTXPort(sendBreak)( JNIEnv *env,
 	jobject jobj, jint duration )
 {
 	int fd = get_java_var( env, jobj,"fd","I" );
+	report_time_start( );
 	ENTER( "RXTXPort:sendBreak()" );
 	tcsendbreak( fd, (int)( duration / 250 ) );
+	report_time_end( );
 	LEAVE( "RXTXPort:sendBreak()" );
 }
 
@@ -1797,6 +1821,7 @@ JNIEXPORT jint JNICALL RXTXPort(readByte)( JNIEnv *env,
 	char msg[80];
 
 	ENTER( "RXTXPort:readByte" );
+	report_time_start( );
 	bytes = read_byte_array( env, &jobj, fd, buffer, 1, timeout );
 	if( bytes < 0 ) {
 		LEAVE( "RXTXPort:readByte" );
@@ -1807,6 +1832,7 @@ JNIEXPORT jint JNICALL RXTXPort(readByte)( JNIEnv *env,
 	LEAVE( "RXTXPort:readByte" );
 	sprintf( msg, "readByte return(%i)\n", bytes ? buffer[ 0 ] : -1 );
 	report( msg );
+	report_time_end( );
 	return (bytes ? (jint)buffer[ 0 ] : -1);
 }
 
@@ -1832,6 +1858,7 @@ JNIEXPORT jint JNICALL RXTXPort(readArray)( JNIEnv *env,
 	int timeout = get_java_var( env, jobj, "timeout", "I" );
 
 	ENTER( "readArray" );
+	report_time_start( );
 	if( length > SSIZE_MAX || length < 0 ) {
 		report( "RXTXPort:readArray length > SSIZE_MAX" );
 		LEAVE( "RXTXPort:readArray" );
@@ -1851,6 +1878,7 @@ JNIEXPORT jint JNICALL RXTXPort(readArray)( JNIEnv *env,
 	}
 	sprintf( msg, "RXTXPort:readArray: %i %i\n", (int) length, bytes);
 	report( msg );
+	report_time_end( );
 	LEAVE( "RXTXPort:readArray" );
 	return (bytes ? bytes : -1);
 }
@@ -2396,6 +2424,7 @@ JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 	if ( !init_threads( &eis ) ) goto end;
 	unlock_monitor_thread( &eis );
 	do{
+		report_time_eventLoop( );
 		do {
 			/* report( "." ); */
 			eis.ret = SELECT( eis.fd + 1, &eis.rfds, NULL, NULL,
