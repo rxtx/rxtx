@@ -444,7 +444,6 @@ Conclusion?  Avoid Sun's native threads unless you can figure out whats going
 wrong.
  
 Q.  How does rxtx detect ports?  Can I override it?
-[FIXME This is going to added shortly]
 
 rxtx tries to detect ports on by scanning /dev for files matching any
 of a set of known-good prefixes, such as 'ttyS', 'ttym', and so on.
@@ -466,7 +465,6 @@ will look kind of like Solaris, if you have created the appropriate
 device nodes.
 
 R.  How can I use Lock Files with rxtx?
-[FIXME This is going to added shortly]
 
 Lock files are used to prevent more than one program accessing a port at a
 time.  Rxtx intentionally avoids defaulting to lock files at this point because
