@@ -7,7 +7,7 @@ import java.io.*;
 import java.util.*;
 import javax.comm.*;
 
-public class Test {
+public class Test implements SerialPortEventListener {
 
 InputStream inputStream;
 OutputStream outputStream;
@@ -19,7 +19,7 @@ Thread readThread;
 			System.out.print("Test.class /dev/ports/serialx\n");
 			System.exit(-1);
 		}
-		System.out.print("opening the Port\n");		
+		System.out.println("opening the Port: " + args[0]);		
 		Test reader = new Test(args[0]);
 	}
 
@@ -32,6 +32,11 @@ Thread readThread;
 			inputStream = serialPort.getInputStream();
 			outputStream = serialPort.getOutputStream();
 		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		try {
+			serialPort.addEventListener(this);
+		} catch (TooManyListenersException e) {
 			e.printStackTrace();
 		}
 		try {
@@ -62,5 +67,32 @@ Thread readThread;
 			e.printStackTrace();
 		}
 	}
+        public void serialEvent(SerialPortEvent event) {
+                switch(event.getEventType()) {
+                        case SerialPortEvent.BI:
+                                System.out.print("BI\n");
+                        case SerialPortEvent.OE:
+                                System.out.print("OE\n");
+                        case SerialPortEvent.FE:
+                                System.out.print("FE\n");
+                        case SerialPortEvent.PE:
+                                System.out.print("PE\n");
+                        case SerialPortEvent.CD:
+                                System.out.print("CD\n");
+                        case SerialPortEvent.CTS:
+                                System.out.print("CTS\n");
+                        case SerialPortEvent.DSR:
+                                System.out.print("DSR\n");
+                        case SerialPortEvent.RI:
+                                System.out.print("RI\n");
+                        case SerialPortEvent.OUTPUT_BUFFER_EMPTY:
+                                System.out.print("Out Buff Empty\n");
+                                break;
+                        case SerialPortEvent.DATA_AVAILABLE:
+                                System.out.print("Data Available\n");
+                                break;
+                }
+        }
+
 }
 

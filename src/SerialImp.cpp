@@ -1290,7 +1290,7 @@ fail:
 */
 }
 
-#ifndef  __BEOS__
+#ifdef  __BEOS__
 /*----------------------------------------------------------
 RXTXPort.eventLoop
 
@@ -1302,6 +1302,8 @@ RXTXPort.eventLoop
 ----------------------------------------------------------*/
 JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 {
+	printf("BeOS eventLoop not Implemented\n");
+#else /*  __BEOS__ */
 
    ////////////////// Open Log File /////////////////////
    fp = fopen("RXTXOut.log", "a");
@@ -1432,9 +1434,9 @@ JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 		}
 	}
 	return;
+#endif /* __BEOS__ */
 }
 
-#endif /* __BEOS__ */
 /*----------------------------------------------------------
  isDeviceGood
 
@@ -1459,9 +1461,8 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(isDeviceGood)(JNIEnv *env,
 	static struct stat mystat;
 	char teststring[256];
 	int fd, i;
-	//const char *name = (*env)->GetStringUTFChars(env, tty_name, 0);
 	const char *name = env->GetStringUTFChars(tty_name, 0); // !!!
-	char *KnownPorts[]= PORTS;
+	printf("inside RXTXCommDriver:isDeviceGood() deviceName is %s.  ",name);
     //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     //Let's try to enumerate the ports
     /*
@@ -1473,20 +1474,9 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(isDeviceGood)(JNIEnv *env,
     for (n = portcount - 1; n >= 0; n--)
     {
        port->GetDeviceName(n, devName);
-       //memcpy(&devName, KnownPorts[
        printf("inside RXTXCommDriver:isDeviceGood() deviceName is %s.  ",devName);
     }
     */
-	//cout << "Hello World\n";
-    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	i=0;
-	while(KnownPorts[i])
-	{
-		if(!strcmp(KnownPorts[i],name)) break;
-		i++;
-	}
-	if(!KnownPorts[i]) return JNI_FALSE;
-
 	for(i=0;i<64;i++){
 #if defined(_GNU_SOURCE)
 		snprintf(teststring, 256, "%s%s%i",DEVICEDIR,name, i);
@@ -1521,9 +1511,28 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(isDeviceGood)(JNIEnv *env,
 		}
 	}
 	printf("result is %i for %s\n",result, name);
-	//(*env)->ReleaseStringUTFChars(env, tty_name, name);
 	env->ReleaseStringUTFChars(tty_name, name); // !!!
 	return(result);
+}
+
+/*----------------------------------------------------------
+ getDeviceDirectory
+
+   accept:      
+   perform:     
+   return:      the directory containing the device files
+   exceptions:  
+   comments:    use this to avoid hard coded "/dev/"
+   		values are in SerialImp.h
+----------------------------------------------------------*/
+/*
+JNIEXPORT jstring JNICALL Java_javax_comm_RXTXCommDriver_getDeviceDirectory(JNIEnv*, jobject);
+
+*/
+JNIEXPORT jstring  JNICALL RXTXCommDriver(getDeviceDirectory)(JNIEnv *env,
+	jobject jobj, int test)
+{
+	return env->NewStringUTF(DEVICEDIR);
 }
 /*----------------------------------------------------------
  setInputBufferSize

@@ -1,8 +1,20 @@
-This is ChangeLog  Thu Jan 18 17:37:47 MST 2001
+This is ChangeLog  Fri Jan 26 13:44:30 MST 2001
 
 rxtx-1.5 and rxtx-1.4 changes are kept in the same file.  skip to the version
 you downloaded.
 
+1.5-4  Jan 26, 2000   Irix build fixes (still needs CFLAGS fixed?)
+		      Michael Delgadillo <delgadil@ymi.com>
+		      Windows build support with lcc
+		      Valentin Pavlov <v_valchev@prosyst.bg>
+		      Windows build fixes with mingw (both need more code)
+		      put enough support into win32 termios to allow BlackBox
+		      to run but not work
+		      BeOS opens and closes serial ports
+		      hpux build fixes merged
+		      merge with rxtx-1.4 fixes and features
+		      backed out Vector port enumeration
+		      Futher Documentation
 1.5-3  Oct  4, 2000   Initial BeOS Support 
 		      Brian D. Hindman <bjhindman@yahoo.com>
 		      Win32 cross build fixes <jcbernard@free.fr>
