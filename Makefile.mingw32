@@ -36,16 +36,16 @@ SRC=../src
 DOSSRC=..\\\src
 
 # path to the jdk directory that has include, bin, lib, ... Unix style path
-JDKHOME=C:/jdk118
+JDKHOME=C:/jdk1.1.8
 
 #path to mingw32
 MINGHOME="D:/mingw"
 
 # path to install RXTXcomm.jar DOS style path
-COMMINSTALL="C:\jdk118\lib"
+COMMINSTALL="C:\jdk1.1.8\lib"
 
 # path to install the shared libraries DOS style path
-LIBINSTALL="C:\jdk118\bin"
+LIBINSTALL="C:\jdk1.1.8\bin"
 
 # path to the mingw32 libraries (directory with libmingw32.a) DOS style path
 LIBDIR="D:\mingw\lib"
@@ -66,7 +66,7 @@ DLLTOOL=dlltool
 # this looks like a nice tool but I was not able to get symbols in the dll.
 DLLWRAP=dllwrap
 
-CLASSPATH=-classpath ".;C:\jdk118\lib\RXTXcomm.jar;c:\BlackBox.jar;c:\jdk118\lib\classes.zip"
+CLASSPATH=-classpath ".;C:\jdk1..18\lib\RXTXcomm.jar;c:\BlackBox.jar;c:\jdk1.1.8\lib\classes.zip"
 JAVAH=javah $(CLASSPATH)
 JAR=jar 
 JAVAC=javac $(CLASSPATH)
@@ -86,7 +86,7 @@ MINGINCLUDE=$(MINGHOME)/include
 JAVAFILES = $(wildcard $(SRC)/*.java)
 CFILES=$(wildcard $(SRC)/*.c) $(wildcard $(SRC)/*.cc)
 TARGETLIBS= Serial.dll 
-DLLOBJECTS= fixup.o SerialImp.o termios.o init.o libmex.dll
+DLLOBJECTS= fixup.o SerialImp.o termios.o init.o fuserImp.o
 
 all:  $(TARGETLIBS) # rebuild  rebuild will force everything to be built.
 
@@ -102,7 +102,7 @@ gnu:
 
 # yayaya We should have put the files in gnu.io to start with
 gnutimestamp:	$(JAVAFILES) $(CFILES) include gnu
-	xcopy $(DOSSRC)\\\*.* gnu\\\io\\\ # need a space here
+	xcopy $(DOSSRC)\\*.* gnu\\io\\
 	echo > gnutimestamp
 
 # FIXME make 3.79.1 behaves really strage if we use %.o rules.
@@ -116,6 +116,9 @@ fixup.o:
 SerialImp.o:
 	$(CC) $(CFLAGS) -c $(SRC)/SerialImp.c -o SerialImp.o
 
+fuserImp.o:
+	$(CC) $(CFLAGS) -c $(SRC)/fuserImp.c -o fuserImp.o
+
 termios.o:
 	$(CC) $(CFLAGS) -c $(SRC)/$*.c -o termios.o
 
@@ -124,8 +127,9 @@ termios.o:
 
 $(SRC)/Serial.def:	$(DLLOBJECTS)
 	$(LD) --base-file Serial.base --dll -o Serial.dll $(DLLOBJECTS) $(LIBS) -e _dll_entry@12
-	echo EXPORTS >$(SRC)/Serial.def;for i in `nm Serial.dll | grep "T _Java"|cut -b 13-`;do echo -n $$i|sed s#@.*##;echo "="$$i;done >> $(SRC)/Serial.def
-	xcopy  $(DOSSRC)\\\Serial.def gnu\\\io\\\ #  need a space here
+	xcopy  $(DOSSRC)\\Serial.def gnu\\io\\
+
+#	echo EXPORTS >$(SRC)/Serial.def;for i in `nm Serial.dll | grep "T _Java"|cut -b 13-`;do echo -n $$i|sed s#@.*##;echo "="$$i;done >> $(SRC)/Serial.def
 
 
 $(TARGETLIBS):	RXTXcomm.jar $(DLLOBJECTS)  $(SRC)/Serial.def
@@ -148,8 +152,8 @@ $(TARGETLIBS):	RXTXcomm.jar $(DLLOBJECTS)  $(SRC)/Serial.def
 #		-mno-cygwin
 
 RXTXcomm.jar:	gnutimestamp
-	$(JAVAC) gnu\\\io\\\\*.java
-	$(JAR) -cf RXTXcomm.jar gnu\\\io\\\\*.class
+	$(JAVAC) gnu\\io\\*.java
+	$(JAR) -cf RXTXcomm.jar gnu\\io\\*.class
 	$(JAVAH) $(JAVAHFLAGS) $(patsubst gnu/io/%.java,gnu.io.%,$(wildcard gnu/io/*.java))
 
 include/config.h:  gnutimestamp
