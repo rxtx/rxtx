@@ -628,7 +628,10 @@ final public class RXTXPort extends SerialPort
 				System.out.println( "return" );
 			return(true);
 		}
-		if( SPEventListener != null ) SPEventListener.serialEvent( e );
+		if( SPEventListener != null )
+		{
+			SPEventListener.serialEvent( e );
+		}
 
 		if( debug_verbose )
 			System.out.println( "return" );

@@ -180,7 +180,6 @@ struct timeval snow, enow, seloop, eeloop;
 #define report_time( ) {}
 #define report_time_start( ) {}
 #define report_time_end( ) {}
-
 #endif /* DEBUG_TIMING */
 
 
@@ -942,10 +941,10 @@ init_threads( )
 ----------------------------------------------------------*/
 int init_threads( struct event_info_struct *eis )
 {
+	jfieldID jeis;
 #if !defined(TIOCSERGETLSR) & !defined(WIN32)
 	sigset_t newmask, oldmask;
 	struct sigaction newaction, oldaction;
-	jfieldID jeis;
 	pthread_t tid;
 
 	report_time_start( );
@@ -979,14 +978,14 @@ int init_threads( struct event_info_struct *eis )
 */
 	sigprocmask( SIG_SETMASK, &newmask, &oldmask );
 
-	report("init_threads: get eis\n");
-	jeis  = (*eis->env)->GetFieldID( eis->env, eis->jclazz, "eis", "I" );
-	report("init_threads: set eis\n");
-	(*eis->env)->SetIntField(eis->env, *eis->jobj, jeis, ( jint ) eis );
 	report("init_threads: creating drain_loop\n");
 	pthread_create( &tid, NULL, drain_loop, (void *) eis );
 	pthread_detach( tid );
 #endif /* TIOCSERGETLSR */
+	report("init_threads: get eis\n");
+	jeis  = (*eis->env)->GetFieldID( eis->env, eis->jclazz, "eis", "I" );
+	report("init_threads: set eis\n");
+	(*eis->env)->SetIntField(eis->env, *eis->jobj, jeis, ( jint ) eis );
 	report("init_threads:  stop\n");
 	report_time_end( );
 	return( 1 );
@@ -1121,6 +1120,7 @@ JNIEXPORT void JNICALL RXTXPort(nativeDrain)( JNIEnv *env,
 	jobject jobj )
 {
 	int fd = get_java_var( env, jobj,"fd","I" );
+	struct event_info_struct *eis = ( struct event_info_struct * ) get_java_var( env, jobj, "eis", "I" );
 	int result, count=0;
 
 	char message[80];
@@ -1138,6 +1138,16 @@ JNIEXPORT void JNICALL RXTXPort(nativeDrain)( JNIEnv *env,
 	LEAVE( "RXTXPort:drain()" );
 	if( result ) throw_java_exception( env, IO_EXCEPTION, "nativeDrain",
 		strerror( errno ) );
+#if !defined(TIOCSERGETLSR) && !defined(WIN32)
+	if( eis && eis->writing )
+	{
+		eis->writing=JNI_FALSE;
+	}
+#endif /* !TIOCSERGETLSR !WIN32 */
+	if( eis->eventflags[SPE_OUTPUT_BUFFER_EMPTY] )
+	{
+		send_event( eis, SPE_OUTPUT_BUFFER_EMPTY, 1 );
+	}
 	report_time_end( );
 	return;
 }
