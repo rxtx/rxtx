@@ -18,27 +18,11 @@
 #-------------------------------------------------------------------------
 
 #  This Makefile works on windows 98 in a cygwin bash shell
-#  The configure is avoided on win32 because java.home a different absolute
-#  path than bash.  I tried a few ways of getting around it without success.
-#  Its easier to just adjust the paths here.
-#
-#  The cross compiling will remain in auto*
-#
-#  The cygwin used was a full/default install including mingw32 version
-#  cygwin version 1.1.7 
+#  The cygwin is a full install including mingw32 version 1.1.7 
 #  www.cygwin.com
-#  jdk was 1.2.2 any thing 1.2.0 or later should work.
+#  jdk was 1.2.2
 #  java.sun.com
-#  java was mounted in /usr/java/jdk
-#  in bash:
-#	mkdir /usr/java
-#	mount C:\\jdk /usr/java
-#	export PATH=/usr/java/jdk/bin:$PATH
-#       tar xzvf rxtx-1.5-?.tar.gz
-#	cd rxtx-1.5-?
-#	make -f Makefile.mingw32
-#	make -f Makefile.mingw32 install
-#
+
 
 ######################
 #  Directories
@@ -62,7 +46,6 @@ CC=gcc
 LD=ld
 DLLTOOL=dlltool
 # this looks like a nice tool but I was not able to get symbols in the dll.
-# the old way still works.
 DLLWRAP=dllwrap
 
 JAVAH=javah
@@ -89,11 +72,13 @@ cfiles=$(wildcard $(SRC)/*.c)
 includes=$(wildcard $(SRC)/*.h)
 OBJECTS=termios.o SerialImp.o fixup.o init.o 
 
-# this is an old crusty, way of generating dlls.  It works.
-
 all:  Serial.dll
 
-Serial.dll:  $(OBJECTS)
+Serial.dll:  comm.jar  $(cfiles) config.h
+	$(CC) $(CFLAGS) -c $(SRC)/SerialImp.c -o SerialImp.o
+	$(CC) $(CFLAGS) -c $(SRC)/termios.c -o termios.o
+	$(CC) $(CFLAGS) -c $(SRC)/fixup.c -o fixup.o
+	$(CC) $(CFLAGS) -c $(SRC)/init.cc -o init.o
 	$(LD) --base-file Serial.base --dll -o Serial.dll $(OBJECTS) $(LIBS) -e _dll_entry@12
 # --base-file Serial.base
 	 echo EXPORTS >Serial.def;for i in `nm Serial.dll | grep "T _Java"|cut -b 13-`;do echo -n $$i|sed s#@.*##;echo "="$$i;done >> Serial.def
@@ -107,13 +92,6 @@ Serial.dll:  $(OBJECTS)
 # nm shows no symbols in the dll produced.  The old stuff above works ok.
 #	$(DLLWRAP) --output-def Serial.def --output-exp Serial.exp --add-stdcall-alias --driver-name gcc -mwindows --target=i386-mingw32 -o Serial.dll $(OBJECTS) $(LIBS) -s -mno-cygwin
 
-%.o: $(SRC)/%.c comm.jar config.h
-	$(CC) $(CFLAGS) -c $(SRC)/$*.c -o $*.o
-
-%.o: $(SRC)/%.cc comm.jar config.h
-	$(CC) $(CFLAGS) -c $(SRC)/$*.cc -o $*.o
-
-
 comm.jar: $(javafiles) 
 	$(JAVAC) -d . $(javafiles) 
 	$(JAR) -cf comm.jar javax
@@ -124,7 +102,7 @@ comm.jar: $(javafiles)
 	done)`
 
 config.h:
-	printf 	"#define HAVE_FCNTL_H 1\n#define HAVE_SIGNAL_H 1\n#define HAVE_SYS_FCNTL_H 1\n#define HAVE_SYS_FILE_H 1\n#define HAVE_SYS_SIGNAL_H 1\n#define HAVE_TERMIOS_H 1\n" > config.h
+	printf 	"#define HAVE_FCNTL_H 1\n#define HAVE_SIGNAL_H 1\n#define HAVE_SYS_FCNTL_H 1\n#define HAVE_SYS_FILE_H 1\n#undef HAVE_SYS_SIGNAL_H \n#undef HAVE_TERMIOS_H\n" > config.h
 
 
 install: all

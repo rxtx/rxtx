@@ -29,12 +29,17 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <limits.h>
+#include <sys/stat.h>
 #ifndef WIN32
 #include <sys/ioctl.h>
 #include <sys/param.h>
 #include <sys/utsname.h>
 #else
 #	include <win32termios.h>
+/*  FIXME  returns 0 in all cases on win32
+#define S_ISCHR(m)	(((m)&S_IFMT) == S_IFCHR)
+*/
+#define S_ISCHR(m) (1)
 #endif /* WIN32 */
 #ifdef HAVE_TERMIOS_H
 #	include <termios.h>
@@ -46,7 +51,6 @@
 #   include <sys/signal.h>
 #endif
 #include <sys/types.h>
-#include <sys/stat.h>
 #ifdef HAVE_SYS_TIME_H
 #   include <sys/time.h>
 #endif
@@ -978,7 +982,7 @@ RXTXPort.eventLoop
 JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 {
 	int fd, ret, change;
-	fd_set rfds;
+	struct fd_set rfds;
 	struct timeval tv_sleep;
 	unsigned int mflags, omflags;
 	jboolean interrupted = 0;
