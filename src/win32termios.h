@@ -57,7 +57,6 @@ int serial_select(int, fd_set *, fd_set *, fd_set *, struct timeval *);
 #define read serial_read
 #define write serial_write
 #define select serial_select
-#define close serial_close
 
 void usleep(unsigned long usec);
 int fcntl(int fd, int command, int arg);
@@ -285,6 +284,11 @@ void cfmakeraw(struct termios *s_termios);
 /* ioctls */
 #define TIOCMGET	0x5415
 #define TIOCMSET	0x5418
+#define TIOCMWAIT	0x545C
+#define TIOCGICOUNT	0x545D
+#define TIOCSERGETLSR	0x5459
+/*define FIONREAD	0x*/ 
+
 /* modem lines */
 #define TIOCM_LE    0x001
 #define TIOCM_DTR   0x002
