@@ -672,8 +672,9 @@ Mac\ OS\ X)
 ;;
 
 Solaris*)
-	LDFLAGS="-lposix4"
-	TARGETLIB="\$(target_alias)/libSerial.la"
+	LDFLAGS=
+	TARGETLIB="\$(target_alias)/libSerial.la \
+		\$(target_alias)/libParallel.la"
 	JHOME=$JPATH/"lib"
 	CFLAGS=$CFLAGS" -D_NO_POSIX=1 -D_NO_XOPEN4=1"
 	CLASSPATH=".:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/RXTXcomm.jar:$CLASSPATH"
