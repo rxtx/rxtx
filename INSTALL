@@ -21,6 +21,17 @@ This is the INSTALL file for RXTX.  Fri Aug 17 14:23:35 MDT 2001
 If, while following the instructions, you find this file unclear or incorrect 
 please make a note and email the details to trentjarvi@yahoo.com.  
 
+A note about rxtx 1.5:
+
+rxtx 1.5 replaces the entire CommAPI.  Every effort is made to conform to
+CommAPI but out of respect for our friends at Sun the package name of 1.5 has
+been moved to gnu.io.  A script is offered in contrib/ChangePackage.sh that
+will switch source tree's between javax.comm and gnu.io.
+
+See Sun's CommAPI license for more details on why this decision was made.
+
+If you would like to use javax.comm, use rxtx 1.4 with Sun's CommAPI.
+
 1.  INSTALL INSTRUCTIONS IN OTHER LANGUAGES
 
 	A. Japanese 
