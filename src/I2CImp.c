@@ -16,8 +16,13 @@
 |   License along with this library; if not, write to the Free
 |   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --------------------------------------------------------------------------*/
+#if defined(__MWERKS__)//dima
+#include "I2C.h"//dima
+#else//dima
+#include "I2C.h"
 #include "config.h"
 #include "gnu_io_I2C.h"
+#endif//dima
 #include <time.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -192,9 +197,9 @@ JNIEXPORT void JNICALL Java_gnu_io_I2CPort_nativeSetI2CPortParams(
 	int cspeed = translate_speed( env, speed );
 	if( !cspeed ) return;
 	if( tcgetattr( fd, &ttyset ) < 0 ) goto fail;
-	if( !translate_data_bits( env, &(ttyset.c_cflag), dataBits ) ) return;
-	if( !translate_stop_bits( env, &(ttyset.c_cflag), stopBits ) ) return;
-	if( !translate_parity( env, &(ttyset.c_cflag), parity ) ) return;
+	if( !translate_data_bits( env, (int *)&(ttyset.c_cflag), dataBits ) ) return;//dima darwin defime c_cflag as unsigned long
+	if( !translate_stop_bits( env, (int *)&(ttyset.c_cflag), stopBits ) ) return;//dima darwin defime c_cflag as unsigned long
+	if( !translate_parity( env, (int *)&(ttyset.c_cflag), parity ) ) return;//dima darwin defime c_cflag as unsigned long
 #ifdef __FreeBSD__
 	if( cfsetspeed( &ttyset, cspeed ) < 0 ) goto fail;
 #else
@@ -405,7 +410,7 @@ JNIEXPORT void JNICALL Java_gnu_io_I2CPort_writeArray( JNIEnv *env,
 	for( i = 0; i < count; i++ ) bytes[ i ] = body[ i + offset ];
 	(*env)->ReleaseByteArrayElements( env, jbarray, body, 0 );
 	do {
-		result=write (fd, bytes + total, count - total);
+		result=write (fd, bytes + total + offset, count - total);//dima
 		if(result >0){
 			total += result;
 		}

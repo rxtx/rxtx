@@ -85,7 +85,7 @@ Flow Control defines inspired by reading how mgetty by Gert Doering does it
 
 
 /* PROTOTYPES */
-int translate_speed( JNIEnv*, jint  );
+int translate_speed( JNIEnv *, jint  );
 int translate_data_bits( JNIEnv *, int *, jint );
 int translate_stop_bits( JNIEnv *, int *, jint );
 int translate_parity( JNIEnv *, int *, jint );

@@ -694,7 +694,7 @@ JNIEXPORT void JNICALL RXTXPort(writeArray)( JNIEnv *env,
 	report( message );
 #endif /* VERBOSE_DEBUG */
 	do {
-		result=WRITE (fd, body + total, count - total);
+		result=WRITE (fd, body + total + offset, count - total);//dima
 		if(result >0){
 			total += result;
 		}
@@ -1225,7 +1225,7 @@ JNIEXPORT jint JNICALL RXTXPort(readArray)( JNIEnv *env,
 		return -1;
 	}
 	body = (*env)->GetByteArrayElements( env, jbarray, 0 );
-	bytes = read_byte_array( fd, body, length, timeout );
+	bytes = read_byte_array( fd, (unsigned char *)(body+offset), length, timeout );//dima
 	(*env)->ReleaseByteArrayElements( env, jbarray, body, 0 );
 	if( bytes < 0 ) {
 		report( "RXTXPort:readArray bytes < 0" );
@@ -1766,6 +1766,7 @@ registerKnownSerialPorts(JNIEnv *env, jobject jobj, jint portType)//dima
             {
 //begin dima
             	jstring	tempJstring;
+
 				tempJstring = (*env)->NewStringUTF(env,getRegistryString(theObject, kIODialinDeviceKey));
                 (*env)->CallStaticVoidMethod(env, cls, mid,tempJstring,portType,jobj);//dima
  				(*env)->DeleteLocalRef(env,tempJstring);
