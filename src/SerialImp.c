@@ -72,6 +72,7 @@
 #ifdef LFS  /* File Lock Server */
 #	include <sys/socket.h>
 #	include <netinet/in.h>
+#	include <arpa/inet.h>
 #endif /* FLS */
 #if defined(__linux__)
 #	include <linux/types.h> /* fix for linux-2.3.4? kernels */
@@ -101,6 +102,7 @@
 #ifdef HAVE_GRP_H
 #include 	<grp.h>
 #endif /* HAVE_GRP_H */
+#include <math.h>
 
 extern int errno;
 #ifdef TRENT_IS_HERE
@@ -1593,9 +1595,6 @@ RXTXPort.nativeStaticSetsetRTS
 JNIEXPORT jboolean JNICALL RXTXPort(nativeStaticSetRTS) (JNIEnv *env,
 	jclass jclazz, jstring jstr, jboolean flag)
 {
-#ifndef WIN32
-	int lock;
-#endif /* WIN32 */
 	int fd;
 	int  pid = -1;
 	int result;
@@ -1656,9 +1655,6 @@ RXTXPort.nativeStaticSetsetDTR
 JNIEXPORT jboolean JNICALL RXTXPort(nativeStaticSetDTR) (JNIEnv *env,
 	jclass jclazz, jstring jstr, jboolean flag)
 {
-#ifndef WIN32
-	int lock;
-#endif /* WIN32 */
 	int fd;
 	int  pid = -1;
 	const char *filename = (*env)->GetStringUTFChars( env, jstr, 0 );
@@ -3339,7 +3335,7 @@ void report(char *msg)
 }
 
 #ifndef WIN32
-
+#ifdef LFS
 /*----------------------------------------------------------
  lfs_lock
 
@@ -3425,6 +3421,7 @@ int lfs_unlock( const char *filename, int pid )
 	if( buffer[0] == '2' ) return 0;
 	return 1;
 }
+#endif /* LFS */
 
 /*----------------------------------------------------------
  fhs_lock
@@ -3441,7 +3438,7 @@ int lfs_unlock( const char *filename, int pid )
 		more reading:
 
 ----------------------------------------------------------*/
-int fhs_lock( const char *filename )
+int fhs_lock( const char *filename, int pid )
 {
 	/*
 	 * There is a zoo of lockdir possibilities
@@ -3532,7 +3529,7 @@ int fhs_lock( const char *filename )
 		rather than an exercise, we will handle them.
 
 ----------------------------------------------------------*/
-int uucp_lock( const char *filename )
+int uucp_lock( const char *filename, int pid )
 {
 	char lockfilename[80], lockinfo[12], message[80];
 	char name[80];
@@ -4011,7 +4008,7 @@ int is_device_locked( const char *port_filename )
    exceptions:  none
    comments:    OS's like Win32 may not have lock files.
 ----------------------------------------------------------*/
-int system_does_not_lock( const char * filename )
+int system_does_not_lock( const char * filename, int pid )
 {
 	return 0;
 }
