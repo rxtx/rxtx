@@ -40,11 +40,16 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
+#ifndef WIN32
 #include <sys/ioctl.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <sys/errno.h>
 #include <sys/param.h>
+#else
+#	include <errno.h>
+#	include <win32termios.h>
+#endif
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <sys/time.h>
 #include <stdlib.h>
 
@@ -268,9 +273,11 @@ JNIEXPORT void JNICALL LPRPort(Initialize)( JNIEnv *env,
 	   for SIGIO, and installs SIG_IGN if there is not.  This is necessary
 		for the native threads jdk, but we don't want to do it with green
 		threads, because it slows things down.  Go figure. */
+#if !defined(WIN32)
 	struct sigaction handler;
 	sigaction( SIGIO, NULL, &handler );
 	if( !handler.sa_handler ) signal( SIGIO, SIG_IGN );
+#endif /* !WIN32 */
 }
 
 
@@ -726,6 +733,24 @@ void throw_java_exception( JNIEnv *env, char *exc, char *foo, char *msg )
 	(*env)->ThrowNew( env, clazz, buf );
 /* ct7 * Added DeleteLocalRef */
 	(*env)->DeleteLocalRef( env, clazz );
+}
+
+/*----------------------------------------------------------
+ report_error
+
+   accept:      string to send to report as an error
+   perform:     send the string to stderr or however it needs to be reported.
+   return:      none
+   exceptions:  none
+   comments:
+----------------------------------------------------------*/
+void report_error(char *msg)
+{
+#ifndef DEBUG_MW
+	fprintf(stderr, msg);
+#else
+	mexWarnMsgTxt( msg );
+#endif /* DEBUG_MW */
 }
 
 /*----------------------------------------------------------
