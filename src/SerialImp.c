@@ -732,7 +732,7 @@ int set_port_params( JNIEnv *env, int fd, int cspeed, int dataBits,
 			return( 1 );
 		}
 
-		cspeed = 38400;
+		cspeed = B38400;
 	}
 #endif /* TIOCGSERIAL  !WIN32 */
 
