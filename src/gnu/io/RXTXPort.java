@@ -1419,9 +1419,8 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	*  all operating systems.
 	*
 	*  Open the port and set DSR.  remove lockfile and do not close
-	*  This is so some software can appear to set the DSR before opening
-	*  the port a second time later on.  Open will raise the DSR and
-	*  SR when called again later so setting DSR low will not do much.
+	*  This is so some software can appear to set the DSR before 'opening'
+	*  the port a second time later on.
 	*
 	*  @return true on success
 	*  @throws UnsupportedCommOperationException;
@@ -1443,9 +1442,8 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	*  all operating systems.
 	*
 	*  Open the port and set DTR.  remove lockfile and do not close
-	*  This is so some software can appear to set the DTR before opening
-	*  the port a second time later on.  Open will raise the DTR and
-	*  DTR when called again later so setting DTR low will not do much.
+	*  This is so some software can appear to set the DTR before 'opening'
+	*  the port a second time later on.
 	*
 	*  @return true on success
 	*  @throws UnsupportedCommOperationException;
@@ -1467,9 +1465,8 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	*  all operating systems.
 	*
 	*  Open the port and set RTS.  remove lockfile and do not close
-	*  This is so some software can appear to set the RTS before opening
-	*  the port a second time later on.  Open will raise the RTS and
-	*  RTS when called again later so setting RTS low will not do much.
+	*  This is so some software can appear to set the RTS before 'opening'
+	*  the port a second time later on.
 	*
 	*  @return none
 	*  @throws UnsupportedCommOperationException;
@@ -1493,7 +1490,7 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	*  find the fd and return RTS without using a Java open() call
 	*
 	*  @param String port
-	*  @return none
+	*  @return boolean true if asserted
 	*  @throws UnsupportedCommOperationException;
 	*
 	*/
@@ -1513,7 +1510,7 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	*  find the fd and return CD without using a Java open() call
 	*
 	*  @param String port
-	*  @return none
+	*  @return boolean true if asserted
 	*  @throws UnsupportedCommOperationException;
 	*
 	*/
@@ -1533,7 +1530,7 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	*  find the fd and return CTS without using a Java open() call
 	*
 	*  @param String port
-	*  @return none
+	*  @return boolean true if asserted
 	*  @throws UnsupportedCommOperationException;
 	*
 	*/
@@ -1553,7 +1550,7 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	*  find the fd and return DSR without using a Java open() call
 	*
 	*  @param String port
-	*  @return none
+	*  @return boolean true if asserted
 	*  @throws UnsupportedCommOperationException;
 	*
 	*/
@@ -1573,7 +1570,7 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	*  find the fd and return DTR without using a Java open() call
 	*
 	*  @param String port
-	*  @return none
+	*  @return boolean true if asserted
 	*  @throws UnsupportedCommOperationException;
 	*
 	*/
@@ -1593,7 +1590,7 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	*  find the fd and return RI without using a Java open() call
 	*
 	*  @param String port
-	*  @return none
+	*  @return boolean true if asserted
 	*  @throws UnsupportedCommOperationException;
 	*
 	*/
