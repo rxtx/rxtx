@@ -79,6 +79,11 @@ final class RXTXPort extends SerialPort
 
 	/** File descriptor */
 	private int fd = 0;
+	/** a pointer to the event info structure used to share information
+	    between threads so write threads can send output buffer empty
+	    from a pthread if need be.
+	*/
+	private int eis = 0;
 	/** pid for lock files */
 	int pid = 0;
 
@@ -516,7 +521,7 @@ final class RXTXPort extends SerialPort
 			case SerialPortEvent.OUTPUT_BUFFER_EMPTY:
 				if( debug_verbose )
 					System.out.println(
-						"OUTPUT_BUF_EMPTY " +
+						"OUTPUT_BUFFER_EMPTY " +
 						monThread.Output + ")" );
 				break;
 			case SerialPortEvent.CTS:
