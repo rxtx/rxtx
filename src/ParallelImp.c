@@ -210,8 +210,8 @@ JNIEXPORT jboolean JNICALL LPRPort(isPrinterBusy)(JNIEnv *env,
 	jobject jobj)
 {
 	int fd = get_java_var( env, jobj,"fd","I" );
-#if defined (__linux__)
 	int status;
+#if defined (__linux__)
 	ioctl(fd, LPGETSTATUS, &status);
 #elif defined (WIN32)
 	return getWin32ParallelStatus( fd, PARALLEL_BUSY); 
