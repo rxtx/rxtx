@@ -2370,19 +2370,20 @@ int ioctl( int fd, int request, ... )
 	{
 		case TCSBRK:
 			arg = va_arg( ap, int * );
+			va_end( ap );
 			return -ENOIOCTLCMD;
 		case TCSBRKP:
 			arg = va_arg( ap, int * );
+			va_end( ap );
 			return -ENOIOCTLCMD;
 		case TIOCGSOFTCAR:
 			arg = va_arg( ap, int * );
+			va_end( ap );
 			return -ENOIOCTLCMD;
 		case TIOCSSOFTCAR:
 			arg = va_arg( ap, int * );
+			va_end( ap );
 			return -ENOIOCTLCMD;
-
-                return -EFAULT;
-
 
 		case TIOCMGET:
 			arg = va_arg( ap, int * );
@@ -2416,9 +2417,11 @@ int ioctl( int fd, int request, ... )
 		/* TIOCMIS, TIOCMBIC and TIOCMSET all do the same thing... */
 		case TIOCMBIS:
 			arg = va_arg( ap, int * );
+			va_end( ap );
 			return -ENOIOCTLCMD;
 		case TIOCMBIC:
 			arg = va_arg( ap, int * );
+			va_end( ap );
 			return -ENOIOCTLCMD;
 		case TIOCMSET:
 			arg = va_arg( ap, int * );
@@ -2547,12 +2550,14 @@ int ioctl( int fd, int request, ... )
 			sstruct = va_arg( ap, struct serial_struct * );
 			sstruct = index->sstruct;
 			report( "TIOCGSERIAL\n" );
+			va_end( ap );
 			return 0;
 		/* set the serial struct info from the underlying API */
 		case TIOCSSERIAL:
 			report( "TIOCSSERIAL\n" );
 			index->sstruct = sstruct;
 			arg = va_arg( ap, int * );
+			va_end( ap );
 			return 0;
 		case TIOCSERCONFIG:
 		case TIOCSERGETLSR:
@@ -2571,6 +2576,7 @@ int ioctl( int fd, int request, ... )
 				set_errno( EBADFD );
 				YACK();
 				report( "TIOCSERGETLSR EBADFD" );
+				va_end( ap );
 				return -1;
 			}
 			if ( (int ) Stat.cbOutQue == 0 )
@@ -2609,19 +2615,24 @@ int ioctl( int fd, int request, ... )
 				//*arg = TIOCSER_TEMP;
 			}
 			MexPrintf("T");
+			va_end( ap );
 			return(0);
 			break;
 		case TIOCSERGSTRUCT:
 			astruct = va_arg( ap, struct async_struct * );
+			va_end( ap );
 			return -ENOIOCTLCMD;
 		case TIOCSERGETMULTI:
 			mstruct = va_arg( ap, struct serial_multiport_struct * );
+			va_end( ap );
 			return -ENOIOCTLCMD;
 		case TIOCSERSETMULTI:
 			mstruct = va_arg( ap, struct serial_multiport_struct * );
+			va_end( ap );
 			return -ENOIOCTLCMD;
 		case TIOCMIWAIT:
 			arg = va_arg( ap, int * );
+			va_end( ap );
 			return -ENOIOCTLCMD;
 		/*
 			On linux this fills a struct with all the line info
@@ -2636,6 +2647,7 @@ int ioctl( int fd, int request, ... )
 				/* FIXME ? */
 				report("TIOCGICOUNT failed\n");
 				set_errno( EBADFD );
+				va_end( ap );
 				return -1;
 			}
 			if( ErrCode & CE_FRAME ) sistruct->frame++;
@@ -2648,12 +2660,14 @@ int ioctl( int fd, int request, ... )
 			else sistruct->parity = 0;
 			if( ErrCode & CE_BREAK ) sistruct->brk++;
 			else sistruct->brk = 0;
+			va_end( ap );
 			return 0;
 		/* abolete ioctls */
 #endif /* TIOCGICOUNT */
 		case TIOCSERGWILD:
 		case TIOCSERSWILD:
 			report( "TIOCSER[GS]WILD absolete\n" );
+			va_end( ap );
 			return 0;
 		/*  number of bytes available for reading */
 		case FIONREAD:
@@ -2664,6 +2678,7 @@ int ioctl( int fd, int request, ... )
 				/* FIXME ? */
 				report("FIONREAD failed\n");
 				set_errno( EBADFD );
+				va_end( ap );
 				return -1;
 			}
 			*arg = ( int ) Stat.cbInQue;
@@ -2683,12 +2698,14 @@ int ioctl( int fd, int request, ... )
 		/* pending bytes to be sent */
 		case TIOCOUTQ:
 			arg = va_arg( ap, int * );
+			va_end( ap );
 			return -ENOIOCTLCMD;
 		default:
 			sprintf( message,
 				"FIXME:  ioctl: unknown request: %#x\n",
 				request );
 			report( message );
+			va_end( ap );
 			return -ENOIOCTLCMD;
 	}
 	va_end( ap );
