@@ -61,7 +61,10 @@
 
 extern int errno;
 #include "SerialImp.h"
-/* #define DEBUG_TIMEOUT */
+/* 
+#define DEBUG_TIMEOUT 
+#define DEBUG
+*/
 
 /* this is so diff will not generate noise when merging 1.4 and 1.5 changes
  * It will eventually be removed.
@@ -163,10 +166,12 @@ JNIEXPORT jint JNICALL RXTXPort(open)(
 #ifndef WIN32
 	fcntl( fd, F_SETOWN, getpid() );
 #endif /* WIN32 */
+#ifdef HOSED
 #ifdef FASYNC
 	fcntl( fd, F_SETFL, FASYNC );
 #endif /* FASYNC */
 
+#endif
 	return (jint)fd;
 
 fail:
@@ -1132,6 +1137,7 @@ JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env,
 				usleep(1000); /* select wont block */
 		}
 	}
+	printf("EventLoop Bailing\n");
 	return;
 }
 

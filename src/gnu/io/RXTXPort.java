@@ -46,7 +46,7 @@ final class RXTXPort extends SerialPort
 
 	/** Initialize the native library */
 	private native static void Initialize();
-	private static boolean debug=true;
+	private static boolean debug = false;
 
 
 	/** Actual SerialPort wrapper class */
@@ -219,9 +219,12 @@ final class RXTXPort extends SerialPort
 	{
 		if (fd == 0 )
 			throw new IllegalStateException("No File Descriptor");
-		enableReceiveTimeout(0);
+		try {
+			enableReceiveTimeout(0);
+		} catch (UnsupportedCommOperationException e){}
 	}
-	public void enableReceiveTimeout( int time )
+	public void enableReceiveTimeout( int time ) 
+		throws UnsupportedCommOperationException
 	{
 		if (fd == 0 )
 			throw new IllegalStateException("No File Descriptor");
@@ -256,7 +259,8 @@ final class RXTXPort extends SerialPort
 
 	private int threshold = 0;
 
-	public void enableReceiveThreshold( int thresh )
+	public void enableReceiveThreshold( int thresh ) 
+		throws UnsupportedCommOperationException
 	{
 		if (fd == 0 )
 			throw new IllegalStateException("No File Descriptor");
@@ -277,7 +281,9 @@ final class RXTXPort extends SerialPort
 	public void disableReceiveThreshold() {
 		if (fd == 0 )
 			throw new IllegalStateException("No File Descriptor");
-		enableReceiveThreshold(0);
+		try {
+			enableReceiveThreshold(0);
+		} catch ( UnsupportedCommOperationException e ) {}
 	}
 	public int getReceiveThreshold()
 	{
@@ -435,6 +441,7 @@ final class RXTXPort extends SerialPort
 				System.err.println("unknown event:"+event);
 				return(false);
 		}
+
 		SerialPortEvent e = new SerialPortEvent(this, event, !state,
 			state );
 		if( SPEventListener != null ) SPEventListener.serialEvent( e );

@@ -30,15 +30,18 @@ public abstract class CommPort extends Object {
 	protected String name;
 	private static boolean debug = false;
 
-	public abstract void enableReceiveFraming( int f ) throws UnsupportedCommOperationException;
+	public abstract void enableReceiveFraming( int f ) 
+		throws UnsupportedCommOperationException;
 	public abstract void disableReceiveFraming();
 	public abstract boolean isReceiveFramingEnabled();
 	public abstract int getReceiveFramingByte();
 	public abstract void disableReceiveTimeout();
-	public abstract void enableReceiveTimeout( int time );
+	public abstract void enableReceiveTimeout( int time )
+		throws UnsupportedCommOperationException;
 	public abstract boolean isReceiveTimeoutEnabled();
 	public abstract int getReceiveTimeout();
-	public abstract void enableReceiveThreshold( int thresh );
+	public abstract void enableReceiveThreshold( int thresh )
+		throws UnsupportedCommOperationException;
 	public abstract void disableReceiveThreshold();
 	public abstract int getReceiveThreshold();
 	public abstract boolean isReceiveThresholdEnabled();
