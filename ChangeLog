@@ -1,11 +1,15 @@
-This is ChangeLog Thu Mar 27 08:13:33 EST 2003
+This is ChangeLog Tue Oct 12 10:01:16 BST 2004
 
 rxtx-2.1 and rxtx-2.0 changes are kept in the same file.  skip to the version
 you downloaded.
 
-2.1-7pre18 Oct 12 2004
+2.1-7pre19 Oct 12 2004
 		Thread safer nativeDrain()/flush() method.
 		Philip Gladstone <philip@gladstonefamily.net>
+		adding the new properties gnu.io.rxtx.SerialPorts and
+		gnu.io.rxtx.ParallelPorts insead of overriding the system
+		properties and uses them only as default values
+		Klaus Kierer <klaus.kierer@tiscover.com>
 2.1-7pre18 Oct 11 2004
 		release locks when device is unavailable.
 		Tico Ballagas <ballagas@cs.rwth-aachen.de>
@@ -17,7 +21,7 @@ you downloaded.
 		Support for USB frobs in Linux (reports are that this does not
 		work exactly as expected with some kernels)
 		Christopher R. Wren <wren@merl.com>
-		configure fixe for jdk 1.5
+		configure fix for jdk 1.5
 		
 2.1-7pre17 Oct 17, 2003
 		merged with 2.0 and took small changes from cvs.
