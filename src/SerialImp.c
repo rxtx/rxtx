@@ -383,9 +383,9 @@ JNIEXPORT void JNICALL RXTXPort(nativeSetSerialPortParams)(
 	struct termios ttyset;
 	int fd = get_java_var( env, jobj,"fd","I" );
 	int cspeed = translate_speed( env, speed );
-#ifdef TIOCGSERIAL
+#if !defined(TIOCGSERIAL) && !defined( WIN32 )
 	struct serial_struct sstruct;
-#endif /* TIOCGSERIAL */
+#endif /* TIOCGSERIAL && !WIN32 */
 	if (cspeed == -1)
 	{
 		throw_java_exception( env, UNSUPPORTED_COMM_OPERATION,
@@ -1589,7 +1589,10 @@ RXTXPort.nativeStaticSetsetRTS
 JNIEXPORT jboolean JNICALL RXTXPort(nativeStaticSetRTS) (JNIEnv *env,
 	jclass jclazz, jstring jstr, jboolean flag)
 {
-	int fd, lock;
+#ifndef WIN32
+	int lock;
+#endif /* WIN32 */
+	int fd;
 	int  pid = -1;
 	int result;
 	const char *filename = (*env)->GetStringUTFChars( env, jstr, 0 );
@@ -1649,7 +1652,10 @@ RXTXPort.nativeStaticSetsetDTR
 JNIEXPORT jboolean JNICALL RXTXPort(nativeStaticSetDTR) (JNIEnv *env,
 	jclass jclazz, jstring jstr, jboolean flag)
 {
-	int fd, lock;
+#ifndef WIN32
+	int lock;
+#endif /* WIN32 */
+	int fd;
 	int  pid = -1;
 	const char *filename = (*env)->GetStringUTFChars( env, jstr, 0 );
 	int result;

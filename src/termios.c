@@ -1403,7 +1403,7 @@ int serial_read( int fd, void *vb, int size )
 					report("ERROR_MORE_DATA ");
 					break;
 				case ERROR_IO_PENDING:
-//					printf("[ERROR_IO_PENDING ");
+//					report("[ERROR_IO_PENDING ");
 					while( ! GetOverlappedResult(
 							index->hComm,
 							&index->rol,
@@ -1417,7 +1417,7 @@ int serial_read( int fd, void *vb, int size )
 								index->hComm,
 								&error,
 								&stat);
-							printf("ERROR_IO_INCOMPLETE] ");
+							report("ERROR_IO_INCOMPLETE] ");
 //							return( total );
 							break;
 						}
@@ -1426,18 +1426,21 @@ int serial_read( int fd, void *vb, int size )
 					total += nBytes;
 					if (size > 0) {
 						now = GetTickCount();
-						printf("size > 0: spent=%ld have=%d\n", now-start, index->ttyset->c_cc[VTIME]*100);
+						sprintf(message, "size > 0: spent=%ld have=%d\n", now-start, index->ttyset->c_cc[VTIME]*100);
+						report( message );
 						if (now-start >= (index->ttyset->c_cc[VTIME]*100)) {
-							printf("TO ");
+							report("TO ");
 							return total;	/* read timeout */
 						}
 					}
-//					printf("end nBytes=%ld] ", nBytes);
+//					sprintf(message, "end nBytes=%ld] ", nBytes);
+					report( message );
 					//usleep(1000);
 					break;
 				default:
 					//usleep(1000);
-					printf("[uknown error %d] ", i);
+					sprintf(message, "[uknown error %d] ", i);
+					report( message );
 					YACK();
 					return -1;
 			}
@@ -1446,7 +1449,8 @@ int serial_read( int fd, void *vb, int size )
 		{
 			//usleep(1000);
 			ClearCommError( index->hComm, &error, &stat);
-//			printf("cce=%ld ", total);
+//			sprintf(message, "cce=%ld ", total);
+			report( message );
 			return( total );
 		}
 	}
