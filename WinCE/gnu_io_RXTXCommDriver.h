@@ -7,7 +7,16 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-/* Inaccessible static: debug */
+#undef gnu_io_RXTXCommDriver_debug
+#define gnu_io_RXTXCommDriver_debug 0L
+/*
+ * Class:     gnu_io_RXTXCommDriver
+ * Method:    nativeGetVersion
+ * Signature: ()Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_gnu_io_RXTXCommDriver_nativeGetVersion
+  (JNIEnv *, jclass);
+
 /*
  * Class:     gnu_io_RXTXCommDriver
  * Method:    registerKnownPorts

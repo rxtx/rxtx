@@ -1,7 +1,7 @@
 /*-------------------------------------------------------------------------
 |   rxtx is a native interface to serial ports in java.
 |   Copyright 2002 Michal Hobot MichalHobot@netscape.net
-|   Copyright 1997-2002 by Trent Jarvi taj@parcelfarce.linux.theplanet.co.uk
+|   Copyright 1997-2002 by Trent Jarvi trentjarvi@yahoo.com
 |
 |   This library is free software; you can redistribute it and/or
 |   modify it under the terms of the GNU Library General Public
@@ -19,7 +19,25 @@
 --------------------------------------------------------------------------*/
 #include "StdAfx.h"
 #include "rxtxHelpers.h"
-#include "gnu_io_RXTXCommDriver.h"
+
+/*
+nativeGetVersion
+
+   accept:      none
+   perform:     return the current version 
+   return:      version
+   exceptions:  none
+   comments:    This is used to avoid mixing versions of the .jar and
+		native library.
+		First introduced in rxtx-1.5-9
+ * Class:     gnu_io_RXTXCommDriver
+ * Method:    nativeGetVersion
+ * Signature: ()Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_gnu_io_RXTXCommDriver_nativeGetVersion(JNIEnv *env, jclass cls)
+{
+  return env->NewStringUTF("RXTX-2.0-1");
+}
 
 /*
  registerKnownPorts

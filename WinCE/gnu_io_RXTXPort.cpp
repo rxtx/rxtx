@@ -1,7 +1,7 @@
 /*-------------------------------------------------------------------------
 |   rxtx is a native interface to serial ports in java.
 |   Copyright 2002 Michal Hobot MichalHobot@netscape.net
-|   Copyright 1997-2002 by Trent Jarvi taj@parcelfarce.linux.theplanet.co.uk
+|   Copyright 1997-2002 by Trent Jarvi trentjarvi@yahoo.com
 |
 |   This library is free software; you can redistribute it and/or
 |   modify it under the terms of the GNU Library General Public
@@ -808,9 +808,9 @@ writeArray
    exceptions:  IOException
  * Class:     gnu_io_RXTXPort
  * Method:    writeArray
- * Signature: ([BII)V
+ * Signature: ([BIIZ)V
  */
-JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_writeArray(JNIEnv *env, jobject jobj, jbyteArray b, jint off, jint len)
+JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_writeArray(JNIEnv *env, jobject jobj, jbyteArray b, jint off, jint len, jboolean i)
 { 
   LPCWSTR lpMsgBuf;
 	DWORD dwNumBytesWritten;
@@ -859,7 +859,7 @@ nativeDrain
  * Method:    nativeDrain
  * Signature: ()V
  */
-JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_nativeDrain(JNIEnv *env, jobject jobj)
+JNIEXPORT jboolean JNICALL Java_gnu_io_RXTXPort_nativeDrain(JNIEnv *env, jobject jobj)
 { 
   //COMSTAT Stat;
   //DWORD dwErrors;
@@ -876,7 +876,7 @@ JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_nativeDrain(JNIEnv *env, jobject job
     (
       printj(env, L"!!! FlushFileBuffers() error %ld\n", GetLastError());
     )
-    return;
+    return JNI_FALSE;
   }
    
   /* Alternative implementation:
@@ -890,6 +890,7 @@ JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_nativeDrain(JNIEnv *env, jobject job
     Sleep(10);
   } while(Stat.cbOutQue > 0);*/
 
+  return JNI_FALSE;
 }
 
 /*
@@ -1286,7 +1287,7 @@ nativeGetParityErrorChar
  * Method:    nativeGetParityErrorChar
  * Signature: ()I
  */
-JNIEXPORT jint JNICALL Java_gnu_io_RXTXPort_nativeGetParityErrorChar(JNIEnv *env, jobject jobj)
+JNIEXPORT jbyte JNICALL Java_gnu_io_RXTXPort_nativeGetParityErrorChar(JNIEnv *env, jobject jobj)
 {
   DCB PortDCB;
   LPCWSTR lpMsgBuf;
@@ -1311,7 +1312,7 @@ JNIEXPORT jint JNICALL Java_gnu_io_RXTXPort_nativeGetParityErrorChar(JNIEnv *env
     return -1;
   }
 
-  return (jint)PortDCB.ErrorChar;
+  return (jbyte)PortDCB.ErrorChar;
 }
 
 /*
@@ -1395,7 +1396,7 @@ nativeGetEndOfInputChar
  * Method:    nativeGetEndOfInputChar
  * Signature: ()I
  */
-JNIEXPORT jint JNICALL Java_gnu_io_RXTXPort_nativeGetEndOfInputChar(JNIEnv *env, jobject jobj)
+JNIEXPORT jbyte JNICALL Java_gnu_io_RXTXPort_nativeGetEndOfInputChar(JNIEnv *env, jobject jobj)
 {
   DCB PortDCB;
   LPCWSTR lpMsgBuf;
@@ -1420,7 +1421,7 @@ JNIEXPORT jint JNICALL Java_gnu_io_RXTXPort_nativeGetEndOfInputChar(JNIEnv *env,
     return -1;
   }
 
-  return (jint)PortDCB.EofChar;
+  return (jbyte)PortDCB.EofChar;
 }
 
 
