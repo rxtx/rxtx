@@ -83,7 +83,7 @@ final class RXTXPort extends SerialPort
 	    between threads so write threads can send output buffer empty
 	    from a pthread if need be.
 	*/
-	private int eis = 0;
+	int eis = 0;
 	/** pid for lock files */
 	int pid = 0;
 
