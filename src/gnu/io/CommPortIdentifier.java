@@ -75,7 +75,7 @@ public class CommPortIdentifier extends Object /* extends Vector? */
 		String OS;
 
 		OS = System.getProperty("os.name");
-		if(OS.equals("Win95"))
+		if(OS.toLowerCase().indexOf("linux") == -1)
 		{
 			System.out.println("Have not implemented native_psmisc_report_owner(PortName)); in CommPortIdentifier");
 		}

@@ -57,6 +57,7 @@ int serial_select(int, fd_set *, fd_set *, fd_set *, struct timeval *);
 #define read serial_read
 #define write serial_write
 #define select serial_select
+#define close serial_close
 
 void usleep(unsigned long usec);
 int fcntl(int fd, int command, int arg);

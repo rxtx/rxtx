@@ -29,14 +29,17 @@
 #include <sys/ioctl.h>
 #include <sys/param.h>
 #include <sys/utsname.h>
+#else
+#	include <win32termios.h>
+#endif
 #ifdef HAVE_TERMIOS_H
 #	include <termios.h>
 #endif
+#ifdef HAVE_SIGNAL_H
+#   include <signal.h>
+#endif
 #ifdef HAVE_SYS_SIGNAL_H
 #   include <sys/signal.h>
-#endif
-#else
-#	include <win32termios.h>
 #endif
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -74,42 +77,45 @@ RXTXPort.Initialize
    perform:     Initialize the native library
    return:      none
    exceptions:  none
+   comments:    Basically this just causes rxtx to ignore signals.  signal
+		handlers where tried but the VM (circa 1.1) did not like it.
+
+		It also allows for some sanity checks on linux boxes if DEBUG
+		is enabled.
 ----------------------------------------------------------*/
 JNIEXPORT void JNICALL RXTXPort(Initialize)(
 	JNIEnv *env,
 	jclass jclazz
 	)
 {
-#ifndef WIN32
-#ifdef DEBUG
+#if defined DEBUG && defined(__linux__)
 	struct utsname name;
-#endif
+#endif /* DEBUG && __linux__ */
 	/* This bit of code checks to see if there is a signal handler installed
 	   for SIGIO, and installs SIG_IGN if there is not.  This is necessary
 	   for the native threads jdk, but we don't want to do it with green
 	   threads, because it slows things down.  Go figure. */
 
 	/* POSIX signal handling functions */
-#if !defined(__FreeBSD___)
+#if !defined(WIN32)
 	struct sigaction handler;
 	sigaction( SIGIO, NULL, &handler );
 	if( !handler.sa_handler ) signal( SIGIO, SIG_IGN );
-#endif /* !__FreeBSD__ */
-#ifdef DEBUG
+#endif /* !WIN32 */
+#if defined(DEBUG) && defined(__linux__)
 	/* Lets let people who upgraded kernels know they may have problems */
 	if (uname (&name) == -1)
 	{
 		report("RXTX WARNING:  cannot get system name\n");
 		return;
 	}
-	if(strcmp(name.release,UTS_RELEASE))
+	if(!strcmp(name.release,UTS_RELEASE))
 	{
 		fprintf(stderr, LINUX_KERNEL_VERSION_ERROR, UTS_RELEASE,
 			name.release);
 		getchar();
 	}
-#endif /* DEBUG */
-#endif /* WIN32 */
+#endif /* DEBUG && __linux__ */
 }
 
 
@@ -134,6 +140,8 @@ JNIEXPORT jint JNICALL RXTXPort(open)(
 	struct termios ttyset;
 	int fd;
 	const char *filename = (*env)->GetStringUTFChars( env, jstr, 0 );
+
+	if (!fhs_lock(filename)) goto fail;
 
 	do {
 		fd=open (filename, O_RDWR | O_NOCTTY | O_NONBLOCK );
@@ -180,14 +188,20 @@ RXTXPort.nativeClose
    exceptions:  none
 ----------------------------------------------------------*/
 JNIEXPORT void JNICALL RXTXPort(nativeClose)( JNIEnv *env,
-	jobject jobj )
+	jobject jobj,jstring jstr )
 {
 	int result;
 	int fd = get_java_var( env, jobj,"fd","I" );
+	const char *filename = (*env)->GetStringUTFChars( env, jstr, 0 );
 
-	do {
-		result=close (fd);
-	}  while (result < 0 && errno==EINTR);
+	if (fd > 0)
+	{
+		do {
+			result=close (fd);
+		}  while (result < 0 && errno==EINTR);
+		fhs_unlock(filename);
+	}
+	(*env)->ReleaseStringUTFChars( env, jstr, NULL );
 	return;
 }
 
@@ -216,7 +230,7 @@ JNIEXPORT void JNICALL RXTXPort(nativeSetSerialPortParams)(
 #else
 	if( cfsetispeed( &ttyset, cspeed ) < 0 ) goto fail;
 	if( cfsetospeed( &ttyset, cspeed ) < 0 ) goto fail;
-#endif
+#endif  /* __FreeBSD__ */
 	if( tcsetattr( fd, TCSANOW, &ttyset ) < 0 ) goto fail;
 	return;
 
@@ -258,10 +272,10 @@ int translate_speed( JNIEnv *env, jint speed )
 		case 115200:	return B115200;
 #ifdef B230400
 		case 230400:	return B230400;
-#endif
+#endif /* B230400 */
 #ifdef B460800
 		case 460800:	return B460800;
-#endif
+#endif /* B460800 */
 	}
 
 	throw_java_exception( env, UNSUPPORTED_COMM_OPERATION,
@@ -1098,14 +1112,6 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(isDeviceGood)(JNIEnv *env,
 	char teststring[256];
 	int fd,i;
 	const char *name = (*env)->GetStringUTFChars(env, tty_name, 0);
-	char *KnownPorts[]= PORTS;
-
-	i=0;while(KnownPorts[i])
-	{
-		if(!strcmp(KnownPorts[i],name)) break;
-		i++;
-	}
-	if(!KnownPorts[i]) return JNI_FALSE;
 
 	for(i=0;i<64;i++){
 #if defined(_GNU_SOURCE)
@@ -1140,6 +1146,24 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(isDeviceGood)(JNIEnv *env,
 	(*env)->ReleaseStringUTFChars(env, tty_name, name);
 	return(result);
 }
+
+/*----------------------------------------------------------
+ getDeviceDirectory
+
+   accept:      
+   perform:     
+   return:      the directory containing the device files
+   exceptions:  
+   comments:    use this to avoid hard coded "/dev/"
+   		values are in SerialImp.h
+----------------------------------------------------------*/
+
+JNIEXPORT jstring  JNICALL RXTXCommDriver(getDeviceDirectory)(JNIEnv *env,
+	jobject jobj)
+{
+	return (*env)->NewStringUTF(env, DEVICEDIR);
+}
+
 /*----------------------------------------------------------
  setInputBufferSize
 
@@ -1256,7 +1280,7 @@ int send_event(JNIEnv *env, jobject jobj, jint type, int flag)
 
 	(*env)->ExceptionClear(env);
 
-	result = (*env)->CallBooleanMethod( env, jobj, foo, type, 
+	result = (*env)->CallBooleanMethod( env, jobj, foo, type,
 		flag > 0 ? JNI_TRUE : JNI_FALSE );
 
 #ifdef DEBUG
@@ -1295,7 +1319,7 @@ int get_java_var( JNIEnv *env, jobject jobj, char *id, char *type )
 #ifdef DEBUG
 	if(!strncmp("fd",id,2) && result == 0)
 		report("invalid file descriptor\n");
-#endif
+#endif /* DEBUG */
 	return result;
 }
 
@@ -1343,7 +1367,178 @@ void report(char *msg)
 {
 #ifdef DEBUG
 	fprintf(stderr, msg);
-#endif
+#endif /* DEBUG */
+}
+
+/*----------------------------------------------------------
+ fhs_lock
+
+   accept:      The name of the device to try to lock
+                termios struct
+   perform:     Create a lock file if there is not one already.
+   return:      1 on failure 0 on success
+   exceptions:  none
+   comments:    This is for linux and freebsd only currently.  I see SVR4 does
+                this differently and there are other proposed changes to the
+		Filesystem Hierachy Standard
+
+		more reading:
+
+		The File System Hierarchy Standard
+		http://www.pathname.com/fhs/
+
+		FSSTND
+		ftp://tsx-11.mit.edu/pub/linux/docs/linux-standards/fsstnd/
+
+		Proposed Changes to the File System Hierarchy Standard
+		ftp://scicom.alphacdc.com/pub/linux/devlock-0.X.tgz
+
+		"UNIX Network Programming", W. Richard Stevens,
+		Prentice-Hall, 1990, pages 96-101.
+
+----------------------------------------------------------*/
+int fhs_lock(const char *filename)
+{
+#ifdef LOCKFILES
+	int i,j,fd, pid;
+	char lockinfo[12], file[80], pid_buffer[20], message[80],*p;
+	struct stat buf;
+	const char *lockdirs[]={ "/etc/locks", "/usr/spool/kermit", 
+		"/usr/spool/locks", "/usr/spool/uucp", "/usr/spool/uucp/",
+		"/usr/spool/uucp/LCK", "/var/lock", "/var/lock/modem", 
+		"/var/spool/lock", "/var/spool/locks", "/var/spool/uucp",NULL
+	};
+
+	/* no lock dir? just return success */
+
+	if (stat(LOCKDIR,&buf)!=0)
+	{
+		report("could not find lock directory.\n");
+		return 1;
+	}
+
+	/* 
+	 * There is a zoo of lockdir possibilities
+	 * Its possible to check for stale processes with most of them.
+	 * for now we will just check for the lockfile on most
+	 * Problem lockfiles will be dealt with.  Some may not even be in use.
+	 *
+	 * TODO follow symbolic links (/dev/modem...)
+	 */
+
+	j=0;
+	while(lockdirs[j])
+	{
+		if(strncmp(lockdirs[j],LOCKDIR,strlen(lockdirs[j])))
+		{
+			i=strlen(filename);
+			p=(char *) filename+i;
+			while(*(p-1)!='/' && i-- !=1) p--;
+			sprintf(file,"%s/LCK..%s",lockdirs[j],p);
+			if(stat(file,&buf)==0)
+			{
+				printf("-----------------------------------\n");
+				printf("RXTX Error:  Unexpected lock file: %s\n Please report to the RXTX developers\n", file);
+				printf("-----------------------------------\n");
+				return 0;
+				
+			}
+			
+		}
+		j++;
+	}
+	
+	/* 
+	check if the device is already locked
+
+	There is much to do here.
+
+		1) UUCP style locks
+			/var/spool/uucp
+		2) SVR4 locks
+			/var/spool/locks
+		3) FSSTND locks
+			/var/lock (done)
+		4) handle stale locks  (done except kermit locks)
+		5) handle minicom lockfile contents (FSSTND?)
+			"     16929 minicom root\n"  (done)
+		6) there are other Lock conventions that use Major and Minor
+		   numbers...
+		7) Stevens recommends LCK..<pid>
+	most are caught above.  If they turn out to be problematic rather than
+	an exercise, we will handle them.
+	*/
+
+	i=strlen(filename);
+	p=(char *) filename+i;
+	while(*(p-1)!='/' && i-- !=1) p--;
+	sprintf(file,"%s/LCK..%s",LOCKDIR,p);
+
+	if(stat(file,&buf)==0)
+	{
+		/* check if its a stale lock */
+		fd=open(file,O_RDONLY);
+		read(fd,pid_buffer,11);
+		close(fd);
+		sscanf(pid_buffer, "%d", &pid);
+
+		if( kill((pid_t) pid, 0) && errno==ESRCH )
+		{
+			report("RXTX Warning:  Removing stale lock file.\n");
+			if(unlink(file) != 0)
+			{
+				snprintf(message, 80, "RXTX Error:  Unable to \
+					remove stale lock file: %s\n",
+					file
+				);
+				report(message);
+				return 0;
+			}
+		}
+		else return 0;
+	}
+	fd=open(file, O_CREAT | O_WRONLY | O_EXCL, 0666);
+	if(fd < 0)
+	{
+		snprintf(message, 80,
+			"RXTX Error: Unable to create lock file: %s\n\n", file);
+		return 0;
+	}
+	sprintf(lockinfo,"%10d\n",getpid());
+	write(fd, lockinfo,11);
+	close(fd);
+	return 1;
+
+#else /* FIXME... This needs to work on all systems that use Lock Files */
+	return 1;
+#endif /* LOCKFILES */
+
+}
+
+/*----------------------------------------------------------
+ fhs_unlock
+
+   accept:      The name of the device to unlock
+   perform:     delete the lock file
+   return:      none
+   exceptions:  none
+   comments:    This is for linux only currently.  I see SVR4 does this
+                differently and there are other proposed changes to the
+		Filesystem Hierachy Standard
+----------------------------------------------------------*/
+void fhs_unlock(const char *filename)
+{
+#ifdef LOCKFILES
+	char file[80],*p;
+	int i;
+
+	i=strlen(filename);
+	p=(char *) filename+i;
+	while(*(p-1)!='/' && i-- !=0) p--;
+	sprintf(file,"%s/LCK..%s",LOCKDIR,p);
+
+	unlink(file);
+#endif /* LOCKFILES */
 }
 
 /*----------------------------------------------------------

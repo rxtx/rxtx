@@ -45,11 +45,11 @@ final class Raw  extends  RawPort {
 
 
 	/** Open the named port */
-	public Raw( String name ) throws IOException {
+	public Raw( String name ) throws PortInUseException {
 		ciAddress=Integer.parseInt(name);
 		open( ciAddress );
 	}
-	private native int open( int ciAddress ) throws IOException;
+	private native int open( int ciAddress ) throws PortInUseException;
 
 
 	/** File descriptor */

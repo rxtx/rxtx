@@ -55,6 +55,8 @@ Flow Control defines inspired by reading how mgetty by Gert Doering does it
 */
 
 /* PROTOTYPES */
+jboolean is_interrupted(JNIEnv *, jobject );
+int send_event(JNIEnv *, jobject, jint, int );
 int read_byte_array( int fd, unsigned char *buffer, int length, int threshold,
    int timeout );
 int get_java_var( JNIEnv *, jobject, char *, char * );

@@ -1,7 +1,7 @@
 /*-------------------------------------------------------------------------
 |   A wrapper to convert RXTX into Linux Java Comm
 |   Copyright 1998 Kevin Hester, kevinh@acm.org
-|   Copyright 2000 Trent Jarvi, TrentJarvi@yahoo.com
+|   Copyright 2000 Trent Jarvi, trentjarvi@yahoo.com
 |
 |   This library is free software; you can redistribute it and/or
 |   modify it under the terms of the GNU Library General Public
@@ -17,19 +17,20 @@
 |   License along with this library; if not, write to the Free
 |   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --------------------------------------------------------------------------*/
+
+/* Martin Pool <mbp@linuxcare.com> added support for explicitly-specified
+ * lists of ports, October 2000. */
+
 package javax.comm;
-import java.io.File;
-import java.io.IOException;
-import java.util.Enumeration;
-import java.util.Vector;
+
+import java.io.*;
+import java.util.*;
+import javax.comm.*;
+import java.util.StringTokenizer;
 
 /**
-* @author Kevin Hester
-* @author Trent Jarvi
-* @version %I%, %G%
-* @since JDK1.0
+   This is the JavaComm for Linux driver.
 */
-
 public class RXTXCommDriver implements CommDriver
 {
 
@@ -42,77 +43,122 @@ public class RXTXCommDriver implements CommDriver
 	}
 
 	/** Get the Serial port prefixes for the running OS */
+	private String deviceDirectory;
+	private String osName;
 	private native boolean isDeviceGood(String dev);
+	private native String getDeviceDirectory();
 
-	/*  create a vector of know ports of some type (RS232, RS485, ...) */
-
-	private final Vector getPortPrefixes(String AllKnownPorts[])
+	private final String[] getPortPrefixes(String AllKnownPorts[])
 	{
+		/*
+		256 is the number of prefixes ( COM, cua, ttyS, ...) not
+		the number of devices (ttyS0, ttyS1, ttyS2, ...)
 
-		if (debug)
-			System.out.println("RXTXCommDriver:getPortPrefixes()");
+		On a Linux system there are about 400 prefixes in
+		deviceDirectory.  
+		registerScannedPorts() assigns AllKnownPorts to something less
+		than 50 prefixes.
 
-		Vector v = new Vector();
+		Trent
+		*/
 
-		for(int j=0;j<AllKnownPorts.length;j++)
+		String PortString[]=new String [256];
+		if(AllKnownPorts==null)
 		{
-			if(isDeviceGood(AllKnownPorts[j]))
-			{
-				v.addElement(AllKnownPorts[j]);
+			if (debug)
+				System.out.println("\nRXTXCommPort:getPortPrefixes() No ports are known for this System.\nPlease check the ports listed for " +osName+" in RXTXCommDriver:registerScannedPorts()\n");
+		}
+		int i=0;
+		for(int j=0;j<AllKnownPorts.length;j++){
+			if(isDeviceGood(AllKnownPorts[j])) {
+				PortString[i++]=new String(AllKnownPorts[j]);
 			}
 		}
-		return(v);
-	}
-
-	/*  If the port is readable and writeable add it to CommPortIdentifier
-	 */
-
-	private void addIfPortGood(String pName, int pType)
-	{
-		String portName = "/dev/" + pName;
-		File port = new File( portName );
-
-		if( port.canRead())
+		String[] returnArray=new String[i];
+		System.arraycopy(PortString, 0, returnArray, 0, i);
+		if(PortString[0]==null)
 		{
-			if( port.canWrite() )
+			if (debug)
+				System.out.println("\nRXTXCommPort:getPortPrefixes() No ports matched the list assumed for this\nSystem in the directory " + deviceDirectory + ".  Please check the ports listed for \"" + osName + "\" in\nRXTXCommDriver:registerScannedPorts()\n");
+		}
+		else
+		{
+			if (debug)
+				System.out.println("\nRXTXCommPort:getPortPrefixes()\nThe following port prefixes have been identified as valid on "+osName+":\n");
+			for(int j=0;j<returnArray.length;j++)
 			{
-				CommPortIdentifier.addPortName( portName, pType, this );
+				if (debug)
+					System.out.println(j + " " +
+						PortString[j]);
 			}
 		}
+		return returnArray;
 	}
 
-	/*  v is a Vector of requested ports with out the #'s.  ie ttyS
-	 *  d is a Vector of all devices on the  system.  ie  ttyS0
-	 *  if  the item in d starts with the item in v request that the
-	 *  port be added to CommPortIdentifier if its readable and writable.
-	 */
+
+   /*
+    * A primitive test of whether a specified device is available or
+    * not.
+    *
+    * FIXME: This is actually a pretty poor test.  These Java calls
+    * map in the 1.2.2 Unix JDK into calls to access(2), which checks
+    * the permission bits on the file.  There are at least two
+    * problems with this, however.
+    *
+    * Firstly, in Linux 2.2 it will fail with EROFS for a device node
+    * on a read-only device, even though you're allowed to write to
+    * them.  This is fixed in Linux 2.4, but may exist on other
+    * systems as well.
+    *
+    * Secondly and more importantly, simply being permitted to access
+    * the device doesn't mean that it physically exists, and therefore
+    * that an attempt to use it will succeed.
+    *
+    * One alternative approach would be to try to actually open the
+    * device for read/write, but that's not a good idea because
+    * opening a device can affect the control pins, etc.
+    *
+    * Even better might be to return all possible devices for this
+    * operating system or hardware without trying to check that
+    * they're usable, and then letting the application cope with ones
+    * that actually turn out not to work.
+    *
+    * @author Martin Pool
+    */
+	private boolean accessReadWrite(String portName)
+	{
+		final File port = new File(portName);
+		return port.canRead() && port.canWrite();
+	}
+
+
 	private void RegisterValidPorts(
-		Vector d,
-		Vector v,
-		int portType
-	)
-	{
-		String s,t,portName;
-		Enumeration req, exhist;
-
+		String devs[],
+		String Prefix[],
+		int PortType
+	) {
+		int p =0 ;
+		int i =0;
 		if (debug)
-			System.out.println(
-				"RXTXCommDriver:RegisterValidPorts()");
-
-		long ms = System.currentTimeMillis();
-		for (req = v.elements() ; req.hasMoreElements() ;)
-		{
-			s=(String) req.nextElement();
-			for( exhist = d.elements(); exhist.hasMoreElements(); )
-			{
-				t = (String) exhist.nextElement();
-				if( t.startsWith( s ))
-				{
-					addIfPortGood( t, portType);
+			System.out.println("Entering RegisterValidPorts()");
+		if ( devs[0]==null || Prefix[0]==null) return;
+		for( i = 0;i<devs.length; i++ ) {
+			for( p = 0;p<Prefix.length; p++ ) {
+				String portName = new String(deviceDirectory + devs[ i ]);
+				if( devs[ i ].startsWith( Prefix[ p ] ) ) {
+					if (accessReadWrite(portName))
+						CommPortIdentifier.addPortName(
+							portName,
+							PortType,
+							this
+						);
 				}
 			}
 		}
+		if (debug)
+			System.out.println("Leaving RegisterValidPorts()");
 	}
+
 
    /*
     * initialize() will be called by the CommPortIdentifier's static
@@ -135,23 +181,109 @@ public class RXTXCommDriver implements CommDriver
 	* Bencom
 
     */
-    /*
-	See SerialImp.c's *KnownPorts[] when adding ports
-    */
+
 	public void initialize()
 	{
 
 		if (debug) System.out.println("RXTXCommDriver:initialize()");
-		
-		File dev = new File( "/dev" );
-		String[] list = dev.list();
-		Vector devs = new Vector();
 
-		/*  fill a vector with all the devices files in /dev */
-		int j=0;while(j<list.length) devs.addElement(list[j++]);
+		osName=System.getProperty("os.name");
+		deviceDirectory=getDeviceDirectory();
 
+	/*
+	 First try to register ports specified in the properties
+	 file.  If that doesn't exist, then scan for ports.
+	*/
+		if (!registerSpecifiedPorts())
+			registerScannedPorts();
+	}
 
-		String[] AllKnownSerialPorts={
+	private void addSpecifiedPorts(String names, int type)
+	{
+		final String pathSep = System.getProperty("path.separator", ":");
+		final StringTokenizer tok = new StringTokenizer(names, pathSep);
+
+		while (tok.hasMoreElements())
+		{
+			String portName = tok.nextToken();
+
+			if (accessReadWrite(portName))
+				CommPortIdentifier.addPortName(portName,
+					type, this);
+		}
+	}
+
+   /*
+    * Register ports specified by the gnu.io.rxtx.SerialPorts and
+    * gnu.io.rxtx.ParallelPorts system properties.
+    */
+	private boolean registerSpecifiedPorts()
+	{
+		boolean found = false;
+		String val;
+
+		val = System.getProperty("gnu.io.rxtx.SerialPorts");
+		if (val == null) 
+			val = System.getProperty("javax.comm.SerialPorts");
+		if (val != null)
+		{
+			addSpecifiedPorts(val, CommPortIdentifier.PORT_SERIAL);
+			found = true;
+		}
+
+		val = System.getProperty("gnu.io.rxtx.ParallelPorts");
+		if (val == null) 
+			val = System.getProperty("javax.comm.ParallelPorts");
+		if (val != null)
+		{
+			addSpecifiedPorts(val, CommPortIdentifier.PORT_PARALLEL);
+			found = true;
+		}
+
+		val = System.getProperty("gnu.io.rxtx.RS485Ports");
+		if (val == null) 
+			val = System.getProperty("javax.comm.RS485Ports");
+		if (val != null)
+		{
+			addSpecifiedPorts(val, CommPortIdentifier.PORT_PARALLEL);
+			found = true;
+		}
+
+		val = System.getProperty("gnu.io.rxtx.I2CPorts");
+		if (val == null) 
+			val = System.getProperty("javax.comm.I2CPorts");
+		if (val != null)
+		{
+			addSpecifiedPorts(val, CommPortIdentifier.PORT_PARALLEL);
+			found = true;
+		}
+
+		val = System.getProperty("gnu.io.rxtx.RawPorts");
+		if (val == null) 
+			val = System.getProperty("javax.comm.RawPorts");
+		if (val != null)
+		{
+			addSpecifiedPorts(val, CommPortIdentifier.PORT_PARALLEL);
+			found = true;
+		}
+
+		return found;
+	}
+
+   /*
+    * Look for all entries in deviceDirectory, and if they look like they should
+    * be serial ports on this OS and they can be opened then register
+    * them.
+    *
+    */
+	private void registerScannedPorts()
+	{
+		File dev = new File( deviceDirectory );
+		String[] devs = dev.list();
+		String[] AllKnownSerialPorts;
+		if(osName.equals("Linux"))
+		{
+			String[] Temp = {
 			"comx",      // linux COMMX synchronous serial card
 			"holter",    // custom card for heart monitoring
 			"modem",     // linux symbolic link to modem.
@@ -180,7 +312,13 @@ public class RXTXCommDriver implements CommDriver
 			"ttyV", // linux Comtrol VS-1000 serial controller
 			"ttyW", // linux specialix cards
 			"ttyX", // linux SpecialX serial card
+			};
+			AllKnownSerialPorts=Temp;
+		}
 
+		else if(osName.equals("Irix"))
+		{
+			String[] Temp = {
 			"ttyc", // irix raw character devices
 			"ttyd", // irix basic serial ports
 			"ttyf", // irix serial ports with hardware flow
@@ -189,27 +327,84 @@ public class RXTXCommDriver implements CommDriver
 			"tty4d",// irix RS422
 			"tty4f",// irix RS422 with HSKo/HSki
 			"midi", // irix serial midi
-			"us",   // irix mapped interface
+			"us"    // irix mapped interface
+			};
+			AllKnownSerialPorts=Temp;
+		}
 
-			"cuaa", // FreeBSD Serial Ports
+		else if(osName.equals("FreeBSD")) //FIXME this is probably wrong
+		{
+			String[] Temp = {
+			"cuaa"  // FreeBSD Serial Ports
+			};
+			AllKnownSerialPorts=Temp;
+		}
 
-			"tty0", // netbsd serial ports
+		else if(osName.equals("NetBSD")) // FIXME this is probably wrong
+		{
+			String[] Temp = {
+			"tty0"  // netbsd serial ports
+			};
+			AllKnownSerialPorts=Temp;
+		}
 
+		else if(osName.equals("HP-UX"))
+		{
+			String[] Temp = {
 			"tty0p",// HP-UX serial ports
-			"tty1p",// HP-UX serial ports
+			"tty1p" // HP-UX serial ports
+			};
+			AllKnownSerialPorts=Temp;
+		}
 
-			"serial",// BeOS serial ports
+		else if(osName.equals("BeOS"))
+		{
+			String[] Temp = {
+			"serial" // BeOS serial ports
+			};
+			AllKnownSerialPorts=Temp;
+		}
 
+		else if(osName.equals("WIN32")) // FIXME this is probably wrong
+		{
+			String[] Temp = {
 			"COM"    // win32 serial ports
-		};
+			};
+			AllKnownSerialPorts=Temp;
+		}
+
+		else
+		{
+			if (debug)
+				System.out.println(osName + " ports have not been entered in RXTXCommDriver.java.  This may just be a typo in the method initialize().");
+			AllKnownSerialPorts=null;
+		}
+
 	/** Get the Parallel port prefixes for the running os
 	* Holger Lehmann
 	* July 12, 1999
 	* IBM
 	*/
-		String[] AllKnownParallelPorts={
-			"lp"    // linux printer port
-		};
+		String[] AllKnownParallelPorts;
+		if(osName.equals("Linux"))
+		{
+			String[] temp={
+				"lp"    // linux printer port
+			};
+			AllKnownParallelPorts=temp;
+		}
+		else  /* printer support is green */
+		{
+			AllKnownParallelPorts=null;
+		}
+
+		if (devs==null)
+		{
+			if (debug)
+				System.out.println("RXTXCommDriver:registerScannedPorts() no Device files to check ");
+			return;
+		}
+
 		String[] AllKnownRS485Ports={};
 		String[] AllKnownI2CPorts={};
 		String[] AllKnownRAWPorts={};
@@ -218,21 +413,25 @@ public class RXTXCommDriver implements CommDriver
 			getPortPrefixes(AllKnownSerialPorts),
 			CommPortIdentifier.PORT_SERIAL
 		);
+
 		RegisterValidPorts(
 			devs,
 			getPortPrefixes(AllKnownParallelPorts),
 			CommPortIdentifier.PORT_PARALLEL
 		);
+
 		RegisterValidPorts(
 			devs,
 			getPortPrefixes(AllKnownRS485Ports),
 			CommPortIdentifier.PORT_RS485
 		);
+
 		RegisterValidPorts(
 			devs,
 			getPortPrefixes(AllKnownI2CPorts),
 			CommPortIdentifier.PORT_I2C
 		);
+
 		RegisterValidPorts(
 			devs,
 			getPortPrefixes(AllKnownRAWPorts),
@@ -274,8 +473,10 @@ public class RXTXCommDriver implements CommDriver
 			{
 				return new RS485( portName );
 			}
-		} catch( IOException e ) {
-			e.printStackTrace();
+		} catch( PortInUseException e ) {
+			if (debug)
+				System.out.println(
+					"Port in use by another application");
 		}
 		return null;
 	}

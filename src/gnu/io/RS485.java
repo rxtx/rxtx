@@ -45,10 +45,10 @@ final class RS485  extends  RS485Port {
 
 
 	/** Open the named port */
-	public RS485( String name ) throws IOException {
+	public RS485( String name ) throws PortInUseException {
 		fd = open( name );
 	}
-	private native int open( String name ) throws IOException;
+	private native int open( String name ) throws PortInUseException;
 
 
 	/** File descriptor */

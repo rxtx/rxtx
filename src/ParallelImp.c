@@ -524,7 +524,6 @@ JNIEXPORT void JNICALL LPRPort(setHWFC)( JNIEnv *env,
 	return;
 }
 
-
 /*----------------------------------------------------------
 LPRPort.eventLoop
 
@@ -532,15 +531,15 @@ LPRPort.eventLoop
    perform:     periodically check for ParallelPortEvents
    return:      none
    exceptions:  none
-   comments:    lots of work needed here
+   comments:    lots of work needed here.  Yes its a mess.
 struct lp_stats
 {
-        unsigned long chars;
-        unsigned long sleeps;
-        unsigned int maxrun;
-        unsigned int maxwait;
-        unsigned int meanwait;
-        unsigned int mdev;
+	unsigned long chars;
+	unsigned long sleeps;
+	unsigned int maxrun;
+	unsigned int maxwait;
+	unsigned int meanwait;
+	unsigned int mdev;
 };
 
 ----------------------------------------------------------*/
@@ -548,99 +547,71 @@ JNIEXPORT void JNICALL LPRPort(eventLoop)( JNIEnv *env,
 	jobject jobj )
 {
 	int fd, ret;
-	/*int change; */
 	unsigned int pflags;
 	fd_set rfds;
 	struct timeval sleep;
-	jfieldID jfield;
-	jmethodID method, interrupt;
 	jboolean interrupted = 0;
-	jclass jclazz, jthread;
-	jclazz = (*env)->GetObjectClass( env, jobj );
+
 	fd = get_java_var( env, jobj,"fd","I" );
-	method = (*env)->GetMethodID( env, jclazz, "sendEvent", "(IZ)V" );
-	jthread = (*env)->FindClass( env, "java/lang/Thread" );
-	interrupt = (*env)->GetStaticMethodID( env, jthread, "interrupted", "()Z" );
+
+	interrupted = is_interrupted(env, jobj);
 
 	FD_ZERO( &rfds );
 	while( !interrupted )
 	{
 		FD_SET( fd, &rfds );
-		sleep.tv_sec = 1;	/* Check every 1 second, or on receive data */
+		/* Check every 1 second, or on receive data */
+		sleep.tv_sec = 1;	
 		sleep.tv_usec = 0;
 		do {
 			ret = select( fd + 1, &rfds, NULL, NULL, &sleep );
 		}
 		while (ret < 0 && errno == EINTR);
 		if( ret < 0 ) break;
-#if defined(__linux__)
-		if( ioctl( fd, LPGETSTATUS, &pflags ) ) break;
+		interrupted = is_interrupted(env, jobj);
+		if(interrupted) {
+			return;
+		}
+
+#if defined(LPGETSTATUS)
+		ioctl( fd, LPGETSTATUS, &pflags );
 #else
-/*  FIXME??  */
+	/*  FIXME??  */
+#	error Trent never looked at this.
 #endif
 
 /*
-                       PAR_EV_BUFFER:
-                       PAR_EV_ERROR:
+			PAR_EV_BUFFER:
+			PAR_EV_ERROR:
 */
 
-#if defined(__linux__)
+#if defined(LP_BUSY)
 		if (pflags&LP_BUSY)    /* inverted input, active high */
-#endif
-#if defined(__FreeBSD__)
+			send_event( env, jobj, PAR_EV_ERROR, JNI_TRUE );
+#elif defined(EBUSY)
 		if (pflags&EBUSY)    /* inverted input, active high */
-#endif
-			(*env)->CallVoidMethod( env, jobj, method, (jint)PAR_EV_ERROR, JNI_TRUE );
+			send_event( env, jobj, PAR_EV_ERROR, JNI_TRUE );
+#endif /* EBUSY LP_BUSY */
 /*  FIXME  this has moved into the ifdef __kernel__?  Need to get the
            posix documentation on this.
 		if (pflags&LP_ACK)
-			(*env)->CallVoidMethod( env, jobj, method, (jint)PAR_EV_ERROR, JNI_TRUE );
+			send_event( env, jobj, PAR_EV_ERROR, JNI_TRUE );
 */
 #if defined (__linux__)
-/* unchanged input, active low */
+		/* unchanged input, active low */
 		if (pflags&LP_NOPA)   /* unchanged input, active high */
-			(*env)->CallVoidMethod( env, jobj, method, (jint)PAR_EV_ERROR, JNI_TRUE );
+			send_event( env, jobj, PAR_EV_ERROR, JNI_TRUE );
 		if (pflags&LP_SELEC)  /* unchanged input, active high */
-			(*env)->CallVoidMethod( env, jobj, method, (jint)PAR_EV_ERROR, JNI_TRUE );
+			send_event( env, jobj, PAR_EV_ERROR, JNI_TRUE );
 		if (pflags&LP_ERR)  /* unchanged input, active low */
-			(*env)->CallVoidMethod( env, jobj, method, (jint)PAR_EV_ERROR, JNI_TRUE );
+			send_event( env, jobj, PAR_EV_ERROR, JNI_TRUE );
 #else
-/*  FIXME??  */
+	/*  FIXME??  */
+#	error Trent never looked at this.
 #endif
-		interrupted = (*env)->CallStaticBooleanMethod( env, jthread, interrupt );
+		usleep(1000);
 	}
 	return;
-}
-
-
-/*----------------------------------------------------------
- send_printer_events
-
-   accept:      int    event     ParallelPortEvent constant
-                int    change    Number of times this event happened
-                int    state     current state: 0 is false, nonzero is true
-   perform:     Send the necessary events
-   return:      none
-   exceptions:  none
-   comments:    Since the interrupt counters tell us how many times the
-                state has changed, we can send a ParallelPortEvent for each
-                interrupt (change) that has occured.  If we don't do this,
-                we'll miss a whole bunch of events.
-----------------------------------------------------------*/
-void send_printer_events( JNIEnv *env, jobject jobj, jmethodID method,
-	int event, int change, int state )
-{
-	int i, s;
-	jboolean flag;
-	if( state ) s = 1;
-	else s = 0;
-
-	for( i = 0; i < change; i++ )
-	{
-		if( ( change + s + i ) % 2 ) flag = JNI_FALSE;
-		else flag = JNI_TRUE;
-		(*env)->CallVoidMethod( env, jobj, method, (jint)event, flag );
-	}
 }
 
 JNIEXPORT void JNICALL LPRPort(setInputBufferSize)(JNIEnv *env,
@@ -703,6 +674,75 @@ void throw_java_exception( JNIEnv *env, char *exc, char *foo, char *msg )
 	(*env)->ThrowNew( env, clazz, buf );
 /* ct7 * Added DeleteLocalRef */
 	(*env)->DeleteLocalRef( env, clazz );
+}
+/*----------------------------------------------------------
+ is_interrupted
+
+   accept:      
+   perform:     see if the port is being closed. 
+   return:      a positive value if the port is being closed.
+   exceptions:  none
+   comments:
+----------------------------------------------------------*/
+jboolean is_interrupted(JNIEnv *env, jobject jobj)
+{
+	jmethodID foo;
+	jclass jclazz;
+	int result;
+
+	(*env)->ExceptionClear(env);
+
+	jclazz = (*env)->GetObjectClass( env, jobj );
+	if(jclazz == NULL) return JNI_TRUE;
+
+	foo = (*env)->GetMethodID( env, jclazz, "checkMonitorThread", "()Z");
+	if(foo == NULL) return JNI_TRUE;
+
+	result = (*env)->CallBooleanMethod( env, jobj, foo );
+
+#ifdef DEBUG
+	if((*env)->ExceptionOccurred(env)) {
+		report ("an error occured calling sendEvent()\n");
+		(*env)->ExceptionDescribe(env);
+		(*env)->ExceptionClear(env);
+	}
+#endif /* DEBUG */
+	(*env)->DeleteLocalRef( env, jclazz );
+
+	return(result);
+}
+/*----------------------------------------------------------
+ send_event
+
+   accept:      The event type and the event state     
+   perform:     if state is > 0 send a JNI_TRUE event otherwise send JNI_FALSE
+   return:      a positive value if the port is being closed.
+   exceptions:  none
+   comments:
+----------------------------------------------------------*/
+int send_event(JNIEnv *env, jobject jobj, jint type, int flag)
+{
+	int result;
+	jmethodID foo;
+	jclass jclazz = (*env)->GetObjectClass( env, jobj );
+
+	if(jclazz == NULL) return JNI_TRUE;
+	foo = (*env)->GetMethodID( env, jclazz, "sendEvent", "(IZ)Z" );
+
+	(*env)->ExceptionClear(env);
+
+	result = (*env)->CallBooleanMethod( env, jobj, foo, type, 
+		flag > 0 ? JNI_TRUE : JNI_FALSE );
+
+#ifdef DEBUG
+	if((*env)->ExceptionOccurred(env)) {
+		report ("an error occured calling sendEvent()\n");
+		(*env)->ExceptionDescribe(env);
+		(*env)->ExceptionClear(env);
+	}
+#endif /* DEBUG */
+	(*env)->DeleteLocalRef( env, jclazz );
+	return(result);
 }
 /*----------------------------------------------------------
 get_java_var

@@ -48,10 +48,10 @@ final class I2C  extends  I2CPort {
 
 
 	/** Open the named port */
-	public I2C( String name ) throws IOException {
+	public I2C( String name ) throws PortInUseException {
 		fd = open( name );
 	}
-	private native int open( String name ) throws IOException;
+	private native int open( String name ) throws PortInUseException;
 
 
 	/** File descriptor */

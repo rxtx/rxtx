@@ -52,33 +52,44 @@
 
 /*  Ports known on the OS */
 #if defined(__linux__)
-#	define PORTS { "lp", "comx", "holter", "modem", "ttyircomm", "ttycosa0c", "ttycosa1c", "ttyC", "ttyCH", "ttyD", "ttyE", "ttyF", "ttyH", "ttyI", "ttyL", "ttyM", "ttyMX", "ttyP", "ttyR", "ttyS", "ttySI", "ttySR", "ttyS", "ttySI", "ttySR", "ttyT", "ttyUSB", "ttyV", "ttyW", "ttyX", NULL }
 #	define DEVICEDIR "/dev/"
+#	define LOCKDIR "/var/lock"
 #endif
-#if defined(__sgi__)
-#	define PORTS { "lp", "ttyd", "ttym", "ttyf", "ttyc", "ttyq", "tty4d", "tty4f", "ttymidi", "ttyus", NULL }
+#if defined(__sgi__) || defined(sgi)
+#error test
 #	define DEVICEDIR "/dev/"
-#endif
+/* see SerialImp.c fhs_lock() & fhs_unlock() */
+#	define LOCKDIR ""
+#endif /* __sgi__ || sgi */
 #if defined(__FreeBSD__)
-#	define PORTS { "lp", "cuaa", NULL }
 #	define DEVICEDIR "/dev/"
+/* see SerialImp.c fhs_lock() & fhs_unlock() */
+#	define LOCKDIR "/var/spool/uucp/"
 #endif
 #if defined(__NetBSD__)
-#	define PORTS { "lp", "tty0", NULL }
 #	define DEVICEDIR "/dev/"
+/* see SerialImp.c fhs_lock() & fhs_unlock() */
+#	define LOCKDIR ""
 #endif
+
 #if defined(__hpux__)
-#	define PORTS { "lp", "tty0p", "tty1p", NULL }
+/* modif cath */
 #	define DEVICEDIR "/dev/"
+/* see SerialImp.c fhs_lock() & fhs_unlock() */
+#	define LOCKDIR ""
 #endif
 #if defined(__BEOS__)
-#	define PORTS { "serial" };
-#	define DEVICEDIR "/dev/ports"
+#	define DEVICEDIR "/dev/ports/"
+/* see SerialImp.c fhs_lock() & fhs_unlock() */
+#	define LOCKDIR ""
 #endif
 #if defined(WIN32)
-#	define PORTS { "COM", NULL }
 #	define DEVICEDIR ""
+/* see SerialImp.c fhs_lock() & fhs_unlock() */
+#	define LOCKDIR ""
 #endif
+
+/*  That should be all you need to look at in this file for porting */
 
 /* java exception class names */
 #define UNSUPPORTED_COMM_OPERATION "javax/comm/UnsupportedCommOperationException"
@@ -145,5 +156,7 @@ int send_event(JNIEnv *, jobject, jint, int );
 void dump_termios(char *,struct termios *);
 void report(char *);
 void throw_java_exception( JNIEnv *, char *, char *, char * );
+void fhs_unlock(const char *);
+int fhs_lock(const char *);
 
 #define LINUX_KERNEL_VERSION_ERROR "\n\n\nRXTX WARNING:  This library was compiled to run with OS release %s and you are currently running OS release %s.  In some cases this can be a problem.  Try recompiling RXTX if you notice strange behavior.  If you just compiled RXTX make sure /usr/include/linux is a symbolic link to the include files that came with the kernel source and not an older copy.\n\n\npress enter to continue\n"

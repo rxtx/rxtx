@@ -167,7 +167,7 @@ BOOL FillDCB(DCB *dcb) {
     return ( TRUE ) ;
 } */
 
-int close(int fd) {
+int serial_close(int fd) {
 	return CloseHandle(tl[fd]->hComm);
 }
 
