@@ -429,7 +429,7 @@ public class RXTXCommDriver implements CommDriver
 				/*
 				   Lets toss in LPT too!
 				*/
-					"LPT1:", "LPT2:", "LPT3:" 
+					"LPT1", "LPT2", "LPT3" 
 				};
 	/*
 				{ "COM1", "COM2","COM3","COM4",
