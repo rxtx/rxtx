@@ -56,10 +56,12 @@
 
 /* glue for unsupported linux speeds see also win32termios.h */
 
+#if !defined(__APPLE__) //dima
 #define B14400		1010001
 #define B28800		1010002
 #define B128000		1010003
 #define B256000		1010004
+#endif //dima
 
 
 /*  Ports known on the OS */
@@ -122,7 +124,25 @@
 #	define DEVICEDIR ""
 #	define LOCKDIR ""
 #	define LOCKFILEPREFIX ""
+#	define OPEN serial_open
+#	define CLOSE serial_close
+#	define WRITE serial_write
+#	define READ serial_read
+#else /* use the system calls for Unix */
+#	define OPEN open
+#	define CLOSE close
+#	define WRITE write
+#	define READ read
+#ifdef TRACE
+#define ENTER(x) report("entering "x" \n");
+#define LEAVE(x) report("leaving "x" \n");
+#else
+#define ENTER(x)
+#define LEAVE(x)
+#endif /* TRACE */
+
 #endif /* WIN32 */
+
 
 /*  That should be all you need to look at in this file for porting */
 #ifdef UUCP
@@ -182,6 +202,12 @@ Flow Control defines inspired by reading how mgetty by Gert Doering does it
 #endif
 
 /* PROTOTYPES */
+#ifdef DEBUG_MW
+extern void mexWarnMsgTxt( const char * );
+extern void mexErrMsgTxt( const char * );
+extern int mexPrintf( const char *, ... );
+#	define printf mexPrintf
+#endif /* DEBUG_MW */
 #ifdef __BEOS__
 data_rate translate_speed( JNIEnv*, jint  );
 int translate_data_bits( JNIEnv *, data_bits *, jint );
@@ -198,6 +224,8 @@ int get_java_var( JNIEnv *, jobject, char *, char * );
 jboolean is_interrupted(JNIEnv *, jobject );
 int send_event(JNIEnv *, jobject, jint, int );
 void dump_termios(char *,struct termios *);
+void report_error(char *);
+void report_warning(char *);
 void report(char *);
 void throw_java_exception( JNIEnv *, char *, char *, char * );
 int lock_device( const char * );
