@@ -173,7 +173,7 @@ CLASSDEST = gnu/io
 LIBTOOLC = $(TOP)/libtool --mode=compile $(CC) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) $(VERBOSE_IOEXCEPTIONS) -c
 LIBTOOL_INST = $(TOP)/libtool --mode=install $(INSTALL_PROGRAM)
 ####################### dirs
-SPATH = $(srcdir)/src
+SPATH = $(TOP)/src
 DEST = $(target_triplet)
 ####################### rules
 CLASSES = $(patsubst $(SPATH)/%.java,$(TOP)/$(CLASSDEST)/%.class,$(wildcard $(SPATH)/*.java))
@@ -417,7 +417,7 @@ $(target_triplet)/librxtx%.@LIB_EXTENSION@: $(SPATH)/%Imp.c $(CLASSES) $(SPATH)/
 	@(							\
 	$(LIBTOOL_FIX)						\
 	cd $(DEST); 						\
-	$(LIBTOOLC) ../$(SPATH)/$*Imp.@EXTENSION@ -o		\
+	$(LIBTOOLC) $(SPATH)/$*Imp.@EXTENSION@ -o		\
 		$(TOP)/$(DEST)/$*Imp.@OBJECT_EXTENSION@;	\
 	if [ "$*" = "rxtxSerial" ]; then 				\
 		$(LIBTOOLC) ../$(SPATH)/fuserImp.@EXTENSION@	\
