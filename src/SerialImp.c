@@ -173,6 +173,7 @@ struct timeval snow, enow, seloop, eeloop;
 	mexPrintf("%8i sec : %8i usec\n", enow.tv_sec - snow.tv_sec, enow.tv_sec - snow.tv_sec?snow.tv_usec-enow.tv_usec:enow.tv_usec - snow.tv_usec); \
 }
 #else
+#define report_time_eventLoop( ){};
 #define report_time( ) {}
 #define report_time_start( ) {}
 #define report_time_end( ) {}
