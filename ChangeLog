@@ -1,13 +1,18 @@
-This is ChangeLog Thu Aug 29 16:02:42 MDT 2002
+This is ChangeLog Wed Sep 25 10:39:10 MDT 2002
 
 rxtx-2.1 and rxtx-2.0 changes are kept in the same file.  skip to the version
 you downloaded.
 
-2.1-6 Aug 29  2002    read(byte) does not timeout
+2.1-6 Sep  7, 2002    read(byte) does not timeout
 		      read(byte[]) returns 0 on timeout (Fixes DalSemi iButtons)
 		      Dave Dribin <dave@dribin.org>
 		      QNX Port Bill Smith <bsmith@tridium.com>
-		      read() fixes for QNX Bill Smith <bsmith@tridium.com>
+		      read() fixes - should be the same as Sun's CommAPI now.
+		      timout and threshold fixes for above
+		      Bill Smith <bsmith@tridium.com>
+		      All QA tests passed.
+		      Debian lock file fix
+		      "Villa Valerio" <valerio.villa@siemens.com>
 2.1-5 Aug 15, 2002    AM_MAINTAINER_MODE for auto* fixes
 2.1-[2-4] Aug 13, 2002 A series of minor bug fixes compile fixes
 		      Custom speed fixes
@@ -124,8 +129,9 @@ you downloaded.
 		      Stallion Card support
 		      Greg Luck <gluck@tempo-services.com.au>
 		      CommPort enumeration with rxtx's comm.jar
-2.0-4 Aug 15 2002     see rxtx-2.1-5
-2.0-[23] Aug 13 2002  see rxtx-2.1-[2-4]
+2.0-5 Sep 7, 2002     see rxtx-2.1-6
+2.0-4 Aug 15, 2002    see rxtx-2.1-5
+2.0-[23] Aug 13, 2002 see rxtx-2.1-[2-4]
 2.0-1  Apr 5, 2002    see rxtx-2.1-1
 1.4-15 Dec 4, 2001    see rxtx-1.5-8
 1.4-14 Oct 18, 2001   see rxtx-1.5-7
