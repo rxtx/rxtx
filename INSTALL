@@ -339,7 +339,17 @@ B.  Exception in thread "main" java.lang.UnsatisfiedLinkError: no rxtxSerial in
 
 		... lets fix it.
 
-	$ mv /usr/local/lib/librxtxSerial.* /usr/local/java/jre/lib/i386/
+    Solution 1: move the file to a place that works
+
+         $ mv /usr/local/lib/librxtxSerial.* /usr/local/java/jre/lib/i386/
+
+    Solution 2: add the location of librxtxSerial to LD_LIBRARY_PATH
+
+         $ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib/
+
+    Solution 3: pass the location in on the command line
+
+         $ java -Djava.library.path=/usr/local/lib/ ...
 
 C.  I Can Not Open the Port.
 
