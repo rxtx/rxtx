@@ -1,15 +1,9 @@
 Hi.
-Enclosed you'll find a first, alpha-version of rxtx for Windows CE.
+Enclosed you'll find a version of rxtx for Windows CE.
 It was compiled using Microsoft's eMbedded Visual C++ 3.0 (which is free).
-There're source and also binaries for ARM (i.e. Compaq iPAQ).
+It was tested on Compaq iPAQ 3650 (ARM).
 
-I didn't enclose .java files since only modifications in them are:
-1) adding colon for COM port candidates (COM1: COM2: and so on.) - it
-doesn't harm "big" Windows
-2) changing library name from "Serial" to "rxtxSerial" since there's
-Serial.dll in CE already.
-
-Rest of code is completely rewritten, since CE doesn't have overlapped IO
+Native code is completely rewritten, since CE doesn't have overlapped IO
 (and MANY other things), but does non-overlapped better than regular Win32
 - simultanous multiple operations on the same handle are OK.
 I tried compiling this project under NT (with Visual C++ 6.0) and it
@@ -26,13 +20,11 @@ Windows CE doesn't have stdio and console at all so I had to make printj()
 function. Look at it - it can be quite usable for other projects. Basically
 it works like printf() but uses System.out.print() for output.
 
-Will you put this source into CVS or something? I don't know how do you
-manage rxtx.
+You can find more info on Java serial support on 
+http://www.mhobot.w.pl/java/comm
 
-Cheers,
 Michal Hobot
 MichalHobot@netscape.net
 
 Krakow,
 Poland
-
