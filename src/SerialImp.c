@@ -968,7 +968,7 @@ JNIEXPORT jint JNICALL RXTXPort(nativeGetParity)(JNIEnv *env, jobject jobj, jint
 
 	if( tcgetattr( fd, &ttyset ) < 0 )
 	{
-		mexPrintf("nativeGetParity:  tcgetattr failed\n");
+		report("nativeGetParity:  tcgetattr failed\n");
 		return( -1 );
 	}
 #ifdef  CMSPAR 
