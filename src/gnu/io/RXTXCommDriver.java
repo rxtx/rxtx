@@ -382,12 +382,12 @@ public class RXTXCommDriver implements CommDriver
 		{
 			String[] temp = 
 			/*
-					{ "//./COM1", "//./COM2", "//./COM3",
-					"//./COM4", "//./COM5", "//./COM6",
-					"//./COM7", "//./COM8" };
+					{ "//./COM1:", "//./COM2:", "//./COM3:",
+					"//./COM4:", "//./COM5:", "//./COM6:",
+					"//./COM7:", "//./COM8:" };
 			*/
-			{ "COM1", "COM2","COM3","COM4",
-			"COM5", "COM6", "COM7", "COM8" };
+			{ "COM1:", "COM2:","COM3:","COM4:",
+			"COM5:", "COM6:", "COM7:", "COM8:" };
 			CandidateDeviceNames=temp;
 		}
 		else if ( osName.equals("Solaris") || osName.equals("SunOS"))
