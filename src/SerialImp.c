@@ -1867,17 +1867,20 @@ int read_byte_array(	JNIEnv *env,
 			int length,
 			int timeout )
 {
-	long start, now;
 	int ret, left, bytes = 0;
+	long now, start = 0;
 
 	ENTER( "read_byte_array" );
 	left = length;
-	start = GetTickCount();
+	if (timeout >= 0)
+		start = GetTickCount();
 	while( bytes < length )
 	{
-		now = GetTickCount();
-		if (now-start >= timeout)
-			return bytes;
+		if (timeout >= 0) {
+			now = GetTickCount();
+			if (now-start >= timeout)
+				return bytes;
+		}
 RETRY:	if ((ret = READ( fd, buffer + bytes, left )) < 0 )
 		{
 			if (errno == EINTR)
