@@ -90,7 +90,7 @@ void MexPrintf( char *string )
 void termios_setflags( int fd, int termios_flags[] )
 {
 	struct termios_list *index = find_port( fd );
-	int i result;
+	int i, result;
 	int windows_flags[11] = { 0, EV_RXCHAR, EV_TXEMPTY, EV_CTS, EV_DSR,
 					//EV_RING, EV_RLSD, EV_ERR,
 					EV_RING|0x2000, EV_RLSD, EV_ERR,
@@ -117,9 +117,9 @@ void termios_setflags( int fd, int termios_flags[] )
 
 	   The screams for a giveio solution that bypasses the kernel.
 	*/
-	if( event_flag & 0x2000 && result == 0 )
+	if( index->event_flag & 0x2000 && result == 0 )
 	{
-		event_flag &= ~0x2000
+		index->event_flag &= ~0x2000;
 		SetCommMask( index->hComm, index->event_flag );
 	}
 }
@@ -542,7 +542,7 @@ serial_close()
 int serial_close( int fd )
 {
 	struct termios_list *index;
-	char message[80];
+	/* char message[80]; */
 	MexPrintf("C");
 
 	ENTER( "close" );
@@ -1272,7 +1272,8 @@ serial_read()
 
 int serial_read( int fd, void *vb, int size )
 {
-	unsigned long nBytes = 0, total = 0, waiting = 0, error;
+	unsigned long nBytes = 0, total = 0, error;
+	/* unsigned long waiting = 0; */
 	int err, vmin;
 	struct termios_list *index;
 	char message[80];
@@ -2835,6 +2836,8 @@ end:
 	LEAVE( "serial_select" );
 #endif /* DEBUG_VERBOSE */
 	return( 1 );
+#ifdef asdf
+	/* FIXME this needs to be cleaned up...
 fail:
 	MexPrintf("f<\n");
 	sprintf( message, "< select called error %i\n", n );
@@ -2845,6 +2848,7 @@ fail:
 	LEAVE( "serial_select" );
 #endif /* DEBUG_VERBOSE */
 	return( 1 );
+#endif /* asdf */
 	
 }
 

@@ -17,6 +17,9 @@
 |   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --------------------------------------------------------------------------*/
 /* gnu.io.SerialPort constants */
+#ifdef WIN32
+#include "win32termios.h"
+#endif /* WIN32 */
 #define JDATABITS_5		5
 #define JDATABITS_6		6
 #define JDATABITS_7		7
@@ -62,6 +65,7 @@
 #define B256000		1010004
 #endif /* dima */
 
+#if !defined(TIOCSERGETLSR) && !defined(WIN32)
 struct tpid_info_struct
 {
 	/* threads, bean counting, and lifespan */
@@ -83,6 +87,7 @@ struct tpid_info_struct
 	int inuse;
 	char *buff;
 };
+#endif /* !defined(TIOCSERGETLSR) && !defined(WIN32) */
 
 struct event_info_struct
 {
@@ -91,9 +96,6 @@ struct event_info_struct
 	int eventflags[11];
 	
 	int initialised;
-	int output_buffer_empty_flag;
-	fd_set rfds;
-	struct timeval tv_sleep;
 	int ret, change;
 	unsigned int omflags;
 	char message[80];
@@ -105,11 +107,17 @@ struct event_info_struct
 	jclass jclazz;
 	jmethodID send_event;
 	jmethodID checkMonitorThread;
-#if defined(TIOCGICOUNT)
-	struct serial_icounter_struct osis;
-#endif /* TIOCGICOUNT */
 	struct event_info_struct *next, *prev;
+#if !defined(TIOCSERGETLSR) && !defined(WIN32)
+	int output_buffer_empty_flag;
 	struct tpid_info_struct *tpid;
+#else
+#	if defined(TIOCSERGETLSR)
+	fd_set rfds;
+	struct timeval tv_sleep;
+	struct serial_icounter_struct osis;
+#endif /* TIOCSERGETLSR */
+#endif /* !defined(TIOCSERGETLSR) && !defined(WIN32) */
 };
 
 /*  Ports known on the OS */

@@ -940,13 +940,14 @@ struct tpid_info_struct *add_tpid( struct tpid_info_struct *p )
 	return( q );
 }
 #endif /* TIOCSERGETLSR */
-
+/*
 static void warn_sig_abort( int signo )
 {
 	char msg[80];
 	sprintf( msg, "RXTX Recieved Signal %i\n", signo );
 	//report_error( msg );
 }
+*/
 /*----------------------------------------------------------
 init_thread_write( )
 
@@ -1016,8 +1017,6 @@ int init_thread_write( struct event_info_struct *eis )
 	jeis  = (*eis->env)->GetFieldID( eis->env, eis->jclazz, "eis", "I" );
 	report("init_thread_write: set eis\n");
 	(*eis->env)->SetIntField(eis->env, *eis->jobj, jeis, ( jint ) eis );
-#else
-	eis->tpid = NULL;
 #endif /* TIOCSERGETLSR */
 	report("init_thread_write:  stop\n");
 	return( 1 );
@@ -1513,7 +1512,7 @@ JNIEXPORT jint JNICALL RXTXPort(nativeGetParityErrorChar)( JNIEnv *env,
 	ENTER( "nativeGetParityErrorChar" );
 #ifdef WIN32
 	result = ( jint ) termiosGetParityErrorChar(
-			get_javavar(env, jobj, "fd", "I" ) );
+			get_java_var(env, jobj, "fd", "I" ) );
 #else
 	/*
 	   arg!  I cant find a way to change it from \0 in Linux.  I think
@@ -1654,7 +1653,9 @@ int read_byte_array(	JNIEnv *env,
 	/* int count = 0; */
 	fd_set rfds;
 	struct timeval sleep;
+#ifndef WIN32
 	struct timeval *psleep=&sleep;
+#endif /* WIN32 */
 
 	ENTER( "read_byte_array" );
 	left = length;
@@ -2275,7 +2276,9 @@ int initialise_event_info_struct( struct event_info_struct *eis )
 	}
 
 	for( i = 0; i < 11; i++ ) eis->eventflags[i] = 0;
+#ifndef TIOCSERGETLSR
 	eis->output_buffer_empty_flag = 0;
+#endif /* TIOCSERGETLSR */
 
 	eis->fd = get_java_var( env, jobj, "fd", "I" );
 	eis->has_tiocsergetlsr = has_line_status_register_access( eis->fd );
