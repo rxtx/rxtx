@@ -423,7 +423,7 @@ JNIEXPORT void JNICALL RXTXPort(nativeSetSerialPortParams)(
 		goto fail;
 	}
 
-#ifdef /* TIOCGSERIAL && !defined(WIN32) */
+#ifdef TIOCGSERIAL && !defined(WIN32)
 	if ( cspeed > 1000000 )
 	{
 		/*
