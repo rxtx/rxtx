@@ -17,6 +17,7 @@
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #-------------------------------------------------------------------------
 srcdir = @srcdir@
+abs_srcdir=@abs_srcdir@
 VPATH = @srcdir@
 
 AUTOMAKE_OPTIONS = foreign
@@ -30,7 +31,7 @@ CLASSDEST=gnu/io
 LIBTOOLC=$(TOP)/libtool --mode=compile $(CC) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) $(VERBOSE_IOEXCEPTIONS) -c
 LIBTOOL_INST=$(TOP)/libtool --mode=install $(INSTALL_PROGRAM)
 ####################### dirs
-SPATH = $(TOP)/src
+SPATH = $(abs_srcdir)/src
 DEST=$(target_triplet)
 ####################### rules
 CLASSES = $(patsubst $(SPATH)/%.java,$(TOP)/$(CLASSDEST)/%.class,$(wildcard $(SPATH)/*.java))

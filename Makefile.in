@@ -161,6 +161,7 @@ am__include = @am__include@
 am__quote = @am__quote@
 install_sh = @install_sh@
 l = @l@
+abs_srcdir = @abs_srcdir@
 
 AUTOMAKE_OPTIONS = foreign
 INCLUDES = -I$(TOP) -I$(DEST) -I. $(JAVAINCLUDE) $(JAVANATINC)
@@ -173,7 +174,7 @@ CLASSDEST = gnu/io
 LIBTOOLC = $(TOP)/libtool --mode=compile $(CC) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) $(VERBOSE_IOEXCEPTIONS) -c
 LIBTOOL_INST = $(TOP)/libtool --mode=install $(INSTALL_PROGRAM)
 ####################### dirs
-SPATH = $(TOP)/src
+SPATH = $(abs_srcdir)/src
 DEST = $(target_triplet)
 ####################### rules
 CLASSES = $(patsubst $(SPATH)/%.java,$(TOP)/$(CLASSDEST)/%.class,$(wildcard $(SPATH)/*.java))
