@@ -292,8 +292,8 @@ LPRPort.isPrinterTimedOut
 JNIEXPORT jboolean JNICALL LPRPort(isPrinterTimedOut)(JNIEnv *env,
 	jobject jobj)
 {
-	int fd = get_java_var( env, jobj,"fd","I" );
 #if defined(__linux__)
+	int fd = get_java_var( env, jobj,"fd","I" );
 	int status;
 	ioctl(fd, LPGETSTATUS, &status);
 	return( status & LP_BUSY ? JNI_TRUE : JNI_FALSE );
