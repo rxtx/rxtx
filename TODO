@@ -38,11 +38,13 @@ Win95/98 with mingw32
 	for documentation.   WaitForSingleObject() may be of use.
 
 RXTXPort.java
+
 	framing control -?-
 	buffer control -?-
 	look for FIXME
 
 ParallelPort support.  Needs some code.
+
 	files:
 		ParallelImp.c stubs 
                       A  large fraction of the stubs are filled in now.
@@ -52,6 +54,7 @@ ParallelPort support.  Needs some code.
 	probably broken the printer support.  More comments in ParallelImp.c
 
 RS485 Support
+
 	This is intended to be an rs232->rs485 driver.
 
 	devices are not coded into RXTXDriver.java see /dev/ttyS0 and gang
@@ -96,6 +99,8 @@ CommPortIdentifier support. Needs some code.
 
 	This has actually expanded to a complete comm.jar implementation.
 	Contact the maintainer if you have interest in working on this.
+	While automatic enumeration of ports needs some work you can
+	open specific ports.
 
 	Plenty of example code can be found in commapi/samples/porting
 	Please dont send in Sun's code.  

@@ -109,20 +109,41 @@ public class RXTXCommDriver implements CommDriver {
 		String[] devs = dev.list();
 		if (debug) System.out.println("RXTXCommDriver:initialize()");
 		String[] AllKnownSerialPorts={
-			"modem",// linux symbolic link to modem.
-			"cuaa", // FreeBSD Serial Ports
-			"ttyS", // linux Serial Ports
-			"ttyI", // linux virtual modems
-			"ttyW", // linux specialix cards
+			"comx",      // linux COMMX synchronous serial card
+			"holter",    // custom card for heart monitoring
+			"modem",     // linux symbolic link to modem.
+			"ttyircomm", // linux IrCommdevices (IrDA serial emu)
+			"ttycosa0c", // linux COSA/SRP synchronous serial card
+			"ttycosa1c", // linux COSA/SRP synchronous serial card
 			"ttyC", // linux cyclades cards
+			"ttyCH",// linux Chase Research AT/PCI-Fast serial card
+			"ttyD", // linux Digiboard serial card
+			"ttuE", // linux Stallion serial card
+			"ttyF", // linux Computone IntelliPort serial card
+			"ttyH", // linux Chase serial card
+			"ttyI", // linux virtual modems
+			"ttyL", // linux SDL RISCom serial card
+			"ttyM", // linux PAM Software's multimodem boards
+			        // linux ISI serial card
+			"ttyMX",// linux Moxa Smart IO cards
+			"ttyP", // linux Hayes ESP serial card
 			"ttyR", // linux comtrol cards
+			        // linux Specialix RIO serial card
+			"ttyS", // linux Serial Ports
+			"ttySI",// linux SmartIO serial card
+			"ttySR",// linux Specialix RIO serial card 257+
+			"ttyT", // linux Technology Concepts serial card
+			"ttyUSB",//linux USB serial converters
+			"ttyV", // linux Comtrol VS-1000 serial controller
+			"ttyW", // linux specialix cards
+			"ttyX", // linux SpecialX serial card
 			"ttyf", // irix serial ports with hardware flow
 			"ttym", // irix modems
 			"ttyq", // irix pseudo ttys
 			"ttyd", // irix serial ports
-			"tty0", // netbsd serial ports 
-			"ttyM", // Moxa Smart IO cards
-			"ttuE"  // Stallion serial card
+			"cuaa", // FreeBSD Serial Ports
+			"tty0" // netbsd serial ports 
+			
 
 		};
 	/** Get the Parallel port prefixes for the running os
