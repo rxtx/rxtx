@@ -221,7 +221,7 @@ Trent
 #	define UUCP
 #endif /* __BEOS__ */
 #if defined(WIN32)
-#	define DEVICEDIR ""
+#	define DEVICEDIR "//./"
 #	define LOCKDIR ""
 #	define LOCKFILEPREFIX ""
 #	define OPEN serial_open
@@ -331,7 +331,8 @@ struct timeval snow, enow, seloop, eeloop;
 #endif /* UUCP */
 
 /* java exception class names */
-#define UNSUPPORTED_COMM_OPERATION "gnu/io/UnsupportedCommOperationException"
+//#define UNSUPPORTED_COMM_OPERATION "gnu/io/UnsupportedCommOperationException"
+#define UNSUPPORTED_COMM_OPERATION "UnsupportedCommOperationException"
 #define ARRAY_INDEX_OUT_OF_BOUNDS "java/lang/ArrayIndexOutOfBoundsException"
 #define OUT_OF_MEMORY "java/lang/OutOfMemoryError"
 #define IO_EXCEPTION "java/io/IOException"
@@ -428,6 +429,7 @@ int system_does_not_lock( const char *, int );
 void system_does_not_unlock( const char *, int );
 int check_group_uucp();
 int check_lock_pid( const char *, int );
+int printj(JNIEnv *env, wchar_t *fmt, ...);
 
 #define UNEXPECTED_LOCK_FILE "RXTX Error:  Unexpected lock file: %s\n Please report to the RXTX developers\n"
 #define LINUX_KERNEL_VERSION_ERROR "\n\n\nRXTX WARNING:  This library was compiled to run with OS release %s and you are currently running OS release %s.  In some cases this can be a problem.  Try recompiling RXTX if you notice strange behavior.  If you just compiled RXTX make sure /usr/include/linux is a symbolic link to the include files that came with the kernel source and not an older copy.\n\n\npress enter to continue\n"
