@@ -3282,7 +3282,7 @@ int fhs_lock( const char *filename )
 		sprintf( message,
 			"RXTX fhs_lock() Error: creating lock file: %s\n",
 			file );
-		report( message );
+		report_error( message );
 		return 1;
 	}
 	sprintf( lockinfo, "%10d\n",(int) getpid() );
@@ -3383,7 +3383,7 @@ int uucp_lock( const char *filename )
 		sprintf( message,
 			"RXTX uucp_lock() Error: creating lock file: %s\n",
 			lockfilename );
-		report( message );
+		report_error( message );
 		return 1;
 	}
 	write( fd, lockinfo,11 );
