@@ -70,21 +70,8 @@ struct tpid_info_struct
 {
 	/* threads, bean counting, and lifespan */
 	int write_counter, closing, tcdrain, write_length;
-	pthread_t tpid;
-
-	pthread_mutex_t *mutex_sleep;
-	pthread_mutex_t *mutex_writing;
-	pthread_mutex_t *mutex_draining;
-	pthread_mutex_t *mutex_closing;
-	pthread_cond_t *cpt_sleep;
-	pthread_cond_t *cpt_writing;
-	pthread_cond_t *cpt_draining;
-	pthread_cond_t *cpt_closing;
-	//pthread_attr_t *attr;
 
 	int length;
-	int done;
-	int inuse;
 	char *buff;
 };
 #endif /* !defined(TIOCSERGETLSR) && !defined(WIN32) */

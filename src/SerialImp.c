@@ -105,14 +105,13 @@
 #include <math.h>
 
 extern int errno;
-#undef TIOCSERGETLSR
 #ifdef TRENT_IS_HERE
+#undef TIOCSERGETLSR
 #define DEBUG
 #define DEBUG_VERBOSE
-#define DEBUG_MW
 #define TRACE
-/*
 #define DEBUG_MW
+/*
 #define DONT_USE_OUTPUT_BUFFER_EMPTY_CODE
 notes:
 	TIOCGSERIAL
@@ -682,222 +681,53 @@ int translate_parity( JNIEnv *env, tcflag_t *cflag, jint parity )
 		"", "parity value not supported" );
 	return 0;
 }
+#if !defined(TIOCSERGETLSR) && !defined(WIN32)
 /*----------------------------------------------------------
-thread_write()
+drain_loop()
 
    accept:      
-   perform:     
+   perform:	call tcdrain() and report an event when it succeds  
    return:      none
    exceptions:  
-   comments:	
+   comments:  	
 ----------------------------------------------------------*/
-
-#if !defined(TIOCSERGETLSR) && !defined( WIN32 )
-void *thread_write( void *arg )
+void *drain_loop( void *arg )
 {
 	struct event_info_struct *eis = ( struct event_info_struct * ) arg;
 	struct tpid_info_struct *t = eis->tpid;
 	char msg[80];
-	int result;
-	int pid=getpid();
-
-	sprintf(msg, "thread_write[%i]: mutex_lock writing\n", pid);
-	report( msg );
-	pthread_mutex_lock( t->mutex_writing );
-	sprintf(msg, "thread_write[%i]: mutex lock closing\n", pid);
-	report( msg );
-	pthread_mutex_lock( t->mutex_closing );
-	if( t->closing == 1 )
+	pthread_detach( pthread_self() );
+	for(;;)
 	{
-		pthread_mutex_lock( t->mutex_writing );
-		pthread_mutex_unlock( t->mutex_closing );
-		sprintf(msg, "thread_write[%i]: closing going to fail\n", pid);
-		report( msg );
-		goto fail;
+		if( !eis || t->closing)
+		{
+			goto end;
+		}
+		if( tcdrain( eis->fd ) == 0 )
+		{
+			if( !eis || t->closing)
+			{
+				goto end;
+			}
+			sprintf(msg, "drain_loop: setting OUTPUT_BUFFER_EMPTY\n" );
+			report( msg );
+			eis->output_buffer_empty_flag = 1;
+			usleep(2000);
+		}
+		else
+		{
+			report("drain_loop:  tcdrain bad fd\n");
+			break;
+		}
 	}
-	else report("got mutex_lock\n");
-	if( !eis->jclazz )
-	{
-		pthread_mutex_lock( t->mutex_writing );
-		pthread_mutex_unlock( t->mutex_closing );
-		sprintf(msg, "thread_write[%i]: jclazz is borked\n", pid);
-		report( msg );
-		pthread_exit( NULL );
-		/* -Wall ?fix */
-		return( NULL );
-	}
-	sprintf(msg, "thread_write[%i]: have jclazz\n", pid);
-	report( msg );
-	sprintf(msg, "thread_write[%i]: mutex_lock draining\n", pid);
-	report( msg );
-	pthread_mutex_lock( t->mutex_draining );
-	while( t->tcdrain == 1 )
-	{
-		/* this causes a 'race' */
-		sprintf(msg, "thread_write[%i]: waiting for a drain\n", pid);
-		report( msg );
-		pthread_cond_wait( t->cpt_draining, t->mutex_draining );
-	}
-	
-	sprintf(msg, "thread_write[%i]: mutex_unlock draining\n", pid);
-	report( msg );
-	pthread_mutex_unlock( t->mutex_draining );
-	sprintf(msg, "thread_write[%i]: mutex_lock event\n", pid);
-	report( msg );
-	if( !t->closing )
-	{
-		result = write( eis->fd, t->buff, t->length );
-		t->length = result;
-		sprintf(msg, "thread_write[%i]: cond_signal writing\n", pid);
-		report( msg );
-		pthread_cond_signal( t->cpt_writing );
-		sprintf(msg, "thread_write[%i]: mutex_unlock writing\n", pid);
-		report( msg );
-		pthread_mutex_unlock( t->mutex_writing );
-	}
-	else
-	{
-		t->length = 0;
-		sprintf(msg, "thread_write[%i]: cond_signal writing\n", pid);
-		report( msg );
-		pthread_cond_signal( t->cpt_writing );
-		sprintf(msg, "thread_write[%i]: mutex_unlock writing\n", pid);
-		report( msg );
-		pthread_mutex_unlock( t->mutex_writing );
-		pthread_mutex_unlock( t->mutex_closing );
-		goto fail;
-	}
-	if( t->closing == 1 ) goto fail;
-	sprintf(msg, "thread_write[%i]: mutex_lock draining\n", pid);
-	report( msg );
-	pthread_mutex_lock( t->mutex_draining );
-	t->tcdrain = 1;
-	if( tcdrain( eis->fd ) == 0 )
-	{
-		sprintf(msg, "thread_write[%i]: mutex_lock event\n", pid);
-		report( msg );
-		sprintf(msg, "thread_write[%i]: setting OUTPUT_BUFFER_EMPTY\n", pid );
-		report( msg );
-		eis->output_buffer_empty_flag = 1;
-	}
-	else
-	{
-		sprintf(msg, "thread_write[%i]: NOT sending the blasted OUTPUT_BUFFER_EMPTY\n", pid );
-		report( msg );
-	}
-	t->tcdrain = 0;
-	sprintf(msg, "thread_write[%i]: pthread_exit(NULL)\n", pid );
-	report( msg );
-	sprintf(msg, "thread_write[%i]: cond_signal draining\n", pid);
-	report( msg );
-	pthread_cond_signal( t->cpt_draining );
-	sprintf(msg, "thread_write[%i]: mutex_unlock draining\n", pid);
-	report( msg );
-	pthread_mutex_unlock( t->mutex_draining );
-	sprintf(msg, "thread_write[%i]: mutex_unlock closing\n", pid);
-	report( msg );
-	pthread_mutex_unlock( t->mutex_closing );
-
-	pthread_exit( NULL );
-	/* -Wall ?fix */
-	return( NULL );
-fail:
-	sprintf(msg, "thread_write[%i]: thread_write returning with errors\n", pid);
-	report( msg );
-	pthread_exit( NULL );
-	/* -Wall ?fix */
+end:
+	t->closing = 2;
+	report("------------------ drain_loop exiting ---------------------\n");
 	return( NULL );
 }
-
+#endif /* !defined(TIOCSERGETLSR) && !defined(WIN32) */
 /*----------------------------------------------------------
-spawn_write_thread()
-
-   accept:      
-   perform:     
-   return:      none
-   exceptions:  
-   comments:	
-----------------------------------------------------------*/
-
-int spawn_write_thread( int fd, char *buff, int length,
-			JNIEnv *env, jobject *jobj)
-{
-	struct event_info_struct *eis;
-	struct tpid_info_struct *t;
-	char msg[80];
-
-	report("spawn_write_thread: entering\n");
-
-#ifdef DONT_USE_OUTPUT_BUFFER_EMPTY_CODE
-	return(write( fd, buff, length )); 
-#else
-
-	eis = (struct event_info_struct * )
-		get_java_var( env, *jobj, "eis", "I" );
-	sprintf( msg, "spawn_write_thread: got eis %i\n", (int) eis );
-	report( msg );
-
-	/*
-	   The eventLoop has not started. just write and return since
-	   Nothing is there to get OUTPUT_BUFFER_EMPTY
-	*/
-	if ( ! eis )
-	{
-		report_warning( "spqn_write_thread: NO EVENT LOOP!!\n");
-		return( write( fd, buff, length )); 
-	}
-
-	t = eis->tpid;
-	t->inuse = 1;
-	if ( t->closing )
-	{
-		report_warning( "spawn_write_thread: closing\n");
-		return( write( fd, buff, length )); 
-	}
-
-	//report("spawn_write_thread: mutex_lock closing\n");
-	//pthread_mutex_lock( t->mutex_closing );
-	report("spawn_write_thread: mutex_lock writing\n");
-	pthread_mutex_lock( t->mutex_writing );
-	while( t->write_counter )
-	{
-		report("spawn_write_thread: writing mutex locked\n");
-		pthread_cond_wait( t->cpt_writing, t->mutex_writing );
-		if( t->closing ) return -1;
-	}
-
-	if( t->closing ) return( 0 );
-
-	/* info for the thread to write and send event when output is empty */
-	t->length = length;
-	t->buff = buff;
-
-	/* queue next write */
-	t->write_counter++;
-
-	/*----------------------------------------------*/
-	//report("spawn_write_thread: mutex_unlock closing\n");
-	//pthread_mutex_unlock( t->mutex_closing );
-	report("spawn_write_thread: create thread_write\n");
-	pthread_create( &t->tpid, NULL, thread_write, eis );
-	pthread_detach( t->tpid );
-	/*----------------------------------------------*/
-	report(">spawn_write_thread: cond_wait writing\n");
-	pthread_cond_wait( t->cpt_writing, t->mutex_writing );
-	report("<spawn_write_thread: cond_wait writing\n");
-	t->write_counter--;
-	report("spawn_write_thread: mutex_unlock writing\n");
-	pthread_mutex_unlock( t->mutex_writing );
-	//report("spawn_write_thread: mutex_unlock closing\n");
-	//pthread_mutex_unlock( t->mutex_closing );
-	sprintf(msg, "spawn_write_thread: returning return = %i\n", t->length );
-	report( msg );
-	return(t->length);
-#endif /* DONT_USE_OUTPUT_BUFFER_EMPTY_CODE */
-}
-#endif /* TIOCSERGETLSR !WIN32 */
-/*----------------------------------------------------------
-finalize_thread_write( )
+finalize_threads( )
 
    accept:      event_info_struct used to access java and communicate with
 	        eventLoop().
@@ -914,52 +744,26 @@ finalize_thread_write( )
 	once the drain has finished, we let the eventLoop know that the
 	output buffer is empty and the Signal is sent.
 ----------------------------------------------------------*/
-void finalize_thread_write( struct event_info_struct *eis )
+void finalize_threads( struct event_info_struct *eis )
 {
 #if     !defined(TIOCSERGETLSR) && !defined( WIN32 )
 	/* used to shut down any remaining write threads */
 
 	eis->tpid->closing = 1;
 	eis->output_buffer_empty_flag = 0;
-	report("finalize_thread_write: cond_broadcast event\n");
-	report("entering finalize_thread_write\n");
-	report("finalize_thread_write: mutex_lock closing\n");
-	pthread_mutex_lock( eis->tpid->mutex_closing );
-	eis->tpid->closing = 1;
-	eis->output_buffer_empty_flag = 0;
-/*
-	if( ! eis ) return;
-	if( ! eis->tpid ) return;
-	report("finalize_thread_write: mutex_lock draining\n");
-	pthread_mutex_lock( eis->tpid->mutex_draining );
-*/
-	while( eis->tpid->write_counter )
+	report("finalize_threads: cond_broadcast event\n");
+	ENTER("finalize_threads\n");
+	while( eis->tpid->write_counter || eis->tpid->closing == 1 )
 	{
-		report("finalize_thread_write: close mutex locked\n");
-		pthread_cond_wait( eis->tpid->cpt_writing, eis->tpid->mutex_closing );
+		usleep(1000);
 	}
-/*
-	report("finalize_thread_write: mutex_unlock drianing\n");
-	pthread_mutex_unlock( eis->tpid->mutex_draining );
-*/
-	if ( eis->tpid->cpt_writing && eis->tpid->cpt_closing )
-	{
-		pthread_cond_destroy( eis->tpid->cpt_writing );
-		report(">finalize_thread_write: destroy cpt_writing/cpt_closing\n");
-		free( eis->tpid->cpt_writing );
-		report("finalize_thread_write: mutex_unlock closing\n");
-		pthread_mutex_unlock( eis->tpid->mutex_closing );
-		usleep(10000);
-		pthread_cond_destroy( eis->tpid->cpt_closing );
-		free( eis->tpid->cpt_closing );
-		report("<finalize_thread_write: free event/cpt_closing\n");
-	}
-	report(">finalize_thread_write: free tpid\n");
+
+	report(">finalize_threads: free tpid\n");
 	if ( eis->tpid ) free( eis->tpid );
-	report("<finalize_thread_write: free tpid\n");
+	report("<finalize_threads: free tpid\n");
 
 	/* need to clean up again after working events */
-	report("leaving finalize_thread_write\n");
+	LEAVE("---------------- finalize_threads ---------------\n");
 #endif /* TIOCSERGETLSR & !WIN32 */
 }
 
@@ -985,7 +789,6 @@ struct tpid_info_struct *add_tpid( struct tpid_info_struct *p )
 		report_error("add_tpid: RXTX: Out of Memory\n");
 		return( NULL );
 	}
-	q->tpid = 0;
 	q->closing = 0;
 	q->write_counter = 0;
 	q->tcdrain = 0;
@@ -1000,7 +803,7 @@ static void warn_sig_abort( int signo )
 #endif /* TIOCSERGETLSR */
 
 /*----------------------------------------------------------
-init_thread_write( )
+init_threads( )
 
    accept:      none
    perform:     
@@ -1008,15 +811,16 @@ init_thread_write( )
    exceptions:  none
    comments:	
 ----------------------------------------------------------*/
-int init_thread_write( struct event_info_struct *eis )
+int init_threads( struct event_info_struct *eis )
 {
 #if !defined(TIOCSERGETLSR) & !defined(WIN32)
 	struct tpid_info_struct *t = add_tpid( NULL);
 	sigset_t newmask, oldmask;
 	struct sigaction newaction, oldaction;
 	jfieldID jeis;
+	pthread_t tid;
 
-	report("init_thread_write:  start\n");
+	report("init_threads:  start\n");
 	sigemptyset(&newmask);
 	sigaddset(&newmask, SIGCHLD);
 	newaction.sa_handler = warn_sig_abort;
@@ -1047,27 +851,16 @@ int init_thread_write( struct event_info_struct *eis )
 	sigprocmask( SIG_SETMASK, &newmask, &oldmask );
 
 	eis->tpid = t;
-	t->mutex_writing = malloc(sizeof(pthread_mutex_t));
-	t->mutex_draining = malloc(sizeof(pthread_mutex_t));
-	t->mutex_closing = malloc(sizeof(pthread_mutex_t));
-	t->cpt_writing = malloc(sizeof(pthread_cond_t));
-	t->cpt_draining = malloc(sizeof(pthread_cond_t));
-	t->cpt_closing = malloc(sizeof(pthread_cond_t));
 
-	report("init_thread_write: init mutex\n");
-	pthread_mutex_init( t->mutex_writing, NULL );
-	pthread_mutex_init( t->mutex_draining, NULL );
-	pthread_mutex_init( t->mutex_closing, NULL );
-	report("init_thread_write: init cond\n");
-	pthread_cond_init( t->cpt_writing, NULL );
-	pthread_cond_init( t->cpt_draining, NULL );
-	pthread_cond_init( t->cpt_closing, NULL );
-	report("init_thread_write: get eis\n");
+	report("init_threads: get eis\n");
 	jeis  = (*eis->env)->GetFieldID( eis->env, eis->jclazz, "eis", "I" );
-	report("init_thread_write: set eis\n");
+	report("init_threads: set eis\n");
 	(*eis->env)->SetIntField(eis->env, *eis->jobj, jeis, ( jint ) eis );
+	report("init_threads: creating drain_loop\n");
+	pthread_create( &tid, NULL, drain_loop, (void *) eis );
+	report("init_threads:  stop\n");
 #endif /* TIOCSERGETLSR */
-	report("init_thread_write:  stop\n");
+	report("init_threads:  stop\n");
 	return( 1 );
 }
 
@@ -1088,25 +881,10 @@ JNIEXPORT void JNICALL RXTXPort(writeByte)( JNIEnv *env,
 	char msg[80];
 
 	ENTER( "RXTXPort:writeByte" );
-	/*
-	   jobject and env are passed to the thread_write code above for
-	   systems that do not have access to the LSR used to detect if
-	   output outputbuffer is empty
-
-	   win32 implements its own write in termios.c
-	
-	   other systems use the API write directly
-	*/
 	do {
 		sprintf( msg, "writeByte %c>>\n", byte );
 		report( msg );
-#ifdef TIOCSERGETLSR
 		result=WRITE (fd, &byte, sizeof(unsigned char));
-#else
-		result=spawn_write_thread (fd, &byte, sizeof(unsigned char),
-						env, &jobj);
-		report("writeByte<<\n");
-#endif /* TIOCSERGETLSR */
 	}  while (result < 0 && errno==EINTR);
 	LEAVE( "RXTXPort:writeByte" );
 	if(result >= 0)
@@ -1146,23 +924,8 @@ JNIEXPORT void JNICALL RXTXPort(writeArray)( JNIEnv *env,
 	sprintf( message, "::::RXTXPort:writeArray(%s);\n", (char *) body );
 	report_verbose( message );
 
-	/*
-	   jobject and env are passed to the thread_write code above for
-	   systems that do not have access to the LSR used to detect if
-	   output outputbuffer is empty
-
-	   win32 implements its own write in termios.c
-	
-	   other systems use the API write directly
-	*/
-
 	do {
-#ifdef TIOCSERGETLSR
 		result=WRITE (fd, body + total + offset, count - total); /* dima */
-#else
-		result=spawn_write_thread (fd, body + total + offset,
-						count - total, env, &jobj);
-#endif /* TIOCSERGETLSR */
 		if(result >0){
 			total += result;
 		}
@@ -2117,7 +1880,6 @@ int check_line_status_register( struct event_info_struct *eis )
 		eis->eventflags[SPE_OUTPUT_BUFFER_EMPTY] )
 	{
 		report("check_line_status_register: sending SPE_OUTPUT_BUFFER_EMPTY\n");
-		report("check_line_status_register: mutex_lock event\n");
 		send_event( eis, SPE_OUTPUT_BUFFER_EMPTY, 1 );
 		//send_event( eis, SPE_DATA_AVAILABLE, 1 );
 		eis->output_buffer_empty_flag = 0;
@@ -2449,10 +2211,6 @@ finalize_event_info_struct
 ----------------------------------------------------------*/
 void finalize_event_info_struct( struct event_info_struct *eis )
 {
-	report("finalize_thread_write: mutex_lock closing\n");
-#if !defined(TIOCSERGETLSR) && !defined(WIN32)
-	pthread_mutex_lock( eis->tpid->mutex_closing );
-#endif /* !TIOCSERGETLSR && !WIN32 */
 	if( eis->jclazz)
 	{
 		(*eis->env)->DeleteLocalRef( eis->env, eis->jclazz );
@@ -2470,9 +2228,6 @@ void finalize_event_info_struct( struct event_info_struct *eis )
 	else if( eis->prev )
 		eis->prev->next = NULL;
 	else master_index = NULL;
-#if !defined(TIOCSERGETLSR) && !defined(WIN32)
-	pthread_mutex_unlock( eis->tpid->mutex_closing );
-#endif /* !TIOCSERGETLSR && !WIN32 */
 }
 
 /*----------------------------------------------------------
@@ -2497,7 +2252,7 @@ JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 
 	report( ">RXTXPort:eventLoop\n" );
 	if ( !initialise_event_info_struct( &eis ) ) goto end;
-	if ( !init_thread_write( &eis ) ) goto end;
+	if ( !init_threads( &eis ) ) goto end;
 	unlock_monitor_thread( &eis );
 	do{
 		/* report( "." ); */
@@ -2508,7 +2263,7 @@ JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 			if( eis.eventloop_interrupted )
 			{
 				report("eventLoop: got interrupt\n");
-				finalize_thread_write( &eis );
+				finalize_threads( &eis );
 				finalize_event_info_struct( &eis );
 				(*env)->SetBooleanField( env, jobj,
 							jfid, JNI_FALSE );
