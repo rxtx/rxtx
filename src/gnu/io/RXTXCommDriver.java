@@ -135,7 +135,6 @@ public class RXTXCommDriver implements CommDriver
 		int p =0 ;
 		/* FIXME quick fix to get COM1-8 on windows working.  The
 		   Read test is not working properly and its crunch time...
-		*/
 		if(osName.toLowerCase().indexOf("windows") != -1 )
 		{
 			for( i=0;i < CandidateDeviceNames.length;i++ )
@@ -146,6 +145,7 @@ public class RXTXCommDriver implements CommDriver
 			return;
 
 		}
+		*/
 		if (debug)
 		{
 			System.out.println("Entering registerValidPorts()");
@@ -356,9 +356,16 @@ public class RXTXCommDriver implements CommDriver
 		String[] CandidateDeviceNames;
 		if (debug)
 			System.out.println("scanning device directory "+deviceDirectory+" for ports of type "+PortType);
+		/* //./name is supposed to work for port numbers > 9 */
 		if(osName.toLowerCase().indexOf("windows") != -1 )
 		{
-			String[] temp = { "COM1", "COM2","COM3","COM4",
+			String[] temp = 
+			/*
+					{ "//./COM1", "//./COM2", "//./COM3",
+					"//./COM4", "//./COM5", "//./COM6",
+					"//./COM7", "//./COM8" };
+			*/
+			{ "COM1", "COM2","COM3","COM4",
 			"COM5", "COM6", "COM7", "COM8" };
 			CandidateDeviceNames=temp;
 		}

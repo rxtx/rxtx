@@ -2509,6 +2509,11 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(testRead)(
 	int pid = -1;
 
 	ENTER( "RXTXPort:testRead" );
+#ifdef WIN32
+	ret = serial_test((char *) name );
+	(*env)->ReleaseStringUTFChars( env, tty_name, name );
+	return(ret);
+#endif /* WIN32 */
 #ifdef TRENT_IS_HERE_DEBUGGING_ENUMERATION
 	/* vmware lies about which ports are there causing irq conflicts */
 	/* this is for testing only */

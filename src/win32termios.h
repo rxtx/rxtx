@@ -110,6 +110,7 @@ struct serial_icounter_struct {
 	int reserved[9]; 	/* unused */
 };
 
+int serial_test( char * );
 int serial_open(const char *File, int flags, ... );
 int serial_close(int fd);
 int serial_read(int fd, void *b, int size);

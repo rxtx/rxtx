@@ -87,6 +87,29 @@ void MexPrintf( char *string )
 }
 #endif DEBUG_SELECT
 
+/*----------------------------------------------------------
+serial_test
+
+   accept: filename to test     
+   perform:     
+   return:      1 on success 0 on failure
+   exceptions:  
+   win32api:    CreateFile CloseHandle
+   comments:    if the file opens it should be ok.
+----------------------------------------------------------*/
+int serial_test( char * filename )
+{
+	unsigned long *hcomm;
+	int ret;
+	hcomm = CreateFile( filename, GENERIC_READ |GENERIC_WRITE, 0, 0, OPEN_EXISTING, 0, 0 );
+	if ( hcomm == INVALID_HANDLE_VALUE )
+		ret = 0;
+	else
+		ret = 1;
+	CloseHandle( hcomm );
+	return(ret);
+}
+
 void termios_setflags( int fd, int termios_flags[] )
 {
 	struct termios_list *index = find_port( fd );
