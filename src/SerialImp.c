@@ -80,29 +80,6 @@
 #if defined(__sun__)
 #	include <sys/filio.h>
 #	include <sys/mkdev.h>
-
-/*----------------------------------------------------------
-cfmakeraw
-
-   accept:      termios to be set to raw
-   perform:     initializes the termios structure.
-   return:      int 0 on success
-   exceptions:  none
-   comments:    this is how linux cfmakeraw works.
-		termios(3) manpage
-----------------------------------------------------------*/
-
-int cfmakeraw ( struct termios *term )
-{
-	ENTER( "cfmakeraw" );
-	term->c_iflag &= ~(IGNBRK|BRKINT|PARMRK|ISTRIP|INLCR|IGNCR|ICRNL|IXON);
-	term->c_oflag &= ~OPOST;
-	term->c_lflag &= ~(ECHO|ECHONL|ICANON|ISIG|IEXTEN);
-	term->c_cflag &= ~(CSIZE|PARENB);
-	term->c_cflag |= CS8;
-	LEAVE( "cfmakeraw");
-	return( 0 );
-}
 #endif /* __sun__ */
 #if defined(__hpux__)
 #	include <sys/modem.h>
@@ -129,6 +106,31 @@ extern int errno;
  * */
 #define RXTXPort(foo) Java_gnu_io_RXTXPort_ ## foo
 #define RXTXCommDriver(foo) Java_gnu_io_RXTXCommDriver_ ## foo
+
+#if defined(__sun__)
+/*----------------------------------------------------------
+cfmakeraw
+
+   accept:      termios to be set to raw
+   perform:     initializes the termios structure.
+   return:      int 0 on success
+   exceptions:  none
+   comments:    this is how linux cfmakeraw works.
+		termios(3) manpage
+----------------------------------------------------------*/
+
+int cfmakeraw ( struct termios *term )
+{
+	ENTER( "cfmakeraw" );
+	term->c_iflag &= ~(IGNBRK|BRKINT|PARMRK|ISTRIP|INLCR|IGNCR|ICRNL|IXON);
+	term->c_oflag &= ~OPOST;
+	term->c_lflag &= ~(ECHO|ECHONL|ICANON|ISIG|IEXTEN);
+	term->c_cflag &= ~(CSIZE|PARENB);
+	term->c_cflag |= CS8;
+	LEAVE( "cfmakeraw" );
+	return( 0 );
+}
+#endif /* __sun__ */
 
 /*----------------------------------------------------------
 RXTXPort.Initialize
@@ -173,13 +175,13 @@ JNIEXPORT void JNICALL RXTXPort(Initialize)(
 		sigaction(SIGIO, &new_action, NULL);
 	} 
 #endif /* !WIN32 */
-	ENTER( "RXTXPort:Initialize");
+	ENTER( "RXTXPort:Initialize" );
 #if defined(DEBUG) && defined(__linux__)
 	/* Lets let people who upgraded kernels know they may have problems */
 	if (uname (&name) == -1)
 	{
-		report("RXTX WARNING:  cannot get system name\n");
-		LEAVE( "RXTXPort:Initialize");
+		report( "RXTX WARNING:  cannot get system name\n" );
+		LEAVE( "RXTXPort:Initialize" );
 		return;
 	}
 	if(strcmp(name.release,UTS_RELEASE)!=0)
@@ -189,7 +191,7 @@ JNIEXPORT void JNICALL RXTXPort(Initialize)(
 		report( message );
 		getchar();
 	}
-	LEAVE( "RXTXPort:Initialize");
+	LEAVE( "RXTXPort:Initialize" );
 #endif /* DEBUG && __linux__ */
 }
 
@@ -225,7 +227,7 @@ JNIEXPORT jint JNICALL RXTXPort(open)(
 			system_does_not_lock	Win32
 	*/
 			
-	ENTER( "RXTXPort:open");
+	ENTER( "RXTXPort:open" );
 	if ( LOCK( filename) )
 	{
 		sprintf( message, "locking has failed for %s\n", filename );
@@ -268,12 +270,12 @@ JNIEXPORT jint JNICALL RXTXPort(open)(
 
 	sprintf( message, "fd returned is %i\n", fd );
 	report( message );
-	LEAVE( "RXTXPort:open");
+	LEAVE( "RXTXPort:open" );
 	return (jint)fd;
 
 fail:
 	(*env)->ReleaseStringUTFChars( env, jstr, filename );
-	LEAVE( "RXTXPort:open");
+	LEAVE( "RXTXPort:open" );
 	throw_java_exception( env, PORT_IN_USE_EXCEPTION, "open",
 		strerror( errno ) );
 	return -1;
@@ -302,7 +304,7 @@ JNIEXPORT void JNICALL RXTXPort(nativeClose)( JNIEnv *env,
 			system_does_not_unlock	Win32
 	*/
 
-	ENTER( "RXTXPort:nativeClose");
+	ENTER( "RXTXPort:nativeClose" );
 	if (fd > 0)
 	{
 		do {
@@ -311,7 +313,7 @@ JNIEXPORT void JNICALL RXTXPort(nativeClose)( JNIEnv *env,
 		UNLOCK(filename);
 	}
 	(*env)->ReleaseStringUTFChars( env, jstr, filename );
-	LEAVE( "RXTXPort:nativeClose");
+	LEAVE( "RXTXPort:nativeClose" );
 	return;
 }
 
@@ -335,39 +337,39 @@ JNIEXPORT void JNICALL RXTXPort(nativeSetSerialPortParams)(
 #endif /* TIOCGSERIAL */
 
 
-	ENTER( "RXTXPort:nativeSetSerialPortParams");
+	ENTER( "RXTXPort:nativeSetSerialPortParams" );
 	if( !cspeed )
 	{
 		report( "Invalid Speed Selected\n" );
-		LEAVE( "RXTXPort:nativeSetSerialPortParams");
+		LEAVE( "RXTXPort:nativeSetSerialPortParams" );
 		return;
 	}
 
 	if( tcgetattr( fd, &ttyset ) < 0 )
 	{
 		report( "Cannot Get Serial Port Settings\n" );
-		LEAVE( "RXTXPort:nativeSetSerialPortParams");
+		LEAVE( "RXTXPort:nativeSetSerialPortParams" );
 		goto fail;
 	}
 
 	if( !translate_data_bits( env, &(ttyset.c_cflag), dataBits ) )
 	{
 		report( "Invalid Data Bits Selected\n" );
-		LEAVE( "RXTXPort:nativeSetSerialPortParams");
+		LEAVE( "RXTXPort:nativeSetSerialPortParams" );
 		return;
 	}
 
 	if( !translate_stop_bits( env, &(ttyset.c_cflag), stopBits ) )
 	{
 		report( "Invalid Stop Bits Selected\n" );
-		LEAVE( "RXTXPort:nativeSetSerialPortParams");
+		LEAVE( "RXTXPort:nativeSetSerialPortParams" );
 		return;
 	}
 
 	if( !translate_parity( env, &(ttyset.c_cflag), parity ) )
 	{
 		report( "Invalid Parity Selected\n" );
-		LEAVE( "RXTXPort:nativeSetSerialPortParams");
+		LEAVE( "RXTXPort:nativeSetSerialPortParams" );
 		return;
 	}
 
@@ -448,11 +450,11 @@ JNIEXPORT void JNICALL RXTXPort(nativeSetSerialPortParams)(
 		goto fail;
 	}
 
-	LEAVE( "RXTXPort:nativeSetSerialPortParams");
+	LEAVE( "RXTXPort:nativeSetSerialPortParams" );
 	return;
 
 fail:
-	LEAVE( "RXTXPort:nativeSetSerialPortParams");
+	LEAVE( "RXTXPort:nativeSetSerialPortParams" );
 	throw_java_exception( env, UNSUPPORTED_COMM_OPERATION,
 		"nativeSetSerialPortParams", strerror( errno ) );
 }
@@ -469,7 +471,7 @@ fail:
 ----------------------------------------------------------*/
 int translate_speed( JNIEnv *env, jint speed )
 {
-	LEAVE( "RXTXPort:translate_speed");
+	LEAVE( "RXTXPort:translate_speed" );
 	switch( speed ) {
 		case 0:		return B0;
 		case 50:	return B50;
@@ -505,7 +507,7 @@ int translate_speed( JNIEnv *env, jint speed )
 #endif //dima
 	}
 
-	LEAVE( "RXTXPort:translate_speed");
+	LEAVE( "RXTXPort:translate_speed" );
 	throw_java_exception( env, UNSUPPORTED_COMM_OPERATION,
 		"translate_speed", "speed" );
 	return 0;
@@ -649,7 +651,7 @@ JNIEXPORT void JNICALL RXTXPort(writeByte)( JNIEnv *env,
 	if(result >= 0)
 	{
 #ifdef VERBOSE_DEBUG
-		report("sending OUTPUT_BUFFER_EMPTY\n");
+		report( "sending OUTPUT_BUFFER_EMPTY\n" );
 #endif /* VERBOSE_DEBUG */
 		send_event( env, jobj, SPE_OUTPUT_BUFFER_EMPTY, 1 );
 		return;
@@ -722,7 +724,7 @@ JNIEXPORT void JNICALL RXTXPort(writeArray)( JNIEnv *env,
 	if( result < 0 ) throw_java_exception( env, IO_EXCEPTION,
 		"writeArray", strerror( errno ) );
 #ifdef VERBOSE_DEBUG
-	report("sending OUTPUT_BUFFER_EMPTY\n");
+	report( "sending OUTPUT_BUFFER_EMPTY\n" );
 #endif /* VERBOSE_DEBUG */
 	send_event( env, jobj, SPE_OUTPUT_BUFFER_EMPTY, 1 );
 	//usleep(50);
@@ -1105,26 +1107,26 @@ int read_byte_array( int fd, unsigned char *buffer, int length, int timeout )
 		}  while (ret < 0 && errno==EINTR);
 		if( ret == 0 )
 		{
-			report("read_byte_array: select returned 0");
+			report( "read_byte_array: select returned 0" );
 			LEAVE( "read_byte_array" );
 			break;
 		}
 		if( ret < 0 )
 		{
-			report("read_byte_array: select returned -1");
+			report( "read_byte_array: select returned -1" );
 			LEAVE( "read_byte_array" );
 			return -1;
 		}
 		ret = READ( fd, buffer + bytes, left );
 		if( ret == 0 )
 		{
-			report("read_byte_array: read returned 0 bytes");
+			report( "read_byte_array: read returned 0 bytes" );
 			LEAVE( "read_byte_array" );
 			break;
 		}
 		else if( ret < 0 )
 		{
-			report("read_byte_array: read returned -1");
+			report( "read_byte_array: read returned -1" );
 			LEAVE( "read_byte_array" );
 			return -1;
 		}
@@ -1216,7 +1218,7 @@ JNIEXPORT jint JNICALL RXTXPort(readArray)( JNIEnv *env,
 
 	ENTER( "readArray" );
 	if( length > SSIZE_MAX || length < 0 ) {
-		report("RXTXPort:readArray length > SSIZE_MAX");
+		report( "RXTXPort:readArray length > SSIZE_MAX" );
 		LEAVE( "RXTXPort:readArray" );
 		throw_java_exception( env, ARRAY_INDEX_OUT_OF_BOUNDS,
 			"readArray", "Invalid length" );
@@ -1226,7 +1228,7 @@ JNIEXPORT jint JNICALL RXTXPort(readArray)( JNIEnv *env,
 	bytes = read_byte_array( fd, body, length, timeout );
 	(*env)->ReleaseByteArrayElements( env, jbarray, body, 0 );
 	if( bytes < 0 ) {
-		report("RXTXPort:readArray bytes < 0");
+		report( "RXTXPort:readArray bytes < 0" );
 		LEAVE( "RXTXPort:readArray" );
 		throw_java_exception( env, IO_EXCEPTION, "readArray",
 			strerror( errno ) );
@@ -1350,14 +1352,14 @@ JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 #endif  /* __sun__ */
 
 	ENTER( "RXTXPort:eventLoop" );
-	fd = get_java_var(env, jobj, "fd", "I");
+	fd = get_java_var(env, jobj, "fd", "I" );
 
 #if defined(TIOCGICOUNT)
 	/* Some multiport serial cards do not implement TIOCGICOUNT ... */
 	/* So use the 'dumb' mode to enable using them after all! JK00 */
 	if( ioctl( fd, TIOCGICOUNT, &osis ) < 0 ) {
 #ifdef VERBOSE_DEBUG
-		report("Port does not support TIOCGICOUNT events\n" );
+		report( "Port does not support TIOCGICOUNT events\n" );
 #endif /* VERBOSE_DEBUG */
 		has_tiocgicount = 0;
 	}
@@ -1367,13 +1369,13 @@ JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 	/* JK00: work around for multiport cards without TIOCSERGETLSR */
 	/* Cyclades is one of those :-(				       */
 	if( ioctl( fd, TIOCSERGETLSR, &change ) ) {
-		report("Port does not support TIOCSERGETLSR\n" );
+		report( "Port does not support TIOCSERGETLSR\n" );
 			has_tiocsergetlsr = 0;
 	}
 #endif /* TIOCSERGETLSR */
 
 	if( ioctl( fd, TIOCMGET, &omflags) <0 ) {
-		report("Port does not support events\n" );
+		report( "Port does not support events\n" );
 		LEAVE( "RXTXPort:eventLoop" );
  		return;
 	}
@@ -1388,21 +1390,21 @@ JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 		}  while (ret < 0 && errno==EINTR);
 		if( ret < 0 )
 		{
-			report("eventLoop select returned < 0\n" );
+			report( "eventLoop select returned < 0\n" );
 			break;
 		}
 
 		interrupted = is_interrupted(env, jobj);
 		if(interrupted)
 		{
-			report("eventLoop detected interrupt. returning\n" );
+			report( "eventLoop detected interrupt. returning\n" );
 			LEAVE( "RXTXPort:eventLoop" );
 			return;
 		}
 		else
 		{
 #ifdef VERBOSE_DEBUG
-			report("eventLoop did not detect MonThread closing\n" );
+			report( "eventLoop did not detect MonThread closing\n" );
 #endif /* VERBOSE_DEBUG */
 		}
 
@@ -1412,7 +1414,7 @@ JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 		if( has_tiocsergetlsr ) {
 			if (fstat(fd, &fstatbuf))
 			{
-				report("eventLoop: fstat\n" );
+				report( "eventLoop: fstat\n" );
 				break;
 			}
 			if( ioctl( fd, TIOCSERGETLSR, &change ) )
@@ -1423,7 +1425,7 @@ JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 			else if( change )
 			{
 #ifdef VERBOSE_DEBUG
-				report("sending OUTPUT_BUFFER_EMPTY\n");
+				report( "sending OUTPUT_BUFFER_EMPTY\n" );
 #endif /* VERBOSE_DEBUG */
 				send_event( env, jobj, SPE_OUTPUT_BUFFER_EMPTY,
 					1 );
@@ -1468,7 +1470,7 @@ JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 
 		if( ioctl( fd, TIOCMGET, &mflags ) )
 		{
-			report("ioctl(TIOCMGET)\n");
+			report( "ioctl(TIOCMGET)\n" );
 			break;
 		}
 
@@ -1685,19 +1687,19 @@ createSerialIterator(io_iterator_t *serialIterator)
     CFMutableDictionaryRef    classesToMatch;
     if ((kernResult=IOMasterPort(NULL, &masterPort)) != KERN_SUCCESS)
     {
-	printf("IOMasterPort returned %d\n", kernResult);
+	printf( "IOMasterPort returned %d\n", kernResult);
 	return kernResult;
     }
     if ((classesToMatch = IOServiceMatching(kIOSerialBSDServiceValue)) == NULL)
     {
-	printf("IOServiceMatching returned NULL\n");
+	printf( "IOServiceMatching returned NULL\n" );
 	return kernResult;
     }
     CFDictionarySetValue(classesToMatch, CFSTR(kIOSerialBSDTypeKey), CFSTR(kIOSerialBSDRS232Type));
     kernResult = IOServiceGetMatchingServices(masterPort, classesToMatch, serialIterator);
     if (kernResult != KERN_SUCCESS)
     {
-	printf("IOServiceGetMatchingServices returned %d\n", kernResult);
+	printf( "IOServiceGetMatchingServices returned %d\n", kernResult);
     }
     return kernResult;
 }
@@ -1746,19 +1748,19 @@ registerKnownSerialPorts(JNIEnv *env, jobject jobj, jint portType)//dima
     int              numPorts = 0;//dima it should initiated
     if (createSerialIterator(&theSerialIterator) != KERN_SUCCESS)
     {
-        printf("createSerialIterator failed\n");
+        printf( "createSerialIterator failed\n" );
     } else {
 	jclass cls;//dima
 	jmethodID mid;//dima
-        cls = (*env)->FindClass(env,"gnu/io/CommPortIdentifier");//dima
+        cls = (*env)->FindClass(env,"gnu/io/CommPortIdentifier" );//dima
         if (cls == 0) {//dima
-            report("can't find class of gnu/io/CommPortIdentifier\n");//dima
+            report( "can't find class of gnu/io/CommPortIdentifier\n" );//dima
             return numPorts;//dima
         }//dima
-        mid = (*env)->GetStaticMethodID(env, cls, "addPortName", "(Ljava/lang/String;ILgnu/io/CommDriver;)V");//dima
+        mid = (*env)->GetStaticMethodID(env, cls, "addPortName", "(Ljava/lang/String;ILgnu/io/CommDriver;)V" );//dima
 
         if (mid == 0) {
-            printf("getMethodID of CommDriver.addPortName failed\n");
+            printf( "getMethodID of CommDriver.addPortName failed\n" );
         } else {
             while (theObject = IOIteratorNext(theSerialIterator))
             {
@@ -1811,7 +1813,7 @@ JNIEXPORT jboolean JNICALL RXTXCommDriver(registerKnownPorts)(JNIEnv *env,
 		case PORT_TYPE_I2C:      break;
 		case PORT_TYPE_RS485:    break;
 		case PORT_TYPE_RAW:      break;
-		default: printf("unknown portType %d handed to native RXTXCommDriver.registerKnownPorts() method.\n", (int) portType );
+		default: printf( "unknown portType %d handed to native RXTXCommDriver.registerKnownPorts() method.\n", (int) portType );
 	}
 	return result;
 }
@@ -1910,7 +1912,7 @@ JNIEXPORT jstring  JNICALL RXTXCommDriver(getDeviceDirectory)(JNIEnv *env,
 JNIEXPORT void JNICALL RXTXPort(setInputBufferSize)(JNIEnv *env,
 	jobject jobj,  jint size )
 {
-	report("setInputBufferSize is not implemented\n");
+	report( "setInputBufferSize is not implemented\n" );
 }
 /*----------------------------------------------------------
  getIputBufferSize
@@ -1924,7 +1926,7 @@ JNIEXPORT void JNICALL RXTXPort(setInputBufferSize)(JNIEnv *env,
 JNIEXPORT jint JNICALL RXTXPort(getInputBufferSize)(JNIEnv *env,
 	jobject jobj)
 {
-	report("getInputBufferSize is not implemented\n");
+	report( "getInputBufferSize is not implemented\n" );
 	return(1);
 }
 /*----------------------------------------------------------
@@ -1939,7 +1941,7 @@ JNIEXPORT jint JNICALL RXTXPort(getInputBufferSize)(JNIEnv *env,
 JNIEXPORT void JNICALL RXTXPort(setOutputBufferSize)(JNIEnv *env,
 	jobject jobj, jint size )
 {
-	report("setOutputBufferSize is not implemented\n");
+	report( "setOutputBufferSize is not implemented\n" );
 }
 /*----------------------------------------------------------
  getOutputBufferSize
@@ -1953,7 +1955,7 @@ JNIEXPORT void JNICALL RXTXPort(setOutputBufferSize)(JNIEnv *env,
 JNIEXPORT jint JNICALL RXTXPort(getOutputBufferSize)(JNIEnv *env,
 	jobject jobj)
 {
-	report("getOutputBufferSize is not implemented\n");
+	report( "getOutputBufferSize is not implemented\n" );
 	return(1);
 }
 
@@ -1978,14 +1980,14 @@ jboolean is_interrupted(JNIEnv *env, jobject jobj)
 	jclazz = (*env)->GetObjectClass( env, jobj );
 	if(jclazz == NULL) return JNI_TRUE;
 
-	foo = (*env)->GetMethodID( env, jclazz, "checkMonitorThread", "()Z");
+	foo = (*env)->GetMethodID( env, jclazz, "checkMonitorThread", "()Z" );
 	if(foo == NULL) return JNI_TRUE;
 
 	result = (*env)->CallBooleanMethod( env, jobj, foo );
 
 #ifdef DEBUG
 	if((*env)->ExceptionOccurred(env)) {
-		report ("an error occured calling sendEvent()\n");
+		report ( "an error occured calling sendEvent()\n" );
 		(*env)->ExceptionDescribe(env);
 		(*env)->ExceptionClear(env);
 	}
@@ -2023,7 +2025,7 @@ int send_event(JNIEnv *env, jobject jobj, jint type, int flag)
 
 #ifdef DEBUG
 	if((*env)->ExceptionOccurred(env)) {
-		report ("an error occured calling sendEvent()\n");
+		report ( "an error occured calling sendEvent()\n" );
 		(*env)->ExceptionDescribe(env);
 		(*env)->ExceptionClear(env);
 	}
@@ -2059,8 +2061,8 @@ int get_java_var( JNIEnv *env, jobject jobj, char *id, char *type )
 	result = (int)( (*env)->GetIntField( env, jobj, jfd ) );
 /* ct7 & gel * Added DeleteLocalRef */
 	(*env)->DeleteLocalRef( env, jclazz );
-	if(!strncmp("fd",id,2) && result == 0)
-		report("invalid file descriptor\n");
+	if(!strncmp( "fd",id,2) && result == 0)
+		report( "invalid file descriptor\n" );
 	LEAVE( "get_java_var" );
 	return result;
 }
@@ -2267,12 +2269,12 @@ int uucp_lock( const char *filename )
 	}
 	if ( stat( LOCKDIR, &buf ) != 0 )
 	{
-		report("RXTX uucp_lock() could not find lock directory.\n");
+		report( "RXTX uucp_lock() could not find lock directory.\n" );
 		return 1;
 	}
 	if ( stat( filename, &buf ) != 0 )
 	{
-		report("RXTX uucp_lock() could not find device.\n");
+		report( "RXTX uucp_lock() could not find device.\n" );
 		sprintf( message, "device was %s\n", name );
 		report( message );
 		return 1;
@@ -2322,7 +2324,7 @@ int check_lock_status( const char *filename )
 
 	if ( stat( LOCKDIR, &buf ) != 0 )
 	{
-		report("could not find lock directory.\n");
+		report( "could not find lock directory.\n" );
 		return 1;
 	}
 
@@ -2330,7 +2332,7 @@ int check_lock_status( const char *filename )
 
 	if ( check_group_uucp() )
 	{
-		report("No permission to create lock file\n");
+		report( "No permission to create lock file\n" );
 		return 1;
 	}
 
@@ -2338,7 +2340,7 @@ int check_lock_status( const char *filename )
 
 	if ( is_device_locked( filename ) )
 	{
-		report("device is locked by another application\n");
+		report( "device is locked by another application\n" );
 		return 1;	
 	}
 	return 0;
@@ -2397,7 +2399,7 @@ void uucp_unlock( const char *filename )
 	if ( stat( filename, &buf ) != 0 ) 
 	{
 		/* hmm the file is not there? */
-		report("uucp() unlock no such device\n");
+		report( "uucp() unlock no such device\n" );
 		return;
 	}
 	sprintf( file, LOCKDIR"/LK.%03d.%03d.%03d",
@@ -2408,7 +2410,7 @@ void uucp_unlock( const char *filename )
 	if ( stat( file, &buf ) != 0 ) 
 	{
 		/* hmm the file is not there? */
-		report("uucp() unlock no such lockfile\n");
+		report( "uucp() unlock no such lockfile\n" );
 		return;
 	}
 	if( !check_lock_pid( file ) )
@@ -2601,7 +2603,7 @@ int is_device_locked( const char *filename )
 	/*  UUCP standard locks */
 		if ( stat( filename, &buf ) != 0 )
 		{
-			report("RXTX is_device_locked() could not find device.\n");
+			report( "RXTX is_device_locked() could not find device.\n" );
 			return 1;
 		}
 		sprintf( file, "%s/LK.%03d.%03d.%03d",
@@ -2696,6 +2698,6 @@ void dump_termios(char *foo,struct termios *ttyset)
 	{
 		fprintf(stderr,"%d=%x ", i, ttyset->c_cc[i]);
 	}
-	fprintf(stderr,"\n");
+	fprintf(stderr,"\n" );
 #endif /* DEBUG */
 }
