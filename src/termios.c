@@ -45,6 +45,7 @@ struct termios_list {
 	int my_errno;
 	HANDLE hComm;
 	struct termios ttyset;
+	int flags;
 };
 struct termios_list *tl[SIZE];
 
@@ -64,7 +65,7 @@ usleep()
 
 void usleep(unsigned long usec)
 {
-	sleep(1);
+	Sleep(usec/1000);
 }
 
 /*----------------------------------------------------------
@@ -463,6 +464,13 @@ int serial_open(const char *filename, int flags) {
 #ifdef DEBUG
 	printf("open: ospeed: %#o\n", cfgetospeed(&tl[fd]->ttyset));
 #endif /* DEBUG */
+
+	/* if opened with non-blocking, then operating non-blocking */
+	if (flags & O_NONBLOCK)
+		tl[fd]->flags = O_NONBLOCK;
+	else
+		tl[fd]->flags = 0;
+
 	return fd;
 }
 
@@ -509,10 +517,16 @@ int serial_read(int fd, void *vb, int size) {
 	/* FIXME: ICRNL: convert \r to \n */
 	/* FIXME: INLCR: convert \n to \r */
 	DWORD nBytes = 0, total = 0;
-	int err;
-	int vmin = tl[fd]->ttyset.c_cc[VMIN];
 	char *b = (char *)vb;
-	while (nBytes <= vmin && size > 0) {
+	int err, vmin;
+
+	if (tl[fd]->flags & O_NONBLOCK)
+		vmin = 0;	/* if vmin would 1 or more, then we would block */
+	else	/* read blocks forever on VMIN chars */
+		vmin = tl[fd]->ttyset.c_cc[VMIN];
+	
+//	printf("serial_read(ing) %d\n", size);
+	while (nBytes <= vmin || size > 0) {
 		if (!ReadFile(tl[fd]->hComm, b, size, &nBytes, NULL)) {
 			err = GetLastError();
 			switch (err) {
@@ -525,11 +539,13 @@ int serial_read(int fd, void *vb, int size) {
 					return -1;
 			}
 		}
-		if (vmin == 0) break;
+//		printf("(g%ld n%d) ", nBytes, size);	/* got, need */
 		size -= nBytes;
 		b += nBytes;
 		total += nBytes;
+		if (vmin == 0) break;	/* wait for no chars, can return whenever */
 	}
+//	printf("serial_read(ed) %ld\n", total);
 	return total;
 }  
 
@@ -842,7 +858,7 @@ int tcgetattr(int fd, struct termios *s_termios) {
 	/***** line discipline (c_line) (== c_cc[33]) *****/
 
 	DCBToTermios(&myDCB, s_termios); /* baudrate */
-	return(1);
+	return 0;
 }
 
 /*
@@ -960,27 +976,26 @@ int tcsetattr(int fd, int when, struct termios *s_termios) {
 
 	if (!SetCommState(tl[fd]->hComm, &dcb)) {
 		fprintf(stderr, "SetCommState error\n");
-		return(-1);
+		return -1;
 	}
 
-#ifdef DEBUG
+//#ifdef DEBUG
 	printf("VTIME:%d, VMIN:%d\n", s_termios->c_cc[VTIME],
 		s_termios->c_cc[VMIN]);
-#endif /* DEBUG */
+//#endif /* DEBUG */
 	vtime = s_termios->c_cc[VTIME] * 100;
 	timeouts.ReadTotalTimeoutConstant = vtime;
 	/* max between bytes */
 	timeouts.ReadIntervalTimeout = vtime;
 	if (s_termios->c_cc[VMIN] > 0 && vtime > 0) {
-		timeouts.ReadIntervalTimeout = s_termios->c_cc[VMIN] * vtime;
-		printf("ReadIntervalTimeout %ld\n",
-			timeouts.ReadIntervalTimeout);
+		/* read blocks forever on VMIN chars */
 	} else if (s_termios->c_cc[VMIN] == 0 && vtime == 0) {
 		/* read returns immediately */
 		timeouts.ReadIntervalTimeout = MAXDWORD;
 		timeouts.ReadTotalTimeoutConstant = 0;
-		timeouts.ReadTotalTimeoutMultiplier= 0;
+		timeouts.ReadTotalTimeoutMultiplier = 0;
 	}
+	printf("ReadIntervalTimeout=%ld\n", timeouts.ReadIntervalTimeout);
 #ifdef DEBUG
 	printf("c_cc[VTIME] = %d, c_cc[VMIN] = %d\n",
 		s_termios->c_cc[VTIME], s_termios->c_cc[VMIN]);
@@ -991,10 +1006,10 @@ int tcsetattr(int fd, int when, struct termios *s_termios) {
 #endif /* DEBUG */
 	if (!SetCommTimeouts(tl[fd]->hComm, &timeouts)) {
 		printf("SetCommTimeouts\n");
-		return(-1);
+		return -1;
 	}
 	memcpy(&tl[fd]->ttyset, s_termios, sizeof(struct termios));
-	return ( TRUE ) ;
+	return 0;
 }
 
 /*----------------------------------------------------------
@@ -1214,9 +1229,30 @@ fcntl()
    comments:    
 ----------------------------------------------------------*/
 
-int fcntl(int fd, int command, int arg) {
-	fprintf(stderr, "FIXME: fcntl(%d, %#o, %#o)\n", fd, command, arg);
-	return 0;
+int fcntl(int fd, int command, ...) {
+	int arg, ret = 0;
+	va_list ap;
+
+	va_start(ap, command);
+
+	arg = va_arg(ap, int);
+	switch (command) {
+		case F_SETOWN:	/* set ownership of fd */
+			break;
+		case F_SETFL:	/* set operating flags */
+			printf("F_SETFL fd=%d flags=%d\n", fd, arg);
+			tl[fd]->flags = arg;
+			break;
+		case F_GETFL:	/* get operating flags */
+			ret = tl[fd]->flags;
+			break;
+		default:
+			fprintf(stderr, "unknown fcntl command %#x\n", command);
+			break;
+	}
+
+	va_end(ap);
+	return ret;
 }
 
 
