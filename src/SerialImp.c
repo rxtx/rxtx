@@ -1063,6 +1063,8 @@ int init_thread_write( struct event_info_struct *eis )
 
 	sigaction(SIGABRT, &newaction, &oldaction);
 	sigaction(SIGCHLD, &newaction, &oldaction);
+	sigaction(SIGALRM, &newaction, &oldaction);
+	sigaction(SIGCONT, &newaction, &oldaction);
 /*
 	sigaction(SIGPOLL, &newaction, &oldaction);
 	sigaction(SIGTRAP, &newaction, &oldaction);
