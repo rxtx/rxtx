@@ -1,6 +1,6 @@
 /*-------------------------------------------------------------------------
 |   rxtx is a native interface to serial ports in java.
-|   Copyright 1997, 1998, 1999 by Trent Jarvi jarvi@ezlink.com.
+|   Copyright 1997-2000 by Trent Jarvi trentjarvi@yahoo.com
 |
 |   This library is free software; you can redistribute it and/or
 |   modify it under the terms of the GNU Library General Public
@@ -19,17 +19,25 @@
 
 
 /* javax.comm.SerialPort constants */
-#define DATABITS_5	5
-#define DATABITS_6	6
-#define DATABITS_7	7
-#define DATABITS_8	8
-#define STOPBITS_1	1
-#define STOPBITS_2	2
-#define PARITY_NONE	0
-#define PARITY_ODD	1
-#define PARITY_EVEN	2
-#define PARITY_MARK	3
-#define PARITY_SPACE	4
+#ifndef WIN32
+#define DATABITS_5		5
+#define DATABITS_6		6
+#define DATABITS_7		7
+#define DATABITS_8		8
+#define PARITY_NONE		0
+#define PARITY_ODD		1
+#define PARITY_EVEN		2
+#define PARITY_MARK		3
+#define PARITY_SPACE		4
+#endif
+#define STOPBITS_1		1
+#define STOPBITS_2		2
+#define FLOWCONTROL_NONE	0
+#define FLOWCONTROL_RTSCTS_IN	1
+#define FLOWCONTROL_RTSCTS_OUT	2
+#define FLOWCONTROL_XONXOFF_IN	4
+#define FLOWCONTROL_XONXOFF_OUT	8
+
 
 /* javax.comm.SerialPortEvent constants */
 #define SPE_DATA_AVAILABLE       1
@@ -42,6 +50,12 @@
 #define SPE_PE                   8
 #define SPE_FE                   9
 #define SPE_BI                  10
+
+/* java exception class names */
+#define UNSUPPORTED_COMM_OPERATION "javax/comm/UnsupportedCommOperationException"
+#define ARRAY_INDEX_OUT_OF_BOUNDS "java/lang/ArrayIndexOutOfBoundsException"
+#define OUT_OF_MEMORY "java/lang/OutOfMemoryError"
+#define IO_EXCEPTION "java/io/IOException"
 
 /*
 Flow Control defines inspired by reading how mgetty by Gert Doering does it
@@ -71,14 +85,13 @@ Flow Control defines inspired by reading how mgetty by Gert Doering does it
 
 
 /* PROTOTYPES */
-int translate_speed( JNIEnv* env, jint speed );
-int translate_data_bits( JNIEnv *env, int *cflag, jint dataBits );
-int translate_stop_bits( JNIEnv *env, int *cflag, jint stopBits );
-int translate_parity( JNIEnv *env, int *cflag, jint parity );
-int read_byte_array( int fd, unsigned char *buffer, int length, int threshold,
-   int timeout );
-int get_java_fd( JNIEnv *env, jobject jobj );
-void send_modem_events( JNIEnv *env, jobject jobj, jmethodID method,
-   int event, int change, int state );
-void IOException( JNIEnv *Env, char *msg );
-void UnsupportedCommOperationException( JNIEnv *env, char *msg );
+int translate_speed( JNIEnv*, jint  );
+int translate_data_bits( JNIEnv *, int *, jint );
+int translate_stop_bits( JNIEnv *, int *, jint );
+int translate_parity( JNIEnv *, int *, jint );
+int read_byte_array( int, unsigned char *, int, int );
+int get_java_var( JNIEnv *, jobject, char *, char * );
+int get_java_fd( JNIEnv *, jobject );
+void send_modem_events( JNIEnv *, jobject, jmethodID, int, int, int );
+void throw_java_exception( JNIEnv *, char *, char *, char * );
+#define LINUX_KERNEL_VERSION_ERROR "\n\n\nRXTX WARNING:  This library was compiled to run with OS release %s and you are currently running OS release %s.  In some cases this can be a problem.  Try recompiling RXTX if you notice strange behavior.  If you just compiled RXTX make sure /usr/include/linux is a symbolic link to the include files that came with the kernel source and not an older copy.\n\n\npress enter to continue\n"
