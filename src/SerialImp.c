@@ -100,10 +100,10 @@
 
 extern int errno;
 #ifdef TRENT_IS_HERE
-/*
-#undef TIOCSERGETLSR
 #define DEBUG
 #define TRACE
+#undef TIOCSERGETLSR
+/*
 #define DEBUG_MW
 #define DONT_USE_OUTPUT_BUFFER_EMPTY_CODE
 notes:
@@ -178,8 +178,6 @@ JNIEXPORT void JNICALL RXTXPort(Initialize)(
 	struct sigaction old_action;
 	sigaction(SIGIO, NULL, &old_action);
 	/* green threads already has handler, no touch */
-	/* FIXME remove for release */
-	printf("Hello Jauhar!\n");
 	if (old_action.sa_handler == NULL) {
 		/* no handler when using native threads, set to ignore */
 		struct sigaction new_action;
@@ -742,6 +740,9 @@ void *thread_write( void *arg )
 	sprintf(msg, "thread_write[%i]: mutex_unlock draining\n", pid);
 	report( msg );
 	pthread_mutex_unlock( t->mutex_draining );
+	sprintf(msg, "thread_write[%i]: mutex_lock event\n", pid);
+	report( msg );
+	pthread_mutex_lock( t->mutex_event );
 	if( !t->closing )
 	{
 		result = write( eis->fd, t->buff, t->length );
@@ -776,7 +777,6 @@ void *thread_write( void *arg )
 		report( msg );
 		while( eis->output_buffer_empty_flag == 1 ) 
 		{
-			pthread_mutex_lock( t->mutex_event );
 			sprintf(msg, ">thread_write[%i]: cond_wait event\n", pid);
 			report( msg );
 			pthread_cond_wait( t->cpt_event, t->mutex_event );

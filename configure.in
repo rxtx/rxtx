@@ -406,7 +406,7 @@ if test "$CC" = "gcc" || test "$CC"="egcs"; then
 		JAVAC="\$(JPATH)/bin/javac -classpath \$(CLASSPATH) -d \$(TOP)/ -O"
 		JAR="\$(JPATH)/bin/jar"
 		JAVADOC="\$(JPATH)/bin/javadoc"
-		CFLAGS=$CFLAGS" -D_BSD_SOURCE"
+		CFLAGS=$CFLAGS" -D_BSD_SOURCE -lpthread"
 		;;
 	esac
 fi
