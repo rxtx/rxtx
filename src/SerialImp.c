@@ -379,15 +379,15 @@ JNIEXPORT void JNICALL RXTXPort(nativeSetSerialPortParams)(
 	struct termios ttyset;
 	int fd = get_java_var( env, jobj,"fd","I" );
 	int cspeed = translate_speed( env, speed );
+#ifdef TIOCGSERIAL
+	struct serial_struct sstruct;
+#endif /* TIOCGSERIAL */
 	if (cspeed == -1)
 	{
 		throw_java_exception( env, UNSUPPORTED_COMM_OPERATION,
 			"", "BaudRate could not be set to the specified value" );
 		return;
 	}
-#ifdef TIOCGSERIAL
-	struct serial_struct sstruct;
-#endif /* TIOCGSERIAL */
 
 
 	ENTER( "RXTXPort:nativeSetSerialPortParams" );
