@@ -2638,12 +2638,12 @@ int ioctl( int fd, int request, ... )
 				set_errno( EBADFD );
 				return -1;
 			}
-			if( ErrCode & CE_FRAME ) sistruct.frame++;
-			if( ErrCode & CE_OVERRUN ) sistruct.overrun++;
+			if( ErrCode & CE_FRAME ) sistruct->frame++;
+			if( ErrCode & CE_OVERRUN ) sistruct->overrun++;
 			/* should this be here? */
-			if( ErrCode & CE_RXOVER ) sistruct.overrun++;
-			if( ErrCode & CE_RXPARITY ) sistruct.parity++;
-			if( ErrCode & CE_BREAK ) sistruct.brk++;
+			if( ErrCode & CE_RXOVER ) sistruct->overrun++;
+			if( ErrCode & CE_RXPARITY ) sistruct->parity++;
+			if( ErrCode & CE_BREAK ) sistruct->brk++;
 			return 0;
 		/* abolete ioctls */
 #endif /* TIOCGICOUNT */
@@ -2843,6 +2843,7 @@ int  serial_select( int  n,  fd_set  *readfds,  fd_set  *writefds,
 		if ( !WaitCommEvent( index->hComm, &dwCommEvent,
 			&index->sol ) )
 		{
+			/* WaitCommEvent failed */
 			if( index->interrupt == 1 )
 			{
 				MexPrintf("i");
@@ -2856,6 +2857,7 @@ int  serial_select( int  n,  fd_set  *readfds,  fd_set  *writefds,
 				return(1);
 				//goto fail;
 			}
+			return(1);
 		}
 		if( index->interrupt == 1 )
 		{
