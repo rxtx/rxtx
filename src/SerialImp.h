@@ -113,11 +113,10 @@ struct event_info_struct
 #if !defined(TIOCSERGETLSR) && !defined(WIN32)
 	int output_buffer_empty_flag;
 	struct tpid_info_struct *tpid;
-#else
-#	if defined(TIOCSERGETLSR)
+#endif /* !TIOCSERGETLSR !WIN32 */
+#	if defined(TIOCGICOUNT)
 	struct serial_icounter_struct osis;
-#endif /* TIOCSERGETLSR */
-#endif /* !defined(TIOCSERGETLSR) && !defined(WIN32) */
+#endif /* TIOCGICOUNT */
 };
 
 /*  Ports known on the OS */
