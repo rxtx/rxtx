@@ -48,6 +48,9 @@
 #		define S_ISCHR(m) (1)
 #	endif /* S_ISCHR(m) */
 #endif /* WIN32 */
+#ifdef HAVE_ASM_TERMBITS_H
+#	include <asm/termbits.h>
+#else
 #ifdef HAVE_TERMIOS_H
 #	include <termios.h>
 #endif /* HAVE_TERMIOS_H */
@@ -105,13 +108,6 @@
 #include <math.h>
 
 extern int errno;
-#ifdef TRENT_IS_HERE
-#define DEBUG
-#define TRACE
-#define DEBUG_MW
-#define DEBUG_VERBOSE
-#undef TIOCSERGETLSR
-#endif /* TRENT_IS_HERE */
 #include "SerialImp.h"
 
 
@@ -1247,7 +1243,7 @@ JNIEXPORT void JNICALL RXTXPort(writeByte)( JNIEnv *env,
 	do {
 		sprintf( msg, "writeByte %c>>\n", byte );
 		report( msg );
-		result=WRITE (fd, &byte, sizeof(unsigned char));
+		result=WRITE (fd, (void * ) &byte, sizeof(unsigned char));
 	}  while (result < 0 && errno==EINTR);
 /*
 	This makes write for win32, glinux and Sol behave the same
@@ -1331,7 +1327,7 @@ JNIEXPORT void JNICALL RXTXPort(writeArray)( JNIEnv *env,
 	*/
 
 	do {
-		result=WRITE (fd, body + total + offset, count - total); /* dima */
+		result=WRITE (fd, (void * ) ((char *) body + total + offset), count - total); /* dima */
 		if(result >0){
 			total += result;
 		}
@@ -2775,6 +2771,8 @@ int read_byte_array( JNIEnv *env,
 	char msg[80];
 	struct timeval tv, *tvP;
 	fd_set rset;
+	/* TRENT */
+	int count = 0;
 
 	report_time_start();
 	ENTER( "read_byte_array" );
@@ -2783,7 +2781,7 @@ int read_byte_array( JNIEnv *env,
 	left = length;
 	if (timeout >= 0)
 		start = GetTickCount();
-	while( bytes < length )
+	while( bytes < length &&  count++ < 20 );
 	{
 		if (timeout >= 0) {
 			now = GetTickCount();
@@ -2833,7 +2831,8 @@ int read_byte_array( JNIEnv *env,
 		Nicolas <ripley@8d.com>
 		*/
 			else {
-				usleep(10);
+				//usleep(10);
+				usleep(1000);
 			}
 		}
 	}
@@ -3843,7 +3842,7 @@ RXTXCommDriver.nativeGetVersion
 JNIEXPORT jstring JNICALL RXTXCommDriver(nativeGetVersion) (JNIEnv *env,
 	jclass jclazz )
 {
-	return (*env)->NewStringUTF( env, "RXTX-2.1-7pre7" );
+	return (*env)->NewStringUTF( env, "RXTX-2.1-7pre11" );
 }
 
 /*----------------------------------------------------------
