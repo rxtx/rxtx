@@ -93,7 +93,7 @@ static void add_file(const char *path,unsigned long device,unsigned long inode, 
     struct stat st;
     FILE_DSC *file,*next;
     ITEM_DSC **item,*this;
-    unsigned long mount_dev;
+    unsigned long mount_dev = 0;
 
     if (device) mount_dev = device;
     for (file = files; file; file = next) {
@@ -133,7 +133,7 @@ static void check_dir(const char *rel,pid_t pid,int type)
     struct stat st;
 
     if (!(dir = opendir(rel))) return;
-    while (de = readdir(dir))
+    while ( (de = readdir(dir) ) )
 	if (strcmp(de->d_name,".") && strcmp(de->d_name,"..")) {
 	    sprintf(path,"%s/%s",rel,de->d_name);
             if (stat(path,&st) >= 0)
@@ -156,8 +156,8 @@ extern void scan_fd(void)
 	exit(1);
     }
     empty = 1;
-    while (de = readdir(dir))
-	if (pid = atoi(de->d_name)) {
+    while ( ( de = readdir(dir) ) )
+	if ( ( pid = atoi(de->d_name) ) ) {
 	    empty = 0;
 	    sprintf(path,"%s/%d",PROC_BASE,pid);
 	    if (chdir(path) >= 0) {
@@ -202,14 +202,14 @@ extern void show_user(const char tstring[],char *rs)
     item = files->items;
     sprintf(path,PROC_BASE "/%d/stat",item->u.proc.pid);
     strcpy(comm,"???");
-    if (f = fopen(path,"r")) {
+    if ( ( f = fopen(path,"r") ) ) {
 	(void) fscanf(f,"%d (%[^)]",&dummy,comm);
 	(void) fclose(f);
     }
     name = comm;
     uid = item->u.proc.uid;
     if (uid == UID_UNKNOWN) user = "???";
-    else if (pw = getpwuid(uid)) user = pw->pw_name;
+    else if ( ( pw = getpwuid(uid) ) ) user = pw->pw_name;
     else {
 	sprintf(tmp,"%d",uid);
 	user = tmp;
@@ -235,7 +235,7 @@ extern void show_user(const char tstring[],char *rs)
 		  returnstring[keeper+1]= '\0';
 	      }
 	      else { 
-		  sprintf(temp,"\\%03o", scan);
+		  sprintf(temp,"\\%03o", (int) scan);
 		  strcat(returnstring,temp);
 	      }
 	 }
