@@ -38,7 +38,6 @@
 #	endif
 #endif
 
-
 /* javax.comm.ParallelPortEvent constants */
 #define PAR_EV_ERROR	1
 #define PAR_EV_BUFFER	2
