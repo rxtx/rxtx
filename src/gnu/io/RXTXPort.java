@@ -80,6 +80,7 @@ final public class RXTXPort extends SerialPort
 		if (debug)
 			System.out.println("RXTXPort:RXTXPort("+name+") fd = " +
 				fd);
+		timeout = -1;	/* default disabled timeout */
 	}
 	private native synchronized int open( String name )
 		throws PortInUseException;
@@ -241,7 +242,7 @@ final public class RXTXPort extends SerialPort
 
 
 	/** Receive timeout control */
-	private int timeout = 0;
+	private int timeout;
 
 	/** 
 	*  @return  int the timeout
