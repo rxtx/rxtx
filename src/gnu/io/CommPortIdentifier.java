@@ -336,9 +336,20 @@ public class CommPortIdentifier extends Object /* extends Vector? */
 		}
 		else
 		{
+			String OS;
+
+			OS = System.getProperty("os.name");
+
 			if (debug) System.out.println("RXTXDriver.getCommPort() Yikes!");
-			throw new PortInUseException(
-				native_psmisc_report_owner(PortName));
+			if(OS.toLowerCase().indexOf("linux") != -1)
+			{
+				System.out.println("In!");
+				throw new PortInUseException(
+					native_psmisc_report_owner(PortName));
+			}
+			else
+				throw new PortInUseException(
+					"Unknown Application");
 		}
 	}
 /*------------------------------------------------------------------------------
