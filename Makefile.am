@@ -23,9 +23,9 @@ AUTOMAKE_OPTIONS = foreign
 INCLUDES= -I $(TOP) -I $(DEST) -I . $(JAVAINCLUDE) $(JAVANATINC)
 ####################### vars for rxtx-1.4->1.5 transition
 JARTARGET=comm.jar
-CLASSDIR=javax.comm
-CLASSTOP=javax
-CLASSDEST=javax/comm
+CLASSDIR=gnu.io
+CLASSTOP=gnu
+CLASSDEST=gnu/io
 ####################### tools
 LIBTOOLC=$(TOP)/libtool --mode=compile $(CC) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) $(VERBOSE_IOEXCEPTIONS) -c
 LIBTOOL_INST=$(TOP)/libtool --mode=install $(INSTALL_PROGRAM)
@@ -66,7 +66,7 @@ $(CLASSES): $(javafiles) $(TOP)/Makefile
 	$(JAVAH_FIX)
 	$(JAVAC) $(javafiles)
 	@$(JAVAH) `(for i in $(javahfiles);do \
-		if grep -q native.*\( $(SPATH)/$$i.java; then \
+		if grep > /dev/null native.*\( $(SPATH)/$$i.java; then \
 			echo $(CLASSDIR).$$i; \
 		fi; \
 	done)`
