@@ -18,7 +18,7 @@
 --------------------------------------------------------------------------*/
 
 
-/* javax.comm.SerialPort constants */
+/* gnu.io.SerialPort constants */
 #ifndef WIN32
 #define DATABITS_5		5
 #define DATABITS_6		6
@@ -39,7 +39,7 @@
 #define FLOWCONTROL_XONXOFF_OUT	8
 
 
-/* javax.comm.SerialPortEvent constants */
+/* gnu.io.SerialPortEvent constants */
 #define SPE_DATA_AVAILABLE       1
 #define SPE_OUTPUT_BUFFER_EMPTY  2
 #define SPE_CTS                  3
@@ -52,7 +52,7 @@
 #define SPE_BI                  10
 
 /* java exception class names */
-#define UNSUPPORTED_COMM_OPERATION "javax/comm/UnsupportedCommOperationException"
+#define UNSUPPORTED_COMM_OPERATION "gnu.io/UnsupportedCommOperationException"
 #define ARRAY_INDEX_OUT_OF_BOUNDS "java/lang/ArrayIndexOutOfBoundsException"
 #define OUT_OF_MEMORY "java/lang/OutOfMemoryError"
 #define IO_EXCEPTION "java/io/IOException"

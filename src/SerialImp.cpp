@@ -17,7 +17,7 @@
 |   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --------------------------------------------------------------------------*/
 #include "config.h"
-#include "javax_comm_RXTXPort.h"
+#include "gnu_io_RXTXPort.h"
 #include <time.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -60,8 +60,8 @@ extern int errno;
 /* this is so diff will not generate noise when merging 1.4 and 1.5 changes
  * It will eventually be removed.
  * */
-#define RXTXPort(foo) Java_javax_comm_RXTXPort_ ## foo
-#define RXTXCommDriver(foo) Java_javax_comm_RXTXCommDriver_ ## foo
+#define RXTXPort(foo) Java_gnu.io_RXTXPort_ ## foo
+#define RXTXCommDriver(foo) Java_gnu.io_RXTXCommDriver_ ## foo
 //#define MAX_PORT_NUM 65;
 BSerialPort *PortArray[65]; // !!!
 BSerialPort *port; // !!!
@@ -319,7 +319,7 @@ data_rate translate_speed( JNIEnv *env, jint speed )
 /*----------------------------------------------------------
  translate_data_bits
 
-   accept:     javax.comm.SerialPort.DATABITS_* constant
+   accept:     gnu.io.SerialPort.DATABITS_* constant
    perform:    convert to BeOS eqivalent bits
    return:     1 if successful
                0 if an exception is thrown
@@ -351,7 +351,7 @@ int translate_data_bits( JNIEnv *env, data_bits *dbits, jint dataBits )
 /*----------------------------------------------------------
  translate_stop_bits
 
-   accept:     javax.comm.SerialPort.STOPBITS_* constant
+   accept:     gnu.io.SerialPort.STOPBITS_* constant
    perform:    convert to BeOS eqivalent bits
    return:     1 if successful
 					0 if an exception is thrown
@@ -385,7 +385,7 @@ int translate_stop_bits( JNIEnv *env, stop_bits *sbits, jint stopBits )
 /*----------------------------------------------------------
  translate_parity
 
-   accept:     javax.comm.SerialPort.PARITY_* constant
+   accept:     gnu.io.SerialPort.PARITY_* constant
    perform:    convert parity parameters to BeOS specific ones.
    return:     1 if successful
                0 if an exception is thrown
@@ -1526,7 +1526,7 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(isDeviceGood)(JNIEnv *env,
    		values are in SerialImp.h
 ----------------------------------------------------------*/
 /*
-JNIEXPORT jstring JNICALL Java_javax_comm_RXTXCommDriver_getDeviceDirectory(JNIEnv*, jobject);
+JNIEXPORT jstring JNICALL Java_gnu.io_RXTXCommDriver_getDeviceDirectory(JNIEnv*, jobject);
 
 */
 JNIEXPORT jstring  JNICALL RXTXCommDriver(getDeviceDirectory)(JNIEnv *env,

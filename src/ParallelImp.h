@@ -17,7 +17,7 @@
 |   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --------------------------------------------------------------------------*/
 
-/* javax.comm.ParallelPort constants */
+/* gnu.io.ParallelPort constants */
 /*  this appears to be handled in /usr/src/linux/misc/parport_pc.c */
 #define LPT_MODE_ANY	0
 #define LPT_MODE_SPP	1
@@ -38,16 +38,16 @@
 #	endif
 #endif
 
-/* javax.comm.ParallelPortEvent constants */
+/* gnu.io.ParallelPortEvent constants */
 #define PAR_EV_ERROR	1
 #define PAR_EV_BUFFER	2
 
 /* java exception class names */
-#define UNSUPPORTED_COMM_OPERATION "javax/comm/UnsupportedCommOperationException"
+#define UNSUPPORTED_COMM_OPERATION "gnu.io/UnsupportedCommOperationException"
 #define ARRAY_INDEX_OUT_OF_BOUNDS "java/lang/ArrayIndexOutOfBoundsException"
 #define OUT_OF_MEMORY "java/lang/OutOfMemoryError"
 #define IO_EXCEPTION "java/io/IOException"
-#define PORT_IN_USE_EXCEPTION "javax/comm/PortInUseException"
+#define PORT_IN_USE_EXCEPTION "gnu.io/PortInUseException"
 
 /*
 Flow Control defines inspired by reading how mgetty by Gert Doering does it

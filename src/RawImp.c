@@ -26,7 +26,7 @@
 #undef __STRICT_ANSI__
 #endif
 #include "config.h"
-#include "javax_comm_Raw.h"
+#include "gnu_io_Raw.h"
 #include <time.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -75,7 +75,7 @@ RawPort.open
                 this function and it turns out to be permissions on the 
                 device file or bios has the device disabled.
 ----------------------------------------------------------*/ 
-JNIEXPORT jint JNICALL Java_javax_comm_RawPort_open( 
+JNIEXPORT jint JNICALL Java_gnu_io_RawPort_open( 
 	JNIEnv *env, 
 	jobject jobj,
 	jint ciAddress 
@@ -97,7 +97,7 @@ RawPort.nativeClose
    return:      none
    exceptions:  none
 ----------------------------------------------------------*/ 
-JNIEXPORT jint JNICALL Java_javax_comm_RawPort_nativeClose( JNIEnv *env,
+JNIEXPORT jint JNICALL Java_gnu_io_RawPort_nativeClose( JNIEnv *env,
 	jobject jobj )
 {
 	int ciAddress = get_java_var( env, jobj,"ciAddress","I" );
@@ -207,7 +207,7 @@ RawPort.Initialize
    return:      none
    exceptions:  none
 ----------------------------------------------------------*/
-JNIEXPORT void JNICALL Java_javax_comm_RawPort_Initialize( 
+JNIEXPORT void JNICALL Java_gnu_io_RawPort_Initialize( 
 	JNIEnv *env,
 	jclass jclazz 
 	)
@@ -250,7 +250,7 @@ JNIEXPORT void JNICALL Java_javax_comm_RawPort_Initialize(
    return:     void
    exceptions: UnsupportedCommOperationException
 ----------------------------------------------------------*/ 
-JNIEXPORT void JNICALL Java_javax_comm_RawPort_nativeSetRawPortParams(
+JNIEXPORT void JNICALL Java_gnu_io_RawPort_nativeSetRawPortParams(
 	JNIEnv *env, jobject jobj, jint speed, jint dataBits, jint stopBits,
 	jint parity )
 {
@@ -322,7 +322,7 @@ int translate_speed( JNIEnv *env, jint speed )
 /*----------------------------------------------------------
  translate_data_bits
 
-   accept:     javax.comm.RawPort.DATABITS_* constant
+   accept:     gnu.io.RawPort.DATABITS_* constant
    perform:    set proper termios c_cflag bits
    return:     1 if successful
 					0 if an exception is thrown
@@ -355,7 +355,7 @@ int translate_data_bits( JNIEnv *env, int *cflag, jint dataBits )
 /*----------------------------------------------------------
  translate_stop_bits
 
-   accept:     javax.comm.RawPort.STOPBITS_* constant
+   accept:     gnu.io.RawPort.STOPBITS_* constant
    perform:    set proper termios c_cflag bits
    return:     1 if successful
 					0 if an exception is thrown
@@ -382,7 +382,7 @@ int translate_stop_bits( JNIEnv *env, int *cflag, jint stopBits )
 /*----------------------------------------------------------
  translate_parity
 
-   accept:     javax.comm.RawPort.PARITY_* constant
+   accept:     gnu.io.RawPort.PARITY_* constant
    perform:    set proper termios c_cflag bits
    return:     1 if successful
                0 if an exception is thrown
@@ -433,7 +433,7 @@ RawPort.writeByte
    return:      none
    exceptions:  IOException
 ----------------------------------------------------------*/ 
-JNIEXPORT void JNICALL Java_javax_comm_RawPort_writeByte( JNIEnv *env,
+JNIEXPORT void JNICALL Java_gnu_io_RawPort_writeByte( JNIEnv *env,
 	jobject jobj, jint ji ) 
 {
 	unsigned char byte = (unsigned char)ji;
@@ -460,7 +460,7 @@ RawPort.writeArray
    return:      none
    exceptions:  IOException
 ----------------------------------------------------------*/ 
-JNIEXPORT void JNICALL Java_javax_comm_RawPort_writeArray( JNIEnv *env,
+JNIEXPORT void JNICALL Java_gnu_io_RawPort_writeArray( JNIEnv *env,
 	jobject jobj, jbyteArray jbarray, jint offset, jint count )
 {
 	int fd = get_java_var( env, jobj,"fd","I" );
@@ -496,7 +496,7 @@ RawPort.drain
                 count logic added to avoid infinite loops when EINTR is
                 true...  Thread.yeild() was suggested.
 ----------------------------------------------------------*/
-JNIEXPORT void JNICALL Java_javax_comm_RawPort_drain( JNIEnv *env,
+JNIEXPORT void JNICALL Java_gnu_io_RawPort_drain( JNIEnv *env,
 	jobject jobj )
 {
 	int fd = get_java_var( env, jobj,"fd","I" );
@@ -519,7 +519,7 @@ RawPort.sendBreak
    exceptions: none
    comments:   not very precise
 ----------------------------------------------------------*/ 
-JNIEXPORT void JNICALL Java_javax_comm_RawPort_sendBreak( JNIEnv *env,
+JNIEXPORT void JNICALL Java_gnu_io_RawPort_sendBreak( JNIEnv *env,
 	jobject jobj, jint duration )
 {
 	int fd = get_java_var( env, jobj,"fd","I" );
@@ -535,7 +535,7 @@ RawPort.NativegetReceiveTimeout
    return:     VTIME 
    comments:   see  NativeEnableReceiveTimeoutThreshold
 ----------------------------------------------------------*/ 
-JNIEXPORT jint JNICALL Java_javax_comm_RawPort_NativegetReceiveTimeout(
+JNIEXPORT jint JNICALL Java_gnu_io_RawPort_NativegetReceiveTimeout(
 	JNIEnv *env, 
 	jobject jobj
 	)
@@ -558,7 +558,7 @@ RawPort.NativeisReceiveTimeoutEnabled
    return:     JNI_TRUE if VTIME > 0 else JNI_FALSE 
    comments:   see  NativeEnableReceiveTimeoutThreshold
 ----------------------------------------------------------*/ 
-JNIEXPORT jboolean JNICALL Java_javax_comm_RawPort_NativeisReceiveTimeoutEnabled(
+JNIEXPORT jboolean JNICALL Java_gnu_io_RawPort_NativeisReceiveTimeoutEnabled(
 	JNIEnv *env, 
 	jobject jobj
 	)
@@ -583,7 +583,7 @@ RawPort.isDSR
    exceptions:  none
    comments:    DSR stands for Data Set Ready
 ----------------------------------------------------------*/
-JNIEXPORT jboolean JNICALL Java_javax_comm_RawPort_isDSR( JNIEnv *env,
+JNIEXPORT jboolean JNICALL Java_gnu_io_RawPort_isDSR( JNIEnv *env,
 	jobject jobj ) 
 {
 	unsigned int result = 0;
@@ -608,7 +608,7 @@ RawPort.isCD
                 permanently on fixed it for me so I don't care"
 
 ----------------------------------------------------------*/
-JNIEXPORT jboolean JNICALL Java_javax_comm_RawPort_isCD( JNIEnv *env,
+JNIEXPORT jboolean JNICALL Java_gnu_io_RawPort_isCD( JNIEnv *env,
 	jobject jobj )
 {
 	unsigned int result = 0;
@@ -629,7 +629,7 @@ RawPort.isCTS
    exceptions:  none
    comments:    CTS stands for Clear To Send.
 ----------------------------------------------------------*/
-JNIEXPORT jboolean JNICALL Java_javax_comm_RawPort_isCTS( JNIEnv *env,
+JNIEXPORT jboolean JNICALL Java_gnu_io_RawPort_isCTS( JNIEnv *env,
 	jobject jobj ) 
 {
 	unsigned int result = 0;
@@ -650,7 +650,7 @@ RawPort.isRI
    exceptions:  none
    comments:    RI stands for Ring Indicator
 ----------------------------------------------------------*/
-JNIEXPORT jboolean JNICALL Java_javax_comm_RawPort_isRI( JNIEnv *env,
+JNIEXPORT jboolean JNICALL Java_gnu_io_RawPort_isRI( JNIEnv *env,
 	jobject jobj )
 {
 	unsigned int result = 0;
@@ -671,7 +671,7 @@ RawPort.isRTS
    exceptions:  none
    comments:    tcgetattr with c_cflag CRTS_IFLOW
 ----------------------------------------------------------*/
-JNIEXPORT jboolean JNICALL Java_javax_comm_RawPort_isRTS( JNIEnv *env,
+JNIEXPORT jboolean JNICALL Java_gnu_io_RawPort_isRTS( JNIEnv *env,
 	jobject jobj )
 {
 	unsigned int result = 0;
@@ -693,7 +693,7 @@ RawPort.setRTS
    exceptions:  none
    comments:    tcsetattr with c_cflag CRTS_IFLOW
 ----------------------------------------------------------*/
-JNIEXPORT void JNICALL Java_javax_comm_RawPort_setRTS( JNIEnv *env,
+JNIEXPORT void JNICALL Java_gnu_io_RawPort_setRTS( JNIEnv *env,
 	jobject jobj, jboolean state ) 
 {
 	unsigned int result = 0;
@@ -717,7 +717,7 @@ RawPort.setDSR
    exceptions:  none
    comments:    tcsetattr with c_cflag CRTS_IFLOW
 ----------------------------------------------------------*/
-JNIEXPORT void JNICALL Java_javax_comm_RawPort_setDSR( JNIEnv *env,
+JNIEXPORT void JNICALL Java_gnu_io_RawPort_setDSR( JNIEnv *env,
 	jobject jobj, jboolean state ) 
 {
 	unsigned int result = 0;
@@ -740,7 +740,7 @@ RawPort.isDTR
    exceptions:  none
    comments:    DTR stands for Data Terminal Ready
 ----------------------------------------------------------*/
-JNIEXPORT jboolean JNICALL Java_javax_comm_RawPort_isDTR( JNIEnv *env,
+JNIEXPORT jboolean JNICALL Java_gnu_io_RawPort_isDTR( JNIEnv *env,
 	jobject jobj )
 {
 	unsigned int result = 0;
@@ -761,7 +761,7 @@ RawPort.setDTR
    exceptions:  none
    comments:    DTR stands for Data Terminal Ready
 ----------------------------------------------------------*/
-JNIEXPORT void JNICALL Java_javax_comm_RawPort_setDTR( JNIEnv *env,
+JNIEXPORT void JNICALL Java_gnu_io_RawPort_setDTR( JNIEnv *env,
 	jobject jobj, jboolean state )
 {
 	unsigned int result = 0;
@@ -838,7 +838,7 @@ NativeEnableReceiveTimeoutThreshold
                 canonical input mode.
 ----------------------------------------------------------*/ 
  
-JNIEXPORT void JNICALL Java_javax_comm_RawPort_NativeEnableReceiveTimeoutThreshold(JNIEnv *env, jobject jobj, jint vtime, jint threshold, jint buffer)
+JNIEXPORT void JNICALL Java_gnu_io_RawPort_NativeEnableReceiveTimeoutThreshold(JNIEnv *env, jobject jobj, jint vtime, jint threshold, jint buffer)
 {
 	int fd = get_java_var( env, jobj,"fd","I" );
 	struct termios ttyset;
@@ -862,7 +862,7 @@ RawPort.readByte
    return:      The byte read
    exceptions:  IOException
 ----------------------------------------------------------*/ 
-JNIEXPORT jint JNICALL Java_javax_comm_RawPort_readByte( JNIEnv *env,
+JNIEXPORT jint JNICALL Java_gnu_io_RawPort_readByte( JNIEnv *env,
 	jobject jobj )
 { 
 	int bytes;
@@ -891,7 +891,7 @@ RawPort.readArray
    comments:     throws ArrayIndexOutOfBoundsException if asked to
                  read more than SSIZE_MAX bytes
 ----------------------------------------------------------*/ 
-JNIEXPORT jint JNICALL Java_javax_comm_RawPort_readArray( JNIEnv *env,
+JNIEXPORT jint JNICALL Java_gnu_io_RawPort_readArray( JNIEnv *env,
 	jobject jobj, jbyteArray jbarray, jint offset, jint length )
 {  
 	int bytes;
@@ -936,7 +936,7 @@ RawPort.nativeavailable
                 -1 on error
    exceptions:  none
 ----------------------------------------------------------*/ 
-JNIEXPORT jint JNICALL Java_javax_comm_RawPort_nativeavailable( JNIEnv *env,
+JNIEXPORT jint JNICALL Java_gnu_io_RawPort_nativeavailable( JNIEnv *env,
 	jobject jobj )
 {
 	int fd = get_java_var( env, jobj,"fd","I" );
@@ -966,7 +966,7 @@ RawPort.setflowcontrol
    comments:  there is no differentiation between input and output hardware
               flow control
 ----------------------------------------------------------*/
-JNIEXPORT void JNICALL Java_javax_comm_RawPort_setflowcontrol( JNIEnv *env,
+JNIEXPORT void JNICALL Java_gnu_io_RawPort_setflowcontrol( JNIEnv *env,
 	jobject jobj, jint flowmode )
 {
 	struct termios ttyset;
@@ -1005,7 +1005,7 @@ RawPort.eventLoop
    exceptions:  none
    comments:    FIXME This is probably wrong on bsd.
 ----------------------------------------------------------*/ 
-JNIEXPORT void JNICALL Java_javax_comm_RawPort_eventLoop( JNIEnv *env,
+JNIEXPORT void JNICALL Java_gnu_io_RawPort_eventLoop( JNIEnv *env,
 	jobject jobj )
 {
 	int fd, ret, change;
@@ -1223,7 +1223,7 @@ void throw_java_exception( JNIEnv *env, char *exc, char *foo, char *msg )
 	(*env)->DeleteLocalRef( env, clazz );
 }
 
-JNIEXPORT jboolean  JNICALL Java_javax_comm_RXTXCommDriver_IsDeviceGood(JNIEnv *env,
+JNIEXPORT jboolean  JNICALL Java_gnu_io_RXTXCommDriver_IsDeviceGood(JNIEnv *env,
 	jobject jobj, jstring tty_name){
 
 	jboolean result;
@@ -1301,26 +1301,26 @@ JNIEXPORT jboolean  JNICALL Java_javax_comm_RXTXCommDriver_IsDeviceGood(JNIEnv *
 	(*env)->ReleaseStringUTFChars(env, tty_name, name);
 	return(result);
 }
-JNIEXPORT void JNICALL Java_javax_comm_RawPort_setInputBufferSize(JNIEnv *env, jobject jobj,  jint size )
+JNIEXPORT void JNICALL Java_gnu_io_RawPort_setInputBufferSize(JNIEnv *env, jobject jobj,  jint size )
 {
 #ifdef DEBUG
 	fprintf(stderr,"setInputBufferSize is not implemented\n");
 #endif
 }
-JNIEXPORT jint JNICALL Java_javax_comm_RawPort_getInputBufferSize(JNIEnv *env, jobject jobj)
+JNIEXPORT jint JNICALL Java_gnu_io_RawPort_getInputBufferSize(JNIEnv *env, jobject jobj)
 {
 #ifdef DEBUG
 	fprintf(stderr,"getInputBufferSize is not implemented\n");
 #endif
 	return(1);
 }
-JNIEXPORT void JNICALL Java_javax_comm_RawPort_setOutputBufferSize(JNIEnv *env, jobject jobj, jint size )
+JNIEXPORT void JNICALL Java_gnu_io_RawPort_setOutputBufferSize(JNIEnv *env, jobject jobj, jint size )
 {
 #ifdef DEBUG
 	fprintf(stderr,"setOutputBufferSize is not implemented\n");
 #endif
 }
-JNIEXPORT jint JNICALL Java_javax_comm_RawPort_getOutputBufferSize(JNIEnv *env, jobject jobj)
+JNIEXPORT jint JNICALL Java_gnu_io_RawPort_getOutputBufferSize(JNIEnv *env, jobject jobj)
 {
 #ifdef DEBUG
 	fprintf(stderr,"getOutputBufferSize is not implemented\n");

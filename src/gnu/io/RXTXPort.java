@@ -16,7 +16,7 @@
 |   License along with this library; if not, write to the Free
 |   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --------------------------------------------------------------------------*/
-package javax.comm;
+package gnu.io;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
@@ -24,8 +24,8 @@ import java.util.TooManyListenersException;
 import java.lang.Math;
 
 /**
-* An extension of javax.comm.SerialPort
-* @see javax.comm.SerialPort
+* An extension of gnu.io.SerialPort
+* @see gnu.io.SerialPort
 */
 
 final class RXTXPort extends SerialPort
@@ -48,7 +48,7 @@ final class RXTXPort extends SerialPort
 	*  Open the named port
 	*  @param name the name of the device to open
 	*  @throws  PortInUseException
-	*  @see javax.comm.SerialPort
+	*  @see gnu.io.SerialPort
 	*/
 	public RXTXPort( String name ) throws PortInUseException
 	{
@@ -106,7 +106,7 @@ final class RXTXPort extends SerialPort
 	*  @param  s stopbits
 	*  @param  p parity
 	*  @throws UnsupportedCommOperationException
-	*  @see javax.comm.UnsupportedCommOperationException
+	*  @see gnu.io.UnsupportedCommOperationException
 	*/
 	public void setSerialPortParams( int b, int d, int s, int p )
 		throws UnsupportedCommOperationException
@@ -157,7 +157,7 @@ final class RXTXPort extends SerialPort
 	private int flowmode = SerialPort.FLOWCONTROL_NONE;
 	/** 
 	*  @param  flowcontrol FLOWCONTROL_NONE is default
-	*  @see javax.comm.SerialPort#FLOWCONTROL_NONE
+	*  @see gnu.io.SerialPort#FLOWCONTROL_NONE
 	*/
 	public void setFlowControlMode( int flowcontrol )
 	{
