@@ -3,13 +3,13 @@ This is AUTHORS Tue Dec  4 15:25:27 MST 2001
 This package is not the result of one persons time.  Recognition is given
 to the following people for their assistance.
 
+Scott Burleigh <Scott.Burleigh@jpl.nasa.gov> Documentation of ThinkPad Serial Behavior and clairification of "No serial ports found!"
+
 Melissa Pike <mpike@mathworks.com>  Integration of rxtx into QA tests.
 
 Jauhar Ismail <jismail@mathworks.com> QA testing
 
 Joey Armstrong <joeya@mathworks.com> The amazing wonder pulling things together behind the scenes.
-
-Peter C. Verhage <peter@no-nonsense.org> FreeBSD fixes
 
 Finbarr O'Kane <finbarr@e-merge.ie> True64 Port
 

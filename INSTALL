@@ -75,6 +75,7 @@ A note on Mac OS X:
 	S.  How can I tell which version of rxtx is installed?
 	T.  What Type of Latency can I expect with RXTX
 	U.  I got rxtx working on a new OS but I can't read from the port
+	V.  My ThinkPad is Not Working!
 
 -------------------------------------------------------------------------------
 1.  INSTALL INSTRUCTIONS IN OTHER LANGUAGES
@@ -723,6 +724,24 @@ on linux.  I'm not positive what is normal on other OS's.
                 Prentice-Hall, 1990, pages 96-101.
                 more reading:
 
+V.  My ThinkPad is Not Working!
+
+	Scott Burleigh <Scott.Burleigh@jpl.nasa.gov> writes:
+
+		For your files, and in case anybody asks in the 
+		future, IBM Thinkpads ship with the external serial port
+		*disabled* by default.  The Thinkpad configuration utility
+		supplied with the machine (under Windows) says it's enabled,
+		and the device manager in the System dialog of the Control
+		panel says it's enabled, but they lie.  In order to enable the
+		port you have to use the old DOS ps2.exe bios configuration 
+		utility which, under Windows 2000, is in
+		c:\Program Files\Thinkpad\utilities:
+
+			ps2 sera enable
+
+		Until you do, "setserial -ga /dev/ttyS0" will always tell you
+		the UART is unknown.  
 -- 
 Trent Jarvi
 TrentJarvi@yahoo.com
