@@ -67,6 +67,8 @@ A.  Japanese
 
 	Instructions are available in Japanese at
 
+	The instructions are fairly old but should help.
+
 	http://www.geocities.co.jp/Technopolis/4789/settei.htm#id1
 	Thanks to Masayuki "Tencho" Yamashita <tencho@venus.kanazawa-it.ac.jp>
 	home page http://www.geocities.co.jp/Technopolis/4789/ 
@@ -102,6 +104,9 @@ A.  Japanese
 		$ make install
 		Read "R.  How can I use Lock Files with rxtx?"
 
+	One catch that has showed up... you cannot have spaces in the path.
+	for instance:  /home/jarvi/test build/rxtx/... will cause problems.
+                                   ----^
 	If that does not work or you do not want a script messing with the 
 	system, read on..
 
@@ -236,6 +241,8 @@ A.  Japanese
 		http://www.linuxgrrls.org/~taj/crossmingw32-2.95-1.i386.rpm
 		A more current version can be obtained:
 		http://www.devolution.com/~slouken/SDL/Xmingw32/crossgcc/index.html
+		prebuilt Binaries:
+		http://www.devolution.com/~slouken/SDL/Xmingw32/mingw32-linux-x86-glibc-2.1.tar.gz
 
 		I built the dll with jdk-1.2.2 for linux using jdk-1.2.2 
 		include files from the win32 JDK.
