@@ -602,7 +602,6 @@ JNIEXPORT void JNICALL RXTXPort(nativeSetSerialPortParams)(
 		goto fail;
 	}
 #endif  /* __FreeBSD__ */
-#ifdef DROP_DTR_ON_SPEED_ZERO
 	if( !cspeed )
 	{
 		/* hang up the modem aka drop DTR  */
@@ -615,7 +614,6 @@ JNIEXPORT void JNICALL RXTXPort(nativeSetSerialPortParams)(
 		ioctl( fd, TIOCMSET, &result );
 	}
 	else {
-#endif /* DROP_DTR_ON_SPEED_ZERO */
 	if(
 		cfsetispeed( &ttyset, cspeed ) < 0 ||
 		cfsetospeed( &ttyset, cspeed ) < 0 )
@@ -623,9 +621,7 @@ JNIEXPORT void JNICALL RXTXPort(nativeSetSerialPortParams)(
 		report( "nativeSetSerialPortParams: Cannot Set Speed\n" );
 		goto fail;
 	}
-#ifdef DROP_DTR_ON_SPEED_ZERO
 	}
-#endif /* DROP_DTR_ON_SPEED_ZERO */
 
 	if( tcsetattr( fd, TCSANOW, &ttyset ) < 0 )
 	{
