@@ -57,12 +57,9 @@ $(target_triplet)/librxtx%.@LIB_EXTENSION@: $(SPATH)/%Imp.c $(CLASSES) $(SPATH)/
 	$(LIBTOOLC) $(SPATH)/$*Imp.@EXTENSION@ -o		\
 		$(TOP)/$(DEST)/$*Imp.@OBJECT_EXTENSION@;	\
 	if [ "$*" = "rxtxSerial" ]; then 				\
-		$(LIBTOOLC) ../$(SPATH)/fuserImp.@EXTENSION@	\
-			-o $(TOP)/$(DEST)/fuserImp.@OBJECT_EXTENSION@;\
-		@LINK@ $(TOP)/$(DEST)/$*Imp.@OBJECT_EXTENSION@	\
-			$(TOP)/$(DEST)/fuserImp.@OBJECT_EXTENSION@;\
+		@LINK@ $(TOP)/$(DEST)/$*Imp.@OBJECT_EXTENSION@; \
 	else							\
-		@LINK@ $(TOP)/$(DEST)/$*Imp.@OBJECT_EXTENSION@ $(FUSER);\
+		@LINK@ $(TOP)/$(DEST)/$*Imp.@OBJECT_EXTENSION@; \
 	fi;							\
 	)
 
@@ -103,15 +100,25 @@ docs: $(CLASSES)
 
 $(DEST)/rxtxSerial.dll: $(CLASSES) $(TOP)/Makefile
 	gcc -DWIN32 -D __int64="long long" -mno-fp-ret-in-387 -b$(target_alias) -I $(TOP) -I $(DEST) -I . $(WINDOWS_JAVA_INCLUDE) -I $(SPATH) -Wall -c $(SPATH)/SerialImp.c -o $(DEST)/SerialImp.o
-	gcc -DWIN32 -D __int64="long long" -mno-fp-ret-in-387 -b$(target_alias) -I $(TOP) -I $(DEST) -I . $(WINDOWS_JAVA_INCLUDE) -I $(SPATH) -Wall -c $(SPATH)/fuserImp.c -o $(DEST)/fuserImp.o
 	gcc -DWIN32 -D __int64="long long" -mno-fp-ret-in-387 -b$(target_alias) -I $(TOP) -I $(DEST) -I . $(WINDOWS_JAVA_INCLUDE) -I $(SPATH) -Wall -c $(SPATH)/termios.c -o $(DEST)/termios.o
 	gcc -DWIN32 -D __int64="long long" -mno-fp-ret-in-387 -b$(target_alias) -I $(TOP) -I $(DEST) -I . $(WINDOWS_JAVA_INCLUDE) -I $(SPATH) -Wall -c $(SPATH)/fixup.c -o $(DEST)/fixup.o
 	gcc -DWIN32 -D __int64="long long" -mno-fp-ret-in-387 -b$(target_alias) -I $(TOP) -I $(DEST) -I . $(WINDOWS_JAVA_INCLUDE) -I $(SPATH) -Wall -c $(SPATH)/init.cc -o $(DEST)/init.o
-	ld --base-file $(DEST)/Serial.base --dll -o $(DEST)/rxtxSerial.dll $(DEST)/termios.o $(DEST)/SerialImp.o $(DEST)/fuserImp.o $(DEST)/fixup.o $(DEST)/init.o -luser32 -lgdi32 -lcomdlg32 -lkernel32 -ladvapi32 -lmingw32 -lmoldname -lcrtdll -e _dll_entry@12 --base-file $(DEST)/Serial.base
-	 echo EXPORTS >$(DEST)/Serial.def;for i in `nm i386-mingw32/rxtxSerial.dll | grep "T _Java"|cut -b 13-`;do echo -n $$i|sed s#@.*##;echo "="$$i;done >> $(DEST)/Serial.def
+	ld --base-file $(DEST)/Serial.base --dll -o $(DEST)/rxtxSerial.dll $(DEST)/termios.o $(DEST)/SerialImp.o $(DEST)/fixup.o $(DEST)/init.o -luser32 -lgdi32 -lcomdlg32 -lkernel32 -ladvapi32 -lmingw32 -lmoldname -lcrtdll -e _dll_entry@12 --base-file $(DEST)/Serial.base
+	 echo EXPORTS >$(DEST)/Serial.def;for i in `nm $(DEST)/rxtxSerial.dll | grep "T _Java"|cut -b 13-`;do echo -n $$i|sed s#@.*##;echo "="$$i;done >> $(DEST)/Serial.def
 	dlltool -b$(DEST) --as=as --dllname $(DEST)/rxtxSerial.dll --def $(DEST)/Serial.def --base-file $(DEST)/Serial.base --output-exp $(DEST)/Serial.exp
-	ld --base-file $(DEST)/Serial.base $(DEST)/Serial.exp -dll -o $(DEST)/rxtxSerial.dll $(DEST)/termios.o $(DEST)/SerialImp.o $(DEST)/fuserImp.o $(DEST)/fixup.o $(DEST)/init.o -luser32 -lgdi32 -lcomdlg32 -lkernel32 -ladvapi32 -lmingw32 -lmoldname -lcrtdll -e _dll_entry@12 --base-file $(DEST)/Serial.base
+	ld --base-file $(DEST)/Serial.base $(DEST)/Serial.exp -dll -o $(DEST)/rxtxSerial.dll $(DEST)/termios.o $(DEST)/SerialImp.o $(DEST)/fixup.o $(DEST)/init.o -luser32 -lgdi32 -lcomdlg32 -lkernel32 -ladvapi32 -lmingw32 -lmoldname -lcrtdll -e _dll_entry@12 --base-file $(DEST)/Serial.base
 	dlltool -b$(DEST) --as=as --dllname $(DEST)/rxtxSerial.dll --def $(DEST)/Serial.def --base-file $(DEST)/Serial.base --output-exp $(DEST)/Serial.exp
-	ld $(DEST)/Serial.exp -dll -o $(DEST)/rxtxSerial.dll $(DEST)/termios.o $(DEST)/SerialImp.o $(DEST)/fuserImp.o $(DEST)/fixup.o $(DEST)/init.o -luser32 -lgdi32 -lcomdlg32 -lkernel32 -ladvapi32 -lmingw32 -lmoldname -lcrtdll -e _dll_entry@12 --base-file $(DEST)/Serial.base
+	ld $(DEST)/Serial.exp -dll -o $(DEST)/rxtxSerial.dll $(DEST)/termios.o $(DEST)/SerialImp.o $(DEST)/fixup.o $(DEST)/init.o -luser32 -lgdi32 -lcomdlg32 -lkernel32 -ladvapi32 -lmingw32 -lmoldname -lcrtdll -e _dll_entry@12 --base-file $(DEST)/Serial.base
 
-# END
+$(DEST)/rxtxParallel.dll: $(CLASSES) $(TOP)/Makefile
+	gcc -DWIN32 -D __int64="long long" -mno-fp-ret-in-387 -b$(target_alias) -I $(TOP) -I $(DEST) -I . $(WINDOWS_JAVA_INCLUDE) -I $(SPATH) -Wall -c $(SPATH)/ParallelImp.c -o $(DEST)/ParallelImp.o
+	gcc -DWIN32 -D __int64="long long" -mno-fp-ret-in-387 -b$(target_alias) -I $(TOP) -I $(DEST) -I . $(WINDOWS_JAVA_INCLUDE) -I $(SPATH) -Wall -c $(SPATH)/termios.c -o $(DEST)/termios.o
+	gcc -DWIN32 -D __int64="long long" -mno-fp-ret-in-387 -b$(target_alias) -I $(TOP) -I $(DEST) -I . $(WINDOWS_JAVA_INCLUDE) -I $(SPATH) -Wall -c $(SPATH)/fixup.c -o $(DEST)/fixup.o
+	gcc -DWIN32 -D __int64="long long" -mno-fp-ret-in-387 -b$(target_alias) -I $(TOP) -I $(DEST) -I . $(WINDOWS_JAVA_INCLUDE) -I $(SPATH) -Wall -c $(SPATH)/init.cc -o $(DEST)/init.o
+	ld --base-file $(DEST)/Parallel.base --dll -o $(DEST)/rxtxParallel.dll $(DEST)/termios.o $(DEST)/ParallelImp.o $(DEST)/fixup.o $(DEST)/init.o -luser32 -lgdi32 -lcomdlg32 -lkernel32 -ladvapi32 -lmingw32 -lmoldname -lcrtdll -e _dll_entry@12 --base-file $(DEST)/Parallel.base
+	 echo EXPORTS >$(DEST)/Parallel.def;for i in `nm $(DEST)/rxtxParallel.dll | grep "T _Java"|cut -b 13-`;do echo -n $$i|sed s#@.*##;echo "="$$i;done >> $(DEST)/Parallel.def
+	dlltool -b$(DEST) --as=as --dllname $(DEST)/rxtxParallel.dll --def $(DEST)/Parallel.def --base-file $(DEST)/Parallel.base --output-exp $(DEST)/Parallel.exp
+	ld --base-file $(DEST)/Parallel.base $(DEST)/Parallel.exp -dll -o $(DEST)/rxtxParallel.dll $(DEST)/termios.o $(DEST)/ParallelImp.o $(DEST)/fixup.o $(DEST)/init.o -luser32 -lgdi32 -lcomdlg32 -lkernel32 -ladvapi32 -lmingw32 -lmoldname -lcrtdll -e _dll_entry@12 --base-file $(DEST)/Parallel.base
+	dlltool -b$(DEST) --as=as --dllname $(DEST)/rxtxParallel.dll --def $(DEST)/Parallel.def --base-file $(DEST)/Parallel.base --output-exp $(DEST)/Parallel.exp
+	ld $(DEST)/Parallel.exp -dll -o $(DEST)/rxtxParallel.dll $(DEST)/termios.o $(DEST)/ParallelImp.o $(DEST)/fixup.o $(DEST)/init.o -luser32 -lgdi32 -lcomdlg32 -lkernel32 -ladvapi32 -lmingw32 -lmoldname -lcrtdll -e _dll_entry@12 --base-file $(DEST)/Parallel.base
+
