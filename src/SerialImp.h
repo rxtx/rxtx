@@ -54,40 +54,33 @@
 #if defined(__linux__)
 #	define DEVICEDIR "/dev/"
 #	define LOCKDIR "/var/lock"
-#endif
+#endif /* __linux__ */
 #if defined(__sgi__) || defined(sgi)
 #error test
 #	define DEVICEDIR "/dev/"
-/* see SerialImp.c fhs_lock() & fhs_unlock() */
-#	define LOCKDIR ""
+#	define LOCKDIR "/usr/spool/uucp"
 #endif /* __sgi__ || sgi */
 #if defined(__FreeBSD__)
 #	define DEVICEDIR "/dev/"
-/* see SerialImp.c fhs_lock() & fhs_unlock() */
 #	define LOCKDIR "/var/spool/uucp/"
-#endif
+#endif /* __FreeBSD__ */
 #if defined(__NetBSD__)
 #	define DEVICEDIR "/dev/"
-/* see SerialImp.c fhs_lock() & fhs_unlock() */
-#	define LOCKDIR ""
-#endif
-
+#	define LOCKDIR "/usr/spool/uucp"
+#endif /* __NetBSD__ */
 #if defined(__hpux__)
 /* modif cath */
 #	define DEVICEDIR "/dev/"
-/* see SerialImp.c fhs_lock() & fhs_unlock() */
-#	define LOCKDIR ""
-#endif
+#	define LOCKDIR "/usr/spool/uucp"
+#endif /* __hpux__ */
 #if defined(__BEOS__)
 #	define DEVICEDIR "/dev/ports/"
-/* see SerialImp.c fhs_lock() & fhs_unlock() */
 #	define LOCKDIR ""
-#endif
+#endif /* __BEOS__ */
 #if defined(WIN32)
 #	define DEVICEDIR ""
-/* see SerialImp.c fhs_lock() & fhs_unlock() */
 #	define LOCKDIR ""
-#endif
+#endif /* WIN32 */
 
 /*  That should be all you need to look at in this file for porting */
 
