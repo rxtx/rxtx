@@ -1227,7 +1227,7 @@ int serial_write( int fd, char *Str, int length )
 	}
 end:
 	/* yaya...  This really does help */
-	FlushFileBuffers( index->hComm );
+	/* FlushFileBuffers( index->hComm ); */
 	MexPrintf("W");
 	index->event_flag |= EV_TXEMPTY;
 	SetCommMask( index->hComm, index->event_flag );
