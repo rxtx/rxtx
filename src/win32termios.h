@@ -285,9 +285,9 @@ void cfmakeraw(struct termios *s_termios);
 #define TIOCMGET	0x5415
 #define TIOCMSET	0x5418
 #define TIOCMWAIT	0x545C
-#define TIOCGICOUNT	0x545D
+/* #define TIOCGICOUNT	0x545D */
 #define TIOCSERGETLSR	0x5459
-/*define FIONREAD	0x*/ 
+/*define FIONREAD	0x */
 
 /* modem lines */
 #define TIOCM_LE    0x001
