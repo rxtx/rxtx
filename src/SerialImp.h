@@ -65,7 +65,7 @@
 struct tpid_info_struct
 {
 	/* threads, bean counting, and lifespan */
-	int write_counter, closing;
+	int write_counter, closing, tcdrain;
 	pthread_t tpid;
 
 	pthread_mutex_t *mutex;

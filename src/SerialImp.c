@@ -101,9 +101,9 @@
 extern int errno;
 #ifdef TRENT_IS_HERE
 #undef TIOCSERGETLSR
-#define DEBUG
-#define USE_OUTPUT_BUFFER_EMPTY_CODE
 /*
+#define DONT_USE_OUTPUT_BUFFER_EMPTY_CODE
+#define DEBUG
 #define SIGNALS
 #define DEBUG_MW
 */
@@ -687,24 +687,18 @@ void *thread_write( void *arg )
 	struct event_info_struct *eis = ( struct event_info_struct * ) arg;
 	struct tpid_info_struct *t = eis->tpid;
 	int result;
-	
-	report("thread_write start\n");
+
 	if( !eis->jclazz )
 	{
 		report("thread_write: jclazz is borked\n");
 		return( NULL );
 	}
 	report("thread_write: have jclazz\n");
+	while( t->tcdrain == 1 ) usleep(2000);
 	if( !t->closing )
 	{
-/*
-		printf("thread_write: write( %i, %i, %i);\n",eis->fd, t->buff[0], t->length);
-*/
 		result = write( eis->fd, t->buff, t->length );
 		t->length = result;
-/*
-		printf("---\n---\nthread_write: wrote %i bytes length is now %i\n", result, t->length);
-*/
 	}
 	else
 	{
@@ -729,15 +723,17 @@ void *thread_write( void *arg )
 		return( NULL );
 	}
 	report("thread_write: tcdrain\n");
-	if( tcdrain( eis->fd ) == 0 )
+	t->tcdrain = 1;
+	if( tcdrain( eis->fd ) == 0 && t->done == 1 )
 	{
 		report("thread_write: setting the dang OUTPUT_BUFFER_EMPTY\n" );
-		while(eis->output_buffer_empty_flag == 1 ) usleep(100);
+		/* while(eis->output_buffer_empty_flag == 1 ) usleep(100); */
 		eis->output_buffer_empty_flag = 1;
 	}
 	else report("thread_write: NOT sending the blasted OUTPUT_BUFFER_EMPTY\n" );
+	t->tcdrain = 0;
 	report("thread_write: return(NULL)\n" );
-	return( NULL );
+	pthread_exit( NULL );
 }
 
 /*----------------------------------------------------------
@@ -755,15 +751,17 @@ int spawn_write_thread( int fd, char *buff, int length,
 {
 	struct event_info_struct *eis;
 	struct tpid_info_struct *t;
+	char msg[80];
 
 	report("spawn_write_thread: entering\n");
 
-#ifndef USE_OUTPUT_BUFFER_EMPTY_CODE
+#ifdef DONT_USE_OUTPUT_BUFFER_EMPTY_CODE
 	return(write( fd, buff, length )); 
 #else
 	eis = (struct event_info_struct * )
 		get_java_var( env, *jobj, "eis", "I" );
-	//report("spawn_write_thread: got eis %i\n", (int) eis);
+	sprintf( msg, "spawn_write_thread: got eis %i\n", (int) eis );
+	report( msg );
 
 	/*
 	   The eventLoop has not started. just write and return since
@@ -785,7 +783,7 @@ int spawn_write_thread( int fd, char *buff, int length,
 		pthread_cond_wait( t->cpt, t->mutex );
 	}
 #else
-	while( t->write_counter && !t->closing ) usleep(10000);
+	while( t->write_counter && !t->closing ) usleep(2000);
 	t->done = 0;
 #endif
 
@@ -798,17 +796,19 @@ int spawn_write_thread( int fd, char *buff, int length,
 	/* queue next write */
 	t->write_counter++;
 
-	//report("spawn_write_thread: %s %i\n", buff, length);
+	sprintf(msg, "spawn_write_thread: %s %i\n", buff, length);
+	report( msg );
 
 	/*----------------------------------------------*/
 	report("spawn_write_thread: create thread_write\n");
 	pthread_create( &t->tpid, NULL, thread_write, eis );
+	pthread_detach( t->tpid );
 	/*----------------------------------------------*/
 #ifdef SIGNALS
 	report(">spawn_write_thread: cond_wait\n");
 	pthread_cond_wait( t->cpt, t->mutex );
 #else
-	while(! t->done ) usleep(100);
+	while(! t->done ) usleep(1000);
 #endif
 	t->write_counter--;
 #ifdef SIGNALS
@@ -816,9 +816,10 @@ int spawn_write_thread( int fd, char *buff, int length,
 	pthread_mutex_unlock( t->mutex );
 	report("<spawn_write_thread: cond_wait\n");
 #endif
-	//printf("spawn_write_thread: exiting! return = %i\n", t->length );
+	sprintf(msg, "spawn_write_thread: exiting! return = %i\n", t->length );
+	report( msg );
 	return(t->length);
-#endif /* USE_OUTPUT_BUFFER_EMPTY_CODE */
+#endif /* DONT_USE_OUTPUT_BUFFER_EMPTY_CODE */
 }
 #endif /* TIOCSERGETLSR */
 
@@ -872,8 +873,8 @@ void finalize_thread_write( struct event_info_struct *eis )
 add_tpid
 
    accept:      struct tpid_info_struct pointer,,
-   perform:     if p is null set up a linked list for bean counting on writes
-   return:      the last member of the linked list.
+   perform:     
+   return:      
    exceptions:  None
    comments:    This is used to cleanup threads and make sure the
 		write()'s happen in order on systems without access to the LSR
@@ -893,6 +894,7 @@ struct tpid_info_struct *add_tpid( struct tpid_info_struct *p )
 	q->tpid = 0;
 	q->closing = 0;
 	q->write_counter = 0;
+	q->tcdrain = 0;
 	return( q );
 }
 #endif /* TIOCSERGETLSR */
@@ -2910,7 +2912,7 @@ int get_java_var( JNIEnv *env, jobject jobj, char *id, char *type )
 /* ct7 & gel * Added DeleteLocalRef */
 	(*env)->DeleteLocalRef( env, jclazz );
 	if(!strncmp( "fd",id,2) && result == 0)
-		report( "invalid file descriptor\n" );
+		report_error( "invalid file descriptor\n" );
 	LEAVE( "get_java_var" );
 	return result;
 }
