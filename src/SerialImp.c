@@ -1851,7 +1851,7 @@ JNIEXPORT jint JNICALL RXTXPort(nativeavailable)( JNIEnv *env,
 		sprintf(message, "    nativeavailable: FIORDCHK result %d, errno %d\n", result , result == -1 ? errno : 0);
 		report( message );
 		if (result == -1) {
-#endif /* __unixware__ */
+#endif /* __unixware__ || defined(__sun__) */
 			LEAVE( "RXTXPort:nativeavailable IOException" );
 			throw_java_exception( env, IO_EXCEPTION,
 						"nativeavailable",
@@ -1863,7 +1863,7 @@ JNIEXPORT jint JNICALL RXTXPort(nativeavailable)( JNIEnv *env,
 			LEAVE( "RXTXPort:nativeavailable" );
 			return (jint)result;
 		}
-#endif /* __unixware__ */
+#endif /* __unixware__ || defined(__sun__) */
 	}
 	else
 		report("RXTXPort:nativeavailable:  FIONREAD failed\n");
