@@ -131,8 +131,21 @@ public class RXTXCommDriver implements CommDriver
 		String ValidPortPrefixes[],
 		int PortType
 	) {
-		int p =0 ;
 		int i =0;
+		int p =0 ;
+		/* FIXME quick fix to get COM1-8 on windows working.  The
+		   Read test is not working properly and its crunch time...
+		*/
+		if(osName.toLowerCase().indexOf("windows") != -1 )
+		{
+			for( i=0;i < CandidateDeviceNames.length;i++ )
+			{
+			CommPortIdentifier.addPortName( CandidateDeviceNames[i],
+							PortType, this );
+			}
+			return;
+
+		}
 		if (debug)
 		{
 			System.out.println("Entering registerValidPorts()");
