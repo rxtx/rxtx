@@ -91,6 +91,18 @@ Serial.dll:  comm.jar  $(cfiles) config.h
 	$(DLLTOOL) --as=$(AS) --dllname Serial.dll --def Serial.def --base-file Serial.base --output-exp Serial.exp
 	$(LD) --base-file Serial.base Serial.exp -dll -o Serial.dll $(OBJECTS) $(LIBS) -e _dll_entry@12
 
+	$(CC) $(CFLAGS) -c $(SRC)/fuserImp.c -o fuserImp.o
+	$(CC) $(CFLAGS) -c $(SRC)/fixup.c -o fixup.o
+	$(CC) $(CFLAGS) -c $(SRC)/init.cc -o init.o
+	$(LD) --base-file fuser.base --dll -o fuser.dll $(OBJECTS) $(LIBS) -e _dll_entry@12
+# --base-file Serial.base
+	 echo EXPORTS >fuser.def;for i in `nm fuser.dll | grep "T _Java"|cut -b 13-`;do echo -n $$i|sed s#@.*##;echo "="$$i;done >> fuser.def
+	$(DLLTOOL) --as=$(AS) --dllname fuser.dll --def fuser.def --base-file fuser.base --output-exp fuser.exp
+	$(LD) --base-file fuser.base fuser.exp -dll -o fuser.dll $(OBJECTS) $(LIBS) -e _dll_entry@12
+# --base-file fuser.base
+	$(DLLTOOL) --as=$(AS) --dllname fuser.dll --def fuser.def --base-file fuser.base --output-exp fuser.exp
+	$(LD) --base-file fuser.base fuser.exp -dll -o fuser.dll $(OBJECTS) $(LIBS) -e _dll_entry@12
+
 # This should replace the mess above if it worked.
 # nm shows no symbols in the dll produced.  The old stuff above works ok.
 #	$(DLLWRAP) --output-def Serial.def --output-exp Serial.exp --add-stdcall-alias --driver-name gcc -mwindows --target=i386-mingw32 -o Serial.dll $(OBJECTS) $(LIBS) -s -mno-cygwin
