@@ -72,6 +72,15 @@
 #if defined(__sun__)
 #	include <sys/filio.h>
 #	include <sys/mkdev.h>
+int cfmakeraw ( struct termios *term )
+{
+	term->c_iflag &= ~(IGNBRK|BRKINT|PARMRK|ISTRIP|INLCR|IGNCR|ICRNL|IXON);
+	term->c_oflag &= ~OPOST;
+	term->c_lflag &= ~(ECHO|ECHONL|ICANON|ISIG|IEXTEN);
+	term->c_cflag &= ~(CSIZE|PARENB);
+	term->c_cflag |= CS8;
+	return( 0 );
+}
 #endif /* __sun__ */
 #if defined(__hpux__)
 #	include <sys/modem.h>
@@ -174,8 +183,12 @@ JNIEXPORT jint JNICALL RXTXPort(open)(
 	if ( LOCK( filename) )
 	{
 		(*env)->ReleaseStringUTFChars( env, jstr, filename );
-		printf("locking has failed\n");
+		fprintf( stderr, "locking has failed for %s\n", filename );
 		goto fail;
+	}
+	else
+	{
+		fprintf( stderr, "locking worked for %s\n", filename );
 	}
 
 	do {
@@ -1210,7 +1223,7 @@ JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 			osis = sis;
 		}
 #endif /*  TIOCGICOUNT */
-	       /* A Portable implementation */
+		/* A Portable implementation */
 
 		if( ioctl( fd, TIOCMGET, &mflags ) ) break;
 
@@ -1267,7 +1280,6 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(testRead)(
 
 	if ( LOCK( name ) )
 	{
-		fprintf( stderr, "testRead is failing. No Lock file\n" );
 		(*env)->ReleaseStringUTFChars(env, tty_name, name);
 		return JNI_FALSE;
 	}
@@ -1366,19 +1378,19 @@ createSerialIterator(io_iterator_t *serialIterator)
     CFMutableDictionaryRef    classesToMatch;
     if ((kernResult=IOMasterPort(NULL, &masterPort)) != KERN_SUCCESS)
     {
-        printf("IOMasterPort returned %d\n", kernResult);
-        return kernResult;
+	printf("IOMasterPort returned %d\n", kernResult);
+	return kernResult;
     }
     if ((classesToMatch = IOServiceMatching(kIOSerialBSDServiceValue)) == NULL)
     {
-        printf("IOServiceMatching returned NULL\n");
-        return kernResult;
+	printf("IOServiceMatching returned NULL\n");
+	return kernResult;
     }
     CFDictionarySetValue(classesToMatch, CFSTR(kIOSerialBSDTypeKey), CFSTR(kIOSerialBSDRS232Type));
     kernResult = IOServiceGetMatchingServices(masterPort, classesToMatch, serialIterator);
     if (kernResult != KERN_SUCCESS)
     {
-        printf("IOServiceGetMatchingServices returned %d\n", kernResult);
+	printf("IOServiceGetMatchingServices returned %d\n", kernResult);
     }
     return kernResult;
 }
@@ -1868,11 +1880,13 @@ int fhs_lock( const char *filename )
 int uucp_lock( const char *filename )
 {
 	char lockfilename[80], lockinfo[12];
+	char name[80];
 	int fd;
 	struct stat buf;
 
 	if ( check_lock_status( filename ) )
 	{
+		fprintf( stderr, "RXTX uucp check_lock_status true\n" );
 		return 1;
 	}
 	if ( stat( LOCKDIR, &buf ) != 0 )
@@ -1880,13 +1894,24 @@ int uucp_lock( const char *filename )
 		report("RXTX uucp_lock() could not find lock directory.\n");
 		return 1;
 	}
-        sprintf( lockfilename, "%s/LK.%03d.%03d.%03d",
+	if ( stat( filename, &buf ) != 0 )
+	{
+		report("RXTX uucp_lock() could not find device.\n");
+		printf("device was %s\n", name);
+		return 1;
+	}
+	sprintf( lockfilename, "%s/LK.%03d.%03d.%03d",
 		LOCKDIR,
 		(int) major( buf.st_dev ),
 	 	(int) major( buf.st_rdev ),
 		(int) minor( buf.st_rdev )
 	);
 	sprintf( lockinfo, "%10d\n", (int) getpid() );
+	if ( stat( lockfilename, &buf ) == 0 )
+	{
+		report("RXTX uucp_lock() File is there\n");
+		return 1;
+	}
 	fd = open( lockfilename, O_CREAT | O_WRONLY | O_EXCL, 0666 );
 	if( fd < 0 )
 	{
@@ -2014,7 +2039,7 @@ void uucp_unlock( const char *filename )
 	i = strlen(filename);
 	p = (char *) filename+i;
 	while( *(p-1) != '/' && i-- != 0) p--;
-        sprintf( file, LOCKDIR"LK.%03d.%03d.%03d",
+	sprintf( file, LOCKDIR"/LK.%03d.%03d.%03d",
 		(int) major( buf.st_dev ),
 	 	(int) major( buf.st_rdev ),
 		(int) minor( buf.st_rdev )
@@ -2119,7 +2144,7 @@ int is_device_locked( const char *filename )
 	i = strlen( filename );
 	p = ( char * ) filename+i;
 	while( *( p-1 ) != '/' && i-- !=1 ) p--;
-	sprintf( file, "%s/LCK..%s", LOCKDIR, p );
+	sprintf( file, "%s/%s%s", LOCKDIR, LOCKFILEPREFIX, p );
 
 	while( lockdirs[i] )
 	{
@@ -2163,7 +2188,7 @@ int is_device_locked( const char *filename )
 					}
 
 					/* UUCP style */
-        				sprintf( file, "%s/%s%03d.%03d.%03d",
+					sprintf( file, "%s/%s%03d.%03d.%03d",
 						lockdirs[i],
 						lockprefixes[k++],
 						(int) major( buf.st_dev ),
@@ -2187,13 +2212,31 @@ int is_device_locked( const char *filename )
 		removed.
 	*/
 		 
-	i = strlen( filename );
-	p = ( char * ) filename + i;
-	while( *(p-1) != '/' && i-- != 1) p--;
-	sprintf( file, "%s/LCK..%s", LOCKDIR, p );
+#ifdef FHS
+	/*  FHS standard locks */
+		i = strlen( filename );
+		p = ( char * ) filename + i;
+		while( *(p-1) != '/' && i-- != 1) p--;
+		sprintf( file, "%s/%s%s", LOCKDIR, LOCKFILEPREFIX, p );
+#else 
+	/*  UUCP standard locks */
+		if ( stat( filename, &buf ) != 0 )
+		{
+			report("RXTX is_device_locked() could not find device.\n");
+			return 1;
+		}
+		sprintf( file, "%s/LK.%03d.%03d.%03d",
+			LOCKDIR,
+			(int) major( buf.st_dev ),
+	 		(int) major( buf.st_rdev ),
+			(int) minor( buf.st_rdev )
+		);
 
-	if( stat( file, &buf )==0)
+#endif /* FHS */
+
+	if( stat( file, &buf )==0 )
 	{
+
 		/* check if its a stale lock */
 		fd=open( file, O_RDONLY );
 		read( fd, pid_buffer, 11 );
@@ -2203,14 +2246,15 @@ int is_device_locked( const char *filename )
 		if( kill( (pid_t) pid, 0 ) && errno==ESRCH )
 		{
 			fprintf( stderr,
-				"RXTX Warning:  Removing stale lock file.\n" );
+				"RXTX Warning:  Removing stale lock file. %s\n",
+				file );
 			if( unlink( file ) != 0 )
 			{
 				snprintf( message, 80, "RXTX Error:  Unable to \
 					remove stale lock file: %s\n",
 					file
 				);
-				fprintf( stderr, message );
+				report( message );
 				return 1;
 			}
 		}
