@@ -78,7 +78,7 @@ OBJECT_EXTENSION="lo"
 LIB_EXTENSION="la"
 COMPILE="cc "
 TOP="`pwd`"
-LINK="\$(TOP)/libtool --mode=link \$(CC) \$(CFLAGS) \$(LDFLAGS) -release \$(VERSION) -o lib\$*.la -rpath \$(RXTX_PATH)"
+LINK="\$(TOP)/libtool --mode=link \$(CC) \$(CFLAGS) \$(LDFLAGS) -release \$(VERSION) -o librxtx\$*.la -rpath \$(RXTX_PATH)"
 
 [case "$host_os" in
 	*-gnu)
