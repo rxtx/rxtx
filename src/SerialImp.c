@@ -408,7 +408,7 @@ RXTXPort.open
 		to the preopened states.
    return:      none
    exceptions:  none
-   comments:    preopened referes to the fact that the serial port has
+   comments:    preopened refers to the fact that the serial port has
 		been configured before the Java open() has been called.
 ----------------------------------------------------------*/
 		
@@ -418,6 +418,7 @@ void set_java_vars( JNIEnv *env, jobject jobj, int fd )
 	int databits = -1;
 	int jparity = -1;
 	int stop_bits = STOPBITS_1_5;
+	int baudrate;
 	jclass jclazz = (*env)->GetObjectClass( env, jobj );
 	jfieldID jfspeed = (*env)->GetFieldID( env, jclazz, "speed", "I" );
 	jfieldID jfdataBits =
@@ -458,8 +459,29 @@ void set_java_vars( JNIEnv *env, jobject jobj, int fd )
                 case 0: stop_bits = STOPBITS_1; break;
                 case CSTOPB:  stop_bits = STOPBITS_2; break;
         }
+/*
+dima writes:
+
+Trent, here is something I found with google:
+(freebsd list freebsd-current@freebsd.org)
+
+Andrzej Bialecki <abial@korin.warman.org.pl> asked:
+I tried to compile a piece of software, probably for Linux, and I noticed
+that we don't define CBAUD constant. I'm not sure, but I think POSIX
+defines and uses it. Should(n't) we?
+
+Bruce Evans <bde@zeta.org.au> answered:
+CBAUD is for SYSV compatibility.  It is considerably inferior to POSIX's
+cf{get,set}{i,o}speed and shouldn't be provided or used.
+
+*/
+#if defined(CBAUD)//dima
+    	baudrate = ttyset.c_cflag&CBAUD;
+#else
+    	baudrate = cfgetispeed(&ttyset);
+#endif
 	(*env)->SetIntField(env, jobj, jfspeed,
-		( jint ) get_java_baudrate( ttyset.c_cflag&CBAUD ) );
+		( jint ) get_java_baudrate(baudrate) );
 	(*env)->SetIntField(env, jobj, jfdataBits, ( jint ) databits );
 	(*env)->SetIntField(env, jobj, jfstopBits, ( jint ) stop_bits );
 	(*env)->SetIntField(env, jobj, jfparity, ( jint ) jparity );
@@ -2149,6 +2171,7 @@ JNIEXPORT jint JNICALL RXTXPort(nativeStaticGetBaudRate)( JNIEnv *env, jobject j
 	const char *filename = (*env)->GetStringUTFChars( env, jstr, 0 );
 	int fd = find_preopened_ports( filename );
 	struct termios ttyset;
+	int baudrate;
 	(*env)->ReleaseStringUTFChars( env, jstr, filename );
 
 	ENTER( "RXTXPort:nativeStaticGetBaudRate" );
@@ -2162,7 +2185,29 @@ JNIEXPORT jint JNICALL RXTXPort(nativeStaticGetBaudRate)( JNIEnv *env, jobject j
 		report( "nativeStaticGetBaudRate: Cannot Get Serial Port Settings\n" );
 		return(-1);
 	}
-	return( get_java_baudrate( ttyset.c_cflag&CBAUD ) );
+/*
+dima writes:
+
+Trent, here is something I found with google:
+(freebsd list freebsd-current@freebsd.org)
+
+Andrzej Bialecki <abial@korin.warman.org.pl> asked:
+I tried to compile a piece of software, probably for Linux, and I noticed
+that we don't define CBAUD constant. I'm not sure, but I think POSIX
+defines and uses it. Should(n't) we?
+
+Bruce Evans <bde@zeta.org.au> answered:
+CBAUD is for SYSV compatibility.  It is considerably inferior to POSIX's
+cf{get,set}{i,o}speed and shouldn't be provided or used.
+
+*/
+#if defined(CBAUD)//dima
+    	baudrate = ttyset.c_cflag&CBAUD;
+#else
+    	if(cfgetispeed(&ttyset) != cfgetospeed(&ttyset)) return -1;
+    	baudrate = cfgetispeed(&ttyset);
+#endif
+	return( get_java_baudrate(baudrate) );
 }
 /*----------------------------------------------------------
 RXTXPort.nativeStaticGetDataBits
