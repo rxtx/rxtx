@@ -531,7 +531,19 @@ public class RXTXCommDriver implements CommDriver
 				else if(osName.equals("FreeBSD")) //FIXME this is probably wrong
 				{
 					String[] Temp = {
-						"cuaa"  // FreeBSD Serial Ports
+						"ttyd",    //general purpose serial ports
+						"cuaa",    //dialout serial ports
+						"ttyA",    //Specialix SI/XIO dialin ports
+						"cuaA",    //Specialix SI/XIO dialout ports
+						"ttyD",    //Digiboard - 16 dialin ports
+						"cuaD",    //Digiboard - 16 dialout ports
+						"ttyE",    //Stallion EasyIO (stl) dialin ports
+						"cuaE",    //Stallion EasyIO (stl) dialout ports
+						"ttyF",    //Stallion Brumby (stli) dialin ports
+						"cuaF",    //Stallion Brumby (stli) dialout ports
+						"ttyR",    //Rocketport dialin ports
+						"cuaR",    //Rocketport dialout ports
+						"stl"      //Stallion EasyIO board or Brumby N 
 					};
 					CandidatePortPrefixes=Temp;
 				}
