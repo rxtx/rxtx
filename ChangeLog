@@ -1,8 +1,24 @@
-This is ChangeLog Sun Oct 14 14:13:12 MDT 2001
+This is ChangeLog Wed Nov 14 16:52:11 MST 2001
 
 rxtx-1.5 and rxtx-1.4 changes are kept in the same file.  skip to the version
 you downloaded.
 
+1.5-8  Nov 14, 2001   True64 Port Finbarr O'Kane <finbarr@e-merge.ie>
+		      FreeBSD fixes Peter C. Verhage <peter@no-nonsense.org>
+		      --disable-lockfiles fixed.
+		      Same exception messages as Sun's CommAPI for baudrate
+		      errors.
+1.5-7  Nov 2, 2001    UnixWare and OpenUNIX ports
+		      Jonathan Schilling <jls@caldera.com>
+		      autotool support for Mac OS X
+		      Dmitry Markman <dmarkman@mac.com>
+		      Asynch write fixes
+		      setParityErrorChar() and setEndOfInputChar() added 
+		      getParityErrorChar() and getEndOfInputChar() added 
+		      Lots of tickles a few wacks more error debug info
+		      fixes by the buckets.
+		      Thread fixes for open/close/monitorthread/native code
+		      win32 fixes for NT and win9?
 1.5-6  Oct 14, 2001   Mac OS X port to Code Warrier
 		      Documentation of the above
 		      possible double deletion fix
