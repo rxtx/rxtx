@@ -108,8 +108,10 @@ final public class RXTXPort extends SerialPort
 	/** a pointer to the event info structure used to share information
 	    between threads so write threads can send output buffer empty
 	    from a pthread if need be.
+
+	    long for 64 bit pointers.
 	*/
-	int eis = 0;
+	long eis = 0;
 	/** pid for lock files */
 	int pid = 0;
 

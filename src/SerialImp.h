@@ -408,7 +408,7 @@ int translate_parity( JNIEnv *, tcflag_t *, jint );
 void system_wait();
 void finalize_event_info_struct( struct event_info_struct * );
 int read_byte_array( JNIEnv *, jobject *, int, unsigned char *, int, int );
-int get_java_var( JNIEnv *, jobject, char *, char * );
+size_t get_java_var( JNIEnv *, jobject, char *, char * );
 jboolean is_interrupted( struct event_info_struct * );
 int send_event(struct event_info_struct *, jint, int );
 void dump_termios(char *,struct termios *);

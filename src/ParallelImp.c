@@ -575,7 +575,7 @@ JNIEXPORT jint JNICALL LPRPort(readArray)( JNIEnv *env,
 	threshold = get_java_var( env, jobj,"threshold","I" );
 	timeout = get_java_var( env, jobj,"threshold","I" );
 
-	if( length < 1 || length > SSIZE_MAX )
+	if( (size_t) length < 1 || (size_t) length > SSIZE_MAX )
 	{
 		throw_java_exception( env, IO_EXCEPTION, "readArray",
 			"Invalid length" );

@@ -36,7 +36,7 @@ public class RXTXVersion
 	private static String Version;
 
 	static {
-		Version = "RXTX-2.1-7pre19";
+		Version = "RXTX-2.1-7pre20";
 	}
 	/**
 	*  static method to return the current version of RXTX

@@ -907,7 +907,7 @@ JNIEXPORT jint JNICALL Java_gnu_io_RS485Port_readArray( JNIEnv *env,
 	int fd = get_java_var( env, jobj, "fd", "I" );
 	int timeout = get_java_var( env, jobj, "timeout", "I" );
 
-	if( length > SSIZE_MAX || length < 0 ) {
+	if( (size_t) length > SSIZE_MAX || (size_t) length < 0 ) {
 		throw_java_exception( env, ARRAY_INDEX_OUT_OF_BOUNDS,
 			"readArray", "Invalid length" );
 		return -1;
