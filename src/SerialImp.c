@@ -3979,7 +3979,7 @@ RXTXCommDriver.nativeGetVersion
 JNIEXPORT jstring JNICALL RXTXCommDriver(nativeGetVersion) (JNIEnv *env,
 	jclass jclazz )
 {
-	return (*env)->NewStringUTF( env, "RXTX-2.1-7pre16" );
+	return (*env)->NewStringUTF( env, "RXTX-2.1-7pre17" );
 }
 
 /*----------------------------------------------------------
