@@ -165,7 +165,7 @@ public class RXTXCommDriver implements CommDriver {
 	 * <p>From the NullDriver.java CommAPI sample.
 	 */
 	public CommPort getCommPort( String portName, int portType ) {
-		if (debug) System.out.println("RXTXCommDriver:getCommPort()");
+		if (debug) System.out.println("RXTXCommDriver:getCommPort("+portName+","+portType+")");
 		try {
 			if (portType==CommPortIdentifier.PORT_SERIAL)
 			{

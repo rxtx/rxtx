@@ -46,6 +46,7 @@ final class RXTXPort extends SerialPort {
 	public RXTXPort( String name ) throws IOException {
 		if (debug) System.out.println("RXTXPort:RXTXPort("+name+")");
 		fd = open( name );
+		System.out.println("RXTXPort:RXTXPort("+name+") fd = " + fd);
 	}
 	private native int open( String name ) throws IOException;
 
