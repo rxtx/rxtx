@@ -32,5 +32,4 @@
 #define PACKAGE "Serial"
 
 /* Version number of package */
-#define VERSION "1.2.10"
-
+#define VERSION "2.1-6"
