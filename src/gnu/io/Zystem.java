@@ -28,6 +28,7 @@ public class Zystem
 	public static final int MEX_MODE	= 3;
 	public static final int PRINT_MODE	= 4;
 	public static final int J2EE_MSG_MODE   = 5;
+ 	public static final int J2SE_LOG_MODE = 6;
 
 	static int mode;
 
@@ -52,6 +53,69 @@ public class Zystem
 		mode = m;
 		startLogger( "asdf" );
 	}
+    /**
+     * Constructor.
+     * Mode is taken from the java system property "gnu.io.log.mode". The available values are :<ul>
+     * <li> SILENT_MODE No logging
+     * <li> FILE_MODE log to file
+     * <li> NET_MODE
+     * <li> MEX_MODE
+     * <li> PRINT_MODE
+     * <li> J2EE_MSG_MODE
+     * <li> J2SE_LOG_MODE log to java.util.logging
+     * </ul>
+     */
+  public Zystem () throws UnSupportedLoggerException
+  {
+    String s = System.getProperty ("gnu.io.log.mode");
+    if (s != null)
+      {
+	if ("SILENT_MODE".equals (s))
+	  {
+	    mode = SILENT_MODE;
+	  }
+	else if ("FILE_MODE".equals (s))
+	  {
+	    mode = FILE_MODE;
+	  }
+	else if ("NET_MODE".equals (s))
+	  {
+	    mode = NET_MODE;
+	  }
+	else if ("MEX_MODE".equals (s))
+	  {
+	    mode = MEX_MODE;
+	  }
+	else if ("PRINT_MODE".equals (s))
+	  {
+	    mode = PRINT_MODE;
+	  }
+	else if ("J2EE_MSG_MODE".equals (s))
+	  {
+	    mode = J2EE_MSG_MODE;
+	  }
+	else if ("J2SE_LOG_MODE".equals (s))
+	  {
+	    mode = J2SE_LOG_MODE;
+	  }
+	else
+	  {
+	    try
+	    {
+	      mode = Integer.parseInt (s);
+	    }
+	    catch (NumberFormatException e)
+	    {
+	      mode = SILENT_MODE;
+	    }
+	  }
+      }
+    else
+      {
+	mode = SILENT_MODE;
+      }
+    startLogger ("asdf");
+  }
 
 
 	public void startLogger( ) throws UnSupportedLoggerException
@@ -136,6 +200,11 @@ public class Zystem
 		{
 			return( false );
 		}
+		else if (mode == J2SE_LOG_MODE)
+		{
+			java.util.logging.Logger.getLogger ("gnu.io").fine (s);
+			return (true);
+		}
 		return( false );
 	}
 
@@ -201,6 +270,10 @@ public class Zystem
 		else if ( mode == J2EE_MSG_MODE )
 		{
 			return( false );
+		}
+		else if (mode == J2SE_LOG_MODE)
+		{
+			return (true);
 		}
 		return( false );
 	}

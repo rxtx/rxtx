@@ -3902,13 +3902,13 @@ RXTXPort.eventLoop
 JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 {
 	struct event_info_struct eis;
+#ifdef WIN32
+	int i = 0;
+#endif /* WIN32 */
 	eis.jclazz = (*env)->GetObjectClass( env, jobj );
 	eis.env = env;
 	eis.jobj = &jobj;
 	eis.initialised = 0;
-#ifdef WIN32
-	int i = 0;
-#endif /* WIN32 */
 
 	ENTER( "eventLoop\n" );
 	if ( !initialise_event_info_struct( &eis ) ) goto end;
