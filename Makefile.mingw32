@@ -36,18 +36,20 @@ SRC=../src
 DOSSRC=..\\\src
 
 # path to the jdk directory that has include, bin, lib, ... Unix style path
-JDKHOME=/jdk118
+JDKHOME=C:/jdk118
+
+#path to mingw32
+MINGHOME="D:/mingw"
 
 # path to install RXTXcomm.jar DOS style path
-COMMINSTALL="\jdk118\lib"
+COMMINSTALL="C:\jdk118\lib"
 
 # path to install the shared libraries DOS style path
-LIBINSTALL="\jdk118\bin"
+LIBINSTALL="C:\jdk118\bin"
 
 # path to the mingw32 libraries (directory with libmingw32.a) DOS style path
-LIBDIR="\mingw\lib"
+LIBDIR="D:\mingw\lib"
 
-CLASSPATH="\jdk118\lib\classes.zip;\BlackBox.jar;\jdk118\lib\RXTXcomm.jar;\jdk118\lib\jcl.jar;."
 ######################
 #  End of user defined variables
 ######################
@@ -64,27 +66,32 @@ DLLTOOL=dlltool
 # this looks like a nice tool but I was not able to get symbols in the dll.
 DLLWRAP=dllwrap
 
-JAVAH=javah
-JAR=jar
-JAVAC=javac
+CLASSPATH=-classpath ".;C:\jdk118\lib\RXTXcomm.jar;c:\BlackBox.jar;c:\jdk118\lib\classes.zip"
+JAVAH=javah $(CLASSPATH)
+JAR=jar 
+JAVAC=javac $(CLASSPATH)
 
 ######################
 #  Tool Flags
 ######################
 
-CFLAGS= $(INCLUDE) -mno-cygwin -DWIN32 -D __int64="long long" -mno-fp-ret-in-387 -Wall  -D TRENT_IS_HERE -D TRENT_IS_HERE_DEBUGGING_ENUMERATION
-INCLUDE= -I . -I $(JDKINCLUDE) -I $(JDKINCLUDE)/win32 -I $(SRC) -I include
-JAVAHFLAGS= -classpath $(CLASSPATH) -jni -d include
-LIBS=-L . -L $(LIBDIR) -luser32 -lgdi32 -lcomdlg32 -lkernel32 -ladvapi32 -lmingw32 -lmoldname -lcrtdll 
+CFLAGS= -O2 $(INCLUDE) -mno-cygwin -DWIN32 -D __int64="long long" -mno-fp-ret-in-387 -Wall -D TRENT_IS_HERE_DEBUGGING_ENUMERATION -DTRENT_IS_HERE_DEBUGGING_THREADS
+INCLUDE= -I . -I $(JDKINCLUDE) -I $(JDKINCLUDE)/win32 -I $(SRC) -I include -I $(MINGINCLUDE)
+JAVAHFLAGS= -jni -d include
+LIBS=-L $(LIBDIR) -luser32 -lgdi32 -lcomdlg32 -lkernel32 -ladvapi32 -lmingw32 -lmoldname -lcrtdll
 
 # path to the java native interface headers (directory with jni.h)
 JDKINCLUDE=$(JDKHOME)/include
+MINGINCLUDE=$(MINGHOME)/include
 JAVAFILES = $(wildcard $(SRC)/*.java)
 CFILES=$(wildcard $(SRC)/*.c) $(wildcard $(SRC)/*.cc)
 TARGETLIBS= Serial.dll 
-DLLOBJECTS= fixup.o fuserImp.o SerialImp.o termios.o init.o # libmex.dll
+DLLOBJECTS= fixup.o SerialImp.o termios.o init.o libmex.dll
 
-all:  $(TARGETLIBS)
+all:  $(TARGETLIBS) # rebuild  rebuild will force everything to be built.
+
+rebuild:
+	rm -rf gnu include RXTXcomm.jar Serial.* * *.O.o *.O gnutimestamp 
 
 include:
 	mkdir include
@@ -105,9 +112,6 @@ init.o:
 
 fixup.o:
 	$(CC) $(CFLAGS) -c $(SRC)/$*.c -o fixup.o
-
-fuserImp.o:
-	$(CC) $(CFLAGS) -c $(SRC)/fuserImp.c -o fuserImp.o
 
 SerialImp.o:
 	$(CC) $(CFLAGS) -c $(SRC)/SerialImp.c -o SerialImp.o
@@ -158,7 +162,9 @@ include/config.h:  gnutimestamp
 
 install: all
 	xcopy RXTXcomm.jar $(COMMINSTALL)
+	xcopy RXTXcomm.jar "e:\matlab~1\java\jarext\commapi\win32"
 	xcopy $(TARGETLIBS) $(LIBINSTALL)
+	xcopy $(TARGETLIBS) "e:\matlab~1\bin\win32"
 
 uninstall:
 	del $(COMMINSTALL)\\\RXTXcomm.jar
@@ -167,4 +173,4 @@ uninstall:
 clean:
 	deltree gnu\\\io\\\*.*
 	deltree include
-	del Serial.* gnutimestamp *.o RXTXcomm.jar
+	del Serial.* gnutimestamp *.o *.O RXTXcomm.jar
