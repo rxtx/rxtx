@@ -309,7 +309,7 @@ public class CommPortIdentifier extends Object /* extends Vector? */
 	private boolean HideOwnerEvents;
 
 	public synchronized CommPort open(String TheOwner, int i) 
-		throws PortInUseException 
+		throws gnu.io.PortInUseException 
 	{ 
 		if(debug) System.out.println("CommPortIdentifier:open("+TheOwner + ", " +i+")");
 		if (Available == false)
@@ -326,7 +326,7 @@ public class CommPortIdentifier extends Object /* extends Vector? */
 		}
 		if (Available == false)
 		{
-			throw new PortInUseException(getCurrentOwner());
+			throw new gnu.io.PortInUseException(getCurrentOwner());
 		}
 		if(commport == null)
 		{
@@ -341,7 +341,7 @@ public class CommPortIdentifier extends Object /* extends Vector? */
 		}
 		else
 		{
-			throw new PortInUseException(
+			throw new gnu.io.PortInUseException(
 					native_psmisc_report_owner(PortName));
 		}
 	}
