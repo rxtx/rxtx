@@ -5,9 +5,30 @@ This is TODO  Tue Nov 13 14:54:06 MST 2001
 	HIGH PRIORITY TODO's 
 
 ----------------------------------------------------------------------------
-
 Win32 Frame Parity CD and RI events.  TIOCGICOUNT is commented out in
-win32termios.h to avoid SIG11's.  The source of these has not been identified.
+win32termios.h to avoid SIG11's.  The source of these has not been
+identified.  I could not figure this one out.  If BlackBox is run on COM1
+and COM2 and you plug in a null modem cable between the ports things blow
+up.  I dont know if variables is on the native side get gc'd or if there
+is a bad pointer someplace.
+
+
+The next bug is also report using BlackBox on Win32:
+"Using all of the default settings, if I click auto-transmit it
+runs for about half a second and then crashes. I've attached the log file
+it gave. Sometimes it runs a little longer than others. If you enable and
+disable auto-transmit repeatedly it seems to help it crash faster. This
+looks like a fairly repeatable way to cause the problem so hopefully
+debugging would be easier."  I'm going to try looking at this tonight.
+
+And the final bug report is reported on FreeBSD 4.5 with some in house
+software:
+
+"Okay, now the application runs.  I don't get a sig11, but my application
+freezes when it tries to talk to the modem.  The user has access to the
+modem as minicom works on that modem.  This application works well under
+windows with the JavaComm from Sun."
+
 
 Sat Jul 28 09:55:37 MDT 2001
 
