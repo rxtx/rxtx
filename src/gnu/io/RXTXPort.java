@@ -733,7 +733,8 @@ final class RXTXPort extends SerialPort
 	public void notifyOnDataAvailable( boolean enable )
 	{
 		if (debug)
-			System.out.println("RXTXPort:notifyOnDataAvailable()");
+			System.out.println("RXTXPort:notifyOnDataAvailable( " +
+				enable+" )");
 		
 		waitForTheNativeCodeSilly();
 
@@ -750,7 +751,8 @@ final class RXTXPort extends SerialPort
 	public void notifyOnOutputEmpty( boolean enable )
 	{
 		if (debug)
-			System.out.println("RXTXPort:notifyOnOutputEmpty()");
+			System.out.println("RXTXPort:notifyOnOutputEmpty( " +
+				enable+" )");
 		waitForTheNativeCodeSilly();
 		MonitorThreadLock = true;
 		nativeSetEventFlag( fd, SerialPortEvent.OUTPUT_BUFFER_EMPTY,
@@ -765,7 +767,8 @@ final class RXTXPort extends SerialPort
 	public void notifyOnCTS( boolean enable )
 	{
 		if (debug)
-			System.out.println("RXTXPort:notifyOnCTS()");
+			System.out.println("RXTXPort:notifyOnCTS( " +
+				enable+" )");
 		waitForTheNativeCodeSilly();
 		MonitorThreadLock = true;
 		nativeSetEventFlag( fd, SerialPortEvent.CTS, enable );
@@ -778,7 +781,8 @@ final class RXTXPort extends SerialPort
 	public void notifyOnDSR( boolean enable )
 	{
 		if (debug)
-			System.out.println("RXTXPort:notifyOnDSR()");
+			System.out.println("RXTXPort:notifyOnDSR( " +
+				enable+" )");
 		waitForTheNativeCodeSilly();
 		MonitorThreadLock = true;
 		nativeSetEventFlag( fd, SerialPortEvent.DSR, enable );
@@ -791,7 +795,8 @@ final class RXTXPort extends SerialPort
 	public void notifyOnRingIndicator( boolean enable )
 	{
 		if (debug)
-			System.out.println("RXTXPort:notifyOnRingIndicator()");
+			System.out.println("RXTXPort:notifyOnRingIndicator( " +
+				enable+" )");
 		waitForTheNativeCodeSilly();
 		MonitorThreadLock = true;
 		nativeSetEventFlag( fd, SerialPortEvent.RI, enable );
@@ -804,7 +809,8 @@ final class RXTXPort extends SerialPort
 	public void notifyOnCarrierDetect( boolean enable )
 	{
 		if (debug)
-			System.out.println("RXTXPort:notifyOnCarrierDetect()");
+			System.out.println("RXTXPort:notifyOnCarrierDetect( " +
+				enable+" )");
 		waitForTheNativeCodeSilly();
 		MonitorThreadLock = true;
 		nativeSetEventFlag( fd, SerialPortEvent.CD, enable );
@@ -817,7 +823,8 @@ final class RXTXPort extends SerialPort
 	public void notifyOnOverrunError( boolean enable )
 	{
 		if (debug)
-			System.out.println("RXTXPort:notifyOnOverrunError()");
+			System.out.println("RXTXPort:notifyOnOverrunError( " +
+				enable+" )");
 		waitForTheNativeCodeSilly();
 		MonitorThreadLock = true;
 		nativeSetEventFlag( fd, SerialPortEvent.OE, enable );
@@ -830,7 +837,8 @@ final class RXTXPort extends SerialPort
 	public void notifyOnParityError( boolean enable )
 	{
 		if (debug)
-			System.out.println("RXTXPort:notifyOnParityError()");
+			System.out.println("RXTXPort:notifyOnParityError( " +
+				enable+" )");
 		waitForTheNativeCodeSilly();
 		MonitorThreadLock = true;
 		nativeSetEventFlag( fd, SerialPortEvent.PE, enable );
@@ -843,7 +851,8 @@ final class RXTXPort extends SerialPort
 	public void notifyOnFramingError( boolean enable )
 	{
 		if (debug)
-			System.out.println("RXTXPort:notifyOnFramingError()");
+			System.out.println("RXTXPort:notifyOnFramingError( " +
+				enable+" )");
 		waitForTheNativeCodeSilly();
 		MonitorThreadLock = true;
 		nativeSetEventFlag( fd, SerialPortEvent.FE, enable );
@@ -856,7 +865,8 @@ final class RXTXPort extends SerialPort
 	public void notifyOnBreakInterrupt( boolean enable )
 	{
 		if (debug)
-			System.out.println("RXTXPort:notifyOnBreakInterrupt()");
+			System.out.println("RXTXPort:notifyOnBreakInterrupt( " +
+				enable+" )");
 		waitForTheNativeCodeSilly();
 		MonitorThreadLock = true;
 		nativeSetEventFlag( fd, SerialPortEvent.BI, enable );
