@@ -1,6 +1,6 @@
 /*-------------------------------------------------------------------------
 |   rxtx is a native interface to serial ports in java.
-|   Copyright 1997-2002 by Trent Jarvi taj@parcelfarce.linux.theplanet.co.uk
+|   Copyright 1997-2002 by Trent Jarvi taj@www.linux.org.uk
 |
 |   This library is free software; you can redistribute it and/or
 |   modify it under the terms of the GNU Library General Public
@@ -1002,7 +1002,12 @@ void *drain_loop( void *arg )
 	for(i=0;;i++)
 	{
 		report_verbose("drain_loop:  looping\n");
+#if defined(__sun__)
+	/* FIXME: No time to test on all OS's for production */
+		usleep(5000);
+#else
 		usleep(1000000);
+#endif /* __sun__ */
 		/*
 		system_wait();
 		*/
@@ -1165,6 +1170,9 @@ JNIEXPORT void JNICALL RXTXPort(writeByte)( JNIEnv *env,
 	int fd = get_java_var( env, jobj,"fd","I" );
 	int result;
 	char msg[80];
+#if defined ( __sun__ )
+	int count;
+#endif /* __sun__ */
 
 	report_time_start();
 	ENTER( "RXTXPort:writeByte" );
@@ -1173,6 +1181,15 @@ JNIEXPORT void JNICALL RXTXPort(writeByte)( JNIEnv *env,
 		report( msg );
 		result=WRITE (fd, &byte, sizeof(unsigned char));
 	}  while (result < 0 && errno==EINTR);
+/*
+	This makes write for win32, glinux and Sol behave the same
+#if defined ( __sun__ )
+	do {
+		report_verbose( "nativeDrain: trying tcdrain\n" );
+		result=tcdrain(fd);
+		count++;
+	}  while (result && errno==EINTR && count <3);
+#endif *//* __sun __ */
 #ifndef TIOCSERGETLSR
 	if( ! interrupted )
 	{
@@ -1219,6 +1236,9 @@ JNIEXPORT void JNICALL RXTXPort(writeArray)( JNIEnv *env,
 	int fd;
 	int result=0,total=0;
 	jbyte *body;
+#if defined ( __sun__ )
+	int icount;
+#endif /* __sun__ */
 	/*
 	char message[1000];
 	*/
@@ -1246,6 +1266,15 @@ JNIEXPORT void JNICALL RXTXPort(writeArray)( JNIEnv *env,
 		}
 		report("writeArray()\n");
 	}  while ( ( total < count ) || (result < 0 && errno==EINTR ) );
+/*
+	This makes write for win32, glinux and Sol behave the same
+#if defined ( __sun__ )
+	do {
+		report_verbose( "nativeDrain: trying tcdrain\n" );
+		result=tcdrain(fd);
+		icount++;
+	}  while (result && errno==EINTR && icount <3);
+#endif *//* __sun__ */
 	(*env)->ReleaseByteArrayElements( env, jbarray, body, 0 );
 #ifndef TIOCSERGETLSR
 	if( !interrupted )
@@ -1290,7 +1319,7 @@ RXTXPort.nativeDrain
                 count logic added to avoid infinite loops when EINTR is
                 true...  Thread.yeild() was suggested.
 ----------------------------------------------------------*/
-JNIEXPORT void JNICALL RXTXPort(nativeDrain)( JNIEnv *env,
+JNIEXPORT jboolean JNICALL RXTXPort(nativeDrain)( JNIEnv *env,
 	jobject jobj, jboolean interrupted )
 {
 	int fd = get_java_var( env, jobj,"fd","I" );
@@ -1309,10 +1338,14 @@ JNIEXPORT void JNICALL RXTXPort(nativeDrain)( JNIEnv *env,
 
 	sprintf( message, "RXTXPort:drain() returns: %i\n", result ); 
 	report_verbose( message );
+#if defined(__sun__)
+	/* FIXME: No time to test on all OS's for production */
+	return( JNI_TRUE );
+#endif /* __sun__ */
 	LEAVE( "RXTXPort:drain()" );
 	if( result ) throw_java_exception( env, IO_EXCEPTION, "nativeDrain",
 		strerror( errno ) );
-	if( interrupted ) return;
+	if( interrupted ) return( JNI_FALSE );
 #if !defined(TIOCSERGETLSR) && !defined(WIN32)
 	if( eis && eis->writing )
 	{
@@ -1325,7 +1358,7 @@ JNIEXPORT void JNICALL RXTXPort(nativeDrain)( JNIEnv *env,
 		send_event( eis, SPE_OUTPUT_BUFFER_EMPTY, 1 );
 	}
 	report_time_end( );
-	return;
+	return( JNI_FALSE );
 }
 
 /*----------------------------------------------------------
@@ -3165,14 +3198,20 @@ void report_serial_events( struct event_info_struct *eis )
 /*
 			report(".");
 */
+#if !defined(__sun__)
+	/* FIXME: No time to test on all OS's for production */
 			usleep(20000);
+#endif /* !__sun__ */
 			return;
 		}
 		report("report_serial_events: sending DATA_AVAILABLE\n");
 		if(!send_event( eis, SPE_DATA_AVAILABLE, 1 ))
 		{
 			/* select wont block */
+#if !defined(__sun__)
+	/* FIXME: No time to test on all OS's for production */
 			usleep(20000);
+#endif /* !__sun__ */
 /*
 			system_wait();
 */
@@ -3354,7 +3393,7 @@ RXTXCommDriver.nativeGetVersion
 JNIEXPORT jstring JNICALL RXTXCommDriver(nativeGetVersion) (JNIEnv *env,
 	jclass jclazz )
 {
-	return (*env)->NewStringUTF( env, "RXTX-2.1" );
+	return (*env)->NewStringUTF( env, "RXTX-2.1-1" );
 }
 
 /*----------------------------------------------------------
