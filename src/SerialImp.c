@@ -120,7 +120,7 @@ JNIEXPORT void JNICALL RXTXPort(Initialize)(
 		report("RXTX WARNING:  cannot get system name\n");
 		return;
 	}
-	if(!strcmp(name.release,UTS_RELEASE))
+	if(strcmp(name.release,UTS_RELEASE)!=0)
 	{
 		fprintf(stderr, LINUX_KERNEL_VERSION_ERROR, UTS_RELEASE,
 			name.release);
