@@ -1,4 +1,3 @@
-#define __APPLE__
 /* config.h.  Generated automatically by configure.  */
 /* config.h.in.  Generated automatically from configure.in by autoheader.  */
 
