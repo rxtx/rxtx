@@ -47,6 +47,7 @@ LIBINSTALL="\jdk118\bin"
 # path to the mingw32 libraries (directory with libmingw32.a) DOS style path
 LIBDIR="\mingw\lib"
 
+CLASSPATH="\jdk118\lib\classes.zip;\BlackBox.jar;\jdk118\lib\comm.jar;\jdk118\lib\jcl.jar;."
 ######################
 #  End of user defined variables
 ######################
@@ -73,7 +74,7 @@ JAVAC=javac
 
 CFLAGS= $(INCLUDE) -mno-cygwin -DWIN32 -D __int64="long long" -mno-fp-ret-in-387 -Wall 
 INCLUDE= -I . -I $(JDKINCLUDE) -I $(JDKINCLUDE)/win32 -I $(SRC) -I include
-JAVAHFLAGS= -jni -d include
+JAVAHFLAGS= -classpath $(CLASSPATH) -jni -d include
 LIBS=-L $(LIBDIR) -luser32 -lgdi32 -lcomdlg32 -lkernel32 -ladvapi32 -lmingw32 -lmoldname -lcrtdll
 
 # path to the java native interface headers (directory with jni.h)

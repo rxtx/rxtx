@@ -163,19 +163,23 @@ void set_errno( int error )
 }
 
 /*----------------------------------------------------------
-usleep()
+nanosleep()
 
    accept:      
    perform:     
    return:      
    exceptions:  
-   win32api:    Sleep()
+   win32api:    Sleep( MilliSeconds )
    comments:    
 ----------------------------------------------------------*/
 
-void usleep( unsigned long usec )
+int nanosleep( const struct timespec *req, struct timespec *rem )
 {
-	Sleep( usec/1000 );
+	if ( req->tv_nsec )
+		Sleep( req->tv_nsec/1000000 );
+	if ( req->tv_sec )
+		Sleep( req->tv_sec * 1000 );
+	return 0;
 }
 
 /*----------------------------------------------------------
@@ -986,7 +990,7 @@ serial_open()
    comments:    
 ----------------------------------------------------------*/
 
-int serial_open( const char *filename, int flags )
+int serial_open( const char *filename, int flags, ... )
 {
 	struct termios_list *port;
 

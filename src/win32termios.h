@@ -54,6 +54,11 @@ typedef unsigned char   cc_t;
 typedef unsigned int    speed_t;
 typedef unsigned int    tcflag_t;
 
+struct timespec
+{
+	time_t	tv_sec;
+	long	tv_nsec;
+};
 
 
 #define NCCS 32
@@ -101,7 +106,7 @@ struct serial_icounter_struct {
 	int reserved[9]; 	/* unused */
 };
 
-int serial_open(const char *File, int flags);
+int serial_open(const char *File, int flags, ...);
 int serial_read(int fd, void *b, int size);
 int serial_write(int fd, char *Str, int length);
 /*
@@ -117,7 +122,8 @@ int serial_select(int, struct fd_set *, struct fd_set *, struct fd_set *, struct
 #define write serial_write
 
 struct termios_list *find_port( int );
-void usleep(unsigned long usec);
+//void usleep(unsigned long usec);
+int nanosleep( const struct timespec *, struct timespec * );
 int fcntl(int fd, int command, ...);
 const char *get_dos_port(const char *);
 void set_errno(int);

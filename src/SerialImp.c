@@ -1823,6 +1823,7 @@ void report(char *msg)
 ----------------------------------------------------------*/
 int fhs_lock( const char *filename )
 {
+#ifndef WIN32
 	/*
 	 * There is a zoo of lockdir possibilities
 	 * Its possible to check for stale processes with most of them.
@@ -1855,6 +1856,7 @@ int fhs_lock( const char *filename )
 	sprintf( lockinfo, "%10d\n",(int) getpid() );
 	write( fd, lockinfo, 11 );
 	close( fd );
+#endif /* !WIN32 */
 	return 0;
 }
 /*----------------------------------------------------------
@@ -1901,6 +1903,7 @@ int fhs_lock( const char *filename )
 ----------------------------------------------------------*/
 int uucp_lock( const char *filename )
 {
+#ifndef WIN32
 	char lockfilename[80], lockinfo[12];
 	char name[80];
 	int fd;
@@ -1944,6 +1947,7 @@ int uucp_lock( const char *filename )
 	}
 	write( fd, lockinfo,11 );
 	close( fd );
+#endif /* WIN32 */
 	return 0;
 }
 
@@ -2053,6 +2057,7 @@ void fhs_unlock( const char *filename )
 ----------------------------------------------------------*/
 void uucp_unlock( const char *filename )
 {
+#ifndef WIN32
 	struct stat buf;
 	char file[80],*p;
 	int i;
@@ -2070,6 +2075,7 @@ void uucp_unlock( const char *filename )
 	{ 
 		unlink(file);
 	}
+#endif /* !WIN32 */
 }
 
 /*----------------------------------------------------------
@@ -2083,6 +2089,7 @@ void uucp_unlock( const char *filename )
 ----------------------------------------------------------*/
 int check_lock_pid( const char *file )
 {
+#ifndef WIN32
 	int fd;
 	char pid_buffer[12];
 
@@ -2101,6 +2108,7 @@ int check_lock_pid( const char *file )
 	{
 		return( 1 );
 	}
+#endif /* !WIN32 */
 	return( 0 );
 }
 /*----------------------------------------------------------
@@ -2117,6 +2125,7 @@ int check_lock_pid( const char *file )
 ----------------------------------------------------------*/
 int check_group_uucp()
 {
+#ifndef WIN32
 	struct group *g = getgrnam( "uucp" );
 	struct passwd *user = getpwuid( geteuid() );
 
@@ -2136,6 +2145,7 @@ int check_group_uucp()
 			return 1;
 		}
 	}
+#endif /* !WIN32 */
 	return 0;
 }
 
@@ -2152,6 +2162,7 @@ int check_group_uucp()
 ----------------------------------------------------------*/
 int is_device_locked( const char *filename )
 {
+#ifndef WIN32
 	const char *lockdirs[] = { "/etc/locks", "/usr/spool/kermit",
 		"/usr/spool/locks", "/usr/spool/uucp", "/usr/spool/uucp/",
 		"/usr/spool/uucp/LCK", "/var/lock", "/var/lock/modem",
@@ -2281,6 +2292,7 @@ int is_device_locked( const char *filename )
 			}
 		}
 	}
+#endif /* WIN32 */
 	return 0;
 }
 
