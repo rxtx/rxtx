@@ -16,7 +16,7 @@
 |   License along with this library; if not, write to the Free
 |   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --------------------------------------------------------------------------*/
-This is the INSTALL file for RXTX.  Tue Nov 13 14:28:41 MST 2001
+This is the INSTALL file for RXTX.  Tue Dec  4 17:16:47 MST 2001
 
 If, while following the instructions, you find this file unclear or incorrect 
 please make a note and email the details to trentjarvi@yahoo.com.  
@@ -561,6 +561,9 @@ You will see that only /dev/ttyS* is searched but the possible addition ports
 that can be used are listed under it.  Just copy the few you need.
 
 R.  How can I use Lock Files with rxtx?
+
+Redhat users.  Note that Redhat changed group uucp to group lock with Redhat
+7.2.
 
 RXTX uses lock files by default.  configure --disable-lockfiles to generate
 rxtx libraries without lock files.  Its strongly recommended that you do
