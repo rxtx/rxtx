@@ -20,10 +20,12 @@ AC_INIT(src/SerialImp.c)
 AM_CONFIG_HEADER(config.h)
 AC_CANONICAL_SYSTEM
 AC_MSG_WARN(Trying libtool.  If the following fails install libtool)
-AC_DISABLE_STATIC
 AC_PROG_CC
+# Comment these two lines out when compiling on SCO
+AC_DISABLE_STATIC
 AM_PROG_LIBTOOL
-AM_INIT_AUTOMAKE(Serial,1.5.6)
+# end of SCO fixes
+AM_INIT_AUTOMAKE(Serial,1.5.8)
 AC_CHECK_HEADERS(fcntl.h)
 AC_CHECK_HEADERS(sys/fcntl.h)
 AC_CHECK_HEADERS(sys/file.h)
@@ -65,13 +67,18 @@ AC_SUBST(EXTENSION)
 AC_SUBST(LIBTOOL_FIX)
 AC_SUBST(LDFLAGS)
 AC_SUBST(LINK)
+AC_SUBST(COMPILE)
 AC_SUBST(OBJECT_EXTENSION)
+AC_SUBST(LIB_EXTENSION)
+
+JHOME=
 RXTX_PATH=
 EXTENSION="c"
 OBJECT_EXTENSION="lo"
+LIB_EXTENSION="la"
+COMPILE="cc "
 TOP="`pwd`"
 LINK="\$(TOP)/libtool --mode=link \$(CC) \$(CFLAGS) \$(LDFLAGS) -release \$(VERSION) -o lib\$*.la -rpath \$(RXTX_PATH)"
-
 
 [case "$host_os" in
 	*-gnu)
@@ -386,6 +393,7 @@ if test "$CC" = "gcc" || test "$CC"="egcs"; then
 		JAVADOC="\$(JPATH)/bin/javadoc -classpath \$(CLASSPATH)"
 		CFLAGS="$CFLAGS -D_BSD_SOURCE"
 		JAVAINCLUDE=""
+		JAVAH_FIX="if test ! -d \$(target_alias);then  mkdir \$(target_alias);fi;"
 		JHOME=$JPATH"/share/kaffe/"
 		RXTX_PATH=$JPATH"/lib/kaffe/"
 		;;
@@ -513,6 +521,7 @@ Linux)
 			#fix_parameters $JPATH/lib/javax.comm.properties
 			check_prefix
 			RXTX_PATH="\$(prefix)/lib/"
+			JAVAH_FIX="if [ ! -d com ]; then if [ ! -f \$(JPATH)/lib/comm.jar ]; then echo \"Please install comm.jar from CommAPI in \$(JPATH)/java/lib/ 1>&2\"; else mkdir -p com/sun/comm;\$(JAR) -xf \$(JPATH)/lib/comm.jar;  fi; fi;";
 		else
 			# Kaffe
 			CLASSPATH=$CLASSPATH:`find $JHOME -name RXTXcomm.jar`	
@@ -533,6 +542,22 @@ Irix*)
 	CLASSPATH=".:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/RXTXcomm.jar:$CLASSPATH"
 	RXTX_PATH="\$(JPATH)/lib/\$(OS_ARCH)"
 	TARGETLIB="\$(target_alias)/libSerial.la"
+;;
+
+#  since the os.name is different for UnixWare and OpenUNIX we could use it to
+#  differentiate the lock files  See SerialImp.h for comments on the lock files
+#  in SCO.  Currently that would be a build time fix though.
+#  FIXME
+
+UnixWare|OpenUNIX)
+	JHOME=$JPATH/"jre/lib"
+	CFLAGS="$CFLAGS -D_NO_POSIX=1 -D_NO_XOPEN4=1 -D__unixware__"
+	CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:\$(JPATH)/jre/lib/rt.jar:\$(JPATH)/jre/lib/ext/comm.jar"
+	TARGETLIB="\$(target_alias)/libSerial.so \
+		\$(target_alias)/libParallel.so"
+	COMPILE="\$(CC) \$(INCLUDES) \$(CPPFLAGS) \$(CFLAGS) \$(VERBOSE_IOEXCEPTIONS) -c "
+	LINK="\$(CC) \$(CFLAGS) \$(LDFLAGS)"
+	echo "In UnixWare, CLASSPATH is $CLASSPATH"     
 ;;
 
 HP-UX)
@@ -630,15 +655,16 @@ WIN32)
 
 Mac\ OS\ X)
 	#fix_parameters $JPATH/lib/javax.comm.properties
-	LINK="cc -bundle -framework CoreFoundation -framework IOKit -o lib\$*.jnilib"
+	LINK="cc -bundle -framework CoreFoundation -framework IOKit -o lib\$*.jnilib "
 	OBJECT_EXTENSION="o"
-	TARGETLIB="\$(target_alias)/libSerial.la"
+	LIB_EXTENSION="jnilib"
+	TARGETLIB="\$(target_alias)/libSerial.jnilib"
 	RXTX_PATH="/usr/lib/java"
 	JHOME=$JPATH"/lib/ext"
 	CFLAGS="$CFLAGS -bundle"
 	LDFLAGS="$LDFLAGS -module -framework JavaVM -framework IOKit -framework CoreFoundation"
 	CLASSPATH=".:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/ext/RXTXcomm.jar:$CLASSPATH"
-	#  email trentjarvi@yahoo.com if you know a nicer fix.
+	#  email trentjarvi@yahoo.com if you know a nicer fix.  Needed anymore?
 	LIBTOOL_FIX="sed s/echo\ so/echo\ jnilib/g libtool > tmp; mv tmp libtool; chmod +x libtool;"
 ;;
 
@@ -678,7 +704,7 @@ AIX)
 
 ;;
 
-Compaq\'s\ Digital\ Unix)
+Compaq\'s\ Digital\ Unix | OSF1 )
 	TARGETLIB="\$(target_alias)/libSerial.la"
 	RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
 	JHOME=$JPATH/"lib"

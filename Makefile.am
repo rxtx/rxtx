@@ -39,18 +39,24 @@ javahfiles = $(patsubst $(SPATH)/%.java,%,$(wildcard $(SPATH)/*.java))
 #######################
 CLEANFILES = $(TOP)/*.class $(TOP)/$(CLASSDEST)/*.class $(TOP)/$(JARTARGET)
 
+# for SCO builds everything else is currently using lib%.la below
+# I'm thinking about taking libtool out completely.  See also Mac OS X builds.
+$(target_alias)/lib%.so: $(SPATH)/%Imp.@EXTENSION@ $(CLASSES)
+	$(COMPILE) $(SPATH)/$*Imp.@EXTENSION@ -o $(TOP)/$(DEST)/$*Imp.o
+	$(LINK) -G -o lib$*.so $(TOP)/$(DEST)/$*Imp.o
+
 #  compile src/SerialImp.c and similar files into libraries.
 #  LIBTOOL_FIX handles problems encountered on some OS's.  See configure.in
 #  If a LIBTOOL_FIX is added be sure to provide a trailing ';' in configure.in
 
-$(target_alias)/lib%.la: $(SPATH)/%Imp.@EXTENSION@ $(CLASSES) $(SPATH)/%Imp.h
-	(							\
+$(target_alias)/lib%.@LIB_EXTENSION@: $(SPATH)/%Imp.c $(CLASSES) $(SPATH)/%Imp.h
+	@(							\
 	$(LIBTOOL_FIX)						\
 	cd $(DEST); 						\
-	$(LIBTOOLC) ../$(SPATH)/$*Imp.c -o			\
+	$(LIBTOOLC) ../$(SPATH)/$*Imp.@EXTENSION@ -o		\
 		$(TOP)/$(DEST)/$*Imp.@OBJECT_EXTENSION@;	\
 	if [ "$*" = "Serial" ]; then 				\
-		$(LIBTOOLC) ../$(SPATH)/fuserImp.c		\
+		$(LIBTOOLC) ../$(SPATH)/fuserImp.@EXTENSION@	\
 			-o $(TOP)/$(DEST)/fuserImp.@OBJECT_EXTENSION@;\
 		@LINK@ $(TOP)/$(DEST)/$*Imp.@OBJECT_EXTENSION@	\
 			$(TOP)/$(DEST)/fuserImp.@OBJECT_EXTENSION@;\

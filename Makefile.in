@@ -85,6 +85,7 @@ CATOBJEXT = @CATOBJEXT@
 CC = @CC@
 CFLAGS = @CFLAGS@
 CLASSPATH = @CLASSPATH@
+COMPILE = @COMPILE@
 DATADIRNAME = @DATADIRNAME@
 DLLTOOL = @DLLTOOL@
 EXTENSION = @EXTENSION@
@@ -118,6 +119,7 @@ LDFLAG = @LDFLAG@
 LDFLAGS = @LDFLAGS@
 LIBTOOL = @LIBTOOL@
 LIBTOOL_FIX = @LIBTOOL_FIX@
+LIB_EXTENSION = @LIB_EXTENSION@
 LINK = @LINK@
 LN_S = @LN_S@
 MAKEINFO = @MAKEINFO@
@@ -346,18 +348,24 @@ distclean-generic clean-generic maintainer-clean-generic clean \
 mostlyclean distclean maintainer-clean
 
 
+# for SCO builds everything else is currently using lib%.la below
+# I'm thinking about taking libtool out completely.  See also Mac OS X builds.
+$(target_alias)/lib%.so: $(SPATH)/%Imp.@EXTENSION@ $(CLASSES)
+	$(COMPILE) $(SPATH)/$*Imp.@EXTENSION@ -o $(TOP)/$(DEST)/$*Imp.o
+	$(LINK) -G -o lib$*.so $(TOP)/$(DEST)/$*Imp.o
+
 #  compile src/SerialImp.c and similar files into libraries.
 #  LIBTOOL_FIX handles problems encountered on some OS's.  See configure.in
 #  If a LIBTOOL_FIX is added be sure to provide a trailing ';' in configure.in
 
-$(target_alias)/lib%.la: $(SPATH)/%Imp.@EXTENSION@ $(CLASSES) $(SPATH)/%Imp.h
-	(							\
+$(target_alias)/lib%.@LIB_EXTENSION@: $(SPATH)/%Imp.c $(CLASSES) $(SPATH)/%Imp.h
+	@(							\
 	$(LIBTOOL_FIX)						\
 	cd $(DEST); 						\
-	$(LIBTOOLC) ../$(SPATH)/$*Imp.c -o			\
+	$(LIBTOOLC) ../$(SPATH)/$*Imp.@EXTENSION@ -o		\
 		$(TOP)/$(DEST)/$*Imp.@OBJECT_EXTENSION@;	\
 	if [ "$*" = "Serial" ]; then 				\
-		$(LIBTOOLC) ../$(SPATH)/fuserImp.c		\
+		$(LIBTOOLC) ../$(SPATH)/fuserImp.@EXTENSION@	\
 			-o $(TOP)/$(DEST)/fuserImp.@OBJECT_EXTENSION@;\
 		@LINK@ $(TOP)/$(DEST)/$*Imp.@OBJECT_EXTENSION@	\
 			$(TOP)/$(DEST)/fuserImp.@OBJECT_EXTENSION@;\
