@@ -137,8 +137,14 @@ JNIEXPORT void JNICALL RXTXPort(Initialize)(
 
 	/* POSIX signal handling functions */
 #if !defined(WIN32)
-	struct sigaction handler;
+	struct sigaction handler, ignorer;
+
+	ignorer.sa_handler = SIG_IGN;
+
 	sigaction( SIGIO, NULL, &handler );
+	sigaction( SIGINT, NULL, NULL );
+	signal( SIGIO, SIG_IGN );
+
 	if( !handler.sa_handler ) signal( SIGIO, SIG_IGN );
 #endif /* !WIN32 */
 #if defined(DEBUG) && defined(__linux__)
@@ -219,6 +225,7 @@ JNIEXPORT jint JNICALL RXTXPort(open)(
 	fcntl( fd, F_SETFL, FASYNC );
 #endif /* FASYNC */
 
+	fprintf( stderr, "fd returned is %i\n", fd );
 	return (jint)fd;
 
 fail:
@@ -579,10 +586,13 @@ JNIEXPORT void JNICALL RXTXPort(writeArray)( JNIEnv *env,
 {
 	int fd = get_java_var( env, jobj,"fd","I" );
 	int result=0,total=0,i;
-
+	struct timespec tspec,retspec;
 	unsigned char *bytes = (unsigned char *)malloc( count );
-
 	jbyte *body = (*env)->GetByteArrayElements( env, jbarray, 0 );
+
+	retspec.tv_sec = 0;
+	retspec.tv_nsec = 50000;
+
 	for( i = 0; i < count; i++ ) bytes[ i ] = body[ i + offset ];
 	(*env)->ReleaseByteArrayElements( env, jbarray, body, 0 );
 	do {
@@ -592,6 +602,10 @@ JNIEXPORT void JNICALL RXTXPort(writeArray)( JNIEnv *env,
 		}
 	}  while ((total<count)||(result < 0 && errno==EINTR));
 	free( bytes );
+	//do {
+	//	tspec = retspec;
+		nanosleep( &tspec, &retspec );
+	//} while( tspec.tv_nsec != 0 );
 	if( result < 0 ) throw_java_exception( env, IO_EXCEPTION,
 		"writeArray", strerror( errno ) );
 }
@@ -1126,7 +1140,6 @@ JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 {
 	int fd, ret, change;
 	fd_set rfds;
-	struct timeval tv_sleep;
 	unsigned int mflags, omflags;
 	jboolean interrupted = 0;
 #if defined TIOCSERGETLSR
@@ -1142,6 +1155,10 @@ JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 #if defined(TIOCSERGETLSR)
 	int has_tiocsergetlsr = 1;
 #endif /* TIOCSERGETLSR */
+	struct timeval tv_sleep;
+	struct timespec tspec,retspec;
+	retspec.tv_sec = 0;
+	retspec.tv_nsec = 100000000;
 
 	fd = get_java_var(env, jobj, "fd", "I");
 
@@ -1246,7 +1263,12 @@ JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 		{
 			if(!send_event( env, jobj, SPE_DATA_AVAILABLE, 1 ))
 			{
-				usleep(100000); /* select wont block */
+				/* select wont block */
+			//	do {
+			//		tspec = retspec;
+					nanosleep( &tspec, &retspec );
+			//	} while( tspec.tv_nsec != 0 );
+					/* usleep(100000); wont work on Solaris  */
 			}
 		}
 	}
@@ -1886,7 +1908,7 @@ int uucp_lock( const char *filename )
 
 	if ( check_lock_status( filename ) )
 	{
-		fprintf( stderr, "RXTX uucp check_lock_status true\n" );
+		report( "RXTX uucp check_lock_status true\n" );
 		return 1;
 	}
 	if ( stat( LOCKDIR, &buf ) != 0 )
