@@ -206,8 +206,8 @@ Trent
 #if defined(__hpux__)
 /* modif cath */
 #	define DEVICEDIR "/dev/"
-#	define LOCKDIR "/usr/spool/uucp"
-#	define LOCKFILEPREFIX "LK."
+#	define LOCKDIR "/var/spool/uucp"
+#	define LOCKFILEPREFIX "LCK."
 #	define UUCP
 #endif /* __hpux__ */
 #if defined(__osf__)  /* Digital Unix */
@@ -269,7 +269,10 @@ Trent
 #endif /* DISABLE_LOCKFILES */
 
 /*  That should be all you need to look at in this file for porting */
-#ifdef UUCP
+#ifdef LFS  /*  Use a Lock File Server */
+#	define LOCK lfs_lock
+#	define UNLOCK lfs_unlock
+#elif defined(UUCP)
 #	define LOCK uucp_lock
 #	define UNLOCK uucp_unlock
 #elif defined(OLDUUCP)
@@ -287,7 +290,7 @@ Trent
 #elif defined(FHS)
 #	define LOCK fhs_lock
 #	define UNLOCK fhs_unlock
-#else /* FSH */
+#else 
 #	define LOCK system_does_not_lock
 #	define UNLOCK system_does_not_unlock
 #endif /* UUCP */

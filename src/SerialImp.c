@@ -69,7 +69,10 @@
 #ifdef HAVE_SYS_FILE_H
 #   include <sys/file.h>
 #endif /* HAVE_SYS_FILE_H */
-
+#ifdef LFS  /* File Lock Server */
+#	include <sys/socket.h>
+#	include <netinet/in.h>
+#endif /* FLS */
 #if defined(__linux__)
 #	include <linux/types.h> /* fix for linux-2.3.4? kernels */
 #	include <linux/serial.h>
@@ -121,7 +124,7 @@ notes:
 #define RXTXPort(foo) Java_gnu_io_RXTXPort_ ## foo
 #define RXTXCommDriver(foo) Java_gnu_io_RXTXCommDriver_ ## foo
 
-#if defined(__sun__)
+#if defined(__sun__) || defined(__hpux__)
 /*----------------------------------------------------------
 cfmakeraw
 
@@ -144,7 +147,7 @@ int cfmakeraw ( struct termios *term )
 	LEAVE( "cfmakeraw" );
 	return( 0 );
 }
-#endif /* __sun__ */
+#endif /* __sun__  || __hpux__ */
 
 struct event_info_struct *master_index = NULL;
 //int eventloop_interrupted = 0;
@@ -263,7 +266,7 @@ JNIEXPORT jint JNICALL RXTXPort(open)(
 	*/
 			
 	ENTER( "RXTXPort:open" );
-	if ( LOCK( filename) )
+	if ( LOCK( filename, pid ) )
 	{
 		sprintf( message, "open: locking has failed for %s\n",
 			filename );
@@ -1605,7 +1608,7 @@ JNIEXPORT jboolean JNICALL RXTXPort(nativeStaticSetRTS) (JNIEnv *env,
 
 	/* Open and lock the port so nothing else changes the setting */
 
-	if ( LOCK( filename ) ) goto fail;;
+	if ( LOCK( filename, pid ) ) goto fail;;
 	
 	do {
 		fd = OPEN (filename, O_RDWR | O_NOCTTY | O_NONBLOCK );
@@ -1668,7 +1671,7 @@ JNIEXPORT jboolean JNICALL RXTXPort(nativeStaticSetDTR) (JNIEnv *env,
 
 	/* Open and lock the port so nothing else changes the setting */
 
-	if ( LOCK( filename ) ) goto fail;;
+	if ( LOCK( filename, pid ) ) goto fail;;
 	
 	do {
 		fd = OPEN (filename, O_RDWR | O_NOCTTY | O_NONBLOCK );
@@ -2616,6 +2619,10 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(testRead)(
 	const char *name = (*env)->GetStringUTFChars(env, tty_name, 0);
 	int ret = JNI_TRUE;
 	int pid = -1;
+	/* We opened the file in this thread, use this pid to unlock */
+#ifndef WIN32
+	pid = getpid();
+#endif /* WIN32 */
 
 	ENTER( "RXTXPort:testRead" );
 #ifdef WIN32
@@ -2643,7 +2650,7 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(testRead)(
 			system_does_not_lock	Win32
 	*/
 
-	if ( LOCK( name ) )
+	if ( LOCK( name, pid ) )
 	{
 		(*env)->ReleaseStringUTFChars(env, tty_name, name);
 		LEAVE( "RXTXPort:testRead no lock" );
@@ -2732,10 +2739,6 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(testRead)(
 	*/
 
 END:
-	/* We opened the file in this thread, use this pid to unlock */
-#ifndef WIN32
-	pid = getpid();
-#endif /* WIN32 */
 	UNLOCK(name, pid );
 	(*env)->ReleaseStringUTFChars( env, tty_name, name );
 	CLOSE( fd );
@@ -3336,6 +3339,93 @@ void report(char *msg)
 }
 
 #ifndef WIN32
+
+/*----------------------------------------------------------
+ lfs_lock
+
+   accept:      The name of the device to try to lock
+   perform:     Create a lock file if there is not one already using a
+                lock file server.
+   return:      1 on failure 0 on success
+   exceptions:  none
+   comments:    
+
+----------------------------------------------------------*/
+int lfs_lock( const char *filename, int pid )
+{
+	int s;
+	int ret;
+	int size = 1024;
+	char *buffer = malloc(size);
+	struct sockaddr_in addr;
+
+	if ( !( s = socket( AF_INET, SOCK_STREAM, 0 ) ) > 0 )
+		return 1;
+	addr.sin_family = AF_INET;
+	addr.sin_port = htons( 50001 );
+	addr.sin_addr.s_addr = inet_addr( "127.0.0.1" );
+   
+	if ( !connect( s, ( struct sockaddr * ) &addr, sizeof( addr ) ) == 0 )
+		return 1;
+	ret=recv( s, buffer, size, 0 );
+	sprintf( buffer, "lock %s %i\n", filename, pid );
+	/* printf( "%s", buffer ); */
+	send( s, buffer, strlen(buffer), 0 );
+	ret=recv( s, buffer, size, 0 );
+	if ( ret > 0 )
+	{
+		buffer[ret] = '\0';
+		/* printf( "Message recieved: %s", buffer ); */
+	}
+	send( s, "quit\n", strlen( "quit\n" ), 0 );
+	close(s);
+	/* printf("%s\n", buffer); */
+	if( buffer[0] == '2' ) return 0;
+	return 1;
+}
+
+/*----------------------------------------------------------
+ lfs_unlock
+
+   accept:      The name of the device to try to unlock
+   perform:     Remove a lock file if there is one using a
+                lock file server.
+   return:      1 on failure 0 on success
+   exceptions:  none
+   comments:    
+
+----------------------------------------------------------*/
+int lfs_unlock( const char *filename, int pid )
+{
+	int s;
+	int ret;
+	int size = 1024;
+	char *buffer = malloc(size);
+	struct sockaddr_in addr;
+
+	if ( !( s = socket( AF_INET, SOCK_STREAM, 0 ) ) > 0 )
+		return 1;
+	addr.sin_family = AF_INET;
+	addr.sin_port = htons( 50001 );
+	addr.sin_addr.s_addr = inet_addr( "127.0.0.1" );
+   
+	if ( !connect( s, ( struct sockaddr * ) &addr, sizeof( addr ) ) == 0 )
+		return 1;
+	sprintf( buffer, "unlock %s %i\n", filename, pid );
+	/* printf( "%s", buffer ); */
+	send( s, buffer, strlen(buffer), 0 );
+	ret = recv( s, buffer, size, 0 );
+	if ( ret > 0 )
+	{
+		buffer[ret] = '\0';
+		/* printf( "Message recieved: %s", buffer ); */
+	}
+	send( s, "quit\n", strlen( "quit\n" ), 0 );
+	close(s);
+	if( buffer[0] == '2' ) return 0;
+	return 1;
+}
+
 /*----------------------------------------------------------
  fhs_lock
 
