@@ -703,18 +703,14 @@ int ioctl(int fd, int request, unsigned int *arg) {
 			break;
 		case FIONREAD: 
 			/*  number of bytes available for reading */
-			/*  number of bytes available for reading */
 			printf("FIXME:  ioctl(FIONREAD) not Implemented in termios.c\n"); 
-/*
-	On linux this give a struct with all the line info (data available, bytes sent, ...
 			return -1;
 /*
-*/
 	On linux this give a struct with all the line info (data available, bytes sent, ...
 		case TIOCGICOUNT: 
 			printf("FIXME:  ioctl(TIOCGICOUNT) not Implemented in termios.c\n"); 
-*/
 			return -1;
+*/
 		case TIOCMWAIT: 
 			printf("FIXME:  ioctl(TIOCMWAIT) not Implemented in termios.c\n"); 
 			return -1;
