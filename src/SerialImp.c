@@ -1272,7 +1272,7 @@ JNIEXPORT void JNICALL RXTXPort(nativeDrain)( JNIEnv *env,
 		eis->output_buffer_empty_flag = 0;
 	}
 #endif /* !TIOCSERGETLSR !WIN32 */
-	if( eis->eventflags[SPE_OUTPUT_BUFFER_EMPTY] )
+	if( eis && eis->eventflags[SPE_OUTPUT_BUFFER_EMPTY] )
 	{
 		send_event( eis, SPE_OUTPUT_BUFFER_EMPTY, 1 );
 	}

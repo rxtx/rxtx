@@ -1233,7 +1233,7 @@ int serial_write( int fd, char *Str, int length )
 	sprintf( message, "===== trying to write %s\n", Str );
 	report( message );
 #endif /* DEBUG_VERBOSE */
-	index->tx_happened = 1; 
+	//index->tx_happened = 1; 
 	if ( !WriteFile( index->hComm, Str, length, &nBytes, &index->wol ) )
 	{
 		/* this causes problems just do it async
@@ -1278,7 +1278,7 @@ end:
 	index->event_flag |= EV_TXEMPTY;
 	SetCommMask( index->hComm, index->event_flag );
 	index->event_flag = old_flag;
-	index->tx_happened = 1; 
+	//index->tx_happened = 1; 
 #ifdef DEBUG
 	//sprintf( message, "serial_write: returning %i\n", (int) nBytes );
 	LEAVE( "serial_write" );
@@ -2170,7 +2170,7 @@ int tcdrain ( int fd )
 	index->event_flag |= EV_TXEMPTY;
 	SetCommMask( index->hComm, index->event_flag );
 	index->event_flag = old_flag;
-	index->tx_happened = 1; 
+	//index->tx_happened = 1; 
 	return 0;
 }
 
