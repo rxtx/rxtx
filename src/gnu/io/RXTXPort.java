@@ -508,7 +508,6 @@ final public class RXTXPort extends SerialPort
 	*/
 	public boolean sendEvent( int event, boolean state )
 	{
-
 		if (debug_verbose)
 			System.out.print("RXTXPort:sendEvent(");
 		/* Let the native side know its time to die */
@@ -534,7 +533,7 @@ final public class RXTXPort extends SerialPort
 			case SerialPortEvent.CTS:
 				if( debug_verbose )
 					System.out.println( "CTS " +
-						monThread.Output + ")" );
+						monThread.CTS + ")" );
 				break;
 			case SerialPortEvent.DSR:
 				if( debug_verbose )
@@ -544,32 +543,32 @@ final public class RXTXPort extends SerialPort
 			case SerialPortEvent.RI:
 				if( debug_verbose )
 					System.out.println( "RI " +
-						monThread.Output + ")" );
+						monThread.RI + ")" );
 				break;
 			case SerialPortEvent.CD:
 				if( debug_verbose )
 					System.out.println( "CD " +
-						monThread.Output + ")" );
+						monThread.CD + ")" );
 				break;
 			case SerialPortEvent.OE:
 				if( debug_verbose )
 					System.out.println( "OE " +
-						monThread.Output + ")" );
+						monThread.OE + ")" );
 				break;
 			case SerialPortEvent.PE:
 				if( debug_verbose )
 					System.out.println( "PE " +
-						monThread.Output + ")" );
+						monThread.PE + ")" );
 				break;
 			case SerialPortEvent.FE:
 				if( debug_verbose )
 					System.out.println( "FE " +
-						monThread.Output + ")" );
+						monThread.FE + ")" );
 				break;
 			case SerialPortEvent.BI:
 				if( debug_verbose )
 					System.out.println( "BI " +
-						monThread.Output + ")" );
+						monThread.BI + ")" );
 				break;
 			default:
 				if( debug_verbose )
@@ -729,7 +728,7 @@ final public class RXTXPort extends SerialPort
 	 *	In worst case test cases this loops once or twice every time.
 	 */
 
-	private void waitForTheNativeCodeSilly()
+	protected void waitForTheNativeCodeSilly()
 	{
 		while( MonitorThreadLock )
 		{
