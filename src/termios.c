@@ -2837,7 +2837,7 @@ end:
 #endif /* DEBUG_VERBOSE */
 	return( 1 );
 #ifdef asdf
-	/* FIXME this needs to be cleaned up...
+	/* FIXME this needs to be cleaned up... */
 fail:
 	MexPrintf("f<\n");
 	sprintf( message, "< select called error %i\n", n );
