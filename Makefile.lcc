@@ -36,6 +36,7 @@ LINKER=lcclnk
 OBJS=init.obj SerialImp.obj termios.obj
 SRC=init.c SerialImp.c termios.c
 LIBS=
+JAVA_HOME=D:\jdk
 
 lib: $(OBJS)
 	lcclnk -dll $(OBJS) wsock32.lib -o Serial.dll
@@ -43,7 +44,7 @@ lib: $(OBJS)
 init.obj:  comm.jar
 	$(CC) $(CFLAGS) init.c
 
-SerialImp.obj: comm.jar
+SerialImp.obj: comm.jar config.h
 	$(CC) $(CFLAGS) SerialImp.c
          
 termios.obj: comm.jar
@@ -53,3 +54,10 @@ comm.jar:
 	javac -d . -O *.java
 	jar -cf comm.jar javax
 	javah -jni javax.comm.RXTXPort javax.comm.RXTXCommDriver
+
+config.h:
+	echo please read how to create config.h in the Makefile
+
+install:
+	copy Serial.dll $(JAVA_HOME)\jre\bin
+	copy comm.jar   $(JAVA_HOME)\jre\lib\ext
