@@ -1,6 +1,6 @@
 /*-------------------------------------------------------------------------
-|   A wrapper to convert RXTX into Linux Java Comm
-|   Copyright 1998 Kevin Hester, kevinh@acm.org
+|   rxtx is a native interface to serial ports in java.
+|   Copyright 1997-2000 by Trent Jarvi trentjarvi@yahoo.com.
 |
 |   This library is free software; you can redistribute it and/or
 |   modify it under the terms of the GNU Library General Public
@@ -16,158 +16,418 @@
 |   License along with this library; if not, write to the Free
 |   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --------------------------------------------------------------------------*/
-package gnu.io;
-
-import javax.comm.*;
-
+package javax.comm;
 import java.io.*;
 import java.util.*;
+import java.lang.Math;
 
 
 /**
-  * Comm API serial port implementation.  Currently, it's just a wrapper for
-  * NativePort, because javah pukes when I feed it a class that extends
-  * SerialPort.  I don't know why.  -DPL
+  * RXTXPort
   */
-public final class RXTXPort extends SerialPort {
+final class RXTXPort extends SerialPort {
 
-	private final NativePort port;
+	static 
+	{
+		System.loadLibrary( "Serial" );
+		Initialize();
+	}
 
+
+	/** Initialize the native library */
+	private native static void Initialize();
+	private static boolean debug=true;
+
+
+	/** Actual SerialPort wrapper class */
+
+
+	/** Open the named port */
 	public RXTXPort( String name ) throws IOException {
-		port = new NativePort( this, name );
+		if (debug) System.out.println("RXTXPort:RXTXPort("+name+")");
+		fd = open( name );
 	}
+	private native int open( String name ) throws IOException;
 
-	public InputStream getInputStream() throws IOException {
-		return port.getInputStream();
-	}
 
-	public OutputStream getOutputStream() throws IOException {
-		return port.getOutputStream();
-	}
+	/** File descriptor */
+	private int fd;
 
-	public void enableReceiveThreshold( int thresh ) {
-		port.enableReceiveThreshold( thresh );
-	}
-	public void disableReceiveThreshold() {
-		port.disableReceiveThreshold();
-	}
-	public boolean isReceiveThresholdEnabled() {
-		return port.isReceiveThresholdEnabled();
-	}
-	public int getReceiveThreshold()	{
-		return port.getReceiveThreshold();
-	}
+	/** DSR flag **/
+	static boolean dsrFlag = false;
 
-	public void enableReceiveTimeout( int timeout ) {
-		port.enableReceiveTimeout( timeout );
-	}
-	public void disableReceiveTimeout() {
-		port.disableReceiveTimeout();
-	}
-	public boolean isReceiveTimeoutEnabled() {
-		return port.isReceiveTimeoutEnabled();
-	}
-	public int getReceiveTimeout() {
-		return port.getReceiveTimeout();
-	}
+	/** Output stream */
+	private final SerialOutputStream out = new SerialOutputStream();
+	public OutputStream getOutputStream() { return out; }
 
-	public void enableReceiveFraming( int framingByte )
+
+	/** Input stream */
+	private final SerialInputStream in = new SerialInputStream();
+	public InputStream getInputStream() { return in; }
+
+
+
+
+	/** Set the SerialPort parameters */
+	public void setSerialPortParams( int b, int d, int s, int p )
 		throws UnsupportedCommOperationException
 	{
-		port.enableReceiveFraming( framingByte );
-	}
-	public void disableReceiveFraming() {
-		port.disableReceiveFraming();
-	}
-	public boolean isReceiveFramingEnabled() {
-		return port.isReceiveFramingEnabled();
-	}
-	public int getReceiveFramingByte() {
-		return port.getReceiveFramingByte();
+		nativeSetSerialPortParams( b, d, s, p );
+		speed = b;
+		dataBits = d;
+		stopBits = s;
+		parity = p;
 	}
 
-	public void setInputBufferSize( int size ) {
-		port.setInputBufferSize( size );
-	}
-	public int getInputBufferSize() {
-		return port.getInputBufferSize();
-	}
-	public void setOutputBufferSize( int size ) {
-		port.setOutputBufferSize( size );
-	}
-	public int getOutputBufferSize() {
-		return port.getOutputBufferSize();
-	}
-	
-	public void setSerialPortParams( int speed, int dataBits, int stopBits,
-		int parity ) throws UnsupportedCommOperationException
-	{
-		port.setSerialPortParams( speed, dataBits, stopBits, parity );
-	}
-	public int getBaudRate() { return port.getBaudRate(); }
-	public int getDataBits() { return port.getDataBits(); }
-	public int getStopBits() { return port.getStopBits(); }
-	public int getParity() { return port.getParity(); }
+	/** Set the native serial port parameters */
+	private native void nativeSetSerialPortParams( int speed, int dataBits,
+		int stopBits, int parity ) throws UnsupportedCommOperationException;
 
-	public void sendBreak( int millis ) {
-		port.sendBreak( millis );
-	}
+	/** Line speed in bits-per-second */
+	private int speed=9600;
+	public int getBaudRate() { return speed; }
 
+	/** Data bits port parameter */
+	private int dataBits=DATABITS_8;
+	public int getDataBits() { return dataBits; }
+
+	/** Stop bits port parameter */
+	private int stopBits=SerialPort.STOPBITS_1;
+	public int getStopBits() { return stopBits; }
+
+	/** Parity port parameter */
+	private int parity= SerialPort.PARITY_NONE;
+	public int getParity() { return parity; }
+
+
+	/** Flow control */
+	private int flowmode = SerialPort.FLOWCONTROL_NONE;
 	public void setFlowControlMode( int flowcontrol ) {
-		port.setFlowControlMode( flowcontrol );
+		try { setflowcontrol( flowcontrol ); }
+		catch( IOException e ) {
+			e.printStackTrace();
+			return;
+		}
+		flowmode=flowcontrol;
+	}
+	public int getFlowControlMode() { return flowmode; }
+	native void setflowcontrol( int flowcontrol ) throws IOException;
+
+
+	/*
+	linux/drivers/char/n_hdlc.c? FIXME
+		trentjarvi@yahoo.com
+	*/
+	/** Receive framing control 
+	*/
+	public void enableReceiveFraming( int f )
+		throws UnsupportedCommOperationException
+	{
+		throw new UnsupportedCommOperationException( "Not supported" );
+	}
+	public void disableReceiveFraming() {}
+	public boolean isReceiveFramingEnabled() { return false; }
+	public int getReceiveFramingByte() { return 0; }
+
+
+	/** Receive timeout control */
+	private int timeout = 0;
+
+	public native int NativegetReceiveTimeout();
+	public native boolean NativeisReceiveTimeoutEnabled();
+	public native void NativeEnableReceiveTimeoutThreshold(int time, int threshold,int InputBuffer);
+	public void disableReceiveTimeout(){
+		enableReceiveTimeout(0);
+	}
+	public void enableReceiveTimeout( int time ){
+		if( time >= 0 )  {
+			timeout = time;
+			NativeEnableReceiveTimeoutThreshold( time , threshold, InputBuffer );
+		}
+		else {
+			System.out.println("Invalid timeout");
+		}
+	}
+	public boolean isReceiveTimeoutEnabled(){
+		return(NativeisReceiveTimeoutEnabled());
+	}
+	public int getReceiveTimeout(){
+		return(NativegetReceiveTimeout( ));
 	}
 
-	public int getFlowControlMode() {
-		return port.getFlowControlMode();
+	/** Receive threshold control */
+	
+	private int threshold = 0;
+	
+	public void enableReceiveThreshold( int thresh ){
+		if(thresh >=0)
+		{
+			threshold=thresh;
+			NativeEnableReceiveTimeoutThreshold(timeout, threshold, InputBuffer);
+		}
+		else /* invalid thresh */
+		{
+			System.out.println("Invalid Threshold");
+		}
+	}
+	public void disableReceiveThreshold() { 
+		enableReceiveThreshold(0);
+	}
+	public int getReceiveThreshold(){
+		return threshold;
+	}
+	public boolean isReceiveThresholdEnabled(){
+		return(threshold>0);
 	}
 
-	public void setDTR( boolean dtr ) { port.setDTR( dtr ); }
-	public boolean isDTR() { return port.isDTR(); }
-	public void setRTS( boolean rts ) { port.setRTS( rts ); }
-	public boolean isRTS() { return port.isRTS(); }
-	public boolean isCTS() { return port.isCTS(); }
-	public boolean isDSR() { return port.isDSR(); }
-	public boolean isRI() { return port.isRI(); }
-	public boolean isCD() { return port.isCD(); }
+	/** Input/output buffers */
+	/** FIXME I think this refers to 
+		FOPEN(3)/SETBUF(3)/FREAD(3)/FCLOSE(3) 
+		trentjarvi@yahoo.com
 
+		These are native stubs...
+	*/
+	private int InputBuffer=0;
+	private int OutputBuffer=0;
+	public void setInputBufferSize( int size )
+	{
+		InputBuffer=size;
+	}
+	public int getInputBufferSize()
+	{
+		return(InputBuffer);
+	}
+	public void setOutputBufferSize( int size )
+	{
+		OutputBuffer=size;
+	}
+	public int getOutputBufferSize()
+	{
+		return(OutputBuffer);
+	}
+
+	/** Line status methods */
+	public native boolean isDTR();
+	public native void setDTR( boolean state );
+	public native void setRTS( boolean state );
+	private native void setDSR( boolean state );
+	public native boolean isCTS();
+	public native boolean isDSR();
+	public native boolean isCD();
+	public native boolean isRI();
+	public native boolean isRTS();
+
+
+	/** Write to the port */
+	public native void sendBreak( int duration );
+	private native void writeByte( int b ) throws IOException;
+	private native void writeArray( byte b[], int off, int len )
+		throws IOException;
+	private native void drain() throws IOException;
+
+
+	/** RXTXPort read methods */
+	private native int nativeavailable() throws IOException;
+	private native int readByte() throws IOException;
+	private native int readArray( byte b[], int off, int len ) 
+		throws IOException;
+
+
+	/** Serial Port Event listener */
+	private SerialPortEventListener SPEventListener;
+
+	/** Thread to monitor data */
+	private MonitorThread monThread;
+
+	/** Process SerialPortEvents */
+	native void eventLoop();
+	private int dataAvailable=0;
+	public void sendEvent( int event, boolean state ) {
+		switch( event ) {
+			case SerialPortEvent.DATA_AVAILABLE:
+				dataAvailable=1;
+				if( monThread.Data ) break;
+				return;
+			case SerialPortEvent.OUTPUT_BUFFER_EMPTY:
+				if( monThread.Output ) break;
+				return;
+/*
+				if( monThread.DSR ) break;
+				return;
+				if (isDSR())
+				{
+					if (!dsrFlag) 
+					{
+						dsrFlag = true;
+						SerialPortEvent e = new SerialPortEvent(this, SerialPortEvent.DSR, !dsrFlag, dsrFlag );
+					}
+				}
+				else if (dsrFlag)
+				{
+					dsrFlag = false;
+					SerialPortEvent e = new SerialPortEvent(this, SerialPortEvent.DSR, !dsrFlag, dsrFlag );
+				}
+*/
+			case SerialPortEvent.CTS:
+				if( monThread.CTS ) break;
+				return;
+			case SerialPortEvent.DSR:
+				if( monThread.DSR ) break;
+				return;
+			case SerialPortEvent.RI:
+				if( monThread.RI ) break;
+				return;
+			case SerialPortEvent.CD:
+				if( monThread.CD ) break;
+				return;
+			case SerialPortEvent.OE:
+				if( monThread.OE ) break;
+				return;
+			case SerialPortEvent.PE:
+				if( monThread.PE ) break;
+				return;
+			case SerialPortEvent.FE:
+				if( monThread.FE ) break;
+				return;
+			case SerialPortEvent.BI:
+				if( monThread.BI ) break;
+				return;
+			default:
+				System.err.println("unknown event:"+event);
+				return;
+		}
+		SerialPortEvent e = new SerialPortEvent(this, event, !state, state );
+		if( SPEventListener != null ) SPEventListener.serialEvent( e );
+	}
+
+	/** Add an event listener */
 	public void addEventListener( SerialPortEventListener lsnr )
 		throws TooManyListenersException
 	{
-		port.addEventListener( lsnr );
+		if( SPEventListener != null ) throw new TooManyListenersException();
+		SPEventListener = lsnr;
+		monThread = new MonitorThread();
+		monThread.start(); 
 	}
-
+	/** Remove the serial port event listener */
 	public void removeEventListener() {
-		port.removeEventListener();
+		SPEventListener = null;
+		if( monThread != null ) {
+			monThread.interrupt();
+			monThread = null;
+		}
 	}
 
-	public void notifyOnDataAvailable( boolean enable ) {
-		port.notifyOnDataAvailable( enable );
+	public void notifyOnDataAvailable( boolean enable ) { monThread.Data = enable; }
+
+	public void notifyOnOutputEmpty( boolean enable ) { monThread.Output = enable; }
+
+	public void notifyOnCTS( boolean enable ) { monThread.CTS = enable; }
+	public void notifyOnDSR( boolean enable ) { monThread.DSR = enable; }
+	public void notifyOnRingIndicator( boolean enable ) { monThread.RI = enable; }
+	public void notifyOnCarrierDetect( boolean enable ) { monThread.CD = enable; }
+	public void notifyOnOverrunError( boolean enable ) { monThread.OE = enable; }
+	public void notifyOnParityError( boolean enable ) { monThread.PE = enable; }
+	public void notifyOnFramingError( boolean enable ) { monThread.FE = enable; }
+	public void notifyOnBreakInterrupt( boolean enable ) { monThread.BI = enable; }
+
+
+	/** Close the port */
+	private native void nativeClose();
+	public void close() {
+		setDTR(false);
+		setDSR(false);
+		nativeClose();
+		super.close();
+		fd = 0;
 	}
-	public void notifyOnOutputEmpty( boolean enable ) {
-		port.notifyOnOutputEmpty( enable );
+
+
+	/** Finalize the port */
+	protected void finalize() {
+		if( fd > 0 ) close();
 	}
-	public void notifyOnCTS( boolean enable ) {
-		port.notifyOnCTS( enable );
+
+
+        /** Inner class for SerialOutputStream */
+        class SerialOutputStream extends OutputStream {
+                public void write( int b ) throws IOException {
+                        writeByte( b );
+                }
+                public void write( byte b[] ) throws IOException {
+                        writeArray( b, 0, b.length );
+                }
+                public void write( byte b[], int off, int len ) throws IOException {
+                        writeArray( b, off, len );
+                }
+                public void flush() throws IOException {
+                        drain();
+                }
+        }
+
+	/** Inner class for SerialInputStream */
+	class SerialInputStream extends InputStream {
+		public int read() throws IOException {
+			dataAvailable=0;
+			return readByte();
+		}
+		public int read( byte b[] ) throws IOException 
+		{
+			return read ( b, 0, b.length);
+		}
+		public int read( byte b[], int off, int len ) throws IOException 
+		{
+			dataAvailable=0;
+			int i=0, Minimum=0;
+			int intArray[] = 
+			{
+				b.length,
+				InputBuffer, 
+				len
+			};
+		/*
+			find the lowest nonzero value
+			timeout and threshold are handled on the native side
+			see  NativeEnableReceiveTimeoutThreshold in
+			SerialImp.c
+		*/
+			while(intArray[i]==0 && i < intArray.length) i++;
+			Minimum=intArray[i];
+			while( i < intArray.length )
+			{
+				if(intArray[i] > 0 )
+				{
+					Minimum=Math.min(Minimum,intArray[i]);
+				}
+				i++;
+			}
+			Minimum=Math.min(Minimum,threshold);
+			if(Minimum == 0) Minimum=1;
+			int Available=available();
+			int Ret = readArray( b, off, Minimum);
+			return Ret;
+		}
+		public int available() throws IOException {
+			return nativeavailable();
+		}
 	}
-	public void notifyOnDSR( boolean enable ) {
-		port.notifyOnDSR( enable );
-	}
-	public void notifyOnRingIndicator( boolean enable ) {
-		port.notifyOnRingIndicator( enable );
-	}
-	public void notifyOnCarrierDetect( boolean enable ) {
-		port.notifyOnCarrierDetect( enable );
-	}
-	public void notifyOnOverrunError( boolean enable ) {
-		port.notifyOnOverrunError( enable );
-	}
-	public void notifyOnParityError( boolean enable ) {
-		port.notifyOnParityError( enable );
-	}
-	public void notifyOnFramingError( boolean enable ) {
-		port.notifyOnFramingError( enable );
-	}
-	public void notifyOnBreakInterrupt( boolean enable ) {
-		port.notifyOnBreakInterrupt( enable );
+	class MonitorThread extends Thread {
+	/** Note: these have to be separate boolean flags because the
+	   SerialPortEvent constants are NOT bit-flags, they are just
+	   defined as integers from 1 to 10  -DPL */
+		private boolean CTS=false;
+		private boolean DSR=false;
+		private boolean RI=false;
+		private boolean CD=false;
+		private boolean OE=false;
+		private boolean PE=false;
+		private boolean FE=false;
+		private boolean BI=false;
+		private boolean Data=false;
+		private boolean Output=false;
+		MonitorThread() { }
+		public void run() {
+			eventLoop();
+		}
 	}
 }
