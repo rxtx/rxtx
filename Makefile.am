@@ -111,13 +111,14 @@ $(TOP)/$(target_alias)/ParallelImp.lo: $(srcdir)/src/ParallelImp.c \
 
 $(TOP)/$(target_alias)/libSerial.la: $(TOP)/$(target_alias)/SerialImp.lo
 	( cd $(TOP)/$(target_alias); \
-	$(LINK) -o libSerial.la -rpath $(RXTX_PATH) $(TOP)/$(target_alias)/SerialImp.lo; )
+	$(LINK) -o libSerial.la -rpath $(RXTX_PATH) $(TOP)/$(target_alias)/SerialImp.lo $(TOP)/$(target_alias)/fuser.lo; )
 
 $(TOP)/$(target_alias)/SerialImp.lo: $(srcdir)/src/SerialImp.c \
                                   $(SERIAL_HEADER) \
 				  $(TOP)/Makefile
 	(cd $(TOP)/$(target_alias); \
-	$(LIBTOOL) --mode=compile $(CC) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) @VERBOSE_IOEXCEPTIONS@ -c ../$(srcdir)/src/SerialImp.c -o $(TOP)/$(target_alias)/SerialImp.lo; )
+	$(LIBTOOL) --mode=compile $(CC) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) @VERBOSE_IOEXCEPTIONS@ -c ../$(srcdir)/src/SerialImp.c -o $(TOP)/$(target_alias)/SerialImp.lo; \
+	$(LIBTOOL) --mode=compile $(CC) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) @VERBOSE_IOEXCEPTIONS@ -c ../$(srcdir)/src/psmisc/fuser.c -o $(TOP)/$(target_alias)/fuser.lo; )
 
 $(TOP)/$(target_alias)/libI2C.la: $(TOP)/$(target_alias)/I2CImp.lo
 	( cd $(TOP)/$(target_alias); \
