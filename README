@@ -16,17 +16,18 @@
 |   License along with this library; if not, write to the Free
 |   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --------------------------------------------------------------------------*/
-Jun 13 2000
+This is README  Thu Jan 18 15:55:38 MST 2001
 
 See Also:
 
-INSTALL:   install instructions and common problems
+INSTALL:   install instructions and solutions to common problems
 TODO:      Comments for developers
 COPYING:   The GPL license
 PORTING:   hints for people trying to port rxtx
 Authors:   who wrote what.
 ChangeLog: when they wrote it.
 RMISecurityManager.html:  Comments for people using RMISecurityManager 
+SerialPortInstructions.txt:  HOWTO on read/writing to your com ports on linux for beginners
 
 There are numerous possibilities for projects that involve serial communication.
 Java is an excellent language for putting GUI apps together.  Well have fun.  

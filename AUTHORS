@@ -1,3 +1,5 @@
+This is AUTHORS Thu Jan 18 17:37:47 MST 2001
+
 This package is not the result of one persons time.  Recognition is given
 to the following people for their assistance.
 
@@ -81,5 +83,9 @@ Michael.Forte@Corp.Sun.COM (Mike Forte)
 
 Gilles.Paquet@ulb.ac.be (Gilles Paquet)
    SunOS port
+
+Martin Pool <mbp@linuxcare.com> 
+
+   Added support for explicitly-specified lists of ports
 
 Maintainer:  Trent Jarvi  trentjarvi@yahoo.com
