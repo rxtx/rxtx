@@ -1830,6 +1830,17 @@ fail:
 	return( JNI_FALSE );
 }
 
+long
+GetTickCount()
+{
+	/* return milliseconds */
+	struct timeval now;
+
+	gettimeofday(&now, NULL);
+
+	return (now.tv_sec * 1000) + ceil(now.tv_usec / 1000);
+}
+
 /*----------------------------------------------------------
 read_byte_array
 
@@ -1855,66 +1866,21 @@ int read_byte_array(	JNIEnv *env,
 			int length,
 			int timeout )
 {
+	long start, now;
 	int ret, left, bytes = 0;
-	/* int count = 0; */
-	fd_set rfds;
-	struct timeval sleep;
-#ifndef WIN32
-	struct timeval *psleep=&sleep;
-#endif /* WIN32 */
 
 	ENTER( "read_byte_array" );
 	left = length;
-	FD_ZERO( &rfds );
-	FD_SET( fd, &rfds );
-	if( timeout != 0 )
-	{
-		sleep.tv_sec = timeout / 1000;
-		sleep.tv_usec = 1000 * ( timeout % 1000 );
-	}
+	start = GetTickCount();
 	while( bytes < length )
 	{
-         /* FIXME: In Linux, select updates the timeout automatically, so
-            other OSes will need to update it manually if they want to have
-            the same behavior.  For those OSes, timeouts will occur after no
-            data AT ALL is received for the timeout duration.  No big deal. */
-#ifndef WIN32
-		do {
-			if( timeout == 0 ) psleep = NULL;
-			ret=SELECT( fd + 1, &rfds, NULL, NULL, psleep );
-		}  while (ret < 0 && errno==EINTR);
-#else
-		/*
-		    the select() needs some work before the above will
-		    work on win32.  The select code cannot be accessed
-		    from both the Monitor Thread and the Reading Thread.
-
-		    This keeps the cpu from racing but the select() code
-		    will have to be fixed at some point.
-		*/
-		ret = RXTXPort(nativeavailable)( env, *jobj );
-#endif /* WIN32 */
-		if( ret == 0 )
+		now = GetTickCount();
+		if (now-start >= timeout)
+			return bytes;
+RETRY:	if ((ret = READ( fd, buffer + bytes, left )) < 0 )
 		{
-			report( "read_byte_array: select returned 0\n" );
-			LEAVE( "read_byte_array" );
-			break;
-		}
-		if( ret < 0 )
-		{
-			report( "read_byte_array: select returned -1\n" );
-			LEAVE( "read_byte_array" );
-			return -1;
-		}
-		ret = READ( fd, buffer + bytes, left );
-		if( ret == 0 )
-		{
-			report( "read_byte_array: read returned 0 bytes\n" );
-			LEAVE( "read_byte_array" );
-			break;
-		}
-		else if( ret < 0 )
-		{
+			if (errno == EINTR)
+				goto RETRY;
 			report( "read_byte_array: read returned -1\n" );
 			LEAVE( "read_byte_array" );
 			return -1;
@@ -1943,7 +1909,7 @@ JNIEXPORT void JNICALL RXTXPort(NativeEnableReceiveTimeoutThreshold)(
 
 	ENTER( "RXTXPort:NativeEnableRecieveTimeoutThreshold" );
 	if( tcgetattr( fd, &ttyset ) < 0 ) goto fail;
-	ttyset.c_cc[ VMIN ] = threshold;
+	ttyset.c_cc[ VMIN ] = 0;
 	ttyset.c_cc[ VTIME ] = vtime/100;
 	if( tcsetattr( fd, TCSANOW, &ttyset ) < 0 ) goto fail;
 
