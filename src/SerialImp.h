@@ -65,17 +65,6 @@
 #define B256000		1010004
 #endif /* dima */
 
-#if !defined(TIOCSERGETLSR) && !defined(WIN32)
-struct tpid_info_struct
-{
-	/* threads, bean counting, and lifespan */
-	int write_counter, closing, tcdrain, write_length;
-
-	int length;
-	char *buff;
-};
-#endif /* !defined(TIOCSERGETLSR) && !defined(WIN32) */
-
 struct event_info_struct
 {
 	int fd;
@@ -97,9 +86,10 @@ struct event_info_struct
 	struct event_info_struct *next, *prev;
 	fd_set rfds;
 	struct timeval tv_sleep;
+	int closing;
 #if !defined(TIOCSERGETLSR) && !defined(WIN32)
+	int writing;
 	int output_buffer_empty_flag;
-	struct tpid_info_struct *tpid;
 #endif /* !TIOCSERGETLSR !WIN32 */
 #	if defined(TIOCGICOUNT)
 	struct serial_icounter_struct osis;

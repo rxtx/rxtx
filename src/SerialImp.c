@@ -106,6 +106,9 @@
 
 extern int errno;
 #ifdef TRENT_IS_HERE
+#define DEBUG
+#define DEBUG_VERBOSE
+#define TRACE
 #undef TIOCSERGETLSR
 #define DEBUG
 #define DEBUG_VERBOSE
@@ -151,7 +154,6 @@ int cfmakeraw ( struct termios *term )
 #endif /* __sun__  || __hpux__ */
 
 struct event_info_struct *master_index = NULL;
-//int eventloop_interrupted = 0;
 
 /*----------------------------------------------------------
 RXTXPort.Initialize
@@ -339,7 +341,7 @@ JNIEXPORT void JNICALL RXTXPort(nativeClose)( JNIEnv *env,
 	pid = get_java_var( env, jobj,"pid","I" );
 
 	report(">nativeClose pid\n");
-	usleep(10000);
+	//usleep(10000);
 	if( !pid ) {
 		(*env)->ExceptionDescribe( env );
 		(*env)->ExceptionClear( env );
@@ -694,35 +696,37 @@ drain_loop()
 void *drain_loop( void *arg )
 {
 	struct event_info_struct *eis = ( struct event_info_struct * ) arg;
-	struct tpid_info_struct *t = eis->tpid;
 	char msg[80];
 	pthread_detach( pthread_self() );
+
 	for(;;)
 	{
-		if( !eis || t->closing)
+		if( eis->eventloop_interrupted )
 		{
 			goto end;
 		}
 		if( tcdrain( eis->fd ) == 0 )
 		{
-			if( !eis || t->closing)
+			if( eis->writing )
 			{
-				goto end;
+				sprintf(msg, "drain_loop: setting OUTPUT_BUFFER_EMPTY\n" );
+				report( msg );
+				eis->output_buffer_empty_flag = 1;
+				eis->writing=JNI_FALSE;
 			}
-			sprintf(msg, "drain_loop: setting OUTPUT_BUFFER_EMPTY\n" );
-			report( msg );
-			eis->output_buffer_empty_flag = 1;
 			usleep(2000);
 		}
 		else
 		{
 			report("drain_loop:  tcdrain bad fd\n");
-			break;
+			goto end;
 		}
 	}
 end:
-	t->closing = 2;
+	//usleep(10000);
 	report("------------------ drain_loop exiting ---------------------\n");
+	eis->closing = 1;
+	pthread_exit( NULL );
 	return( NULL );
 }
 #endif /* !defined(TIOCSERGETLSR) && !defined(WIN32) */
@@ -749,51 +753,15 @@ void finalize_threads( struct event_info_struct *eis )
 #if     !defined(TIOCSERGETLSR) && !defined( WIN32 )
 	/* used to shut down any remaining write threads */
 
-	eis->tpid->closing = 1;
 	eis->output_buffer_empty_flag = 0;
-	report("finalize_threads: cond_broadcast event\n");
 	ENTER("finalize_threads\n");
-	while( eis->tpid->write_counter || eis->tpid->closing == 1 )
-	{
-		usleep(1000);
-	}
-
-	report(">finalize_threads: free tpid\n");
-	if ( eis->tpid ) free( eis->tpid );
-	report("<finalize_threads: free tpid\n");
 
 	/* need to clean up again after working events */
-	LEAVE("---------------- finalize_threads ---------------\n");
+	LEAVE("---------------- finalize_threads ---------------");
 #endif /* TIOCSERGETLSR & !WIN32 */
 }
 
-/*----------------------------------------------------------
-add_tpid
-
-   accept:      struct tpid_info_struct pointer,,
-   perform:     
-   return:      
-   exceptions:  None
-   comments:    This is used to cleanup threads and make sure the
-		write()'s happen in order on systems without access to the LSR
-----------------------------------------------------------*/
 #if !defined(TIOCSERGETLSR) && !defined( WIN32 )
-struct tpid_info_struct *add_tpid( struct tpid_info_struct *p )
-{
-	struct tpid_info_struct *q;
-
-	/* FIXME TRENT.  Do we need to use key funcitons here? */
-	q = malloc( sizeof(struct tpid_info_struct) );
-	if( !q )
-	{
-		report_error("add_tpid: RXTX: Out of Memory\n");
-		return( NULL );
-	}
-	q->closing = 0;
-	q->write_counter = 0;
-	q->tcdrain = 0;
-	return( q );
-}
 static void warn_sig_abort( int signo )
 {
 	char msg[80];
@@ -814,7 +782,6 @@ init_threads( )
 int init_threads( struct event_info_struct *eis )
 {
 #if !defined(TIOCSERGETLSR) & !defined(WIN32)
-	struct tpid_info_struct *t = add_tpid( NULL);
 	sigset_t newmask, oldmask;
 	struct sigaction newaction, oldaction;
 	jfieldID jeis;
@@ -850,15 +817,12 @@ int init_threads( struct event_info_struct *eis )
 	pthread_sigmask( SIG_BLOCK, &newmask, &oldmask );
 	sigprocmask( SIG_SETMASK, &newmask, &oldmask );
 
-	eis->tpid = t;
-
 	report("init_threads: get eis\n");
 	jeis  = (*eis->env)->GetFieldID( eis->env, eis->jclazz, "eis", "I" );
 	report("init_threads: set eis\n");
 	(*eis->env)->SetIntField(eis->env, *eis->jobj, jeis, ( jint ) eis );
 	report("init_threads: creating drain_loop\n");
 	pthread_create( &tid, NULL, drain_loop, (void *) eis );
-	report("init_threads:  stop\n");
 #endif /* TIOCSERGETLSR */
 	report("init_threads:  stop\n");
 	return( 1 );
@@ -875,6 +839,7 @@ RXTXPort.writeByte
 JNIEXPORT void JNICALL RXTXPort(writeByte)( JNIEnv *env,
 	jobject jobj, jint ji )
 {
+	struct event_info_struct *index = master_index;
 	unsigned char byte = (unsigned char)ji;
 	int fd = get_java_var( env, jobj,"fd","I" );
 	int result;
@@ -886,6 +851,17 @@ JNIEXPORT void JNICALL RXTXPort(writeByte)( JNIEnv *env,
 		report( msg );
 		result=WRITE (fd, &byte, sizeof(unsigned char));
 	}  while (result < 0 && errno==EINTR);
+	index = master_index;
+#ifndef TIOCSERGETLSR
+	if( index )
+	{
+		while( index->fd != fd &&
+			index->next ) index = index->next;
+	}
+	index->writing = JNI_TRUE;
+#endif
+	sprintf( msg, "RXTXPort:writeByte %i\n", result );
+	report( msg );
 	LEAVE( "RXTXPort:writeByte" );
 	if(result >= 0)
 	{
@@ -1426,7 +1402,7 @@ RXTXPort.nativeGetParityErrorChar
 
    accept:      -
    perform:     check the ParityErrorChar
-   return:      The ParityErrorChar as an int.
+   return:      The ParityErrorChar as an jbyte.
    exceptions:  UnsupportedCommOperationException if not implemented
    comments:    It appears the Parity char is usually \0.  The windows
 		API allows for this to be changed.  I cant find may
@@ -1435,7 +1411,7 @@ RXTXPort.nativeGetParityErrorChar
 		Use a direct call to the termios file until we find a
 		solution.
 ----------------------------------------------------------*/
-JNIEXPORT jint JNICALL RXTXPort(nativeGetParityErrorChar)( JNIEnv *env,
+JNIEXPORT jbyte JNICALL RXTXPort(nativeGetParityErrorChar)( JNIEnv *env,
 	jobject jobj )
 {
 	unsigned int result = 0;
@@ -1453,7 +1429,7 @@ JNIEXPORT jint JNICALL RXTXPort(nativeGetParityErrorChar)( JNIEnv *env,
 
 #endif /* WIN32 */
 	LEAVE( "nativeGetParityErrorChar" );
-	return( ( jint ) result );
+	return( ( jbyte ) result );
 }
 
 /*----------------------------------------------------------
@@ -1461,11 +1437,11 @@ RXTXPort.nativeGetEndOfInputChar
 
    accept:      -
    perform:     check the EndOf InputChar
-   return:      the EndOfInputChar as an int.  -1 on error
+   return:      the EndOfInputChar as an jbyte.  -1 on error
    exceptions:  UnsupportedCommOperationException if not implemented
    comments:    
 ----------------------------------------------------------*/
-JNIEXPORT jint JNICALL RXTXPort(nativeGetEndOfInputChar)( JNIEnv *env,
+JNIEXPORT jbyte JNICALL RXTXPort(nativeGetEndOfInputChar)( JNIEnv *env,
 	jobject jobj )
 {
 	int fd = get_java_var( env, jobj,"fd","I" );
@@ -1474,11 +1450,11 @@ JNIEXPORT jint JNICALL RXTXPort(nativeGetEndOfInputChar)( JNIEnv *env,
 	ENTER( "nativeGetEndOfInputChar" );
 	if( tcgetattr( fd, &ttyset ) < 0 ) goto fail;
 	LEAVE( "nativeGetEndOfInputChar" );
-	return( (jint) ttyset.c_cc[VEOF] );
+	return( (jbyte) ttyset.c_cc[VEOF] );
 fail:
 	LEAVE( "nativeGetEndOfInputChar" );
 	report( "nativeGetEndOfInputChar failed\n" );
-	return( ( jint ) -1 );
+	return( ( jbyte ) -1 );
 }
 
 /*----------------------------------------------------------
@@ -1593,8 +1569,11 @@ int read_byte_array(	JNIEnv *env,
 {
 	int ret, left, bytes = 0;
 	long now, start = 0;
+	char msg[80];
 
 	ENTER( "read_byte_array" );
+	sprintf(msg, "read_byte_array requests %i\n", length);
+	report( msg );
 	left = length;
 	if (timeout >= 0)
 		start = GetTickCount();
@@ -1616,6 +1595,8 @@ RETRY:	if ((ret = READ( fd, buffer + bytes, left )) < 0 )
 		bytes += ret;
 		left -= ret;
 	}
+	sprintf(msg, "read_byte_array returns %i\n", bytes);
+	report( msg );
 	LEAVE( "read_byte_array" );
 	return bytes;
 }
@@ -1698,6 +1679,7 @@ JNIEXPORT jint JNICALL RXTXPort(readArray)( JNIEnv *env,
 {
 	int bytes;
 	jbyte *body;
+	char msg[80];
 	int fd = get_java_var( env, jobj, "fd", "I" );
 	int timeout = get_java_var( env, jobj, "timeout", "I" );
 
@@ -1719,6 +1701,8 @@ JNIEXPORT jint JNICALL RXTXPort(readArray)( JNIEnv *env,
 			strerror( errno ) );
 		return -1;
 	}
+	sprintf( msg, "RXTXPort:readArray: %i %i\n", (int) length, bytes);
+	report( msg );
 	LEAVE( "RXTXPort:readArray" );
 	return (bytes ? bytes : -1);
 }
@@ -1755,6 +1739,9 @@ JNIEXPORT jint JNICALL RXTXPort(nativeavailable)( JNIEnv *env,
 		goto fail;
 	}
 #endif /* FIORDCHK */
+	sprintf(message, "    nativeavailable: FIORDCHK result %d, \
+		errno %d\n", result , result == -1 ? errno : 0);
+	report( message );
 	if (result == -1) {
 		goto fail;
 	}
@@ -1857,6 +1844,7 @@ int check_line_status_register( struct event_info_struct *eis )
 
 	if( ! eis->eventflags[SPE_OUTPUT_BUFFER_EMPTY] )
 	{
+		report( "check_line_status_registe OUPUT_BUFFER_EMPTY not set\n" );
 		return 0;
 	}
 	if ( fstat( eis->fd, &fstatbuf ) )
@@ -1879,7 +1867,7 @@ int check_line_status_register( struct event_info_struct *eis )
 	if( eis->output_buffer_empty_flag == 1 && 
 		eis->eventflags[SPE_OUTPUT_BUFFER_EMPTY] )
 	{
-		report("check_line_status_register: sending SPE_OUTPUT_BUFFER_EMPTY\n");
+		report_verbose("check_line_status_register: sending SPE_OUTPUT_BUFFER_EMPTY\n");
 		send_event( eis, SPE_OUTPUT_BUFFER_EMPTY, 1 );
 		//send_event( eis, SPE_DATA_AVAILABLE, 1 );
 		eis->output_buffer_empty_flag = 0;
@@ -2008,7 +1996,7 @@ void check_tiocmget_changes( struct event_info_struct * eis )
 	unsigned int mflags;
 	int change = eis->change;
 
-	report_verbose("enterming check_tiocmget_changes\n");
+	report_verbose("entering check_tiocmget_changes\n");
 	if( ioctl( eis->fd, TIOCMGET, &mflags ) )
 	{
 		report( "=======================================\n");
@@ -2033,6 +2021,7 @@ void check_tiocmget_changes( struct event_info_struct * eis )
 	if( change ) send_event( eis, SPE_CD, change );
 
 	eis->omflags = mflags;
+	report_verbose("leaving check_tiocmget_changes\n");
 }
 
 /*----------------------------------------------------------
@@ -2118,14 +2107,15 @@ void report_serial_events( struct event_info_struct *eis )
 
 	check_tiocmget_changes( eis );
 
-	if(!eis->eventflags[SPE_DATA_AVAILABLE] )
-	{
-		report_verbose("report_serial_events: ignoring DATA_AVAILABLE\n");
-		return;
-	}
-
 	if( port_has_changed_fionread( eis ) )
 	{
+		if(!eis->eventflags[SPE_DATA_AVAILABLE] )
+		{
+			report_verbose("report_serial_events: ignoring DATA_AVAILABLE\n");
+			report(".");
+			usleep(20000);
+			return;
+		}
 		report("report_serial_events: sending DATA_AVAILABLE\n");
 		if(!send_event( eis, SPE_DATA_AVAILABLE, 1 ))
 		{
@@ -2172,7 +2162,10 @@ int initialise_event_info_struct( struct event_info_struct *eis )
 	for( i = 0; i < 11; i++ ) eis->eventflags[i] = 0;
 #if !defined(TIOCSERGETLSR) && !defined(WIN32)
 	eis->output_buffer_empty_flag = 0;
+	eis->writing = 0;
 #endif /* TIOCSERGETLSR */
+	eis->eventloop_interrupted = 0;
+	eis->closing = 0;
 
 	eis->fd = get_java_var( env, jobj, "fd", "I" );
 	eis->has_tiocsergetlsr = has_line_status_register_access( eis->fd );
@@ -2186,7 +2179,6 @@ int initialise_event_info_struct( struct event_info_struct *eis )
 		"(IZ)Z" );
 	if(eis->send_event == NULL)
 		goto fail;
-	eis->eventloop_interrupted = 0;
 end:
 	FD_ZERO( &eis->rfds );
 	FD_SET( eis->fd, &eis->rfds );
@@ -2250,23 +2242,23 @@ JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 	eis.jobj = &jobj;
 	eis.initialised = 0;
 
-	report( ">RXTXPort:eventLoop\n" );
+	ENTER( "eventLoop\n" );
 	if ( !initialise_event_info_struct( &eis ) ) goto end;
 	if ( !init_threads( &eis ) ) goto end;
 	unlock_monitor_thread( &eis );
 	do{
-		/* report( "." ); */
 		do {
+			/* report( "." ); */
 			eis.ret = SELECT( eis.fd + 1, &eis.rfds, NULL, NULL,
 					&eis.tv_sleep );
 			/* nothing goes between this call and select */
-			if( eis.eventloop_interrupted )
+			if( eis.closing )
 			{
-				report("eventLoop: got interrupt\n");
 				finalize_threads( &eis );
 				finalize_event_info_struct( &eis );
 				(*env)->SetBooleanField( env, jobj,
 							jfid, JNI_FALSE );
+				LEAVE("eventLoop");
 				return;
 			}
 			usleep(1000);
@@ -2278,7 +2270,7 @@ JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 		initialise_event_info_struct( &eis );
 	} while( 1 );
 end:
-	report( "<RXTXPort:eventLoop\n" );
+	LEAVE( "eventLoop:  Bailing!\n" );
 }
 
 /*----------------------------------------------------------
@@ -2802,6 +2794,17 @@ JNIEXPORT void JNICALL RXTXPort(interruptEventLoop)(JNIEnv *env,
 		}
 	}
 	index->eventloop_interrupted = 1;
+	/*
+	Many OS's need a thread running to determine if output buffer is
+	empty.  For Linux and Win32 it is not needed.  So closing is used to
+	shut down the thread in the write order on OS's that don't have
+	kernel support for output buffer empty.
+
+	In rxtx TIOCSERGETLSR is defined for win32 and Linux
+	*/
+#ifdef TIOCSERGETLSR
+	index->closing=1;
+#endif /* TIOCSERGETLSR */
 #ifdef WIN32
 	termios_interrupt_event_loop( index->fd, 1 );
 #endif /* WIN32 */
@@ -2887,20 +2890,30 @@ int send_event( struct event_info_struct *eis, jint type, int flag )
 	JNIEnv *env = eis->env;
 
 	ENTER( "send_event" );
+	if( eis->eventloop_interrupted > 1 )
+	{
+		report("event loop interrupted\n");
+		return JNI_TRUE;
+	}
+	report_verbose("send_event: !eventloop_interupted\n");
 	if(eis->jclazz == NULL) return JNI_TRUE;
+	report_verbose("send_event: jclazz\n");
 
 	(*env)->ExceptionClear(env);
 
+	report_verbose("send_event: calling\n");
 	result = (*env)->CallBooleanMethod( env, *eis->jobj, eis->send_event,
 		type, flag > 0 ? JNI_TRUE : JNI_FALSE );
+	report_verbose("send_event: called\n");
 
-#ifdef DEBUG
+#ifdef asdf
 	if((*eis->env)->ExceptionOccurred(eis->env)) {
 		report ( "send_event: an error occured calling sendEvent()\n" );
 		(*eis->env)->ExceptionDescribe(eis->env);
 		(*eis->env)->ExceptionClear(eis->env);
 	}
 #endif /* DEBUG */
+	/* report("e"); */
 	LEAVE( "send_event" );
 	return(result);
 }

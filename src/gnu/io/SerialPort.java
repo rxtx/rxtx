@@ -90,11 +90,11 @@ public abstract class SerialPort extends CommPort {
 	public abstract static boolean staticSetRTS( String port, boolean flag )
 		throws UnsupportedCommOperationException;
 */
-	public abstract int getParityErrorChar( )
+	public abstract byte getParityErrorChar( )
 		throws UnsupportedCommOperationException;
 	public abstract boolean setParityErrorChar( byte b )
 		throws UnsupportedCommOperationException;
-	public abstract int getEndOfInputChar( )
+	public abstract byte getEndOfInputChar( )
 		throws UnsupportedCommOperationException;
 	public abstract boolean setEndOfInputChar( byte b )
 		throws UnsupportedCommOperationException;

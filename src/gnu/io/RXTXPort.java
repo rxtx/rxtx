@@ -577,6 +577,8 @@ final public class RXTXPort extends SerialPort
 						event + ")" );
 				break;
 		}
+		if( debug_verbose )
+			System.out.println( "checking flags " );
 
 		switch( event )
 		{
@@ -614,10 +616,22 @@ final public class RXTXPort extends SerialPort
 				System.err.println("unknown event: " + event);
 				return(false);
 		}
+		if( debug_verbose )
+			System.out.println( "getting event" );
 		SerialPortEvent e = new SerialPortEvent(this, event, !state,
 			state );
+		if( debug_verbose )
+			System.out.println( "sending event" );
+		if(monThreadisInterrupted) 
+		{
+			if( debug_verbose )
+				System.out.println( "return" );
+			return(true);
+		}
 		if( SPEventListener != null ) SPEventListener.serialEvent( e );
 
+		if( debug_verbose )
+			System.out.println( "return" );
 
 		if (fd == 0 ||  SPEventListener == null || monThread == null) 
 		{
@@ -689,19 +703,31 @@ final public class RXTXPort extends SerialPort
 			   using isInterrupted().
 			*/
 			MonitorThreadCloseLock = true;
+			if (debug)
+				System.out.println("RXTXPort:calling interruptEventLoop");
 			interruptEventLoop( );
+			if (debug)
+				System.out.print("RXTXPort:waiting on closelock");
 			while( MonitorThreadCloseLock )
 			{
+				if (debug)
+					System.out.print(".");
 				try {
 					Thread.sleep(100);
 				} catch( Exception e ) {}
 			}
+			if (debug)
+				System.out.println();
+			if (debug)
+				System.out.println("RXTXPort:calling monThread.join()");
 			try {
 				monThread.join(1000);
 			} catch (Exception ex) {
 				/* yikes */
 				ex.printStackTrace();
 			}
+			if (debug)
+				System.out.println("RXTXPort:waiting on isAlive()");
 			while( monThread.isAlive() )
 			{
 				if ( debug )
@@ -714,6 +740,8 @@ final public class RXTXPort extends SerialPort
 			}
 			
 		}
+		if (debug)
+			System.out.println("RXTXPort:calling gc()");
 		monThread = null;
 		SPEventListener = null;
 		Runtime.getRuntime().gc();
@@ -905,16 +933,26 @@ final public class RXTXPort extends SerialPort
 		}
 		setDTR(false);
 		setDSR(false);
+		if (debug)
+			System.out.println("RXTXPort:close( " + this.name + " ) setting monThreadisInterrupted"); 
 		if ( ! monThreadisInterrupted )
 		{
 			removeEventListener();
 		}
+		if (debug)
+			System.out.println("RXTXPort:close( " + this.name + " ) calling nativeClose"); 
 		nativeClose( this.name );
+		if (debug)
+			System.out.println("RXTXPort:close( " + this.name + " ) calling super.close"); 
 		super.close();
+		if (debug)
+			System.out.println("RXTXPort:close( " + this.name + " ) calling System.gc"); 
 
 		fd = 0;
 		Runtime.getRuntime().gc();
 		closeLock = false;
+		if (debug)
+			System.out.println("RXTXPort:close( " + this.name + " ) leaving"); 
 	}
 
 
@@ -1006,7 +1044,12 @@ final public class RXTXPort extends SerialPort
 			if ( fd == 0 ) throw new IOException();
 			if ( monThreadisInterrupted == true )
 			{
-				throw new IOException( "Port has been Closed" );
+				return;
+				/* FIXME Trent this breaks
+					InstrumentControlSerialPort = hGetPort
+					in Matlab.
+				*/
+				//throw new IOException( "flush() Port has been Closed" );
 			}
 			waitForTheNativeCodeSilly();
 			nativeDrain();
@@ -1203,11 +1246,11 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	private native static boolean nativeStaticSetRTS( String port,
 							boolean flag )
 		throws UnsupportedCommOperationException;
-	private native int nativeGetParityErrorChar( )
+	private native byte nativeGetParityErrorChar( )
 		throws UnsupportedCommOperationException;
 	private native boolean nativeSetParityErrorChar( byte b )
 		throws UnsupportedCommOperationException;
-	private native int nativeGetEndOfInputChar( )
+	private native byte nativeGetEndOfInputChar( )
 		throws UnsupportedCommOperationException;
 	private native boolean nativeSetEndOfInputChar( byte b )
 		throws UnsupportedCommOperationException;
@@ -1290,10 +1333,10 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	*  Anyone know how to do this in Unix?
 	*/
 
-	public int getParityErrorChar( )
+	public byte getParityErrorChar( )
 		throws UnsupportedCommOperationException
 	{
-		int ret;
+		byte ret;
 		if ( debug )
 			System.out.println( "getParityErrorChar()" );
 		ret = nativeGetParityErrorChar();
@@ -1332,10 +1375,10 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	*  Anyone know how to do this in Unix?
 	*/
 
-	public int getEndOfInputChar( )
+	public byte getEndOfInputChar( )
 		throws UnsupportedCommOperationException
 	{
-		int ret;
+		byte ret;
 		if ( debug )
 			System.out.println( "getEndOfInputChar()" );
 		ret = nativeGetEndOfInputChar();
