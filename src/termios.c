@@ -2600,7 +2600,11 @@ int ioctl( int fd, int request, ... )
 			report( "TIOCGSERIAL\n" );
 
 			dcb = malloc( sizeof( DCB ) );
-			if( !dcb ) return -1;
+			if( !dcb )
+			{
+				va_end( ap );
+				return -1;
+			}
 			memset( dcb, 0, sizeof( DCB ) );
 			GetCommState( index->hComm, dcb );
 
@@ -2622,7 +2626,11 @@ int ioctl( int fd, int request, ... )
 			report( "TIOCSSERIAL\n" );
 
 			dcb = malloc( sizeof( DCB ) );
-			if( !dcb ) return -1;
+			if( !dcb )
+			{
+				va_end( ap );
+				return -1;
+			}
 			memset( dcb, 0, sizeof( DCB ) );
 			GetCommState( index->hComm, dcb );
 
