@@ -1,7 +1,94 @@
-This is ChangeLog Tue Oct 15 20:33:12 MDT 2002
+This is ChangeLog Thu Mar 27 08:13:33 EST 2003
 
 rxtx-2.1 and rxtx-2.0 changes are kept in the same file.  skip to the version
 you downloaded.
+
+2.1-7pre16 Mar 27, 2003
+		remove debug "Condition" warnings used to debug NT4 issues.
+2.1-7pre15a
+		build without requiring rxtxZystem.dll.  Add back the
+		TIOCGICOUNT #define for breaks.
+2.1-7pre15
+		100 fold speedup of read(byte) and read(byte[] ...)
+		10 fold speedup of available()
+		implementented read(byte[],offset,length,terminator[2]);
+		-- not tested.
+2.1-7pre14
+		select fix that could cause crashes in read and the
+		eventLoop
+		-- cleaner patch is pending but not tested  as
+		mentioned to Melissa and Jauhar.
+
+		Tried to cause exceptions for possible NT4SP6 writes
+		-- this was the "Three Blind Mice" test
+
+		Changed build tool chain for XP problems (?).
+		-- "XP Blows up"
+
+		Support for COM1-256
+
+		port reenumeration for people that change win32
+		port assignments CommPortIdentifier:getPortIdentifiers()
+2.1-7pre13
+		Isolated lockup on w32 read.
+		Added possible fix for w32 write lockups
+		throw error on impossible write situations.
+		- small input buffer, large writes.
+2.1-7pre12
+		All input stream methods are synchronized now. 
+		I had this in before cleaning up but thought it
+		was not needed (nothing failed here).	
+		read() will toss an IOException (caught in the
+		examples below but not in this library) if read
+		thinks there will be a deadlock.
+		Some small fixes found while merging with rxtx 2.0
+		for public release.  Just sanity checks for library
+		versions and such.
+
+		- everything is in synch with the public CVS and
+		public prerelease bins are out and being tested.
+2.1-7pre11
+		fix for lockup found.
+		removed Python and Cygwin code (ZystemImp.c)
+		removed extra attempts to fix lockup
+		removed previous attempts to fix tcrash
+		- the solution before was to avoid using the
+		API but now it appears to work with it -crazy
+
+2.1-7pre10
+		wrote Zystem (probably will be a seperate
+		library) for logging over the network. Some
+		attempts to fix lockup bugs.
+		-pedantic compile passes.
+2.1-7pre9
+		termios.c cleanup (w32)
+2.1-7pre8
+		More LPT support for w32
+2.1-7pre7
+		initial LPT support for w32
+2.1-7pre6
+		tlockup.m does not lock but fails (?) (W2K SP2)
+		tcrash.m does not crash (W2K SP2)
+		suite serial passes (W2K SP2)
+		debug for flow control and parity switched off.
+2.1-7pre5
+		Later stage tinkering with flowcontrol and parity
+		fixes.  Possibly bugs (w32 has many ways this can
+		be setup).
+2.1-7pre4
+		testRead() now uses //./COM9 to verify port is
+		usable (fixes bug introduced in pre3)
+		build used java/jar/javac 1.3.1_06-b01
+		-- initial tinkering with parity --
+2.1-7pre3
+		fixed //./COM?? so matlab can do s=serial('COM16')
+		-- needed to test tcrash.m
+2.1-7pre2
+		support for COM1-16 on w32 using //./COM??
+2.1-7pre1
+		Mark/Space parity fixes on w332
+2.1-6
+		Solaris Enumeration fixes
 
 2.1-6 Sep  7, 2002    read(byte) does not timeout
 		      read(byte[]) returns 0 on timeout (Fixes DalSemi iButtons)
