@@ -191,6 +191,8 @@ JNIEXPORT void JNICALL RXTXPort(Initialize)(
 	} 
 #endif /* !WIN32 */
 	ENTER( "RXTXPort:Initialize" );
+	//mexPrintf("RXTX  \
+	//Mon Jan 21 17:40:28 EST 2002\n");
 #if defined(DEBUG) && defined(__linux__)
 	/* Lets let people who upgraded kernels know they may have problems */
 	if (uname (&name) == -1)
@@ -708,10 +710,10 @@ void *drain_loop( void *arg )
 	int i;
 	pthread_detach( pthread_self() );
 
-#include <time.h>
 	for(i=0;;i++)
 	{
 		report("drain_loop:  looping\n");
+		usleep(10000);
 		if( eis->eventloop_interrupted )
 		{
 			goto end;
@@ -741,7 +743,6 @@ void *drain_loop( void *arg )
 		}
 	}
 end:
-	//usleep(10000);
 	report("------------------ drain_loop exiting ---------------------\n");
 	eis->closing = 1;
 	pthread_exit( NULL );
@@ -2227,7 +2228,7 @@ void report_serial_events( struct event_info_struct *eis )
 		if(!eis->eventflags[SPE_DATA_AVAILABLE] )
 		{
 			report_verbose("report_serial_events: ignoring DATA_AVAILABLE\n");
-			report(".");
+			//report(".");
 			usleep(20000);
 			return;
 		}
@@ -2235,7 +2236,8 @@ void report_serial_events( struct event_info_struct *eis )
 		if(!send_event( eis, SPE_DATA_AVAILABLE, 1 ))
 		{
 			/* select wont block */
-			system_wait();
+			usleep(20000);
+			//system_wait();
 		}
 	}
 }
@@ -2377,7 +2379,7 @@ JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 				LEAVE("eventLoop");
 				return;
 			}
-			usleep(1000);
+			usleep(10000);
 		}  while ( eis.ret < 0 && errno == EINTR );
 		if( eis.ret >= 0 )
 		{
