@@ -414,7 +414,8 @@ public class RXTXCommDriver implements CommDriver
 		}
 		else  /* printer support is green */
 		{
-			AllKnownParallelPorts=null;
+			String [] temp={};
+			AllKnownParallelPorts=temp;
 		}
 
 		if (devs==null)
