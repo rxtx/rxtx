@@ -1,6 +1,4 @@
-package gnu.io;
-import javax.comm.*;
-
+package javax.comm;
 
 /* extend CommApiVersion so we can add RXTX version information  */
 
