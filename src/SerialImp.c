@@ -944,7 +944,9 @@ int init_threads( struct event_info_struct *eis )
 	sigfillset(&newmask);
 	sigprocmask( SIG_SETMASK, &newmask, &oldmask );
 */
+#ifndef __APPLE__
 	pthread_sigmask( SIG_BLOCK, &newmask, &oldmask );
+#endif
 	sigprocmask( SIG_SETMASK, &newmask, &oldmask );
 
 	report("init_threads: get eis\n");
@@ -3635,9 +3637,7 @@ int check_lock_status( const char *filename )
 
 	if ( check_group_uucp() )
 	{
-		report_error( "check_lock_status: No permission to create lock file.
-
-		please see: How can I use Lock Files with rxtx? in INSTALL\n" );
+		report_error( "check_lock_status: No permission to create lock file.\nplease see: How can I use Lock Files with rxtx? in INSTALL\n" );
 		exit(0);
 	}
 
