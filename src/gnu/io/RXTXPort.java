@@ -653,11 +653,12 @@ final class RXTXPort extends SerialPort
 	/**
 	*  Remove the serial port event listener
 	*/
-	
+
 	public synchronized void removeEventListener()
 	{
 		if (debug)
 			System.out.println("RXTXPort:removeEventListener()");
+		//if( monThread != null && monThread.isAlive() )
 		if( monThreadisInterrupted == true )
 		{
 			System.out.println("RXTXPort:removeEventListener() already interrupted");
@@ -828,18 +829,18 @@ final class RXTXPort extends SerialPort
 	*  @param b
 	*  @throws IOException
 	*/
-                public synchronized void write( int b ) throws IOException
+		public synchronized void write( int b ) throws IOException
 		{
 			if (debug)
 				System.out.println("RXTXPort:SerialOutputStream:write(int)");
 			if ( fd == 0 ) throw new IOException();
-                        writeByte( b );
-                }
+				writeByte( b );
+		}
 	/**
 	*  @param b[]
 	*  @throws IOException
 	*/
-                public synchronized void write( byte b[] ) throws IOException
+		public synchronized void write( byte b[] ) throws IOException
 		{
 			if (debug)
 			{
@@ -847,17 +848,17 @@ final class RXTXPort extends SerialPort
 				System.out.println("RXTXPort:SerialOutputStream:write() data = " + new String(b) );
 			}
 			if ( fd == 0 ) throw new IOException();
-                        writeArray( b, 0, b.length );
+				writeArray( b, 0, b.length );
 			if (debug)
 				System.out.println("::::: Leaving RXTXPort:SerialOutputStream:write(" +b.length +")");
-                }
+		}
 	/**
 	*  @param b[]
 	*  @param off
 	*  @param len
 	*  @throws IOException
 	*/
-                public synchronized void write( byte b[], int off, int len )
+		public synchronized void write( byte b[], int off, int len )
 			throws IOException
 		{
 			if( off + len  > b.length )
@@ -875,19 +876,19 @@ final class RXTXPort extends SerialPort
 				System.out.println("RXTXPort:SerialOutputStream:write() data = " +  new String(send) );
 			}
 			if ( fd == 0 ) throw new IOException();
-                        writeArray( send, 0, len );
+				writeArray( send, 0, len );
 			if( debug )
 				System.out.println("::::: Leaving RXTXPort:SerialOutputStream:write(" + send.length + " " + off + " " + len + " " +")" +  new String(send) );
-                }
+		}
 	/**
 	*/
-                //public synchronized void flush() throws IOException
-                public void flush() throws IOException
+		//public synchronized void flush() throws IOException
+		public void flush() throws IOException
 		{
 			if (debug)
 				System.out.println("RXTXPort:SerialOutputStream:flush() enter");
 			if ( fd == 0 ) throw new IOException();
-                        nativeDrain();
+				nativeDrain();
 			if (debug)
 				System.out.println("RXTXPort:SerialOutputStream:flush() leave");
 		}
@@ -1006,8 +1007,8 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	   SerialPortEvent constants are NOT bit-flags, they are just
 	   defined as integers from 1 to 10  -DPL */
 		private volatile boolean CTS=false;
-		private volatile boolean DSR = false;
-		private volatile boolean RI = false;
+		private volatile boolean DSR=false;
+		private volatile boolean RI=false;
 		private volatile boolean CD=false;
 		private volatile boolean OE=false;
 		private volatile boolean PE=false;
@@ -1148,7 +1149,7 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	{
 		return nativeGetDivisor();
 	}
-	
+
 	/**
 	*  Extension to CommAPI
 	*  returns boolean true on success
