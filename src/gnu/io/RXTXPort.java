@@ -44,6 +44,7 @@ final class RXTXPort extends SerialPort
 
 	/** Initialize the native library */
 	private native static void Initialize();
+	boolean MonitorThreadAlive=false;
 
 	/** 
 	*  Open the named port
@@ -74,6 +75,7 @@ final class RXTXPort extends SerialPort
 			monThread = new MonitorThread();
 			monThread.start();
 			waitForTheNativeCodeSilly();
+			MonitorThreadAlive=true;
 	//	} catch ( PortInUseException e ){}
 		if (debug)
 			System.out.println("RXTXPort:RXTXPort("+name+") fd = " +
@@ -648,6 +650,14 @@ final class RXTXPort extends SerialPort
 		if( SPEventListener != null )
 			throw new TooManyListenersException();
 		SPEventListener = lsnr;
+		if( !MonitorThreadAlive )
+		{
+			MonitorThreadLock = true;
+			monThread = new MonitorThread();
+			monThread.start();
+			waitForTheNativeCodeSilly();
+			MonitorThreadAlive=true;
+		}
 		if (debug)
 			System.out.println("RXTXPort:Interrupt=false");
 	}
@@ -708,6 +718,7 @@ final class RXTXPort extends SerialPort
 		SPEventListener = null;
 		Runtime.getRuntime().gc();
 		MonitorThreadLock = false;
+		MonitorThreadAlive=false;
 	}
 	/**
 	 *	Give the native code a chance to start listening to the hardware
