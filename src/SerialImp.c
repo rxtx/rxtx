@@ -180,6 +180,42 @@ struct timeval snow, enow, seloop, eeloop;
 
 struct event_info_struct *master_index = NULL;
 
+
+/*----------------------------------------------------------
+RXTXPort.Initialize
+
+   accept:      The JNIEnv and jobj of the thread, the original eis.
+   perform:     fill in the needed variables with this threads values
+   return:      none
+   exceptions:  none
+   comments:    java variables (especially JNIEnv) should not be shared
+		between threads.  Right now we build a local struct with
+		the thread's info before using the variabls.  This is
+		especially true for send_event.
+
+		See also JNI_OnLoad() if the thread does not have the values
+----------------------------------------------------------*/
+struct event_info_struct build_threadsafe_eis(
+	JNIEnv *env,
+	jobject *jobj,
+	struct event_info_struct *eis
+)
+{
+	struct event_info_struct myeis = *eis;
+
+	myeis.env = env;
+	myeis.jclazz = (*env)->GetObjectClass( env, *jobj );
+	myeis.jobj = jobj;
+	myeis.fd = get_java_var( env, *jobj, "fd", "I" );
+	myeis.send_event = (*env)->GetMethodID(
+		env,
+		myeis.jclazz,
+		"sendEvent",
+		"(IZ)Z"
+	);
+	return( myeis );
+}
+
 /*----------------------------------------------------------
 RXTXPort.Initialize
 
@@ -1433,7 +1469,9 @@ JNIEXPORT jboolean JNICALL RXTXPort(nativeDrain)( JNIEnv *env,
 #endif /* !TIOCSERGETLSR !WIN32 */
 	if( eis && eis->eventflags[SPE_OUTPUT_BUFFER_EMPTY] )
 	{
-		send_event( eis, SPE_OUTPUT_BUFFER_EMPTY, 1 );
+                struct event_info_struct myeis =
+			build_threadsafe_eis( env, &jobj, eis );
+		send_event( &myeis, SPE_OUTPUT_BUFFER_EMPTY, 1 );
 	}
 	report_time_end( );
 	return( JNI_FALSE );
@@ -3977,7 +4015,7 @@ RXTXCommDriver.nativeGetVersion
 JNIEXPORT jstring JNICALL RXTXCommDriver(nativeGetVersion) (JNIEnv *env,
 	jclass jclazz )
 {
-	return (*env)->NewStringUTF( env, "RXTX-2.1-7pre18" );
+	return (*env)->NewStringUTF( env, "RXTX-2.1-7pre19" );
 }
 
 /*----------------------------------------------------------
