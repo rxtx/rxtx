@@ -1679,7 +1679,7 @@ void DCBToTermios( DCB *dcb, struct termios *s_termios )
 	ENTER( "DCBToTermios" );
 	s_termios->c_ispeed = CBR_to_B( dcb->BaudRate );
 	s_termios->c_ospeed = s_termios->c_ispeed;
-	s_termios->c_cflag = s_termios->c_ispeed & CBAUD;
+	s_termios->c_cflag |= s_termios->c_ispeed & CBAUD;
 	LEAVE( "DCBToTermios" );
 }
 
@@ -1902,12 +1902,12 @@ int tcgetattr( int fd, struct termios *s_termios )
 	}
 	/* CSIZE */
 	s_termios->c_cflag |= bytesize_to_termios( myDCB.ByteSize );
-	/* CTS_OFLOW: cts output flow control */
-	if ( myDCB.fOutxCtsFlow == TRUE ) s_termios->c_cflag |= CCTS_OFLOW;
-	else s_termios->c_cflag &= ~CCTS_OFLOW;
-	/* CRTS_IFLOW: rts input flow control */
-	if ( myDCB.fRtsControl == TRUE ) s_termios->c_cflag |= CRTS_IFLOW;
-	else s_termios->c_cflag &= ~CRTS_IFLOW;
+	/* CRTSCTS: hardware flow control */
+	if (( myDCB.fOutxCtsFlow == TRUE ) ||
+            ( myDCB.fRtsControl == RTS_CONTROL_HANDSHAKE))
+          s_termios->c_cflag |= CRTSCTS;
+        else
+          s_termios->c_cflag &= ~CRTSCTS;
 	/* MDMBUF: carrier based flow control of output */
 	/* CIGNORE: tcsetattr will ignore control modes & baudrate */
 
@@ -2059,11 +2059,13 @@ int tcsetattr( int fd, int when, struct termios *s_termios )
 			dcb.Parity = NOPARITY;
 		if ( s_termios->c_cflag & CSTOPB ) dcb.StopBits = TWOSTOPBITS;
 			else dcb.StopBits = ONESTOPBIT;
-		if ( s_termios->c_cflag & CRTS_IFLOW )
-			dcb.fRtsControl = RTS_CONTROL_HANDSHAKE;
-		else dcb.fRtsControl = RTS_CONTROL_ENABLE;
-		if ( s_termios->c_cflag & CCTS_OFLOW ) dcb.fOutxCtsFlow = TRUE;
-		else dcb.fOutxCtsFlow = FALSE;
+		if ( s_termios->c_cflag & CRTSCTS ) {
+                  dcb.fRtsControl = RTS_CONTROL_HANDSHAKE;
+                  dcb.fOutxCtsFlow = TRUE;
+                } else {
+                  dcb.fRtsControl = RTS_CONTROL_ENABLE;
+		  dcb.fOutxCtsFlow = FALSE;
+                }
 	}
 
 	/*** input flags, c_iflag **/
