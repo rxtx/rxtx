@@ -149,7 +149,7 @@ JAR = $(JPATH)/bin/jar
 JAVADOC = $(JPATH)/bin/javadoc $(JCLASSPATH)
 LIBTOOL = $(SHELL) $(TOP)/libtool
 LINK = $(LIBTOOL) --mode=link $(CC) $(CFLAGS) $(LDFLAGS) -version-info 1:0:1
-SERIAL_HEADER = $(TOP)/$(target_alias)/javax_comm_RXTXPort.h $(TOP)/$(target_alias)/javax_comm_RXTXCommDriver.h
+SERIAL_HEADER = $(TOP)/$(target_alias)/javax_comm_RXTXPort.h $(TOP)/$(target_alias)/javax_comm_RXTXCommDriver.h $(TOP)/$(target_alias)/javax_comm_CommPortIdentifier.h
 PARALLEL_HEADER = $(TOP)/$(target_alias)/javax_comm_LPRPort.h
 I2C_HEADER = $(TOP)/$(target_alias)/javax_comm_I2CPort.h 
 Raw_HEADER = $(TOP)/$(target_alias)/javax_comm_RawPort.h 
@@ -468,15 +468,15 @@ $(TOP)/javax/comm/RawPort.class $(TOP)/javax/comm/RawPortEvent.class $(TOP)/java
 
 Raw: $(TOP)/javax/comm/RawPort.class $(TOP)/javax/comm/RawPortEvent.class $(TOP)/javax/comm/RawPortEventListener.class 
 
-$(TOP)/javax/comm/CommPortEnumerator.class $(TOP)/javax/comm/CommPortIdentifier.class $(TOP)/javax/comm/CPOList.class $(srcdir)/src/CommPortEnumerator.java $(srcdir)/src/CommPortIdentifier.java
-	$(JAVAC) $(srcdir)/src/CommPortEnumerator.java $(srcdir)/src/CommPortIdentifier.java
+$(TOP)/javax/comm/PortInUseException.class $(TOP)/javax/comm/CommPortEnumerator.class $(TOP)/javax/comm/CommPortIdentifier.class $(TOP)/javax/comm/CommPort.class $(TOP)/javax/comm/CommDriver.class $(TOP)/CommPortOwnershipListener.class $(TOP)/NoSuchPortException.class: $(srcdir)/src/CommPortEnumerator.java $(srcdir)/src/CommPortIdentifier.java $(srcdir)/src/CommPort.java $(srcdir)/src/CommDriver.java $(srcdir)/src/CommPortOwnershipListener.java $(srcdir)/src/PortInUseException.java $(srcdir)/src/NoSuchPortException.java
+	$(JAVAC) $(srcdir)/src/CommPortEnumerator.java $(srcdir)/src/CommPortIdentifier.java $(srcdir)/src/CommPort.java $(srcdir)/src/CommDriver.java $(srcdir)/src/CommPortOwnershipListener.java $(srcdir)/src/PortInUseException.java $(srcdir)/src/NoSuchPortException.java
 
 IDENT: $(TOP)/javax/comm/CommPortEnumerator.class $(TOP)/javax/comm/CommPortIdentifier.class
 
 $(TOP)/%.class $(TOP)/javax/comm/%.class: $(srcdir)/src/%.java 
 	$(JAVAC) $< 
 
-$(I2C_HEADER) $(Raw_HEADER) $(RS485_HEADER) $(SERIAL_HEADER) $(PARALLEL_HEADER): $(TOP)/javax/comm/RXTXPort.class
+$(I2C_HEADER) $(Raw_HEADER) $(RS485_HEADER) $(SERIAL_HEADER) $(PARALLEL_HEADER): $(TOP)/javax/comm/RXTXPort.class $(TOP)/javax/comm/CommPortIdentifier.class
 	$(JAVAH) javax.comm.`echo $(@F) | sed s#\.h##|sed s#javax_comm_##`
 	touch $(TOP)/$(target_alias)/$(@F)
 

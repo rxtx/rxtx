@@ -2119,6 +2119,7 @@ fi
 	if test x$enable_RXTXIDENT = xyes; then 
 	IDENTIFIERS="\
 \$(TOP)/javax/comm/UnsupportedCommOperationException.class \
+\$(TOP)/javax/comm/CommPortIdentifier.class \
 \$(TOP)/javax/comm/CommPort.class \
 \$(TOP)/javax/comm/CommDriver.class \
 \$(TOP)/javax/comm/CommPortOwnershipListener.class \
