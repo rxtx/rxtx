@@ -6,6 +6,7 @@ JNIEXPORT jstring JNICALL Java_gnu_io_CommPortIdentifier_native_1psmisc_1report_
 #else
 
 /* loosly based on fuser.c by Werner Almesberger. */
+/* fuser.c - identify processes using files */
 
 /* Copyright 1993-1998 Werner Almesberger. See file COPYING for details. 
 psmisc (fuser, killall and pstree) program code, documentation and
