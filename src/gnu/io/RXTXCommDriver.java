@@ -143,8 +143,6 @@ public class RXTXCommDriver implements CommDriver {
 			"ttyd", // irix serial ports
 			"cuaa", // FreeBSD Serial Ports
 			"tty0" // netbsd serial ports 
-			
-
 		};
 	/** Get the Parallel port prefixes for the running os
 	* Holger Lehmann
