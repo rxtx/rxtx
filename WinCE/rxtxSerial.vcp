@@ -436,7 +436,7 @@ SOURCE=.\StdAfx.h
 # End Group
 # Begin Source File
 
-SOURCE=.\ReadMe.txt
+SOURCE=.\README
 # End Source File
 # End Target
 # End Project

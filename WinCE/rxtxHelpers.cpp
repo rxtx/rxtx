@@ -268,7 +268,7 @@ int printj(JNIEnv *env, wchar_t *fmt, ...)
  	env->DeleteLocalRef(jsBuf);
   env->DeleteLocalRef(clsOut);
   env->DeleteLocalRef(clsSystem);
-  //Sleep(3000);
+  
   return retval;
 }
 
@@ -287,9 +287,9 @@ DWORD __stdcall CommEventThread(LPVOID lpEventInfo)
   DWORD dwErr;
   EventInfoStruct *EventInfo = (EventInfoStruct *)lpEventInfo;
   HANDLE hPort = EventInfo->fd;
-
+  
   // Specify a set of events to be monitored for the port.
-  if(!SetCommMask(hPort, EventInfo->ef | EV_DSR))
+  if(!SetCommMask(hPort, EventInfo->ef))
   {
     dwErr = GetLastError();
     IF_DEBUG
@@ -299,13 +299,11 @@ DWORD __stdcall CommEventThread(LPVOID lpEventInfo)
       MessageBoxW(NULL, lpMsgBuf, L"!!! CommEventThread - SetCommMask() error", MB_OK | MB_ICONEXCLAMATION | MB_SETFOREGROUND);
       ReleaseErrorMsg(lpMsgBuf);
     )
-    EventInfo->env->DeleteGlobalRef(EventInfo->jobj);
     return dwErr;
   }
 
   // Thread is ready to work
-  EventInfo->env->SetBooleanField(EventInfo->jobj, EventInfo->jfMonitorThreadLock, JNI_FALSE);
-  EventInfo->env->DeleteGlobalRef(EventInfo->jobj);
+  EventInfo->eventThreadReady = true;
 
   do
   {

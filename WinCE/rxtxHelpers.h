@@ -20,7 +20,7 @@
 #if !defined(Included_RXTXHELPERS_H)
 #define Included_RXTXSERIAL_H
 
-/* gnu.io.SerialPortEvent constants */
+/* javax.comm.SerialPortEvent constants */
 #define SPE_DATA_AVAILABLE       1
 #define SPE_OUTPUT_BUFFER_EMPTY  2
 #define SPE_CTS                  3
@@ -61,25 +61,25 @@
 #endif
 
 /* java exception class names */
-#define UNSUPPORTED_COMM_OPERATION "gnu/io/UnsupportedCommOperationException"
+#define UNSUPPORTED_COMM_OPERATION "javax/comm/UnsupportedCommOperationException"
 #define ARRAY_INDEX_OUT_OF_BOUNDS "java/lang/ArrayIndexOutOfBoundsException"
 #define OUT_OF_MEMORY "java/lang/OutOfMemoryError"
 #define IO_EXCEPTION "java/io/IOException"
-#define PORT_IN_USE_EXCEPTION "gnu/io/PortInUseException"
+#define PORT_IN_USE_EXCEPTION "javax/comm/PortInUseException"
 
 
 typedef struct
 {
+  /* Port handle */
   HANDLE fd;
   /* flags for events */
   DWORD ef;
-	
+  /* event handle for Monitor interthread signalling*/
   HANDLE eventHandle;
-  /* current event */
+  /* current serial event */
   DWORD event;
-  JNIEnv *env;
-  jobject jobj;
-  jfieldID jfMonitorThreadLock;
+  /* EventThread sets this flag to TRUE when it's ready */
+  bool eventThreadReady;
 } EventInfoStruct;
 
 

@@ -19,7 +19,6 @@
 --------------------------------------------------------------------------*/
 #include "StdAfx.h"
 #include "rxtxHelpers.h"
-#include "gnu_io_RXTXPort.h"
 
 /*
 Initialize
@@ -40,10 +39,9 @@ JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_Initialize(JNIEnv *env, jclass cls)
 /*
 open
 
-   accept:      The device to open.  ie "COM1:" ///"/dev/ttyS0"
-   perform:     open the device, ///set the termios struct to sane settings and
-                return the filedescriptor
-   return:      handle ///fd
+   accept:      The device to open. ie "COM1:"
+   perform:     open the device
+   return:      handle
    exceptions:  IOExcepiton
    comments:    Very often people complain about not being able to get past
                 this function and it turns out to be permissions on the
@@ -62,14 +60,12 @@ JNIEXPORT jint JNICALL Java_gnu_io_RXTXPort_open(JNIEnv *env, jobject jobj, jstr
 
   LPCWSTR wszName = env->GetStringChars(name, NULL); 
   HANDLE hPort = CreateFileW(wszName,      // Pointer to the name of the port
-                             GENERIC_READ | GENERIC_WRITE,
-                                           // Access (read-write) mode
+                             GENERIC_READ | GENERIC_WRITE,// Access (read-write) mode
                              0,            // Share mode
                              NULL,         // Pointer to the security attribute
                              OPEN_EXISTING,// How to open the serial port
                              0,            // Port attributes
-                             NULL);        // Handle to port with attribute
-                                           // to copy
+                             NULL);        // Handle to port with attribute to copy
   // If it fails to open the port, return FALSE.
   if ( hPort == INVALID_HANDLE_VALUE ) 
   { // Could not open the port.
@@ -203,11 +199,6 @@ JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_nativeSetSerialPortParams(JNIEnv *en
 
   // Change the DCB structure settings.
   PortDCB.BaudRate = speed;             // Current baud 
-  //PortDCB.fOutxCtsFlow = FALSE;       // No CTS output flow control 
-  //PortDCB.fOutxDsrFlow = FALSE;       // No DSR output flow control 
-  //PortDCB.fDsrSensitivity = FALSE;    // DSR sensitivity 
-  //PortDCB.fOutX = FALSE;              // No XON/XOFF out flow control 
-  //PortDCB.fInX = FALSE;               // No XON/XOFF in flow control 
   PortDCB.ByteSize = (BYTE)dataBits;    // Number of bits/byte, 4-8 
   PortDCB.Parity = (BYTE)parity;        // 0-4=no,odd,even,mark,space 
   switch(stopBits) 
@@ -229,8 +220,7 @@ JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_nativeSetSerialPortParams(JNIEnv *en
       
   }
 
-  // Configure the port according to the specifications of the DCB 
-  // structure.
+  // Configure the port according to the specifications of the DCB structure.
   if (!SetCommState (hPort, &PortDCB))
   { //Unable to configure the serial port
     CreateErrorMsg(GetLastError(), lpMsgBuf);
@@ -419,7 +409,7 @@ JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_NativeEnableReceiveTimeoutThreshold(
     return;
   }
 
-  /* ------ from gnu.io javadoc ------------------------------------------------------------------
+  /* ------ from javax.CommPort javadoc ------------------------------------------------------------------
   |    Threshold   |    Timeout   |Read Buffer Size | Read Behaviour
   |State   |Value  |State   |Value|                 |
   |disabled|  -    |disabled| -   |    n bytes      | block until any data is available 
@@ -429,7 +419,7 @@ JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_NativeEnableReceiveTimeoutThreshold(
   --------------------------------------------------------------------------------------------------------
   */
 
-  // Following is based of my understanding of timeout parameters meaning.
+  // Following is based on my understanding of timeout parameters meaning.
   // Not completely correct (threshold?!)
   if(time == 0)
   {
@@ -543,8 +533,7 @@ JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_setDTR(JNIEnv *env, jobject jobj, jb
     PortDCB.fDtrControl = DTR_CONTROL_DISABLE;
 
 
-  // Configure the port according to the specifications of the DCB 
-  // structure.
+  // Configure the port according to the specifications of the DCB structure.
   if (!SetCommState (hPort, &PortDCB))
   { //Unable to configure the serial port
     GetLastError();
@@ -819,8 +808,8 @@ JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_writeByte(JNIEnv *env, jobject jobj,
 writeArray
 
    accept:      jbarray: bytes used for writing
-                offset: offset in array to start writing
-                count: Number of bytes to write
+                off: offset in array to start writing
+                len: Number of bytes to write
    perform:     write length bytes of jbarray
    return:      none
    exceptions:  IOException
@@ -838,6 +827,10 @@ JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_writeArray(JNIEnv *env, jobject jobj
   jbyte *body = env->GetByteArrayElements(b, NULL);
 
 	do {
+    IF_DEBUG
+    (
+      printj(env, L"--- writeArray - %d bytes to write\n", len-total);
+    )
     if (!WriteFile(hPort,              // Port handle
                    body+total+off,     // Pointer to the data to write 
                    len-total,          // Number of bytes to write
@@ -893,7 +886,8 @@ JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_nativeDrain(JNIEnv *env, jobject job
     return;
   }
    
-  /*do
+  /* Alternative implementation:
+  do
   {
     if(!ClearCommError(hPort, &dwErrors, &Stat))
     {
@@ -1040,7 +1034,7 @@ eventLoop
  */
 JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_eventLoop(JNIEnv *env, jobject jobj)
 { 
-  jfieldID jfMonitorThreadCloseLock, /*jfMonitorThreadLock,*/ jfMonThreadisInterrupted;
+  jfieldID jfMonitorThreadCloseLock, jfMonitorThreadLock, jfMonThreadisInterrupted;
   jmethodID jmSendEvent;
   HANDLE hCommEventThread;
   DWORD dwThreadID, dwWaitResult, dwEvent;
@@ -1056,7 +1050,7 @@ JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_eventLoop(JNIEnv *env, jobject jobj)
   jclass cls = env->GetObjectClass(jobj);
 
   // Get pointers to some Java variables and methods:
-  if( !(EventInfo->jfMonitorThreadLock = env->GetFieldID(cls, "MonitorThreadLock", "Z")) ||
+  if( !(jfMonitorThreadLock = env->GetFieldID(cls, "MonitorThreadLock", "Z")) ||
       !(jfMonThreadisInterrupted = env->GetFieldID(cls, "monThreadisInterrupted", "Z")) ||
       !(jfMonitorThreadCloseLock = env->GetFieldID(cls, "MonitorThreadCloseLock", "Z")) ||
       !(jmSendEvent = env->GetMethodID(cls, "sendEvent", "(IZ)Z"))
@@ -1070,9 +1064,6 @@ JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_eventLoop(JNIEnv *env, jobject jobj)
 	  return;
   }
 
-  EventInfo->env = env;
-  EventInfo->jobj = env->NewGlobalRef(jobj);
-
   hCommEventThread = CreateThread(NULL, 0, CommEventThread, (LPVOID)EventInfo, 0, &dwThreadID);
   if(hCommEventThread == NULL)
   {
@@ -1085,7 +1076,6 @@ JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_eventLoop(JNIEnv *env, jobject jobj)
 
   CloseHandle(hCommEventThread);
 
-
   do
   {
     if(env->GetBooleanField(jobj, jfMonThreadisInterrupted) == JNI_TRUE)
@@ -1097,11 +1087,21 @@ JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_eventLoop(JNIEnv *env, jobject jobj)
       
       CloseHandle(EventInfo->eventHandle);
       
-	  env->SetBooleanField(jobj, jfMonitorThreadCloseLock, JNI_FALSE);
+	    env->SetBooleanField(jobj, jfMonitorThreadCloseLock, JNI_FALSE);
       return;
     }
 
-    if((dwWaitResult = WaitForSingleObject(EventInfo->eventHandle, 1000)) == WAIT_FAILED)
+    if(EventInfo->eventThreadReady)
+    { // Thread is ready to work - pass signal to Java
+      IF_DEBUG
+      (
+        printj(env, L"--- RXTXPort.eventLoop() - EventThread is ready\n");
+      )
+      env->SetBooleanField(jobj, jfMonitorThreadLock, JNI_FALSE);
+      EventInfo->eventThreadReady = false;
+    }
+
+    if((dwWaitResult = WaitForSingleObject(EventInfo->eventHandle, 500)) == WAIT_FAILED)
     {
       IF_DEBUG
       (
@@ -1474,7 +1474,16 @@ JNIEXPORT jboolean JNICALL Java_gnu_io_RXTXPort_nativeSetEndOfInputChar(JNIEnv *
     return JNI_FALSE;
   }
 
-  PortDCB.EofChar = b;
+  if( b != 0)
+  {
+    PortDCB.fBinary = FALSE;
+    PortDCB.EofChar = b;
+  }
+  else
+  {
+    PortDCB.fBinary = TRUE;
+    PortDCB.EofChar = 0;
+  }
 
   if (!SetCommState(hPort, &PortDCB))
   {
@@ -1483,6 +1492,7 @@ JNIEXPORT jboolean JNICALL Java_gnu_io_RXTXPort_nativeSetEndOfInputChar(JNIEnv *
     (
       printj(env, L"!!! nativeSetEndOfInputChar - SetCommState() error: %s\n", lpMsgBuf);
     )
+    throw_java_exceptionW(env, UNSUPPORTED_COMM_OPERATION, L"nativeSetEndOfInputChar", lpMsgBuf);
     ReleaseErrorMsg(lpMsgBuf);
     return JNI_FALSE;
   }
