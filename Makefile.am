@@ -175,10 +175,10 @@ $(TOP)/javax/comm/RawPort.class $(TOP)/javax/comm/RawPortEvent.class $(TOP)/java
 
 Raw: $(TOP)/javax/comm/RawPort.class $(TOP)/javax/comm/RawPortEvent.class $(TOP)/javax/comm/RawPortEventListener.class 
 
-$(TOP)/javax/comm/CommPortEnumerator.class $(TOP)/javax/comm/CommPortIdentifier.class $(TOP)/javax/comm/CpoListEntry.class $(TOP)/javax/comm/CPOList.class $(TOP)/javax/comm/OwnershipEventThread.class: $(srcdir)/src/CommPortEnumerator.java $(srcdir)/src/CommPortIdentifier.java $(srcdir)/src/CpoList.java  $(srcdir)/src/CpoListEntry.java $(srcdir)/src/OwnershipEventThread.java
-	$(JAVAC) $(srcdir)/src/CommPortEnumerator.java $(srcdir)/src/CommPortIdentifier.java  $(srcdir)/src/CpoList.java  $(srcdir)/src/CpoListEntry.java $(srcdir)/src/OwnershipEventThread.java
+$(TOP)/javax/comm/CommPortEnumerator.class $(TOP)/javax/comm/CommPortIdentifier.class $(TOP)/javax/comm/CPOList.class $(srcdir)/src/CommPortEnumerator.java $(srcdir)/src/CommPortIdentifier.java
+	$(JAVAC) $(srcdir)/src/CommPortEnumerator.java $(srcdir)/src/CommPortIdentifier.java
 
-IDENT: $(TOP)/javax/comm/CommPortEnumerator.class $(TOP)/javax/comm/CommPortIdentifier.class $(TOP)/javax/comm/CpoList.class $(TOP)/javax/comm/CpoListEntry.class $(TOP)/javax/comm/OwnershipEventThread.class
+IDENT: $(TOP)/javax/comm/CommPortEnumerator.class $(TOP)/javax/comm/CommPortIdentifier.class
 
 $(TOP)/%.class $(TOP)/javax/comm/%.class: $(srcdir)/src/%.java 
 	$(JAVAC) $< 

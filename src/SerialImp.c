@@ -18,6 +18,7 @@
 --------------------------------------------------------------------------*/
 #include "config.h"
 #include "javax_comm_RXTXPort.h"
+#include "javax_comm_CommPortIdentifier.h"
 #include <time.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -67,6 +68,7 @@ extern int errno;
  * */
 #define RXTXPort(foo) Java_javax_comm_RXTXPort_ ## foo
 #define RXTXCommDriver(foo) Java_javax_comm_RXTXCommDriver_ ## foo
+#define CommPortIdentifier(foo) Java_javax_comm_RXTXCommDriver_ ## foo
 
 /*----------------------------------------------------------
 RXTXPort.Initialize
@@ -1308,6 +1310,15 @@ JNIEXPORT jint JNICALL RXTXPort(getOutputBufferSize)(JNIEnv *env,
 #endif
 	return(1);
 }
+JNIEXPORT jstring JNICALL Java_javax_comm_CommPortIdentifier_native_1psmisc_1report_1owner (JNIEnv *env, jobject obj, jstring arg)
+{
+	char returnstring[256];
+	const char *str = (*env)->GetStringUTFChars(env, arg, 0);
+        show_user(str,returnstring);
+	(*env)->ReleaseStringUTFChars(env, arg, str);
+	return (*env)->NewStringUTF(env, returnstring);;
+}
+
 
 void dump_termios(char *foo,struct termios *ttyset)
 {

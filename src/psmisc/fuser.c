@@ -1,4 +1,4 @@
-/* loosly based on fuser.c by Werner Almesberger */
+/* loosly based on fuser.c by Werner Almesberger. */
 
 /* Copyright 1993-1998 Werner Almesberger. See file COPYING for details. 
 psmisc (fuser, killall and pstree) program code, documentation and
@@ -36,6 +36,7 @@ is provided "as is" and without any express or implied warranties.
 #define FLAG_UID   2	/* show uid */
 #define FLAG_VERB  4	/* show verbose output */
 #define FLAG_DEV   8	/* show all processes using this device */
+char returnstring[256];
 void parse_args(char *);
 typedef struct {
     const char *name;
@@ -156,74 +157,76 @@ extern void scan_fd(void)
     }
 }
 
-extern void show_user(char tstring[])
+extern void show_user(char tstring[],char *rs)
 {
     const ITEM_DSC *item;
     FILE *f;
     const struct passwd *pw;
     const char *user,*scan;
     char tmp[10],path[PATH_MAX+1],comm[COMM_LEN+1];
-    int length,dummy;
+    int dummy;
+    int keeper;
     pid_t self;
     const char *name;
     int uid;
+    char temp[80];
 
     parse_args(tstring);
     scan_fd();
-    if (seteuid(getuid()) < 0) {
-            perror("seteuid");
-            return;
+    if (seteuid(getuid()) < 0) { 
+	sprintf(rs, "%s", "Unknown Linux Application");
+	return; 
     }
     self = getpid();
-	if (files->name && (files->items || all)) {
-	    printf("DEVICE               USER        PID ACCESS COMMAND\n");
-	    length = 0;
-	    for (scan = files->name; *scan; scan++)
-		if (*scan == '\\') length += printf("\\\\");
-		else if (*scan > ' ' && *scan <= '~') {
-			putchar(*scan);
-			length++;
-		    }
-		    else length += printf("\\%03o",*scan);
-		if (files->name_space)
-		length += printf("/%s",files->name_space->name);
-		while (length < NAME_FIELD) {
-			putchar(' ');
-			length++;
-		}
-		item = files->items;
-		sprintf(path,PROC_BASE "/%d/stat",item->u.proc.pid);
-		strcpy(comm,"???");
-		if (f = fopen(path,"r")) {
-			(void) fscanf(f,"%d (%[^)]",&dummy,comm);
-			(void) fclose(f);
-		}
-		name = comm;
-		uid = item->u.proc.uid;
-		if (uid == UID_UNKNOWN) user = "???";
-		else if (pw = getpwuid(uid)) user = pw->pw_name;
-			else {
-				sprintf(tmp,"%d",uid);
-				user = tmp;
-			}
-		if (length > NAME_FIELD)
-			printf("\n%*s",NAME_FIELD,"");
-		printf(" %-8s ",user);
-		printf("%6d %c%c%c%c%c  ",item->u.proc.pid,
-			item->u.proc.ref_set & REF_FILE ? 'f' : '.',
-			item->u.proc.ref_set & REF_ROOT ? 'r' : '.',
-			item->u.proc.ref_set & REF_CWD ? 'c' : '.',
-			item->u.proc.ref_set & REF_EXE ? 'e' : '.',
-			(item->u.proc.ref_set & REF_MMAP) &&
-			!(item->u.proc.ref_set & REF_EXE) ? 'm' : '.');
-		if (name)
-			for (scan = name; *scan; scan++)
-				if (*scan == '\\') printf("\\\\");
-			else if (*scan > ' ' && *scan <= '~')
-				putchar(*scan);
-			else printf("\\%03o",(unsigned char) *scan);
-			putchar('\n');
-	}
+    if (!files->name || !(files->items || all))
+    {
+	 sprintf(rs, "%s", "Unknown Linux Application");
+	 return; 
+    }
+    scan = files->name;
+    strcat(returnstring," ");
+    item = files->items;
+    sprintf(path,PROC_BASE "/%d/stat",item->u.proc.pid);
+    strcpy(comm,"???");
+    if (f = fopen(path,"r")) {
+	(void) fscanf(f,"%d (%[^)]",&dummy,comm);
+	(void) fclose(f);
+    }
+    name = comm;
+    uid = item->u.proc.uid;
+    if (uid == UID_UNKNOWN) user = "???";
+    else if (pw = getpwuid(uid)) user = pw->pw_name;
+    else {
+	sprintf(tmp,"%d",uid);
+	user = tmp;
+    }
+    strcat(returnstring,user);
+    strcat(returnstring," PID = ");
+    sprintf(temp,"%6d ",item->u.proc.pid);
+    strcat(returnstring,temp);
+    strcat(returnstring,"Program = ");
+    if (name)
+    {
+	 for (scan = name; *scan; scan++)
+	 {
+	      if (*scan == '\\') 
+	      {
+		  sprintf(temp,"\\\\");
+		  strcat(returnstring,temp);
+	      }
+	      else if (*scan > ' ' && *scan <= '~')
+	      {
+		  keeper=strlen(returnstring);
+		  returnstring[keeper]= *scan;
+		  returnstring[keeper+1]= '\0';
+	      }
+	      else { 
+		  sprintf(temp,"\\%03o", scan);
+		  strcat(returnstring,temp);
+	      }
+	 }
+    }
+    strcpy(rs,returnstring);
 }
 static void enter_item(const char *name,int flags,int sig_number,dev_t dev, ino_t ino,SPACE_DSC *name_space)
 {
@@ -256,11 +259,11 @@ static void enter_item(const char *name,int flags,int sig_number,dev_t dev, ino_
  void parse_args(char *argv)
 {
     SPACE_DSC *name_space;
-    int flags,silent,sig_number,no_files;
+    int flags,sig_number,no_files;
     SPACE_DSC *this_name_space;
     struct stat st;
 
-    flags = silent = 0;
+    flags = 0;
     sig_number = SIGKILL;
     name_space = name_spaces;
     no_files = 1;

@@ -28,10 +28,19 @@ import java.lang.Math;
 final class RXTXPort extends SerialPort
 {
 
-	static
+        static
 	{
-		System.loadLibrary( "Serial" );
-		Initialize();
+		String OS;
+
+		OS = System.getProperty("os.name");
+		if(OS.equals("Win95"))
+		{
+			System.loadLibrary("SerialW95");
+		}
+		else
+		{
+			System.loadLibrary( "Serial" );
+		}
 	}
 
 
@@ -53,6 +62,7 @@ final class RXTXPort extends SerialPort
 			fd = open( name );
 		} catch ( PortInUseException e ){}
 		System.out.println("RXTXPort:RXTXPort("+name+") fd = " + fd);
+		if( fd == 0 ) throw new IOException("port in use");
 		PortName=name;
 	}
 

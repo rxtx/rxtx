@@ -28,11 +28,11 @@ import java.util.Vector;
 public class RXTXCommDriver implements CommDriver
 {
 
-	static String OS;
 	private static boolean debug = false;
 
         static
 	{
+		String OS;
 		if(debug ) System.out.println("RXTXCommDriver {}");
 		OS = System.getProperty("os.name");
 		if(OS.equals("Win95"))
@@ -76,9 +76,12 @@ public class RXTXCommDriver implements CommDriver
 		String portName = "/dev/" + pName;
 		File port = new File( portName );
 
-		if( port.canRead() && port.canWrite() )
+		if( port.canRead())
 		{
-			CommPortIdentifier.addPortName( portName, pType, this );
+			if( port.canWrite() )
+			{
+				CommPortIdentifier.addPortName( portName, pType, this );
+			}
 		}
 	}
 
@@ -153,7 +156,7 @@ public class RXTXCommDriver implements CommDriver
 		int j=0;while(j<list.length) devs.addElement(list[j++]);
 
 
-		static final String[] AllKnownSerialPorts={
+		String[] AllKnownSerialPorts={
 			"comx",      // linux COMMX synchronous serial card
 			"holter",    // custom card for heart monitoring
 			"modem",     // linux symbolic link to modem.
@@ -200,12 +203,12 @@ public class RXTXCommDriver implements CommDriver
 	* July 12, 1999
 	* IBM
 	*/
-		static final String[] AllKnownParallelPorts={
+		String[] AllKnownParallelPorts={
 			"lp"    // linux printer port
 		};
-		static final String[] AllKnownRS485Ports={};
-		static final String[] AllKnownI2CPorts={};
-		static final String[] AllKnownRAWPorts={};
+		String[] AllKnownRS485Ports={};
+		String[] AllKnownI2CPorts={};
+		String[] AllKnownRAWPorts={};
 		RegisterValidPorts(
 			devs,
 			getPortPrefixes(AllKnownSerialPorts),
@@ -267,9 +270,7 @@ public class RXTXCommDriver implements CommDriver
 			{
 				return new RS485( portName );
 			}
-		} catch( IOException e ) {
-			e.printStackTrace();
-		}
+		} catch( IOException e ) { }
 		return null;
 	}
 }

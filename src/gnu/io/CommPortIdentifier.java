@@ -18,13 +18,9 @@
 --------------------------------------------------------------------------*/
 package  javax.comm;
 
-import  java.io.*;
-import  java.util.*;
-
-/*------------------------------------------------------------------------------
-Lots of stubs here.  Taken from the javadoc material produced from Sun's
-commapi porting file.  Not used yet.
-------------------------------------------------------------------------------*/
+import  java.io.FileDescriptor;
+import  java.util.Vector;
+import  java.util.Enumeration;
 
 public class CommPortIdentifier 
 {
@@ -41,10 +37,9 @@ public class CommPortIdentifier
  	static CommPortIdentifier   CommPortIndex;
 	CommPortIdentifier next;
 	private int PortType;
-	private static boolean debug=true;
+	private static boolean debug = false;
 	static Object Sync;
-	CpoList cpoList = new CpoList();
-	OwnershipEventThread oeThread;
+	Vector ownershipListener;
 
 
 
@@ -69,6 +64,18 @@ public class CommPortIdentifier
 		catch (Throwable e) 
 		{
 			System.err.println(e + "thrown while loading " + "javax.comm.RXTXCommDriver");
+		}
+
+		String OS;
+
+		OS = System.getProperty("os.name");
+		if(OS.equals("Win95"))
+		{
+			System.loadLibrary("SerialW95");
+		}
+		else
+		{
+			System.loadLibrary( "Serial" );
 		}
 	}
 	CommPortIdentifier ( String pn, CommPort cp, int pt, CommDriver driver) 
@@ -98,10 +105,10 @@ public class CommPortIdentifier
 	}
 /*------------------------------------------------------------------------------
 	AddIdentifierToList()
-	accept:         
+	accept:        The cpi to add to the list. 
 	perform:        
 	return: 	
-	exceptions:     
+	exceptions:    
 	comments:
 ------------------------------------------------------------------------------*/
 	private static void AddIdentifierToList( CommPortIdentifier cpi)
@@ -132,11 +139,25 @@ public class CommPortIdentifier
 	perform:
 	return:
 	exceptions:
-	comments:   FIXME
+	comments:   
 ------------------------------------------------------------------------------*/
 	public void addPortOwnershipListener(CommPortOwnershipListener c) 
 	{ 
-		if(debug) System.out.println("FIXME CommPortIdentifier:addPortOwnershipListener()");
+		if(debug) System.out.println("CommPortIdentifier:addPortOwnershipListener()");
+
+		/*  is the Vector instantiated? */
+
+		if( ownershipListener == null )
+		{
+			ownershipListener = new Vector();
+		}
+
+		/* is the ownership listener already in the list? */
+
+		if ( ownershipListener.contains(c) == false)
+		{
+			ownershipListener.addElement(c);
+		}
 	}
 /*------------------------------------------------------------------------------
 	getCurrentOwner()
@@ -149,7 +170,7 @@ public class CommPortIdentifier
 	public String getCurrentOwner() 
 	{ 
 		if(debug) System.out.println("CommPortIdentifier:getCurrentOwner()");
-		return(Owner);
+		return( Owner );
 	}
 /*------------------------------------------------------------------------------
 	getName()
@@ -162,7 +183,7 @@ public class CommPortIdentifier
 	public String getName() 
 	{ 
 		if(debug) System.out.println("CommPortIdentifier:getName()");
-		return(this.PortName);
+		return( PortName );
 	}
 /*------------------------------------------------------------------------------
 	getPortIdentifier()
@@ -170,7 +191,7 @@ public class CommPortIdentifier
 	perform:
 	return:
 	exceptions:
-	comments:
+	comments:   
 ------------------------------------------------------------------------------*/
 	static public CommPortIdentifier getPortIdentifier(String s) throws NoSuchPortException 
 	{ 
@@ -194,14 +215,23 @@ public class CommPortIdentifier
 	perform:
 	return:
 	exceptions:
-	comments:    FIXME
+	comments:    
 ------------------------------------------------------------------------------*/
-	static public CommPortIdentifier getPortIdentifier(CommPort c) throws NoSuchPortException 	
+	static public CommPortIdentifier getPortIdentifier(CommPort p) 
+		throws NoSuchPortException 	
 	{ 
-		if(debug) System.out.println("FIXME CommPortIdentifier:getPortIdentifier(CommPort)");
+		if(debug) System.out.println("CommPortIdentifier:getPortIdentifier(CommPort)");
 		System.out.println("configure --enable-RXTXIDENT is for developers only");
-		//throw new NoSuchPortException();
-		return(null);
+		CommPortIdentifier c = CommPortIndex;
+		synchronized( Sync )
+		{
+			while ( c != null && c.commport != p )
+				c = c.next;
+		}
+		if ( c != null )
+			return (c);
+
+		throw new NoSuchPortException();
 	}
 /*------------------------------------------------------------------------------
 	getPortIdentifiers()
@@ -222,12 +252,12 @@ public class CommPortIdentifier
 	perform:
 	return:
 	exceptions:
-	comments:    FIXME
+	comments:
 ------------------------------------------------------------------------------*/
 	public int getPortType() 
 	{ 
-		if(debug) System.out.println("FIXME CommPortIdentifier:getPortType()");
-		return(PortType);
+		if(debug) System.out.println("CommPortIdentifier:getPortType()");
+		return( PortType );
 	}
 /*------------------------------------------------------------------------------
 	isCurrentlyOwned()
@@ -235,12 +265,12 @@ public class CommPortIdentifier
 	perform:
 	return:
 	exceptions:
-	comments:     FIXME  This is where we want to use psutils code.
+	comments:    
 ------------------------------------------------------------------------------*/
 	public synchronized boolean isCurrentlyOwned() 
 	{ 
-		if(debug) System.out.println("FIXME CommPortIdentifier:isCurrentlyOwned()");
-		return(false);
+		if(debug) System.out.println("CommPortIdentifier:isCurrentlyOwned()");
+		return(!Available);
 	}
 /*------------------------------------------------------------------------------
 	open()
@@ -248,13 +278,21 @@ public class CommPortIdentifier
 	perform:
 	return:
 	exceptions:
-	comments:     FIXME
+	comments:
 ------------------------------------------------------------------------------*/
 	public synchronized CommPort open(FileDescriptor f) throws UnsupportedCommOperationException 
 	{ 
-		if(debug) System.out.println("FIXME CommPortIdentifier:open(FileDescriptor)");
+		if(debug) System.out.println("CommPortIdentifier:open(FileDescriptor)");
 		throw new UnsupportedCommOperationException();
 	}
+	private native String native_psmisc_report_owner(String PortName);
+	/*
+	private String native_psmisc_report_owner(String PortName)
+	{
+		return("soon to be known Linux Application");
+	}
+	*/
+
 /*------------------------------------------------------------------------------
 	open()
 	accept:      application makeing the call and milliseconds to block
@@ -266,23 +304,43 @@ public class CommPortIdentifier
 ------------------------------------------------------------------------------*/
 	private boolean HideOwnerEvents;
 
-	public synchronized CommPort open(String TheOwner, int i) throws PortInUseException 
+	public synchronized CommPort open(String TheOwner, int i) 
+		throws PortInUseException 
 	{ 
 		if(debug) System.out.println("CommPortIdentifier:open("+TheOwner + ", " +i+")");
-		commport = RXTXDriver.getCommPort(PortName,PortType);
-		if(Available)
+		if (Available == false)
 		{
-			Available = false;
+			synchronized (Sync)
+			{
+				fireOwnershipEvent(CommPortOwnershipListener.PORT_OWNERSHIP_REQUESTED);
+				try
+				{
+					wait(i);
+				}
+				catch ( InterruptedException e ) { }
+			}
+		}
+		if (Available == false)
+		{
+			throw new PortInUseException(getCurrentOwner());
+		}
+		if(commport == null)
+		{
+			commport = RXTXDriver.getCommPort(PortName,PortType);
+		}
+		if(commport != null)
+		{
 			Owner = TheOwner;
+			Available=false;
+			fireOwnershipEvent(CommPortOwnershipListener.PORT_OWNED);
 			return commport;
 		}
-		/* 
-		possibly talk other jvms about getting the port?
-		NativeFindOwner(PortName);
-		throw new PortInUseException(); 
-		*/
-		if (debug) System.out.println("RXTXDriver.getCommPort() Yikes!");
-		return null;
+		else
+		{
+			if (debug) System.out.println("RXTXDriver.getCommPort() Yikes!");
+			throw new PortInUseException(
+				native_psmisc_report_owner(PortName));
+		}
 	}
 /*------------------------------------------------------------------------------
 	removePortOwnership()
@@ -290,37 +348,33 @@ public class CommPortIdentifier
 	perform:
 	return:
 	exceptions:
-	comments:    FIXME
+	comments:
 ------------------------------------------------------------------------------*/
 	public void removePortOwnershipListener(CommPortOwnershipListener c) 
 	{ 
-		Available=true;
-		Owner="";
-		if(debug) System.out.println("FIXME CommPortIdentifier:removePortOwnershipListener()");
+		if(debug) System.out.println("CommPortIdentifier:removePortOwnershipListener()");
+		/* why is this called twice? */
+		if(ownershipListener != null)
+			ownershipListener.removeElement(c);
 	}
-/*------------------------------------------------------------------------------
-	ownershipThreadWaiter()
-	accept:
-	perform:
-	return:
-	exceptions:
-	comments:    FIXME
-------------------------------------------------------------------------------*/
-	void ownershipThreadWaiter()
-	{
-		if(debug) System.out.println("FIXME CommPortIdentifier:ownershipThreadWaiter()");
-	}
+
 /*------------------------------------------------------------------------------
 	internalClosePort()
-	accept:
-	perform:
-	return:
-	exceptions:
-	comments:    FIXME
+	accept:       None
+	perform:      clean up the Ownership information and send the event
+	return:       None
+	exceptions:   None
+	comments:     None
 ------------------------------------------------------------------------------*/
 	synchronized void internalClosePort() 
 	{
-		if(debug) System.out.println("FIXME CommPortIdentifier:internalClosePort()");
+		if(debug) System.out.println("CommPortIdentifier:internalClosePort()");
+		Owner = null;
+		Available = true;
+		commport = null;
+		/*  this tosses null pointer?? */
+		notifyAll();
+		fireOwnershipEvent(CommPortOwnershipListener.PORT_UNOWNED);
 	}
 /*------------------------------------------------------------------------------
 	fireOwnershipEvent()
@@ -328,21 +382,19 @@ public class CommPortIdentifier
 	perform:
 	return:
 	exceptions:
-	comments:    FIXME
+	comments:
 ------------------------------------------------------------------------------*/
 	void fireOwnershipEvent(int eventType)
 	{
-		if(debug) System.out.println("FIXME CommPortIdentifier:fireOwnershipEvent()");
+		if(debug) System.out.println("CommPortIdentifier:fireOwnershipEvent( " + eventType + " )");
+		if (ownershipListener != null)
+		{
+			CommPortOwnershipListener c;
+			for ( Enumeration e = ownershipListener.elements();
+				e.hasMoreElements(); 
+				c.ownershipChange(eventType))
+				c = (CommPortOwnershipListener) e.nextElement();
+		}
 	}
-/*------------------------------------------------------------------------------
-	parsePropsFile()
-	accept:
-	perform:
-	return:
-	exceptions:
-	comments:    FIXME? Could used in static init
-------------------------------------------------------------------------------*/
-//	private static String[] parsePropsFile(InputStream in) {}
-
 }
 

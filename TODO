@@ -115,9 +115,6 @@ CommPortIdentifier support. Needs some code.
 		CommPortEnumerator.java
 		CommPortIdentifier.java
 		CommPortOwnershipListener.java
-		CpoList.java
-		CpoListEntry.java
-		OwnershipEventThread.java
 		SerialPort.java
 		SerialPortEvent.java
 		SerialPortEventListener.java

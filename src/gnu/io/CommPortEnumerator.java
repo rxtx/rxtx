@@ -18,14 +18,19 @@
 --------------------------------------------------------------------------*/
 package  javax.comm;
 
-import java.util.*;
+import java.util.Enumeration;
 
-class CommPortEnumerator implements Enumeration {
-	private CommPortIdentifier CPI;
-	private boolean debug=true;
-	static 
+class CommPortEnumerator implements Enumeration
+{
+	private CommPortIdentifier index;
+	private boolean debug=false;
+	static
 	{
 		System.out.println("CommPortEnumerator:{}");
+	}
+
+	CommPortEnumerator()
+	{
 	}
 /*------------------------------------------------------------------------------
         nextElement()
@@ -35,14 +40,14 @@ class CommPortEnumerator implements Enumeration {
         exceptions:
         comments:
 ------------------------------------------------------------------------------*/
-	public Object nextElement() 
-	{ 
+	public Object nextElement()
+	{
 		if(debug) System.out.println("CommPortEnumerator:nextElement()");
 		synchronized (CommPortIdentifier.Sync)
 		{
-			if(CPI != null) CPI = CPI.next;
-			else CPI=CommPortIdentifier.CommPortIndex;
-			return(CPI);
+			if(index != null) index = index.next;
+			else index=CommPortIdentifier.CommPortIndex;
+			return(index);
 		}
 	}
 /*------------------------------------------------------------------------------
@@ -53,15 +58,14 @@ class CommPortEnumerator implements Enumeration {
         exceptions:
         comments:
 ------------------------------------------------------------------------------*/
-	public boolean hasMoreElements() 
-	{ 
+	public boolean hasMoreElements()
+	{
 		if(debug) System.out.println("CommPortEnumerator:hasMoreElements");
 		synchronized (CommPortIdentifier.Sync)
 		{
-			if(CPI != null) return CPI == null ? false : true;
-			else return CommPortIdentifier.CommPortIndex == null ? 
+			if(index != null) return index == null ? false : true;
+			else return CommPortIdentifier.CommPortIndex == null ?
 				false : true;
 		}
-			
 	}
 }
