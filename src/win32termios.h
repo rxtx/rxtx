@@ -80,6 +80,8 @@ struct termios
 
 /*  for TIOCGSERIAL and TIOCSSERIAL of interest are baud_base and
  *  custom_divisor
+ *  --- NOTE:  This is not used.  Win32 sets custom speeds on the
+ *             kernel side.
  */
 struct serial_struct {
 /*
@@ -401,9 +403,11 @@ void termiosSetParityError( int, char );
 #define TIOCSER_TEMP	0x01
 /*
 #define FIONREAD	0x541b
-*/
+TIOC[GS]SERIAL is not used on win32.  It was dropped after we could not
+find a way to get/set buad_base and divisor directly.
 #define TIOCGSERIAL	0x541e
 #define TIOCSSERIAL	0x541f
+*/
 #define TCSBRKP		0x5425
 #define TIOCSERCONFIG	0x5453
 #define TIOCSERGWILD	0x5454

@@ -652,9 +652,9 @@ int set_port_params( JNIEnv *env, int fd, int cspeed, int dataBits,
 {
 	struct termios ttyset;
 	int result = 0;
-#if defined(TIOCGSERIAL) && !defined( WIN32 )
+#if defined(TIOCGSERIAL)
 	struct serial_struct sstruct;
-#endif /* TIOCGSERIAL && !WIN32 */
+#endif /* TIOCGSERIAL */
 
 	if( tcgetattr( fd, &ttyset ) < 0 )
 	{
@@ -680,62 +680,6 @@ int set_port_params( JNIEnv *env, int fd, int cspeed, int dataBits,
 		return(1);
 	}
 
-#if defined(TIOCGSERIAL) && !defined(WIN32)
-	if ( cspeed > 1000000 )
-	{
-		/*
-		The following speeds can not be set using cfset*speed()
-		The defines are added in SerialImp.h.
-
-		The speed is set to 38400 which is actually a custom
-		speed.
-
-		The baud_base and desired speed are then used to
-		calculate a custom divisor.
-
-		On linux the setserial man page covers this.
-		*/
-
-		if ( ioctl( fd, TIOCGSERIAL, &sstruct ) < 0 )
-		{
-			return( 1 );
-		}
-
-		switch( cspeed )
-		{
-			case B14400:
-				cspeed = 14400;
-				break;
-			case B28800:
-				cspeed = 28800;
-				break;
-			case B128000:
-				cspeed = 128000;
-				break;
-			case B256000:
-				cspeed = 256000;
-				break;
-			default:
-				return( 1 );
-		}
-	
-		if ( cspeed < 1  || sstruct.baud_base < 1 )
-		{
-			return( 1 );
-		}
-
-		sstruct.custom_divisor = ( sstruct.baud_base/cspeed );
-
-		if (	sstruct.baud_base < 1 ||
-			ioctl( fd, TIOCSSERIAL, &sstruct ) < 0 )
-		{
-			return( 1 );
-		}
-
-		cspeed = B38400;
-	}
-#endif /* TIOCGSERIAL  !WIN32 */
-
 #ifdef __FreeBSD__
 	if( cfsetspeed( &ttyset, cspeed ) < 0 )
 	{
@@ -758,8 +702,42 @@ int set_port_params( JNIEnv *env, int fd, int cspeed, int dataBits,
 	if(     cfsetispeed( &ttyset, cspeed ) < 0 ||
 		cfsetospeed( &ttyset, cspeed ) < 0 )
 	{
-		report( "nativeSetSerialPortParams: Cannot Set Speed\n" );
-		return( 1 );
+		/*
+		    Some people need to set the baud rate to ones not defined
+		    in termios.h
+
+		    This includes some baud rates which are supported by CommAPI
+		    in Unix ( 14400, 28800, 128000, 256000 )
+
+		    If the above fails, we assume this is not a defined
+		    baud rate on Unix.  With Win32, It is assumed the kernel
+		    will do this for us.
+
+		    The baud_base and desired speed are used to
+		    calculate a custom divisor.
+
+		    On linux the setserial man page covers this.
+		*/
+
+#if defined(TIOCGSERIAL)
+		sstruct.custom_divisor = ( sstruct.baud_base/cspeed );
+		cspeed = B38400;
+#endif /* TIOCGSERIAL */
+		if(     cfsetispeed( &ttyset, cspeed ) < 0 ||
+			cfsetospeed( &ttyset, cspeed ) < 0 )
+		{
+			/* OK, we tried everything */
+			report( "nativeSetSerialPortParams: Cannot Set Speed\n" );
+			return( 1 );
+		}
+#if defined(TIOCSSERIAL)
+		/*  It is assumed Win32 does this for us */
+		if (	sstruct.baud_base < 1 ||
+			ioctl( fd, TIOCSSERIAL, &sstruct ) < 0 )
+		{
+			return( 1 );
+		}
+#endif /* TIOCSSERIAL */
 	}
 
 	if( tcsetattr( fd, TCSANOW, &ttyset ) < 0 )
@@ -853,8 +831,12 @@ int translate_speed( JNIEnv *env, jint speed )
 #ifdef B460800
 		case 460800:	return B460800;
 #endif /* B460800 */
+#ifdef B14400
 		case 14400:	return B14400;
+#endif /* B14400 */
+#ifdef B28800
 		case 28800:	return B28800;
+#endif /* B28800 */
 #ifdef B128000  /* dima */
 		case 128000:	return B128000;
 #endif  /* dima */
@@ -863,8 +845,13 @@ int translate_speed( JNIEnv *env, jint speed )
 #endif  /* dima */
 	}
 
-	LEAVE( "RXTXPort:translate_speed: Error condition" );
-	return -1;
+	/* Handle custom speeds */
+	if( speed >= 0 ) return speed;
+	else
+	{
+		LEAVE( "RXTXPort:translate_speed: Error condition" );
+		return -1;
+	}
 }
 
 /*----------------------------------------------------------
@@ -1733,6 +1720,153 @@ void static_add_filename( const char *filename, int fd)
 			return;
 		}
 	}
+}
+/*----------------------------------------------------------
+RXTXPort.nativeSetBaudBase
+
+   accept:      The Baud Base for custom speeds
+   perform:     set the Baud Base
+   return:      0 on success
+   exceptions:  Unsupported Comm Operation on systems not supporting 
+                TIOCGSERIAL
+   comments:    
+		Set baud rate to 38400 before using this
+		First introduced in rxtx-2.1-3
+----------------------------------------------------------*/
+JNIEXPORT jboolean JNICALL RXTXPort(nativeSetBaudBase)(
+	JNIEnv *env,
+	jobject jobj,
+	jint BaudBase
+)
+{
+
+#if defined(TIOCGSERIAL)
+
+	int fd = get_java_var( env, jobj,"fd","I" );
+	struct serial_struct sstruct;
+
+	if (	sstruct.baud_base < 1 ||
+		ioctl( fd, TIOCSSERIAL, &sstruct ) < 0 )
+	{
+		return( JNI_TRUE );
+	}
+	return( JNI_FALSE );
+#else
+	throw_java_exception( env, UNSUPPORTED_COMM_OPERATION,
+		"nativeSetBaudBase", strerror( errno ) );
+	return( JNI_TRUE );
+#endif /* TIOCGSERIAL */
+}
+
+/*----------------------------------------------------------
+RXTXPort.nativeGetBaudBase
+
+   accept:      the Baud Base used for custom speeds
+   perform:     
+   return:      Baud Base
+   exceptions:  Unsupported Comm Operation on systems not supporting 
+                TIOCGSERIAL
+   comments:    
+		First introduced in rxtx-2.1-3
+----------------------------------------------------------*/
+JNIEXPORT jint JNICALL RXTXPort(nativeGetBaudBase)(
+	JNIEnv *env,
+	jobject jobj
+)
+{
+
+#if defined(TIOCGSERIAL)
+
+	int fd = get_java_var( env, jobj,"fd","I" );
+	struct serial_struct sstruct;
+
+	if ( ioctl( fd, TIOCGSERIAL, &sstruct ) < 0 )
+	{
+		return( ( jint ) -1 );
+	}
+	return( ( jint ) ( sstruct.baud_base ) );
+#else
+	throw_java_exception( env, UNSUPPORTED_COMM_OPERATION,
+		"nativeGetBaudBase", strerror( errno ) );
+	return( ( jint ) -1 );
+#endif /* TIOCGSERIAL */
+}
+
+/*----------------------------------------------------------
+RXTXPort.nativeSetDivisor
+
+   accept:      Divisor for custom speeds
+   perform:     set the Divisor for custom speeds
+   return:      0 on success
+   exceptions:  Unsupported Comm Operation on systems not supporting 
+                TIOCGSERIAL
+   comments:    
+		Set baud rate to 38400 before using this
+		First introduced in rxtx-2.1-3
+----------------------------------------------------------*/
+JNIEXPORT jboolean JNICALL RXTXPort(nativeSetDivisor)(
+	JNIEnv *env,
+	jobject jobj,
+	jint Divisor
+)
+{
+
+#if defined(TIOCGSERIAL)
+
+	int fd = get_java_var( env, jobj,"fd","I" );
+	struct serial_struct sstruct;
+
+	if ( ioctl( fd, TIOCGSERIAL, &sstruct ) < 0 )
+	{
+		return( JNI_TRUE );
+	}
+
+	if (	sstruct.custom_divisor < 1 ||
+		ioctl( fd, TIOCSSERIAL, &sstruct ) < 0 )
+	{
+		return( JNI_TRUE );
+	}
+	return( JNI_FALSE );
+#else
+	throw_java_exception( env, UNSUPPORTED_COMM_OPERATION,
+		"nativeSetDivisor", strerror( errno ) );
+	return( JNI_TRUE );
+#endif /* TIOCGSERIAL */
+}
+
+/*----------------------------------------------------------
+RXTXPort.nativeGetDivisor
+
+   accept:      none
+   perform:     Find the Divisor used for custom speeds
+   return:      Divisor
+   exceptions:  Unsupported Comm Operation on systems not supporting
+	        TIOCGSERIAL
+   comments:    
+		First introduced in rxtx-2.1-3
+----------------------------------------------------------*/
+JNIEXPORT jint JNICALL RXTXPort(nativeGetDivisor)(
+	JNIEnv *env,
+	jobject jobj
+)
+{
+
+#if defined(TIOCGSERIAL)
+
+	int fd = get_java_var( env, jobj,"fd","I" );
+	struct serial_struct sstruct;
+
+	if ( ioctl( fd, TIOCGSERIAL, &sstruct ) < 0 )
+	{
+		return( ( jint ) -1 );
+	}
+
+	return( ( jint ) sstruct.custom_divisor );
+#else
+	throw_java_exception( env, UNSUPPORTED_COMM_OPERATION,
+		"nativeGetDivisor", strerror( errno ) );
+	return( ( jint ) -1 );
+#endif /* TIOCGSERIAL */
 }
 
 /*----------------------------------------------------------
@@ -3393,7 +3527,7 @@ RXTXCommDriver.nativeGetVersion
 JNIEXPORT jstring JNICALL RXTXCommDriver(nativeGetVersion) (JNIEnv *env,
 	jclass jclazz )
 {
-	return (*env)->NewStringUTF( env, "RXTX-2.1-2" );
+	return (*env)->NewStringUTF( env, "RXTX-2.1-3" );
 }
 
 /*----------------------------------------------------------

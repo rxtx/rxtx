@@ -2440,10 +2440,13 @@ ioctl()
 
 int ioctl( int fd, int request, ... )
 {
-	unsigned long dwStatus = 0, ErrCode;
+	unsigned long dwStatus = 0;
 	va_list ap;
 	int *arg, ret, result;
+#ifdef TIOCGSERIAL
+	unsigned long ErrCode;
 	struct serial_struct *sstruct;
+#endif /* TIOCGSERIAL */
 	struct async_struct *astruct;
 	struct serial_multiport_struct *mstruct;
 	COMSTAT Stat;
@@ -2648,20 +2651,30 @@ int ioctl( int fd, int request, ... )
 				report("not changing RTS\n");
 */
 			break;
-		/* get the serial struct info from the underlying API */
+		/* get the serial struct info from the underlying API
+		 * TIOCGSERIAL is not used on win32.  Its commented out
+		 * in win32termios.h
+		 */
+#ifdef TIOCGSERIAL
 		case TIOCGSERIAL:
 			sstruct = va_arg( ap, struct serial_struct * );
 			sstruct = index->sstruct;
 			report( "TIOCGSERIAL\n" );
 			va_end( ap );
 			return 0;
-		/* set the serial struct info from the underlying API */
+#endif /* TIOCGSERIAL */
+		/* set the serial struct info from the underlying API
+		 * this is not implemented.  TIOCSSERIAL is commented out
+		 * in win32termios.h
+	         */
+#ifdef TIOCSSERIAL
 		case TIOCSSERIAL:
 			report( "TIOCSSERIAL\n" );
 			index->sstruct = sstruct;
 			arg = va_arg( ap, int * );
 			va_end( ap );
 			return 0;
+#endif /* TIOCSSERIAL */
 		case TIOCSERCONFIG:
 		case TIOCSERGETLSR:
 			MexPrintf("t");

@@ -125,6 +125,9 @@ final public class RXTXPort extends SerialPort
 	*  @param  p parity
 	*  @throws UnsupportedCommOperationException
 	*  @see gnu.io.UnsupportedCommOperationException
+
+	*  If speed is not a predifined speed it is assumed to be
+	*  the actual speed desired.
 	*/
 	public synchronized void setSerialPortParams( int b, int d, int s, int p )
 		throws UnsupportedCommOperationException
@@ -140,7 +143,11 @@ final public class RXTXPort extends SerialPort
 		parity = p;
 	}
 
-	/** Set the native serial port parameters */
+	/**
+	*  Set the native serial port parameters
+	*  If speed is not a predifined speed it is assumed to be
+	*  the actual speed desired.
+	*/
 	private native void nativeSetSerialPortParams( int speed, int dataBits,
 		int stopBits, int parity )
 		throws UnsupportedCommOperationException;
@@ -149,6 +156,7 @@ final public class RXTXPort extends SerialPort
 	private int speed=9600;
 	/** 
 	*  @return  int representing the baudrate
+	*  This will not behave as expected with custom speeds
 	*/
 	public int getBaudRate() { return speed; }
 
@@ -1343,6 +1351,7 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	*  @param  port the name of the port thats been preopened
 	*  @return BaudRate on success
 	*  @throws UnsupportedCommOperationException;
+	*  This will not behave as expected with custom speeds
 	*
 	*/
 	public static int staticGetBaudRate( String port )
