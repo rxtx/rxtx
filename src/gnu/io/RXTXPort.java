@@ -28,7 +28,7 @@ import java.lang.Math;
 * @see gnu.io.SerialPort
 */
 
-final class RXTXPort extends SerialPort
+final public class RXTXPort extends SerialPort
 {
 
 	private static boolean debug = false;
@@ -1164,6 +1164,12 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 
 /*------------------------  END OF CommAPI -----------------------------*/
 
+	private native static boolean nativeStaticSetDTR( String port,
+							boolean flag )
+		throws UnsupportedCommOperationException;
+	private native static boolean nativeStaticSetRTS( String port,
+							boolean flag )
+		throws UnsupportedCommOperationException;
 	private native int nativeGetParityErrorChar( )
 		throws UnsupportedCommOperationException;
 	private native boolean nativeSetParityErrorChar( byte b )
@@ -1197,13 +1203,61 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	*  Extension to CommAPI
 	*  This is an extension to CommAPI.  It may not be supported on
 	*  all operating systems.
+	*
+	*  Open the port and set DTR.  remove lockfile and do not close
+	*  This is so some software can appear to set the DTR before opening
+	*  the port a second time later on.  Open will raise the DTR and
+	*  DTR when called again later so setting DTR low will not do much.
+	*
+	*  @return true on success
+	*  @throws UnsupportedCommOperationException;
+	*
+	*/
+
+	public static boolean staticSetDTR( String port, boolean flag )
+		throws UnsupportedCommOperationException
+	{
+		if ( debug )
+			System.out.println( "RXTXPort:staticSetDTR( " + port +
+						" " + flag );
+		return( nativeStaticSetDTR( port, flag ) );
+	}
+
+	/**
+	*  Extension to CommAPI
+	*  This is an extension to CommAPI.  It may not be supported on
+	*  all operating systems.
+	*
+	*  Open the port and set RTS.  remove lockfile and do not close
+	*  This is so some software can appear to set the RTS before opening
+	*  the port a second time later on.  Open will raise the RTS and
+	*  RTS when called again later so setting RTS low will not do much.
+	*
+	*  @return none
+	*  @throws UnsupportedCommOperationException;
+	*
+	*/
+
+	public static boolean staticSetRTS( String port, boolean flag )
+		throws UnsupportedCommOperationException
+	{
+		if ( debug )
+			System.out.println( "RXTXPort:staticSetRTS( " + port +
+						" " + flag );
+		return( nativeStaticSetRTS( port, flag ) );
+	}
+
+	/**
+	*  Extension to CommAPI
+	*  This is an extension to CommAPI.  It may not be supported on
+	*  all operating systems.
 	*  @return int the Parity Error Character
 	*  @throws UnsupportedCommOperationException;
 	*
 	*  Anyone know how to do this in Unix?
 	*/
 
-	int getParityErrorChar( )
+	public int getParityErrorChar( )
 		throws UnsupportedCommOperationException
 	{
 		int ret;
@@ -1227,7 +1281,7 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	*  Anyone know how to do this in Unix?
 	*/
 
-	boolean setParityErrorChar( byte b )
+	public boolean setParityErrorChar( byte b )
 		throws UnsupportedCommOperationException
 	{
 		if ( debug )
@@ -1245,7 +1299,7 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	*  Anyone know how to do this in Unix?
 	*/
 
-	int getEndOfInputChar( )
+	public int getEndOfInputChar( )
 		throws UnsupportedCommOperationException
 	{
 		int ret;
@@ -1267,7 +1321,7 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	*  @throws UnsupportedCommOperationException;
 	*/
 
-	boolean setEndOfInputChar( byte b )
+	public boolean setEndOfInputChar( byte b )
 		throws UnsupportedCommOperationException
 	{
 		if ( debug )
@@ -1289,6 +1343,8 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	public boolean setUARTType(String type, boolean test)
 		throws UnsupportedCommOperationException
 	{
+		if ( debug )
+			System.out.println( "RXTXPort:setUARTType()");
 		return nativeSetUartType(type, test);
 	}
 	/**
@@ -1316,6 +1372,8 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	public boolean setBaudBase(int BaudBase)
 		throws UnsupportedCommOperationException
 	{
+		if ( debug )
+			System.out.println( "RXTXPort:setBaudBase()");
 		return nativeSetBaudBase(BaudBase);
 	}
 
@@ -1327,6 +1385,8 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 
 	public int getBaudBase() throws UnsupportedCommOperationException
 	{
+		if ( debug )
+			System.out.println( "RXTXPort:getBaudBase()");
 		return nativeGetBaudBase();
 	}
 
@@ -1339,6 +1399,8 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	public boolean setDivisor(int Divisor)
 		throws UnsupportedCommOperationException
 	{
+		if ( debug )
+			System.out.println( "RXTXPort:setDivisor()");
 		return nativeSetDivisor(Divisor);
 	}
 
@@ -1350,6 +1412,8 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 
 	public int getDivisor() throws UnsupportedCommOperationException
 	{
+		if ( debug )
+			System.out.println( "RXTXPort:getDivisor()");
 		return nativeGetDivisor();
 	}
 
@@ -1361,6 +1425,8 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 
 	public boolean setLowLatency() throws UnsupportedCommOperationException
 	{
+		if ( debug )
+			System.out.println( "RXTXPort:setLowLatency()");
 		return nativeSetLowLatency();
 	}
 
@@ -1372,6 +1438,8 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 
 	public boolean getLowLatency() throws UnsupportedCommOperationException
 	{
+		if ( debug )
+			System.out.println( "RXTXPort:getLowLatency()");
 		return nativeGetLowLatency();
 	}
 
@@ -1384,6 +1452,8 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	public boolean setCallOutHangup(boolean NoHup)
 		throws UnsupportedCommOperationException
 	{
+		if ( debug )
+			System.out.println( "RXTXPort:setCallOutHangup()");
 		return nativeSetCallOutHangup(NoHup);
 	}
 
@@ -1396,6 +1466,8 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	public boolean getCallOutHangup()
 		throws UnsupportedCommOperationException
 	{
+		if ( debug )
+			System.out.println( "RXTXPort:getCallOutHangup()");
 		return nativeGetCallOutHangup();
 	}
 

@@ -80,5 +80,42 @@ public abstract class SerialPort extends CommPort {
 	public abstract void setRcvFifoTrigger(int trigger);
          deprecated
 */
+/* ----------------------   end of commapi ------------------------ */
 
+/*
+	can't have static abstract?
+
+	public abstract static boolean staticSetDTR( String port, boolean flag )
+		throws UnsupportedCommOperationException;
+	public abstract static boolean staticSetRTS( String port, boolean flag )
+		throws UnsupportedCommOperationException;
+*/
+	public abstract int getParityErrorChar( )
+		throws UnsupportedCommOperationException;
+	public abstract boolean setParityErrorChar( byte b )
+		throws UnsupportedCommOperationException;
+	public abstract int getEndOfInputChar( )
+		throws UnsupportedCommOperationException;
+	public abstract boolean setEndOfInputChar( byte b )
+		throws UnsupportedCommOperationException;
+	public abstract boolean setUARTType(String type, boolean test)
+		throws UnsupportedCommOperationException;
+	public abstract String getUARTType()
+		throws UnsupportedCommOperationException;
+	public abstract boolean setBaudBase(int BaudBase)
+		throws UnsupportedCommOperationException;
+	public abstract int getBaudBase()
+		throws UnsupportedCommOperationException;
+	public abstract boolean setDivisor(int Divisor)
+		throws UnsupportedCommOperationException;
+	public abstract int getDivisor()
+		throws UnsupportedCommOperationException;
+	public abstract boolean setLowLatency()
+		throws UnsupportedCommOperationException;
+	public abstract boolean getLowLatency()
+		throws UnsupportedCommOperationException;
+	public abstract boolean setCallOutHangup(boolean NoHup)
+		throws UnsupportedCommOperationException;
+	public abstract boolean getCallOutHangup()
+		throws UnsupportedCommOperationException;
 }

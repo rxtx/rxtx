@@ -102,6 +102,7 @@
 extern int errno;
 #ifdef TRENT_IS_HERE
 #define DEBUG
+#define DEBUG_MW
 #define TRACE
 /*
 #undef TIOCSERGETLSR
@@ -1479,7 +1480,6 @@ JNIEXPORT void JNICALL RXTXPort(setRTS)( JNIEnv *env,
 	if( state == JNI_TRUE ) result |= TIOCM_RTS;
 	else result &= ~TIOCM_RTS;
 	ioctl( fd, TIOCMSET, &result );
-	if( state == JNI_TRUE ) result |= TIOCM_DSR;
 	sprintf( message, "setRTS( %i )\n", state );
 	report( message );
 	LEAVE( "RXTXPort:setRTS" );
@@ -1569,6 +1569,121 @@ JNIEXPORT void JNICALL RXTXPort(setDTR)( JNIEnv *env,
 	report( message );
 	LEAVE( "RXTXPort:setDTR" );
 	return;
+}
+/*----------------------------------------------------------
+RXTXPort.nativeStaticSetsetRTS
+
+   accept:      new RTS state
+   perform:     if flag is true, TIOCM_RTS is set
+                if flag is false, TIOCM_RTS is unset
+   return:      none
+   exceptions:  none
+   comments:    Set the RTS so it does not raise on the next open
+		needed for some funky test boards?
+
+		This is static so we can not call the open() setDTR()
+		we dont have the jobject.
+----------------------------------------------------------*/
+JNIEXPORT jboolean JNICALL RXTXPort(nativeStaticSetRTS) (JNIEnv *env,
+	jclass jclazz, jstring jstr, jboolean flag)
+{
+	int fd, lock;
+	int  pid = -1;
+	int result;
+	const char *filename = (*env)->GetStringUTFChars( env, jstr, 0 );
+
+	ENTER( "RXTXPort:nativeStaticSetRTS" );
+#ifndef WIN32
+	pid = getpid();
+#endif /* WIN32 */
+
+	/* Open and lock the port so nothing else changes the setting */
+
+	if ( LOCK( filename ) ) goto fail;;
+	
+	do {
+		fd = OPEN (filename, O_RDWR | O_NOCTTY | O_NONBLOCK );
+	}  while (fd < 0 && errno==EINTR);
+	if ( fd < 0 ) goto fail;
+
+	/* raise the RTS */
+
+	ioctl( fd, TIOCMGET, &result );
+	if( flag == JNI_TRUE ) result |= TIOCM_RTS;
+	else result &= ~TIOCM_RTS;
+	ioctl( fd, TIOCMSET, &result );
+
+	/* Unlock the port.  Good luck! :) */
+
+	UNLOCK( filename,  pid );
+
+	/* dont close the port.  Its not clear if the RTS would remain high */
+
+	(*env)->ReleaseStringUTFChars( env, jstr, filename );
+	LEAVE( "RXTXPort:nativeStaticSetRTS" );
+	return( JNI_TRUE );
+fail:
+	(*env)->ReleaseStringUTFChars( env, jstr, filename );
+	LEAVE( "RXTXPort:nativeStaticSetRTS" );
+	return( JNI_FALSE );
+}
+
+/*----------------------------------------------------------
+RXTXPort.nativeStaticSetsetDTR
+
+   accept:      new DTR state
+   perform:     if flag is true, TIOCM_DTR is set
+                if flag is false, TIOCM_DTR is unset
+   return:      none
+   exceptions:  none
+   comments:    Set the DTR so it does not raise on the next open
+		needed for some funky test boards?
+
+		This is static so we can not call the open() setDTR()
+		we dont have the jobject.
+----------------------------------------------------------*/
+JNIEXPORT jboolean JNICALL RXTXPort(nativeStaticSetDTR) (JNIEnv *env,
+	jclass jclazz, jstring jstr, jboolean flag)
+{
+	int fd, lock;
+	int  pid = -1;
+	const char *filename = (*env)->GetStringUTFChars( env, jstr, 0 );
+	int result;
+
+	ENTER( "RXTXPort:nativeStaticSetDTR" );
+#ifndef WIN32
+	pid = getpid();
+#endif /* WIN32 */
+
+	/* Open and lock the port so nothing else changes the setting */
+
+	if ( LOCK( filename ) ) goto fail;;
+	
+	do {
+		fd = OPEN (filename, O_RDWR | O_NOCTTY | O_NONBLOCK );
+	}  while (fd < 0 && errno==EINTR);
+	if ( fd < 0 ) goto fail;
+
+	/* raise the DTR */
+
+	ioctl( fd, TIOCMGET, &result );
+	if( flag == JNI_TRUE ) result |= TIOCM_DTR;
+	else result &= ~TIOCM_DTR;
+	ioctl( fd, TIOCMSET, &result );
+
+	/* Unlock the port.  Good luck! :) */
+
+	UNLOCK( filename,  pid );
+
+	/* dont close the port.  Its not clear if the DTR would remain high */
+
+	(*env)->ReleaseStringUTFChars( env, jstr, filename );
+	LEAVE( "RXTXPort:nativeStaticSetDTR" );
+	return( JNI_TRUE );
+fail:
+	(*env)->ReleaseStringUTFChars( env, jstr, filename );
+	LEAVE( "RXTXPort:nativeStaticSetDTR" );
+	return( JNI_FALSE );
 }
 
 /*----------------------------------------------------------
