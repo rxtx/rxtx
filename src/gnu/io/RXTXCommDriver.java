@@ -23,7 +23,7 @@
 /* Joseph Goldstone <joseph@lp.com> reorganized to support registered ports,
  * known ports, and scanned ports, July 2001 */
 
-package javax.comm;
+package gnu.io;
 
 import java.io.*;
 import java.util.*;
@@ -103,6 +103,11 @@ public class RXTXCommDriver implements CommDriver
 			}
 		}
 		return returnArray;
+	}
+
+	private void registerKnownPortsCallback(String knownPort, int portType)
+	{
+		CommPortIdentifier.addPortName(knownPort, portType, this);
 	}
 
 	private void registerValidPorts(
@@ -226,27 +231,27 @@ public class RXTXCommDriver implements CommDriver
 		switch (PortType) {
 			case CommPortIdentifier.PORT_SERIAL:
 				if ((val = System.getProperty("gnu.io.rxtx.SerialPorts")) == null)
-				val = System.getProperty("javax.comm.SerialPorts");
+				val = System.getProperty("gnu.io.SerialPorts");
 				break;
 
 			case CommPortIdentifier.PORT_PARALLEL:
 				if ((val = System.getProperty("gnu.io.rxtx.ParallelPorts")) == null)
-				val = System.getProperty("javax.comm.ParallelPorts");
+				val = System.getProperty("gnu.io.ParallelPorts");
 				break;
 
 			case CommPortIdentifier.PORT_I2C:
 				if ((val = System.getProperty("gnu.io.rxtx.I2CPorts")) == null)
-				val = System.getProperty("javax.comm.I2CPorts");
+				val = System.getProperty("gnu.io.I2CPorts");
 				break;
 
 			case CommPortIdentifier.PORT_RS485:
 				if ((val = System.getProperty("gnu.io.rxtx.RS485Ports")) == null)
-				val = System.getProperty("javax.comm.RS485Ports");
+				val = System.getProperty("gnu.io.RS485Ports");
 				break;
 
 			case CommPortIdentifier.PORT_RAW:
 				if ((val = System.getProperty("gnu.io.rxtx.RawPorts")) == null)
-				val = System.getProperty("javax.comm.RawPorts");
+				val = System.getProperty("gnu.io.RawPorts");
 				break;
 
 			default:
@@ -355,6 +360,14 @@ public class RXTXCommDriver implements CommDriver
 				{
 					String[] Temp = {
 						"tty0"  // netbsd serial ports
+					};
+					CandidatePortPrefixes=Temp;
+				}
+				else if(osName.equals("Solaris"))
+				{
+					String[] Temp = {
+						"term",
+						"cuaa"
 					};
 					CandidatePortPrefixes=Temp;
 				}
