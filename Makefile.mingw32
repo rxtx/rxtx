@@ -88,14 +88,14 @@ all:  $(TARGETLIBS)
 include:
 	mkdir include
 
-javax:
-	mkdir javax
-	mkdir javax\\\comm
+gnu:
+	mkdir gnu
+	mkdir gnu\\\io
 
-# yayaya We should have put the files in javax.comm to start with
-javaxtimestamp:	$(JAVAFILES) $(CFILES) include javax
-	xcopy $(DOSSRC)\\\*.* javax\\\comm\\\ # need a space here
-	echo > javaxtimestamp
+# yayaya We should have put the files in gnu.io to start with
+gnutimestamp:	$(JAVAFILES) $(CFILES) include gnu
+	xcopy $(DOSSRC)\\\*.* gnu\\\io\\\ # need a space here
+	echo > gnutimestamp
 
 # FIXME make 3.79.1 behaves really strage if we use %.o rules.
 
@@ -120,7 +120,7 @@ termios.o:
 $(SRC)/Serial.def:	$(DLLOBJECTS)
 	$(LD) --base-file Serial.base --dll -o Serial.dll $(DLLOBJECTS) $(LIBS) -e _dll_entry@12
 	echo EXPORTS >$(SRC)/Serial.def;for i in `nm Serial.dll | grep "T _Java"|cut -b 13-`;do echo -n $$i|sed s#@.*##;echo "="$$i;done >> $(SRC)/Serial.def
-	xcopy  $(DOSSRC)\\\Serial.def javax\\\comm\\\ #  need a space here
+	xcopy  $(DOSSRC)\\\Serial.def gnu\\\io\\\ #  need a space here
 
 
 $(TARGETLIBS):	comm.jar $(DLLOBJECTS)  $(SRC)/Serial.def
@@ -142,12 +142,12 @@ $(TARGETLIBS):	comm.jar $(DLLOBJECTS)  $(SRC)/Serial.def
 #		--target=i386-mingw32 -o $*.dll $(DLLOBJECTS) $(LIBS) -s
 #		-mno-cygwin
 
-comm.jar:	javaxtimestamp
-	$(JAVAC) javax\\\comm\\\\*.java
-	$(JAR) -cf comm.jar javax\\\comm\\\\*.class
-	$(JAVAH) $(JAVAHFLAGS) $(patsubst javax/comm/%.java,javax.comm.%,$(wildcard javax/comm/*.java))
+comm.jar:	gnutimestamp
+	$(JAVAC) gnu\\\io\\\\*.java
+	$(JAR) -cf comm.jar gnu\\\io\\\\*.class
+	$(JAVAH) $(JAVAHFLAGS) $(patsubst gnu/io/%.java,gnu.io.%,$(wildcard gnu/io/*.java))
 
-include/config.h:  javaxtimestamp
+include/config.h:  gnutimestamp
 	echo "#define HAVE_FCNTL_H 1" > include\\\config.h
 	echo "#define HAVE_SIGNAL_H 1" >> include\\\config.h
 	echo "#define HAVE_SYS_FCNTL_H 1" >> include\\\config.h
@@ -164,6 +164,6 @@ uninstall:
 	del $(LIBINSTALL)\\\$(TARGETLIBS)
 
 clean:
-	deltree javax\\\comm\\\*.*
+	deltree gnu\\\io\\\*.*
 	deltree include
-	del Serial.* javaxtimestamp *.o comm.jar
+	del Serial.* gnutimestamp *.o comm.jar

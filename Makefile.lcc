@@ -54,8 +54,8 @@ termios.obj: comm.jar
 
 comm.jar:
 	javac -d . -O *.java
-	jar -cf comm.jar javax
-	javah -jni javax.comm.RXTXPort javax.comm.RXTXCommDriver
+	jar -cf comm.jar gnu
+	javah -jni gnu.io.RXTXPort gnu.io.RXTXCommDriver
 
 config.h:
 	echo please read how to create config.h in the Makefile
