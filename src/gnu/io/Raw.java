@@ -24,7 +24,7 @@ import java.lang.Math;
 
 /**
 * @author Trent Jarvi
-* @version $Name$
+* @version $Id$
 * @since JDK1.0
 */
 
