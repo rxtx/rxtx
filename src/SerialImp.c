@@ -99,10 +99,10 @@
 #endif /* HAVE_GRP_H */
 
 extern int errno;
-#define DEBUG_MW
 #ifdef TRENT_IS_HERE
 /*
 #define DEBUG
+#define DEBUG_MW
 #undef TIOCSERGETLSR
 #define DONT_USE_OUTPUT_BUFFER_EMPTY_CODE
 notes:
@@ -331,6 +331,7 @@ JNIEXPORT void JNICALL RXTXPort(nativeClose)( JNIEnv *env,
 	pid = get_java_var( env, jobj,"pid","I" );
 
 	report(">nativeClose pid\n");
+	usleep(10000);
 	if( !pid ) {
 		(*env)->ExceptionDescribe( env );
 		(*env)->ExceptionClear( env );
@@ -2283,9 +2284,6 @@ int initialise_event_info_struct( struct event_info_struct *eis )
 	eis->has_tiocsergetlsr = has_line_status_register_access( eis->fd );
 	eis->has_tiocgicount = driver_has_tiocgicount( eis );
 
-	eis->jclazz = (*env)->GetObjectClass( env, jobj );
-	if(eis->jclazz == NULL)
-		goto fail;
 	if( ioctl( eis->fd, TIOCMGET, &eis->omflags) < 0 ) {
 		report( "initialise_event_info_struct: Port does not support events\n" );
 	}
@@ -2294,11 +2292,6 @@ int initialise_event_info_struct( struct event_info_struct *eis )
 		"(IZ)Z" );
 	if(eis->send_event == NULL)
 		goto fail;
-#ifdef oldcode
-	eis->checkMonitorThread = (*env)->GetMethodID( env, eis->jclazz,
-		"checkMonitorThread", "()Z" );
-	if(eis->checkMonitorThread == NULL) goto fail;
-#endif /* oldcode */
 	eis->eventloop_interrupted = 0;
 end:
 	FD_ZERO( &eis->rfds );
@@ -2356,6 +2349,10 @@ RXTXPort.eventLoop
 JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 {
 	struct event_info_struct eis;
+	jclass jclazz = (*env)->GetObjectClass( env, jobj );
+	jfieldID jfid = (*env)->GetFieldID( env, jclazz,
+						"MonitorThreadCloseLock", "Z" );
+	eis.jclazz = jclazz;
 	eis.env = env;
 	eis.jobj = &jobj;
 	eis.initialised = 0;
@@ -2375,6 +2372,8 @@ JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 				report("eventLoop: got interrupt\n");
 				finalize_thread_write( &eis );
 				finalize_event_info_struct( &eis );
+				(*env)->SetBooleanField( env, jobj,
+							jfid, JNI_FALSE );
 				return;
 			}
 			usleep(1000);
