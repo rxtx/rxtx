@@ -33,8 +33,8 @@
 CFLAGS=-I\JDK\INCLUDE -I\jdk\include\win32 -I.
 CC=lcc
 LINKER=lcclnk
-OBJS=init.obj SerialImp.obj termios.obj
-SRC=init.c SerialImp.c termios.c
+OBJS=init.obj SerialImp.obj termios.obj fuserImp.obj
+SRC=init.c SerialImp.c termios.c fuserImp.c
 LIBS=
 JAVA_HOME=D:\jdk
 
@@ -46,6 +46,8 @@ init.obj:  comm.jar
 
 SerialImp.obj: comm.jar config.h
 	$(CC) $(CFLAGS) SerialImp.c
+
+fuserImp.obj: comm.jar config.h
          
 termios.obj: comm.jar
 	$(CC) $(CFLAGS) termios.c
