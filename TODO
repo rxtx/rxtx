@@ -1,12 +1,12 @@
 
-The VM crashes with a NullPointException if you enable notifications
+The system crashes with a NullPointException if you enable notifications
 before your register a listener.
  
 Example:
     notifyOnDataAvailable(true);
     addEventListener( this );
  
-It is ok if you first register the listener, then enable notifications
+It is OK if you first register the listener, then enable notifications
 (which is probably the best thing to do anyway).
 
 DSR does not work reliably for some people.  contrib/DSR-workaround.java
@@ -14,7 +14,7 @@ contains a workaround the Ken Eisner contributed.  If you are able to reproduce
 the problem and find a fix for RXTX please let the maintainer know.
 
 Buffer Size is just a var.  No memory is allocated.  This was done to duplicate
-the behavior in the behaviour table in javax.comm.CommPort.html.  Its not clear
+the behavior in the behavior table in javax.comm.CommPort.html.  Its not clear
 to me if the buffers are just mallocs or modem buffers.  Any experts there?
 
 While looking through the blackdown mail list, it was obvious that some people
@@ -38,13 +38,11 @@ Win95/98 with mingw32
 	for documentation.   WaitForSingleObject() may be of use.
 
 RXTXPort.java
-
 	framing control -?-
 	buffer control -?-
 	look for FIXME
 
 ParallelPort support.  Needs some code.
-
 	files:
 		ParallelImp.c stubs 
                       A  large fraction of the stubs are filled in now.
@@ -132,9 +130,9 @@ CommPortIdentifier support. Needs some code.
 		PortInUseException.java
 	
 ------------------
-backwards compatibility for older linux systems.
+backwards compatibility for older Linux systems.
 ------------------
-non linux specific implementations
+non Linux specific implementations
 ------------------
 allow the library to catch sigint so it can shut down the port properly when
 sent

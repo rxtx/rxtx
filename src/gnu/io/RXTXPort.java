@@ -278,20 +278,25 @@ final class RXTXPort extends SerialPort
 	/** Process SerialPortEvents */
 	native void eventLoop();
 	private int dataAvailable=0;
-	public void sendEvent( int event, boolean state )
+	public synchronized boolean sendEvent( int event, boolean state )
 	{
+
+		/* Let the native side know its time to die */
+
+		if ( SPEventListener == null || monThread == null) return(true);  
+
 		switch( event )
 		{
 			case SerialPortEvent.DATA_AVAILABLE:
 				dataAvailable=1;
 				if( monThread.Data ) break;
-				return;
+				return(false);
 			case SerialPortEvent.OUTPUT_BUFFER_EMPTY:
 				if( monThread.Output ) break;
-				return;
+				return(false);
 /*
 				if( monThread.DSR ) break;
-				return;
+				return(false);
 				if (isDSR())
 				{
 					if (!dsrFlag)
@@ -308,35 +313,36 @@ final class RXTXPort extends SerialPort
 */
 			case SerialPortEvent.CTS:
 				if( monThread.CTS ) break;
-				return;
+				return(false);
 			case SerialPortEvent.DSR:
 				if( monThread.DSR ) break;
-				return;
+				return(false);
 			case SerialPortEvent.RI:
 				if( monThread.RI ) break;
-				return;
+				return(false);
 			case SerialPortEvent.CD:
 				if( monThread.CD ) break;
-				return;
+				return(false);
 			case SerialPortEvent.OE:
 				if( monThread.OE ) break;
-				return;
+				return(false);
 			case SerialPortEvent.PE:
 				if( monThread.PE ) break;
-				return;
+				return(false);
 			case SerialPortEvent.FE:
 				if( monThread.FE ) break;
-				return;
+				return(false);
 			case SerialPortEvent.BI:
 				if( monThread.BI ) break;
-				return;
+				return(false);
 			default:
 				System.err.println("unknown event:"+event);
-				return;
+				return(false);
 		}
 		SerialPortEvent e = new SerialPortEvent(this, event, !state,
 			state );
 		if( SPEventListener != null ) SPEventListener.serialEvent( e );
+		return(false);
 	}
 
 	/** Add an event listener */
@@ -351,7 +357,7 @@ final class RXTXPort extends SerialPort
 		monThread.start();
 	}
 	/** Remove the serial port event listener */
-	public void removeEventListener()
+	public synchronized void removeEventListener()
 	{
 		SPEventListener = null;
 		if( monThread != null )
@@ -407,7 +413,7 @@ final class RXTXPort extends SerialPort
 
 	/** Close the port */
 	private native void nativeClose();
-	public void close()
+	public synchronized void close()
 	{
 		setDTR(false);
 		setDSR(false);
@@ -525,16 +531,16 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	/** Note: these have to be separate boolean flags because the
 	   SerialPortEvent constants are NOT bit-flags, they are just
 	   defined as integers from 1 to 10  -DPL */
-		private boolean CTS=false;
-		private boolean DSR=false;
-		private boolean RI=false;
-		private boolean CD=false;
-		private boolean OE=false;
-		private boolean PE=false;
-		private boolean FE=false;
-		private boolean BI=false;
-		private boolean Data=false;
-		private boolean Output=false;
+		private volatile boolean CTS=false;
+		private volatile boolean DSR=false;
+		private volatile boolean RI=false;
+		private volatile boolean CD=false;
+		private volatile boolean OE=false;
+		private volatile boolean PE=false;
+		private volatile boolean FE=false;
+		private volatile boolean BI=false;
+		private volatile boolean Data=false;
+		private volatile boolean Output=false;
 		MonitorThread() { }
 		public void run()
 		{

@@ -1,0 +1,44 @@
+Jun 13 2000
+
+If you want to port rxtx to a new Unix platform do the following.
+
+*IMPORTANT* you will need gnu make.
+
+There are probably two areas you will need to focus on:
+
+configure.in
+
+src/SerialImp.c src/ParallelImp.c
+
+configure.in grabs information about the OS, Java, ... and tries to set sane
+values for the Makefile.  Look towards the bottom of configure.in and just
+copy *bsd or HP-UX.  Modify to your liking.
+
+Edit configure.in, run autoconf, run configure, run make.  repeat. An endless 
+loop analagous to shampoo instructions.
+
+SerialImp.c and ParallelImp.c may require system specific includes and possibly
+a small amount of #ifdef's in the code.  
+
+Finally, I've got this beast compiling on hp-ux but I think the compile flags
+need adjusting.  Keep that in mind while looking through the files.
+
+Common problems include the following varibles in the Makefile
+
+      JAVAINCLUDE
+      JAVANATINC
+      CLASSPATH
+
+Which are defined in configure.in
+
+We will gladly help with any UNIX platform.  Send questions to
+trentjarvi@yahoo.com.  New OS's usually require tweaks.
+
+If its not compiling try backing out functionality until it compiles.
+
+win32 support has not been tested.  Contact trentjarvi@yahoo.com if your 
+interested in developing win32 support.   
+
+For all Unix flavors... If the package did not work out of the box please
+see BUGS and send a comment.
+

@@ -37,9 +37,12 @@ final class LPRPort extends ParallelPort {
 
 	/** Open the named port */
 	public LPRPort( String name ) throws IOException {
-		fd = open( name );
+		try {
+			fd = open( name );
+		} catch ( PortInUseException e ){}
 	}
-	private native int open( String name ) throws IOException;
+	private synchronized native int open( String name ) 
+		throws PortInUseException;
 
 	/** File descriptor */
 	private int fd;
@@ -94,7 +97,7 @@ final class LPRPort extends ParallelPort {
 
 	/** Close the port */
 	private native void nativeClose();
-	public void close(){
+	public synchronized void close(){
 		nativeClose();
 		super.close();
 		fd = 0;
@@ -160,7 +163,10 @@ final class LPRPort extends ParallelPort {
 
 	/** Process ParallelPortEvents */
 	native void eventLoop();
-	void sendEvent( int event, boolean state ) {
+	synchronized void sendEvent( int event, boolean state ) {
+
+		if ( fd == 0 ) return;  /* close() was called */
+
 		switch( event ) {
 			case ParallelPortEvent.PAR_EV_BUFFER:
 				if(  monThread.monBuffer ) break;

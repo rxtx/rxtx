@@ -76,7 +76,9 @@ JNIEXPORT void JNICALL Java_javax_comm_RXTXPort_Initialize(
 	)
 {
 #ifndef WIN32
+#ifdef DEBUG
 	struct utsname name;
+#endif
 	/* This bit of code checks to see if there is a signal handler installed
 	   for SIGIO, and installs SIG_IGN if there is not.  This is necessary
 	   for the native threads jdk, but we don't want to do it with green
@@ -88,7 +90,7 @@ JNIEXPORT void JNICALL Java_javax_comm_RXTXPort_Initialize(
 	sigaction( SIGIO, NULL, &handler );
 	if( !handler.sa_handler ) signal( SIGIO, SIG_IGN );
 #endif /* !__FreeBSD__ */
-#if defined(__linux__) 
+#ifdef DEBUG
 	/* Lets let people who upgraded kernels know they may have problems */
 	if (uname (&name) == -1)
 	{
@@ -101,7 +103,7 @@ JNIEXPORT void JNICALL Java_javax_comm_RXTXPort_Initialize(
 			name.release);
 		getchar();
 	}
-#endif /* __linux__ */
+#endif /* DEBUG */
 #endif /* WIN32 */
 }
 
@@ -160,7 +162,8 @@ JNIEXPORT jint JNICALL Java_javax_comm_RXTXPort_open(
 	return (jint)fd;
 
 fail:
-	throw_java_exception( env, PORT_IN_USE_EXCEPTION, "open", strerror( errno ) );
+	throw_java_exception( env, PORT_IN_USE_EXCEPTION, "open", 
+		strerror( errno ) );
 	return -1;
 }
 
@@ -959,6 +962,7 @@ JNIEXPORT void JNICALL Java_javax_comm_RXTXPort_eventLoop( JNIEnv *env,
 	int fd, ret, change;
 	fd_set rfds;
 	struct timeval tv_sleep;
+	struct stat fstatbuf;
 	unsigned int mflags;
 #if defined(TIOCGICOUNT)
 	struct serial_icounter_struct sis, osis;
@@ -970,15 +974,16 @@ JNIEXPORT void JNICALL Java_javax_comm_RXTXPort_eventLoop( JNIEnv *env,
 #endif
 	unsigned int omflags;
 
-	jmethodID method, interrupt;
+	jmethodID sendEvent, interrupt;
 	jboolean interrupted = 0;
 	jclass jclazz, jthread;
+	jthrowable exception;
 	jclazz = (*env)->GetObjectClass( env, jobj );
 	fd = fd = get_java_var(env, jobj, "fd", "I");
-	method = (*env)->GetMethodID( env, jclazz, "sendEvent", "(IZ)V" );
+	sendEvent = (*env)->GetMethodID( env, jclazz, "sendEvent", "(IZ)Z" );
 	jthread = (*env)->FindClass( env, "java/lang/Thread" );
-	interrupt = (*env)->GetStaticMethodID( env, jthread, "interrupted", "()Z" );
-
+	interrupt = (*env)->GetStaticMethodID( env, jthread, "interrupted", 
+		"()Z" );
 	/* Some multiport serial cards do not implement TIOCGICOUNT ... */
 	/* So use the 'dumb' mode to enable using them after all! JK00 */
 #if defined(TIOCGICOUNT)
@@ -1006,6 +1011,8 @@ JNIEXPORT void JNICALL Java_javax_comm_RXTXPort_eventLoop( JNIEnv *env,
 
 	FD_ZERO( &rfds );
 	while( !interrupted ) {
+		interrupted = (*env)->CallStaticBooleanMethod( env, jthread, 
+			interrupt );
 		FD_SET( fd, &rfds );
 		/* Check every 1 second, or on receive data */
 		tv_sleep.tv_sec = 1; 
@@ -1021,12 +1028,16 @@ JNIEXPORT void JNICALL Java_javax_comm_RXTXPort_eventLoop( JNIEnv *env,
 #if defined TIOCSERGETLSR
 		/* JK00: work around for Multi IO cards without TIOCSERGETLSR */
 		if( has_tiocsergetlsr ) {
+
+			if (fstat(fd, &fstatbuf))  break;
+
 			if( ioctl( fd, TIOCSERGETLSR, &change ) ) {
 				fprintf( stderr, "TIOCSERGETLSR Failed\n" );
 				break;
 			}
 			else if( change ) {
-				(*env)->CallVoidMethod( env, jobj, method,
+				interrupted=(*env)->CallBooleanMethod( env, 
+					jobj, sendEvent,
 					(jint)SPE_OUTPUT_BUFFER_EMPTY, 
 					JNI_TRUE );
 			}
@@ -1047,23 +1058,27 @@ JNIEXPORT void JNICALL Java_javax_comm_RXTXPort_eventLoop( JNIEnv *env,
 				break; 
 			}
 			while( sis.frame != osis.frame ) {
-				(*env)->CallVoidMethod( env, jobj, method, 
-					(jint)SPE_FE, JNI_TRUE );
+				interrupted = (*env)->CallBooleanMethod( env, 
+					jobj, sendEvent, (jint)SPE_FE, 
+					JNI_TRUE );
 				osis.frame++;
 			}
 			while( sis.overrun != osis.overrun ) {
-				(*env)->CallVoidMethod( env, jobj, method, 
+				interrupted = (*env)->CallBooleanMethod( env, 
+					jobj, sendEvent, 
 					(jint)SPE_OE, JNI_TRUE );
 				osis.overrun++;
 			}
 			while( sis.parity != osis.parity ) {
-				(*env)->CallVoidMethod( env, jobj, method, 
+				interrupted = (*env)->CallBooleanMethod( env, 
+					jobj, sendEvent, 
 					(jint)SPE_PE, JNI_TRUE );
 				osis.parity++;
 			}
 			while( sis.brk != osis.brk ) {
-				(*env)->CallVoidMethod( env, jobj, method, 
-					(jint)SPE_BI, JNI_TRUE );
+				interrupted = (*env)->CallBooleanMethod( env, 
+					jobj, sendEvent, (jint)SPE_BI, 
+					JNI_TRUE );
 				osis.brk++;
 			}
 			osis = sis;
@@ -1073,41 +1088,40 @@ JNIEXPORT void JNICALL Java_javax_comm_RXTXPort_eventLoop( JNIEnv *env,
 			fprintf( stderr, "TIOCMGET Failed\n" );
 			break; 
 		}
-		interrupted = (*env)->CallStaticBooleanMethod( env, jthread, 
-			interrupt );
 	       /* A Portable implementation */
 		change = (mflags&TIOCM_CTS) - (omflags&TIOCM_CTS);
 		if( change ) {
 			fprintf(stderr, "Sending SPE_CTS\n");
-			(*env)->CallVoidMethod( env, jobj, method,
-				(jint)SPE_CTS, JNI_TRUE );
+			interrupted = (*env)->CallBooleanMethod( env, jobj, 
+				sendEvent, (jint)SPE_CTS, JNI_TRUE );
 		}
 		change = (mflags&TIOCM_DSR) - (omflags&TIOCM_DSR);
 		if( change ) {
 			fprintf(stderr, "Sending SPE_DSR\n");
-			(*env)->CallVoidMethod( env, jobj, method,
-				(jint)SPE_DSR, JNI_TRUE );
+			interrupted = (*env)->CallBooleanMethod( env, jobj, 
+				sendEvent, (jint)SPE_DSR, JNI_TRUE );
 		}
 		change = (mflags&TIOCM_RNG) - (omflags&TIOCM_RNG);
 		if( change ) {
 			fprintf(stderr, "Sending SPE_RI\n");
-			(*env)->CallVoidMethod( env, jobj, method,
-				(jint)SPE_RI, JNI_TRUE );
+			interrupted = (*env)->CallBooleanMethod( env, jobj, 
+				sendEvent, (jint)SPE_RI, JNI_TRUE );
 		}
 		change = (mflags&TIOCM_CD) - (omflags&TIOCM_CD);
 		if( change ) {
 			fprintf(stderr, "Sending SPE_CD\n");
-			(*env)->CallVoidMethod( env, jobj, method,
-				(jint)SPE_CD, JNI_TRUE );
+			interrupted = (*env)->CallBooleanMethod( env, jobj, 
+				sendEvent, (jint)SPE_CD, JNI_TRUE );
 		}
 		omflags = mflags;
 		if( ioctl( fd, FIONREAD, &change ) ) {
 			fprintf( stderr, "FIONREAD Failed\n" );
 		}
 		else if( change ) {
-			(*env)->CallVoidMethod( env, jobj, method,
-				(jint)SPE_DATA_AVAILABLE, JNI_TRUE );
-			usleep(1000); /* select wont block */
+			interrupted = (*env)->CallBooleanMethod( env, jobj, 
+				sendEvent, (jint)SPE_DATA_AVAILABLE, JNI_TRUE );
+			if( !interrupted )
+				usleep(1000); /* select wont block */
 		}
 	}
 	return;
@@ -1143,7 +1157,7 @@ void send_modem_events( JNIEnv *env, jobject jobj, jmethodID method,
 }
 
 /*----------------------------------------------------------
-get_java_fd
+get_java_var
 
    accept:      env (keyhole to java)
                 jobj (java RXTXPort object)
@@ -1206,7 +1220,6 @@ JNIEXPORT jboolean  JNICALL Java_javax_comm_RXTXCommDriver_IsDeviceGood(JNIEnv *
 	char teststring[256];
 	int fd,i;
     	const char *name = (*env)->GetStringUTFChars(env, tty_name, 0);
-
 #if defined(__linux__)
 	char *KnownPorts[]={ "lp", "comx", "holter", "modem", "ttyircomm", \
 		"ttycosa0c", "ttycosa1c", "ttyC", "ttyCH", "ttyD", "ttuE", \

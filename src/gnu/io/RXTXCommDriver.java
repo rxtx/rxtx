@@ -73,7 +73,7 @@ public class RXTXCommDriver implements CommDriver {
 					String portName = "/dev/" + devs[ i ];
 					File port = new File( portName );
 					if( port.canRead() && port.canWrite() ) 
-					 CommPortIdentifier.addPortName( 
+						CommPortIdentifier.addPortName( 
 							portName,
 							PortType,
 							this 
@@ -104,6 +104,10 @@ public class RXTXCommDriver implements CommDriver {
          * Bencom
 
     */
+    /*
+	See SerialImp.c's *KnownPorts[] when adding ports 
+    */
+
 	public void initialize() {
 		File dev = new File( "/dev" );
 		String[] devs = dev.list();
@@ -137,12 +141,18 @@ public class RXTXCommDriver implements CommDriver {
 			"ttyV", // linux Comtrol VS-1000 serial controller
 			"ttyW", // linux specialix cards
 			"ttyX", // linux SpecialX serial card
+
 			"ttyf", // irix serial ports with hardware flow
 			"ttym", // irix modems
 			"ttyq", // irix pseudo ttys
 			"ttyd", // irix serial ports
+
 			"cuaa", // FreeBSD Serial Ports
-			"tty0" // netbsd serial ports 
+
+			"tty0", // netbsd serial ports 
+
+			"tty0p",// HP-UX serial ports
+			"tty1p" // HP-UX serial ports
 		};
 	/** Get the Parallel port prefixes for the running os
 	* Holger Lehmann

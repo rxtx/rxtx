@@ -400,8 +400,6 @@ EOF
 		echo 1>&2
 		echo "       WARNING:  Kernel include files do not match the current kernel" 1>&2
 		echo 1>&2
-		echo "                 Press enter to continue." 
-		read REPLY
 	fi
 	rm -f conftest.c
 	rm -f conftest
@@ -457,7 +455,7 @@ JAVAINCLUDE="\$(JPATH)/include"
 if test "$CC" = "gcc" || test "$CC"="egcs"; then
 	case $JAVA_VENDOR in
 	Tran*) #FIXME
-		CFLAGS="$CFLAGS -D_BSD_SOURCE "
+		CFLAGS="$CFLAGS -D_BSD_SOURCE"
 		fix_javanatinc jni.h
 		JAVAINCLUDE=""
 		KAFFE_LIB_FIX="/kaffe"
@@ -466,7 +464,7 @@ if test "$CC" = "gcc" || test "$CC"="egcs"; then
 		CFLAGS="$CFLAGS -D_BSD_SOURCE"
 		;;
 	*)
-		CFLAGS="$CFLAGS -D_BSD_SOURCE "
+		CFLAGS="$CFLAGS -D_BSD_SOURCE"
 		;;
 	esac
 fi
@@ -475,12 +473,11 @@ Linux)
 	#check_kernel_headers
 	check_java_headers
 	case $JAVA_VERSION in
-	1.2*) 
+	1.2*|1.3*) 
 		#fix_parameters $JPATH/jre/lib/javax.comm.properties
 		#fix_comm_jar $JPATH/jre/lib/ext/comm.jar
 		JCLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:$CLASSPATH"
 		JAVA_H_CLASSPATH="-classpath .:`find $JPATH/ -name comm.jar |head -n1`"
-		JCL_PATH="\$(JPATH)/lib"
 		JCL_PATH="jre/lib/ext"
 
 		case $OS_ARCH in
@@ -489,7 +486,7 @@ Linux)
 		;;
 		*)
 			# best we can do without knowing what java returns
-			RXTX_PATH="\$(JPATH)/jre/lib/($OS_ARCH)"
+			RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
 		;;
 		esac
 		case $OS_VERSION in
