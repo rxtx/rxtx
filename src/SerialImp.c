@@ -156,7 +156,7 @@ struct timeval snow, enow, seloop, eeloop;
 		gettimeofday(&eeloop, NULL); \
 		seloop.tv_sec = eeloop.tv_sec; \
 		seloop.tv_usec = eeloop.tv_usec; \
-		mexPrintf("%8i sec : %8i usec\n", eeloop.tv_sec - seloop.tv_sec, eeloop.tv_usec - seloop.tv_usec); \
+		printf("%8i sec : %8i usec\n", eeloop.tv_sec - seloop.tv_sec, eeloop.tv_usec - seloop.tv_usec); \
 	} \
 }
 #define report_time( ) \
@@ -232,11 +232,12 @@ JNIEXPORT void JNICALL RXTXPort(Initialize)(
 	ENTER( "RXTXPort:Initialize" );
 #ifdef PRERELEASE
 	/*  this is just for avoiding confusion while testing new libraries */
-	mexPrintf("RXTX Prerelease for testing  Tue Feb  5 13:53:33 MST 2002\n");
-#endif /* PRERELEASE */
 #ifdef DEBUG_MW
-	mexPrintf("RXTX Prerelease for testing  Tue Feb  5 21:15:02 EST 2002\n");
+	mexPrintf("RXTX Prerelease for testing  Tue Feb 19 18:00:27 EST 2002\n");
+#else
+	printf("RXTX Prerelease for testing  Tue Feb 19 18:00:27 EST 2002\n");
 #endif /* DEBUG_MW */
+#endif /* PRERELEASE */
 #if DEBUG_TIMING
 	gettimeofday(&seloop, NULL);
 #endif /* DEBUG_TIMING */
@@ -268,7 +269,7 @@ RXTXPort.find_preopened_ports
    comments:    see
 			RXTXPort.nativeStaticSetDTR
 			RXTXPort.nativeStaticSetRTS
-			RXTXPort.nativeStaticSetSerialPortParms
+			RXTXPort.nativeStaticSetSerialPortParams
 		This is used so people can setDTR low before calling the
 		Java open().
 ----------------------------------------------------------*/
@@ -498,7 +499,7 @@ JNIEXPORT void JNICALL RXTXPort(nativeClose)( JNIEnv *env,
 		function.  The static method gets a fd first.  The instance
 		method can get the fd from the object.
 
-		see:  nativeSetSerialPortParms & nativeStaticSerialPortParams
+		see:  nativeSetSerialPortParams & nativeStaticSerialPortParams
 ----------------------------------------------------------*/
 int set_port_params( JNIEnv *env, int fd, int cspeed, int dataBits,
 			int stopBits, int parity )
@@ -626,21 +627,21 @@ int set_port_params( JNIEnv *env, int fd, int cspeed, int dataBits,
 }
 
 /*----------------------------------------------------------
- RXTXPort.nativeSetSerialPortParms
+ RXTXPort.nativeSetSerialPortParams
 
    accept:     speed, data bits, stop bits, parity
    perform:    set the serial port parameters
    return:     void
    exceptions: UnsupportedCommOperationException
 ----------------------------------------------------------*/
-JNIEXPORT void JNICALL RXTXPort(nativeSetSerialPortParms)(
+JNIEXPORT void JNICALL RXTXPort(nativeSetSerialPortParams)(
 	JNIEnv *env, jobject jobj, jint speed, jint dataBits, jint stopBits,
 	jint parity )
 {
 	int fd = get_java_var( env, jobj,"fd","I" );
 	int cspeed = translate_speed( env, speed );
 
-	ENTER( "RXTXPort:nativeSetSerialPortParms" );
+	ENTER( "RXTXPort:nativeSetSerialPortParams" );
 	report_time_start( );
 
 	if (cspeed == -1)
@@ -653,12 +654,12 @@ JNIEXPORT void JNICALL RXTXPort(nativeSetSerialPortParms)(
 
 	if( set_port_params( env, fd, cspeed, dataBits, stopBits, parity ) )
 	{
-		LEAVE( "RXTXPort:nativeSetSerialPortParms" );
+		LEAVE( "RXTXPort:nativeSetSerialPortParams" );
 		throw_java_exception( env, UNSUPPORTED_COMM_OPERATION,
-			"nativeSetSerialPortParms", strerror( errno ) );
+			"nativeSetSerialPortParams", strerror( errno ) );
 	}
 
-	LEAVE( "RXTXPort:nativeSetSerialPortParms" );
+	LEAVE( "RXTXPort:nativeSetSerialPortParams" );
 	report_time_end( );
 	return;
 }
@@ -1472,7 +1473,7 @@ RXTXPort.static_add_filename
    comments:    see
 			RXTXPort.nativeStaticSetDTR
 			RXTXPort.nativeStaticSetRTS
-			RXTXPort.nativeStaticSetSerialPortParms
+			RXTXPort.nativeStaticSetSerialPortParams
 		This is used so people can setDTR low before calling the
 -----------------------------------------------------------*/
 
