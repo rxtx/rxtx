@@ -3,13 +3,13 @@ This is ChangeLog Wed Jun 20 10:47:21 MDT 2001
 rxtx-1.5 and rxtx-1.4 changes are kept in the same file.  skip to the version
 you downloaded.
 
-1.5-7		      win32 fixes <wroberts1@home.com>
+1.5-5  Sep 28, 2001   Merged with rxtx-1.4
+		      win32 fixes <wroberts1@home.com>
 		      more Mac OS X port fixes (still not finding system libs)
                       Paul Tokarchuk <ptokarchuk@sympatico.ca>
 		      Memory leak Cleanups
 		      cross-compile fixes
 		      Makefile for building on mingw32 systems in DOS
-1.5-5  Jun 28, 2001   Merged with rxtx-1.4
 		      More work on Mac OS X port
 		      Joseph Goldstone <joseph@lp.com>
 		      minor cleanups
