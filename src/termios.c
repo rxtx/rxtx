@@ -2762,7 +2762,9 @@ int  serial_select( int  n,  fd_set  *readfds,  fd_set  *writefds,
 			{
 				sprintf( message, "WaitCommEvent filename = %s\n", index->filename);
 				report( message );
-				goto fail;
+				MexPrintf("-");
+				return(1);
+				//goto fail;
 			}
 		}
 		if( index->interrupt == 1 )
