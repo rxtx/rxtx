@@ -10,6 +10,7 @@ test.class
 tx.class
 rx.class
 i486-pc-linux-gnu
+i686-pc-linux-gnu
 gnu
 WIN32
 CROSSCOMPILE
