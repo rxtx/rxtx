@@ -83,11 +83,12 @@ include:
 	mkdir include
 
 javax:
-	mkdir javax\comm
+	mkdir javax
+	mkdir javax\\\comm
 
 # yayaya We should have put the files in javax.comm to start with
 javaxtimestamp:	$(MINGJAVAFILES) $(CFILES) include javax
-	copy ..\src\*.* javax\comm
+	xcopy ..\\\src\\\*.* javax\\\comm
 	echo > javaxtimestamp
 
 init.o:	$(INCLUDES)
@@ -109,30 +110,27 @@ Serial.dll:	$(CFILES) include/config.h $(DLLOBJECTS) fuserImp.o SerialImp.o term
 #	$(DLLWRAP) --output-def $*.def --output-exp $*.exp --add-stdcall-alias --driver-name gcc -mwindows --target=i386-mingw32 -o $*.dll $(DLLOBJECTS) $(LIBS) -s -mno-cygwin
 
 comm.jar: $(MINGJAVAFILES) 
-	javac javax\comm\\*.java
-	$(JAR) -cf comm.jar javax\comm\\*.class
+	javac javax\\\comm\\\*.java
+	$(JAR) -cf comm.jar javax\\\comm\\\*.class
 	$(JAVAH) $(JAVAHFLAGS) $(patsubst javax/comm/%.java,javax.comm.%,$(wildcard javax/comm/*.java))
 
 include/config.h:
-	echo "#define HAVE_FCNTL_H 1" > include/\onfig.h
-	echo "#define HAVE_SIGNAL_H 1" >> include\config.h
-	echo "#define HAVE_SYS_FCNTL_H 1" >> include\config.h
-	echo "#define HAVE_SYS_FILE_H 1" >> include\config.h
-	echo "#undef HAVE_SYS_SIGNAL_H" >> include\config.h
-	echo "#undef HAVE_TERMIOS_H\n" >> include\config.h
+	echo "#define HAVE_FCNTL_H 1" > include\\\config.h
+	echo "#define HAVE_SIGNAL_H 1" >> include\\\config.h
+	echo "#define HAVE_SYS_FCNTL_H 1" >> include\\\config.h
+	echo "#define HAVE_SYS_FILE_H 1" >> include\\\config.h
+	echo "#undef HAVE_SYS_SIGNAL_H" >> include\\\config.h
+	echo "#undef HAVE_TERMIOS_H" >> include\\\config.h
 
 install: all
 	copy comm.jar $(COMMINSTALL)
 	copy Serial.dll $(LIBINSTALL)
 
 uninstall:
-	del $(COMMINSTALL)\comm.jar
-	del $(LIBINSTALL)\Serial.dll
+	del $(COMMINSTALL)\\\comm.jar
+	del $(LIBINSTALL)\\\Serial.dll
 
 clean:
-	del /Q javax\comm\\*.*
-	rmdir javax\comm
-	rmdir javax
-	del /Q include\\*
-	rmdir include
-	del /Q Serial.* javaxtimestamp *.o comm.jar
+	deltree javax\\\comm\\\*.*
+	deltree include
+	del Serial.* javaxtimestamp *.o comm.jar
