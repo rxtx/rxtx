@@ -17,7 +17,7 @@
 |   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --------------------------------------------------------------------------*/
 #include "config.h"
-#include "gnu.io_RXTXPort.h"
+#include "gnu_io_RXTXPort.h"
 #include <time.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -60,8 +60,8 @@ extern int errno;
 /* this is so diff will not generate noise when merging 1.4 and 1.5 changes
  * It will eventually be removed.
  * */
-#define RXTXPort(foo) Java_gnu.io_RXTXPort_ ## foo
-#define RXTXCommDriver(foo) Java_gnu.io_RXTXCommDriver_ ## foo
+#define RXTXPort(foo) Java_gnu_io_RXTXPort_ ## foo
+#define RXTXCommDriver(foo) Java_gnu_io_RXTXCommDriver_ ## foo
 //#define MAX_PORT_NUM 65;
 BSerialPort *PortArray[65]; // !!!
 BSerialPort *port; // !!!
@@ -1526,7 +1526,7 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(isDeviceGood)(JNIEnv *env,
    		values are in SerialImp.h
 ----------------------------------------------------------*/
 /*
-JNIEXPORT jstring JNICALL Java_gnu.io_RXTXCommDriver_getDeviceDirectory(JNIEnv*, jobject);
+JNIEXPORT jstring JNICALL Java_gnu_io_RXTXCommDriver_getDeviceDirectory(JNIEnv*, jobject);
 
 */
 JNIEXPORT jstring  JNICALL RXTXCommDriver(getDeviceDirectory)(JNIEnv *env,
