@@ -66,6 +66,8 @@ public class RXTXCommDriver implements CommDriver
 		*/
 
 		String ValidPortPrefixes[]=new String [256];
+		if (debug)
+			System.out.println("\nRXTXCommDriver:getValidPortPrefixes()");
 		if(CandidatePortPrefixes==null)
 		{
 			if (debug)
@@ -103,11 +105,6 @@ public class RXTXCommDriver implements CommDriver
 			}
 		}
 		return returnArray;
-	}
-
-	private void registerKnownPortsCallback(String knownPort, int portType)
-	{
-		CommPortIdentifier.addPortName(knownPort, portType, this);
 	}
 
 	private void registerValidPorts(
@@ -206,6 +203,8 @@ public class RXTXCommDriver implements CommDriver
 		final String pathSep = System.getProperty("path.separator", ":");
 		final StringTokenizer tok = new StringTokenizer(names, pathSep);
 
+		if (debug)
+			System.out.println("\nRXTXCommDriver:addSpecifiedPorts()");
 		while (tok.hasMoreElements())
 		{
 			String PortName = tok.nextToken();
@@ -217,17 +216,46 @@ public class RXTXCommDriver implements CommDriver
 	}
 
    /*
-    * Register ports specified by the gnu.io.rxtx.SerialPorts and
-    * gnu.io.rxtx.ParallelPorts system properties.
+    * Register ports specified in the file "gnu.io.rxtx.properties"
+    * Key system properties:
+    *                   gnu.io.rxtx.SerialPorts
+    * 			gnu.io.rxtx.ParallelPorts 
+    *
+    * Tested only with sun jdk1.3
+    * The file gnu.io.rxtx.properties must reside in the java extension dir
+    *
+    * Example: /usr/local/java/jre/lib/ext/gnu.io.rxtx.properties
+    *
+    * The file contains the following key properties:
+    * 
+    *  gnu.io.rxtx.SerialPorts=/dev/ttyS0:/dev/ttyS1:
+    *  gnu.io.rxtx.ParallelPorts=/dev/lp0:
+    *
     */
 	private boolean registerSpecifiedPorts(int PortType)
 	{
 		String val = null;
-		/* FIXME */
+				
+		try
+		    {
+		     
+		     String ext_dir=System.getProperty("java.ext.dirs")+System.getProperty("file.separator");
+		     FileInputStream rxtx_prop=new FileInputStream(ext_dir+"gnu.io.rxtx.properties");
+		     Properties p=new Properties(System.getProperties());
+		     p.load(rxtx_prop);
+		     System.setProperties(p); 
+		    }catch(Exception e){
+			if (debug){
+			    System.out.println("The file: gnu.io.rxtx.properties doesn't exists.");
+			    System.out.println(e.toString());
+			    }//end if
+			}//end catch
+
 		if (debug)
 			System.out.println("checking for system-known ports of type "+PortType);
 		if (debug)
 			System.out.println("checking registry for ports of type "+PortType);
+
 		switch (PortType) {
 			case CommPortIdentifier.PORT_SERIAL:
 				if ((val = System.getProperty("gnu.io.rxtx.SerialPorts")) == null)
@@ -302,6 +330,16 @@ public class RXTXCommDriver implements CommDriver
 					System.out.println("scanning for serial ports for os "+osName);
 				if(osName.equals("Linux"))
 				{
+					String[] Temp = {
+					"ttyS" // linux Serial Ports
+					};
+					CandidatePortPrefixes=Temp;
+				}
+				else if(osName.equals("Linux-all-ports"))
+				{
+				/* if you want to enumerate all ports ~5000
+				   possible, then replace the above with this
+				*/
 					String[] Temp = {
 					"comx",      // linux COMMX synchronous serial card
 					"holter",    // custom card for heart monitoring
@@ -524,5 +562,11 @@ public class RXTXCommDriver implements CommDriver
 					"Port "+PortName+" in use by another application");
 		}
 		return null;
+	}
+
+	/*  Yikes.  Trying to call println from C for odd reasons */
+	public void Report( String arg )
+	{
+		System.out.println(arg);
 	}
 }
