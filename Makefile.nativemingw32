@@ -1,0 +1,109 @@
+#-------------------------------------------------------------------------
+#   rxtx is a native interface to serial ports in java.
+#   Copyright 1997-2001 by Trent Jarvi trentjarvi@yahoo.com.
+#
+#   This library is free software; you can redistribute it and/or
+#   modify it under the terms of the GNU Library General Public
+#   License as published by the Free Software Foundation; either
+#   version 2 of the License, or (at your option) any later version.
+#
+#   This library is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+#   Library General Public License for more details.
+#
+#   You should have received a copy of the GNU Library General Public
+#   License along with this library; if not, write to the Free
+#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#-------------------------------------------------------------------------
+
+#  This Makefile works on windows 98 with mingw32
+#  cygwin is not used mingw32 version 1.1.7 
+#  jdk was 1.1.8
+#  java.sun.com
+
+
+######################
+#  Directories
+######################
+# rx in this example is the rxtx top directory
+
+# path to the source code (directory with SerialImp.c)
+SRC=../src
+DOSSRC="d:\\rx\\src\\"
+# path to the java native interface headers (directory with jni.h)
+JDKINCLUDE="d:\\jdk118\\include"
+# path to the mingw32 libraries (directory with libmingw32.a)
+MINGLIBS=-L "d:\\mingw\lib"
+# for install.  
+JREHOME="d:\jdk118"
+
+######################
+#  Tools
+######################
+
+AS=as
+CC=gcc
+LD=ld
+DLLTOOL=dlltool
+# this looks like a nice tool but I was not able to get symbols in the dll.
+DLLWRAP=dllwrap
+
+JAVAH=javah
+JAR=jar
+JAVAC=javac -d .
+
+######################
+#  Tool Flags
+######################
+
+CFLAGS= $(INCLUDE) -mno-cygwin -DWIN32 -D __int64="long long" -mno-fp-ret-in-387 -Wall 
+INCLUDE= -I . -I $(JDKINCLUDE) -I $(JDKINCLUDE)/win32 -I $(SRC)
+JAVAHFLAGS= -jni
+LIBS=$(MINGLIBS) -luser32 -lgdi32 -lcomdlg32 -lkernel32 -ladvapi32 -lmingw32 -lmoldname -lcrtdll
+
+######################
+#  End of user defined variables
+######################
+
+CLASSES = $(patsubst $(SRC)/%.java,javax/comm/%.class,$(wildcard $(SRC)/*.java))
+mingjavafiles = $(wildcard $(SRC)/*.java)
+dosjavafiles = $(patsubst $(SRC)/%.java,$(DOSSRC)%.java,$(wildcard $(SRC)/*.java))
+javahfiles = $(patsubst $(SRC)/%.java,javax.comm.%,$(wildcard $(SRC)/*.java))
+cfiles=$(wildcard $(SRC)/*.c)
+includes=$(wildcard $(SRC)/*.h)
+OBJECTS=termios.o SerialImp.o fixup.o init.o 
+
+all:  Serial.dll
+
+Serial.dll:  comm.jar  $(cfiles) config.h
+	$(JAVAH) $(JAVAHFLAGS) $(javahfiles)
+	$(CC) $(CFLAGS) -c $(SRC)/SerialImp.c -o SerialImp.o
+	$(CC) $(CFLAGS) -c $(SRC)/termios.c -o termios.o
+	$(CC) $(CFLAGS) -c $(SRC)/fixup.c -o fixup.o
+	$(CC) $(CFLAGS) -c $(SRC)/init.cc -o init.o
+	$(LD) --base-file Serial.base --dll -o Serial.dll $(OBJECTS) $(LIBS) -e _dll_entry@12
+# --base-file Serial.base
+	 echo EXPORTS >Serial.def;for i in `nm Serial.dll | grep "T _Java"|cut -b 13-`;do echo -n $$i|sed s#@.*##;echo "="$$i;done >> Serial.def
+	$(DLLTOOL) --as=$(AS) --dllname Serial.dll --def Serial.def --base-file Serial.base --output-exp Serial.exp
+	$(LD) --base-file Serial.base Serial.exp -dll -o Serial.dll $(OBJECTS) $(LIBS) -e _dll_entry@12
+# --base-file Serial.base
+	$(DLLTOOL) --as=$(AS) --dllname Serial.dll --def Serial.def --base-file Serial.base --output-exp Serial.exp
+	$(LD) --base-file Serial.base Serial.exp -dll -o Serial.dll $(OBJECTS) $(LIBS) -e _dll_entry@12
+
+# This should replace the mess above if it worked.
+# nm shows no symbols in the dll produced.  The old stuff above works ok.
+#	$(DLLWRAP) --output-def Serial.def --output-exp Serial.exp --add-stdcall-alias --driver-name gcc -mwindows --target=i386-mingw32 -o Serial.dll $(OBJECTS) $(LIBS) -s -mno-cygwin
+
+comm.jar: $(mingjavafiles) 
+	echo $(JAVAC) $(dosjavafiles) > build.bat
+	./build.bat
+	$(JAR) -cf comm.jar javax
+
+config.h:
+	printf 	"#define HAVE_FCNTL_H 1\n#define HAVE_SIGNAL_H 1\n#define HAVE_SYS_FCNTL_H 1\n#define HAVE_SYS_FILE_H 1\n#undef HAVE_SYS_SIGNAL_H \n#undef HAVE_TERMIOS_H\n" > config.h
+
+
+install: all
+	cp comm.jar $(JREHOME)/lib/ext
+	cp Serial.dll $(JREHOME)/bin
