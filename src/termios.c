@@ -2520,7 +2520,6 @@ int ioctl( int fd, int request, ... )
 			TIOCM_ST
 			TIOCM_SR
 */
-			*arg = 0;
 			va_end( ap );
 			return( 0 );
 		/* TIOCMIS, TIOCMBIC and TIOCMSET all do the same thing... */
