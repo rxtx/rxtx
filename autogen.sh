@@ -15,6 +15,10 @@ DIE=0
     DIE=1
 }
 
+/* avoid libtool on Mac OS X codename Darwin Dmitry */
+
+
+if test `uname` != "Darwin"; then
 (libtool --version) < /dev/null > /dev/null 2>&1 || {
     echo
     echo "**Error**: You must have "\`libtool\'" installed to compile rxtx."
@@ -22,6 +26,7 @@ DIE=0
     echo "(or a newer version if it is available)"
     DIE=1
 }
+fi
 
 (automake --version) < /dev/null > /dev/null 2>&1 || {
     echo

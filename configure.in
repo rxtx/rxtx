@@ -564,7 +564,7 @@ UnixWare|OpenUNIX)
 ;;
 
 HP-UX)
-	CFLAGS="-g -Aa +e -D__hpux__ -D_HPUX_SOURCE -D_NO_POSIX=1 -D_NO_XOPEN4=1"
+	CFLAGS=$CFLAGS" -g -Aa +e -D__hpux__ -D_HPUX_SOURCE -D_NO_POSIX=1 -D_NO_XOPEN4=1"
 	RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
 	TARGETLIB="\$(target_alias)/libSerial.la"
 	case $JAVA_VERSION in
