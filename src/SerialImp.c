@@ -62,6 +62,12 @@ extern int errno;
 #include "SerialImp.h"
 /* #define DEBUG_TIMEOUT */
 
+/* this is so diff will not generate noise when merging 1.4 and 1.5 changes
+ * It will eventually be removed.
+ * */
+#define RXTXPort(foo) Java_javax_comm_RXTXPort_ ## foo
+#define RXTXCommDriver(foo) Java_javax_comm_RXTXCommDriver_ ## foo
+
 /*----------------------------------------------------------
 RXTXPort.Initialize
 
@@ -70,9 +76,9 @@ RXTXPort.Initialize
    return:      none
    exceptions:  none
 ----------------------------------------------------------*/
-JNIEXPORT void JNICALL Java_javax_comm_RXTXPort_Initialize( 
+JNIEXPORT void JNICALL RXTXPort(Initialize)(
 	JNIEnv *env,
-	jclass jclazz 
+	jclass jclazz
 	)
 {
 #ifndef WIN32
@@ -112,18 +118,18 @@ JNIEXPORT void JNICALL Java_javax_comm_RXTXPort_Initialize(
 RXTXPort.open
 
    accept:      The device to open.  ie "/dev/ttyS0"
-   perform:     open the device, set the termios struct to sane settings and 
+   perform:     open the device, set the termios struct to sane settings and
                 return the filedescriptor
    return:      fd
    exceptions:  IOExcepiton
    comments:    Very often people complain about not being able to get past
-                this function and it turns out to be permissions on the 
+                this function and it turns out to be permissions on the
                 device file or bios has the device disabled.
-----------------------------------------------------------*/ 
-JNIEXPORT jint JNICALL Java_javax_comm_RXTXPort_open( 
-	JNIEnv *env, 
+----------------------------------------------------------*/
+JNIEXPORT jint JNICALL RXTXPort(open)(
+	JNIEnv *env,
 	jobject jobj,
-	jstring jstr 
+	jstring jstr
 	)
 {
 	struct termios ttyset;
@@ -162,7 +168,7 @@ JNIEXPORT jint JNICALL Java_javax_comm_RXTXPort_open(
 	return (jint)fd;
 
 fail:
-	throw_java_exception( env, PORT_IN_USE_EXCEPTION, "open", 
+	throw_java_exception( env, PORT_IN_USE_EXCEPTION, "open",
 		strerror( errno ) );
 	return -1;
 }
@@ -174,8 +180,8 @@ RXTXPort.nativeClose
    perform:     get the fd from the java end and close it
    return:      none
    exceptions:  none
-----------------------------------------------------------*/ 
-JNIEXPORT void JNICALL Java_javax_comm_RXTXPort_nativeClose( JNIEnv *env,
+----------------------------------------------------------*/
+JNIEXPORT void JNICALL RXTXPort(nativeClose)( JNIEnv *env,
 	jobject jobj )
 {
 	int result;
@@ -194,8 +200,8 @@ JNIEXPORT void JNICALL Java_javax_comm_RXTXPort_nativeClose( JNIEnv *env,
    perform:    set the serial port parameters
    return:     void
    exceptions: UnsupportedCommOperationException
-----------------------------------------------------------*/ 
-JNIEXPORT void JNICALL Java_javax_comm_RXTXPort_nativeSetSerialPortParams(
+----------------------------------------------------------*/
+JNIEXPORT void JNICALL RXTXPort(nativeSetSerialPortParams)(
 	JNIEnv *env, jobject jobj, jint speed, jint dataBits, jint stopBits,
 	jint parity )
 {
@@ -231,7 +237,7 @@ fail:
    exceptions: UnsupportedCommOperationException
    comments:   Only the lowest level code should know about
                the magic constants.
-----------------------------------------------------------*/ 
+----------------------------------------------------------*/
 int translate_speed( JNIEnv *env, jint speed )
 {
 	switch( speed ) {
@@ -272,7 +278,7 @@ int translate_speed( JNIEnv *env, jint speed )
    return:     1 if successful
 					0 if an exception is thrown
    exceptions: UnsupportedCommOperationException
-----------------------------------------------------------*/ 
+----------------------------------------------------------*/
 int translate_data_bits( JNIEnv *env, int *cflag, jint dataBits )
 {
 	int temp = (*cflag) & ~CSIZE;
@@ -307,7 +313,7 @@ int translate_data_bits( JNIEnv *env, int *cflag, jint dataBits )
    exceptions: UnsupportedCommOperationException
    comments:   If you specify 5 data bits and 2 stop bits, the port will
                allegedly use 1.5 stop bits.  Does anyone care?
-----------------------------------------------------------*/ 
+----------------------------------------------------------*/
 int translate_stop_bits( JNIEnv *env, int *cflag, jint stopBits )
 {
 	switch( stopBits ) {
@@ -334,7 +340,7 @@ int translate_stop_bits( JNIEnv *env, int *cflag, jint stopBits )
    exceptions: UnsupportedCommOperationException
    comments:   The CMSPAR bit should be used for 'mark' and 'space' parity,
                but it's not in glibc's includes.  Oh well, rarely used anyway.
-----------------------------------------------------------*/ 
+----------------------------------------------------------*/
 int translate_parity( JNIEnv *env, int *cflag, jint parity )
 {
 	(*cflag) &= ~(PARENB | PARODD);
@@ -377,9 +383,9 @@ RXTXPort.writeByte
    perform:     write a single byte to the port
    return:      none
    exceptions:  IOException
-----------------------------------------------------------*/ 
-JNIEXPORT void JNICALL Java_javax_comm_RXTXPort_writeByte( JNIEnv *env,
-	jobject jobj, jint ji ) 
+----------------------------------------------------------*/
+JNIEXPORT void JNICALL RXTXPort(writeByte)( JNIEnv *env,
+	jobject jobj, jint ji )
 {
 	unsigned char byte = (unsigned char)ji;
 	int fd = get_java_var( env, jobj,"fd","I" );
@@ -398,14 +404,14 @@ JNIEXPORT void JNICALL Java_javax_comm_RXTXPort_writeByte( JNIEnv *env,
 /*----------------------------------------------------------
 RXTXPort.writeArray
 
-   accept:      jbarray: bytes used for writing 
+   accept:      jbarray: bytes used for writing
                 offset: offset in array to start writing
                 count: Number of bytes to write
    perform:     write length bytes of jbarray
    return:      none
    exceptions:  IOException
-----------------------------------------------------------*/ 
-JNIEXPORT void JNICALL Java_javax_comm_RXTXPort_writeArray( JNIEnv *env,
+----------------------------------------------------------*/
+JNIEXPORT void JNICALL RXTXPort(writeArray)( JNIEnv *env,
 	jobject jobj, jbyteArray jbarray, jint offset, jint count )
 {
 	int fd = get_java_var( env, jobj,"fd","I" );
@@ -441,11 +447,11 @@ RXTXPort.drain
                 count logic added to avoid infinite loops when EINTR is
                 true...  Thread.yeild() was suggested.
 ----------------------------------------------------------*/
-JNIEXPORT void JNICALL Java_javax_comm_RXTXPort_drain( JNIEnv *env,
+JNIEXPORT void JNICALL RXTXPort(drain)( JNIEnv *env,
 	jobject jobj )
 {
 	int fd = get_java_var( env, jobj,"fd","I" );
-	int result, count=0; 
+	int result, count=0;
 
 	do {
 		result=tcdrain (fd);
@@ -463,8 +469,8 @@ RXTXPort.sendBreak
    perform:    send break for actual time.  not less than 0.25 seconds.
    exceptions: none
    comments:   not very precise
-----------------------------------------------------------*/ 
-JNIEXPORT void JNICALL Java_javax_comm_RXTXPort_sendBreak( JNIEnv *env,
+----------------------------------------------------------*/
+JNIEXPORT void JNICALL RXTXPort(sendBreak)( JNIEnv *env,
 	jobject jobj, jint duration )
 {
 	int fd = get_java_var( env, jobj,"fd","I" );
@@ -475,13 +481,13 @@ JNIEXPORT void JNICALL Java_javax_comm_RXTXPort_sendBreak( JNIEnv *env,
 /*----------------------------------------------------------
 RXTXPort.NativegetReceiveTimeout
 
-   accept:     none 
-   perform:    get termios.c_cc[VTIME] 
-   return:     VTIME 
+   accept:     none
+   perform:    get termios.c_cc[VTIME]
+   return:     VTIME
    comments:   see  NativeEnableReceiveTimeoutThreshold
-----------------------------------------------------------*/ 
-JNIEXPORT jint JNICALL Java_javax_comm_RXTXPort_NativegetReceiveTimeout(
-	JNIEnv *env, 
+----------------------------------------------------------*/
+JNIEXPORT jint JNICALL RXTXPort(NativegetReceiveTimeout)(
+	JNIEnv *env,
 	jobject jobj
 	)
 {
@@ -491,7 +497,7 @@ JNIEXPORT jint JNICALL Java_javax_comm_RXTXPort_NativegetReceiveTimeout(
 	if( tcgetattr( fd, &ttyset ) < 0 ) goto fail;
 	return(ttyset.c_cc[ VTIME ] * 100);
 fail:
-	throw_java_exception( env, IO_EXCEPTION, "getReceiveTimeout", 
+	throw_java_exception( env, IO_EXCEPTION, "getReceiveTimeout",
 		strerror( errno ) );
 	return -1;
 }
@@ -499,13 +505,13 @@ fail:
 /*----------------------------------------------------------
 RXTXPort.NativeisReceiveTimeoutEnabled
 
-   accept:     none 
-   perform:    determine if VTIME is none 0 
-   return:     JNI_TRUE if VTIME > 0 else JNI_FALSE 
+   accept:     none
+   perform:    determine if VTIME is none 0
+   return:     JNI_TRUE if VTIME > 0 else JNI_FALSE
    comments:   see  NativeEnableReceiveTimeoutThreshold
-----------------------------------------------------------*/ 
-JNIEXPORT jboolean JNICALL Java_javax_comm_RXTXPort_NativeisReceiveTimeoutEnabled(
-	JNIEnv *env, 
+----------------------------------------------------------*/
+JNIEXPORT jboolean JNICALL RXTXPort(NativeisReceiveTimeoutEnabled)(
+	JNIEnv *env,
 	jobject jobj
 	)
 {
@@ -515,7 +521,7 @@ JNIEXPORT jboolean JNICALL Java_javax_comm_RXTXPort_NativeisReceiveTimeoutEnable
 	if( tcgetattr( fd, &ttyset ) < 0 ) goto fail;
 	return(ttyset.c_cc[ VTIME ] > 0 ? JNI_TRUE:JNI_FALSE);
 fail:
-	throw_java_exception( env, IO_EXCEPTION, "isReceiveTimeoutEnabled", 
+	throw_java_exception( env, IO_EXCEPTION, "isReceiveTimeoutEnabled",
 		strerror( errno ) );
 	return JNI_FALSE;
 }
@@ -530,8 +536,8 @@ RXTXPort.isDSR
    exceptions:  none
    comments:    DSR stands for Data Set Ready
 ----------------------------------------------------------*/
-JNIEXPORT jboolean JNICALL Java_javax_comm_RXTXPort_isDSR( JNIEnv *env,
-	jobject jobj ) 
+JNIEXPORT jboolean JNICALL RXTXPort(isDSR)( JNIEnv *env,
+	jobject jobj )
 {
 	unsigned int result = 0;
 	int fd = get_java_var( env, jobj,"fd","I" );
@@ -551,11 +557,11 @@ RXTXPort.isCD
    exceptions:  none
    comments:    CD stands for Carrier Detect
                 The following comment has been made...
-                "well, it works, there might ofcourse be a bug, but making DCD 
+                "well, it works, there might ofcourse be a bug, but making DCD
                 permanently on fixed it for me so I don't care"
 
 ----------------------------------------------------------*/
-JNIEXPORT jboolean JNICALL Java_javax_comm_RXTXPort_isCD( JNIEnv *env,
+JNIEXPORT jboolean JNICALL RXTXPort(isCD)( JNIEnv *env,
 	jobject jobj )
 {
 	unsigned int result = 0;
@@ -576,8 +582,8 @@ RXTXPort.isCTS
    exceptions:  none
    comments:    CTS stands for Clear To Send.
 ----------------------------------------------------------*/
-JNIEXPORT jboolean JNICALL Java_javax_comm_RXTXPort_isCTS( JNIEnv *env,
-	jobject jobj ) 
+JNIEXPORT jboolean JNICALL RXTXPort(isCTS)( JNIEnv *env,
+	jobject jobj )
 {
 	unsigned int result = 0;
 	int fd = get_java_var( env, jobj,"fd","I" );
@@ -597,7 +603,7 @@ RXTXPort.isRI
    exceptions:  none
    comments:    RI stands for Ring Indicator
 ----------------------------------------------------------*/
-JNIEXPORT jboolean JNICALL Java_javax_comm_RXTXPort_isRI( JNIEnv *env,
+JNIEXPORT jboolean JNICALL RXTXPort(isRI)( JNIEnv *env,
 	jobject jobj )
 {
 	unsigned int result = 0;
@@ -618,7 +624,7 @@ RXTXPort.isRTS
    exceptions:  none
    comments:    tcgetattr with c_cflag CRTS_IFLOW
 ----------------------------------------------------------*/
-JNIEXPORT jboolean JNICALL Java_javax_comm_RXTXPort_isRTS( JNIEnv *env,
+JNIEXPORT jboolean JNICALL RXTXPort(isRTS)( JNIEnv *env,
 	jobject jobj )
 {
 	unsigned int result = 0;
@@ -640,8 +646,8 @@ RXTXPort.setRTS
    exceptions:  none
    comments:    tcsetattr with c_cflag CRTS_IFLOW
 ----------------------------------------------------------*/
-JNIEXPORT void JNICALL Java_javax_comm_RXTXPort_setRTS( JNIEnv *env,
-	jobject jobj, jboolean state ) 
+JNIEXPORT void JNICALL RXTXPort(setRTS)( JNIEnv *env,
+	jobject jobj, jboolean state )
 {
 	unsigned int result = 0;
 	int fd = get_java_var( env, jobj,"fd","I" );
@@ -664,8 +670,8 @@ RXTXPort.setDSR
    exceptions:  none
    comments:    tcsetattr with c_cflag CRTS_IFLOW
 ----------------------------------------------------------*/
-JNIEXPORT void JNICALL Java_javax_comm_RXTXPort_setDSR( JNIEnv *env,
-	jobject jobj, jboolean state ) 
+JNIEXPORT void JNICALL RXTXPort(setDSR)( JNIEnv *env,
+	jobject jobj, jboolean state )
 {
 	unsigned int result = 0;
 	int fd = get_java_var( env, jobj,"fd","I" );
@@ -687,7 +693,7 @@ RXTXPort.isDTR
    exceptions:  none
    comments:    DTR stands for Data Terminal Ready
 ----------------------------------------------------------*/
-JNIEXPORT jboolean JNICALL Java_javax_comm_RXTXPort_isDTR( JNIEnv *env,
+JNIEXPORT jboolean JNICALL RXTXPort(isDTR)( JNIEnv *env,
 	jobject jobj )
 {
 	unsigned int result = 0;
@@ -708,7 +714,7 @@ RXTXPort.setDTR
    exceptions:  none
    comments:    DTR stands for Data Terminal Ready
 ----------------------------------------------------------*/
-JNIEXPORT void JNICALL Java_javax_comm_RXTXPort_setDTR( JNIEnv *env,
+JNIEXPORT void JNICALL RXTXPort(setDTR)( JNIEnv *env,
 	jobject jobj, jboolean state )
 {
 	unsigned int result = 0;
@@ -738,7 +744,7 @@ read_byte_array
 		
 		The nuts and bolts are documented in
 		NativeEnableReceiveTimeoutThreshold()
-----------------------------------------------------------*/ 
+----------------------------------------------------------*/
 int read_byte_array( int fd, unsigned char *buffer, int length, int timeout )
 {
 	int ret, left, bytes = 0;
@@ -754,7 +760,7 @@ int read_byte_array( int fd, unsigned char *buffer, int length, int timeout )
 		sleep.tv_sec = timeout / 1000;
 		sleep.tv_usec = 1000 * ( timeout % 1000 );
 	}
-	while( bytes < length ) 
+	while( bytes < length )
 	{
          /* FIXME: In Linux, select updates the timeout automatically, so
             other OSes will need to update it manually if they want to have
@@ -781,12 +787,12 @@ NativeEnableReceiveTimeoutThreshold
    perform:     Set c_cc->VMIN to threshold and c_cc=>VTIME to vtime
    return:      void
    exceptions:  IOException
-   comments:    This is actually all handled in read with select in 
+   comments:    This is actually all handled in read with select in
                 canonical input mode.
-----------------------------------------------------------*/ 
- 
-JNIEXPORT 
-void JNICALL Java_javax_comm_RXTXPort_NativeEnableReceiveTimeoutThreshold(
+----------------------------------------------------------*/
+
+JNIEXPORT
+void JNICALL RXTXPort(NativeEnableReceiveTimeoutThreshold)(
 	JNIEnv *env, jobject jobj, jint vtime, jint threshold, jint buffer)
 {
 	int fd = get_java_var( env, jobj,"fd","I" );
@@ -799,7 +805,7 @@ void JNICALL Java_javax_comm_RXTXPort_NativeEnableReceiveTimeoutThreshold(
 
 	return;
 fail:
-	throw_java_exception( env, IO_EXCEPTION, "TimeoutThreshold", 
+	throw_java_exception( env, IO_EXCEPTION, "TimeoutThreshold",
 		strerror( errno ) );
 	return;
 }
@@ -811,10 +817,10 @@ RXTXPort.readByte
    perform:     Read a single byte from the port
    return:      The byte read
    exceptions:  IOException
-----------------------------------------------------------*/ 
-JNIEXPORT jint JNICALL Java_javax_comm_RXTXPort_readByte( JNIEnv *env,
+----------------------------------------------------------*/
+JNIEXPORT jint JNICALL RXTXPort(readByte)( JNIEnv *env,
 	jobject jobj )
-{ 
+{
 	int bytes;
 	unsigned char buffer[ 1 ];
 	int fd = get_java_var( env, jobj,"fd","I" );
@@ -832,7 +838,7 @@ JNIEXPORT jint JNICALL Java_javax_comm_RXTXPort_readByte( JNIEnv *env,
 /*----------------------------------------------------------
 RXTXPort.readArray
 
-   accept:       offset (offset to start storing data in the jbarray) and 
+   accept:       offset (offset to start storing data in the jbarray) and
                  Length (bytes to read)
    perform:      read bytes from the port into a byte array
    return:       bytes read on success
@@ -840,10 +846,10 @@ RXTXPort.readArray
    exceptions:   IOException
    comments:     throws ArrayIndexOutOfBoundsException if asked to
                  read more than SSIZE_MAX bytes
-----------------------------------------------------------*/ 
-JNIEXPORT jint JNICALL Java_javax_comm_RXTXPort_readArray( JNIEnv *env,
+----------------------------------------------------------*/
+JNIEXPORT jint JNICALL RXTXPort(readArray)( JNIEnv *env,
 	jobject jobj, jbyteArray jbarray, jint offset, jint length )
-{  
+{ 
 	int bytes;
 	jbyte *body;
 	unsigned char *buffer;
@@ -885,16 +891,16 @@ RXTXPort.nativeavailable
    return:      available bytes
                 -1 on error
    exceptions:  none
-----------------------------------------------------------*/ 
-JNIEXPORT jint JNICALL Java_javax_comm_RXTXPort_nativeavailable( JNIEnv *env,
+----------------------------------------------------------*/
+JNIEXPORT jint JNICALL RXTXPort(nativeavailable)( JNIEnv *env,
 	jobject jobj )
 {
 	int fd = get_java_var( env, jobj,"fd","I" );
 	int result;
 
-	if( ioctl( fd, FIONREAD, &result ) ) 
+	if( ioctl( fd, FIONREAD, &result ) )
 	{
-		throw_java_exception( env, IO_EXCEPTION, "nativeavailable", 
+		throw_java_exception( env, IO_EXCEPTION, "nativeavailable",
 			strerror( errno ) );
 		return -1;
 	}
@@ -905,7 +911,7 @@ JNIEXPORT jint JNICALL Java_javax_comm_RXTXPort_nativeavailable( JNIEnv *env,
 /*----------------------------------------------------------
 RXTXPort.setflowcontrol
 
-   accept:      flowmode 
+   accept:      flowmode
 	FLOWCONTROL_NONE        none
 	FLOWCONTROL_RTSCTS_IN   hardware flow control
 	FLOWCONTROL_RTSCTS_OUT         ""
@@ -917,7 +923,7 @@ RXTXPort.setflowcontrol
    comments:  there is no differentiation between input and output hardware
               flow control
 ----------------------------------------------------------*/
-JNIEXPORT void JNICALL Java_javax_comm_RXTXPort_setflowcontrol( JNIEnv *env,
+JNIEXPORT void JNICALL RXTXPort(setflowcontrol)( JNIEnv *env,
 	jobject jobj, jint flowmode )
 {
 	struct termios ttyset;
@@ -955,8 +961,8 @@ RXTXPort.eventLoop
    return:      none
    exceptions:  none
    comments:    FIXME This is probably wrong on bsd.
-----------------------------------------------------------*/ 
-JNIEXPORT void JNICALL Java_javax_comm_RXTXPort_eventLoop( JNIEnv *env,
+----------------------------------------------------------*/
+JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env,
 	jobject jobj )
 {
 	int fd, ret, change;
@@ -982,7 +988,7 @@ JNIEXPORT void JNICALL Java_javax_comm_RXTXPort_eventLoop( JNIEnv *env,
 	fd = fd = get_java_var(env, jobj, "fd", "I");
 	sendEvent = (*env)->GetMethodID( env, jclazz, "sendEvent", "(IZ)Z" );
 	jthread = (*env)->FindClass( env, "java/lang/Thread" );
-	interrupt = (*env)->GetStaticMethodID( env, jthread, "interrupted", 
+	interrupt = (*env)->GetStaticMethodID( env, jthread, "interrupted",
 		"()Z" );
 	/* Some multiport serial cards do not implement TIOCGICOUNT ... */
 	/* So use the 'dumb' mode to enable using them after all! JK00 */
@@ -1011,18 +1017,18 @@ JNIEXPORT void JNICALL Java_javax_comm_RXTXPort_eventLoop( JNIEnv *env,
 
 	FD_ZERO( &rfds );
 	while( !interrupted ) {
-		interrupted = (*env)->CallStaticBooleanMethod( env, jthread, 
+		interrupted = (*env)->CallStaticBooleanMethod( env, jthread,
 			interrupt );
 		FD_SET( fd, &rfds );
 		/* Check every 1 second, or on receive data */
-		tv_sleep.tv_sec = 1; 
+		tv_sleep.tv_sec = 1;
 		tv_sleep.tv_usec = 0;
 		do {
 			ret=select( fd + 1, &rfds, NULL, NULL, &tv_sleep );
 		}  while (ret < 0 && errno==EINTR);
 		if( ret < 0 ) {
 			fprintf( stderr, "select() Failed\n" );
-			break; 
+			break;
 		}
 
 #if defined TIOCSERGETLSR
@@ -1036,9 +1042,9 @@ JNIEXPORT void JNICALL Java_javax_comm_RXTXPort_eventLoop( JNIEnv *env,
 				break;
 			}
 			else if( change ) {
-				interrupted=(*env)->CallBooleanMethod( env, 
+				interrupted=(*env)->CallBooleanMethod( env,
 					jobj, sendEvent,
-					(jint)SPE_OUTPUT_BUFFER_EMPTY, 
+					(jint)SPE_OUTPUT_BUFFER_EMPTY,
 					JNI_TRUE );
 			}
 		}
@@ -1047,7 +1053,7 @@ JNIEXPORT void JNICALL Java_javax_comm_RXTXPort_eventLoop( JNIEnv *env,
 	/*	wait for RNG, DSR, CD or CTS  but not DataAvailable
 	 *      The drawback here is it never times out so if someone
 	 *      reads there will be no chance to try again.
-	 *      This may make sense if the program does not want to 
+	 *      This may make sense if the program does not want to
 	 *      be notified of data available or errors.
 	 *	ret=ioctl(fd,TIOCMIWAIT);
 	 */
@@ -1055,29 +1061,29 @@ JNIEXPORT void JNICALL Java_javax_comm_RXTXPort_eventLoop( JNIEnv *env,
 		if (has_tiocgicount) {
 			if( ioctl( fd, TIOCGICOUNT, &sis ) ) {
 				fprintf( stderr, "TIOCGICOUNT Failed\n" );
-				break; 
+				break;
 			}
 			while( sis.frame != osis.frame ) {
-				interrupted = (*env)->CallBooleanMethod( env, 
-					jobj, sendEvent, (jint)SPE_FE, 
+				interrupted = (*env)->CallBooleanMethod( env,
+					jobj, sendEvent, (jint)SPE_FE,
 					JNI_TRUE );
 				osis.frame++;
 			}
 			while( sis.overrun != osis.overrun ) {
-				interrupted = (*env)->CallBooleanMethod( env, 
-					jobj, sendEvent, 
+				interrupted = (*env)->CallBooleanMethod( env,
+					jobj, sendEvent,
 					(jint)SPE_OE, JNI_TRUE );
 				osis.overrun++;
 			}
 			while( sis.parity != osis.parity ) {
-				interrupted = (*env)->CallBooleanMethod( env, 
-					jobj, sendEvent, 
+				interrupted = (*env)->CallBooleanMethod( env,
+					jobj, sendEvent,
 					(jint)SPE_PE, JNI_TRUE );
 				osis.parity++;
 			}
 			while( sis.brk != osis.brk ) {
-				interrupted = (*env)->CallBooleanMethod( env, 
-					jobj, sendEvent, (jint)SPE_BI, 
+				interrupted = (*env)->CallBooleanMethod( env,
+					jobj, sendEvent, (jint)SPE_BI,
 					JNI_TRUE );
 				osis.brk++;
 			}
@@ -1086,31 +1092,31 @@ JNIEXPORT void JNICALL Java_javax_comm_RXTXPort_eventLoop( JNIEnv *env,
 #endif /*  TIOCGICOUNT */
 		if( ioctl( fd, TIOCMGET, &mflags ) ) {
 			fprintf( stderr, "TIOCMGET Failed\n" );
-			break; 
+			break;
 		}
 	       /* A Portable implementation */
 		change = (mflags&TIOCM_CTS) - (omflags&TIOCM_CTS);
 		if( change ) {
 			fprintf(stderr, "Sending SPE_CTS\n");
-			interrupted = (*env)->CallBooleanMethod( env, jobj, 
+			interrupted = (*env)->CallBooleanMethod( env, jobj,
 				sendEvent, (jint)SPE_CTS, JNI_TRUE );
 		}
 		change = (mflags&TIOCM_DSR) - (omflags&TIOCM_DSR);
 		if( change ) {
 			fprintf(stderr, "Sending SPE_DSR\n");
-			interrupted = (*env)->CallBooleanMethod( env, jobj, 
+			interrupted = (*env)->CallBooleanMethod( env, jobj,
 				sendEvent, (jint)SPE_DSR, JNI_TRUE );
 		}
 		change = (mflags&TIOCM_RNG) - (omflags&TIOCM_RNG);
 		if( change ) {
 			fprintf(stderr, "Sending SPE_RI\n");
-			interrupted = (*env)->CallBooleanMethod( env, jobj, 
+			interrupted = (*env)->CallBooleanMethod( env, jobj,
 				sendEvent, (jint)SPE_RI, JNI_TRUE );
 		}
 		change = (mflags&TIOCM_CD) - (omflags&TIOCM_CD);
 		if( change ) {
 			fprintf(stderr, "Sending SPE_CD\n");
-			interrupted = (*env)->CallBooleanMethod( env, jobj, 
+			interrupted = (*env)->CallBooleanMethod( env, jobj,
 				sendEvent, (jint)SPE_CD, JNI_TRUE );
 		}
 		omflags = mflags;
@@ -1118,7 +1124,7 @@ JNIEXPORT void JNICALL Java_javax_comm_RXTXPort_eventLoop( JNIEnv *env,
 			fprintf( stderr, "FIONREAD Failed\n" );
 		}
 		else if( change ) {
-			interrupted = (*env)->CallBooleanMethod( env, jobj, 
+			interrupted = (*env)->CallBooleanMethod( env, jobj,
 				sendEvent, (jint)SPE_DATA_AVAILABLE, JNI_TRUE );
 			if( !interrupted )
 				usleep(1000); /* select wont block */
@@ -1140,7 +1146,7 @@ JNIEXPORT void JNICALL Java_javax_comm_RXTXPort_eventLoop( JNIEnv *env,
                 state has changed, we can send a SerialPortEvent for each
                 interrupt (change) that has occured.  If we don't do this,
                 we'll miss a whole bunch of events.
-----------------------------------------------------------*/ 
+----------------------------------------------------------*/
 void send_modem_events( JNIEnv *env, jobject jobj, jmethodID method,
 	int event, int change, int state )
 {
@@ -1164,7 +1170,7 @@ get_java_var
    return:      the fd field from the java object
    exceptions:  none
    comments:
-----------------------------------------------------------*/ 
+----------------------------------------------------------*/
 int get_java_var( JNIEnv *env, jobject jobj, char *id, char *type )
 {
 	int result = 0;
@@ -1192,7 +1198,7 @@ throw_java_exception
    return:      none
    exceptions:  haha!
    comments:
-----------------------------------------------------------*/ 
+----------------------------------------------------------*/
 void throw_java_exception( JNIEnv *env, char *exc, char *foo, char *msg )
 {
 	char buf[ 60 ];
@@ -1212,7 +1218,7 @@ void throw_java_exception( JNIEnv *env, char *exc, char *foo, char *msg )
 	(*env)->DeleteLocalRef( env, clazz );
 }
 
-JNIEXPORT jboolean  JNICALL Java_javax_comm_RXTXCommDriver_IsDeviceGood(JNIEnv *env,
+JNIEXPORT jboolean  JNICALL RXTXCommDriver(isDeviceGood)(JNIEnv *env,
 	jobject jobj, jstring tty_name){
 
 	jboolean result;
@@ -1272,14 +1278,14 @@ JNIEXPORT jboolean  JNICALL Java_javax_comm_RXTXCommDriver_IsDeviceGood(JNIEnv *
 	(*env)->ReleaseStringUTFChars(env, tty_name, name);
 	return(result);
 }
-JNIEXPORT void JNICALL Java_javax_comm_RXTXPort_setInputBufferSize(JNIEnv *env,
+JNIEXPORT void JNICALL RXTXPort(setInputBufferSize)(JNIEnv *env,
 	jobject jobj,  jint size )
 {
 #ifdef DEBUG
 	fprintf(stderr,"setInputBufferSize is not implemented\n");
 #endif
 }
-JNIEXPORT jint JNICALL Java_javax_comm_RXTXPort_getInputBufferSize(JNIEnv *env,
+JNIEXPORT jint JNICALL RXTXPort(getInputBufferSize)(JNIEnv *env,
 	jobject jobj)
 {
 #ifdef DEBUG
@@ -1287,14 +1293,14 @@ JNIEXPORT jint JNICALL Java_javax_comm_RXTXPort_getInputBufferSize(JNIEnv *env,
 #endif
 	return(1);
 }
-JNIEXPORT void JNICALL Java_javax_comm_RXTXPort_setOutputBufferSize(JNIEnv *env,
+JNIEXPORT void JNICALL RXTXPort(setOutputBufferSize)(JNIEnv *env,
 	jobject jobj, jint size )
 {
 #ifdef DEBUG
 	fprintf(stderr,"setOutputBufferSize is not implemented\n");
 #endif
 }
-JNIEXPORT jint JNICALL Java_javax_comm_RXTXPort_getOutputBufferSize(JNIEnv *env,
+JNIEXPORT jint JNICALL RXTXPort(getOutputBufferSize)(JNIEnv *env,
 	jobject jobj)
 {
 #ifdef DEBUG

@@ -25,8 +25,8 @@ import java.util.*;
 /**
   * LPRPort
   */
-final class LPRPort extends ParallelPort {
-
+final class LPRPort extends ParallelPort 
+{
 	static {
 		System.loadLibrary( "Parallel" );
 		Initialize();
@@ -36,7 +36,8 @@ final class LPRPort extends ParallelPort {
 	private native static void Initialize();
 
 	/** Open the named port */
-	public LPRPort( String name ) throws IOException {
+	public LPRPort( String name ) throws IOException 
+	{
 		try {
 			fd = open( name );
 		} catch ( PortInUseException e ){}
@@ -59,7 +60,8 @@ final class LPRPort extends ParallelPort {
 	    or LPT_MODE_ECP */
 	private int lprmode=LPT_MODE_ANY;
 	public int getMode() { return lprmode; }
-	public int setMode(int mode) {
+	public int setMode(int mode) 
+	{
 		try {
 			setLPRMode(mode);
 		} catch(UnsupportedCommOperationException e) {
@@ -69,10 +71,17 @@ final class LPRPort extends ParallelPort {
 		lprmode = mode;
 		return(0);
 	}
-	public void restart(){System.out.println("restart() is not implemented");};
-	public void suspend(){System.out.println("suspend() is not implemented");};
+	public void restart()
+	{
+		System.out.println("restart() is not implemented");
+	}
+	public void suspend()
+	{
+		System.out.println("suspend() is not implemented");
+	}
 	
-	public native boolean setLPRMode(int mode) throws UnsupportedCommOperationException;
+	public native boolean setLPRMode(int mode) 
+		throws UnsupportedCommOperationException;
 	public native boolean isPaperOut();
 	public native boolean isPrinterBusy();
 	public native boolean isPrinterError();
@@ -97,7 +106,8 @@ final class LPRPort extends ParallelPort {
 
 	/** Close the port */
 	private native void nativeClose();
-	public synchronized void close(){
+	public synchronized void close()
+	{
 		nativeClose();
 		super.close();
 		fd = 0;
@@ -114,7 +124,8 @@ final class LPRPort extends ParallelPort {
 
 	/** Receive timeout control */
 	private int timeout = 0;
-	public void enableReceiveTimeout( int t ) {
+	public void enableReceiveTimeout( int t ) 
+	{
 		if( t > 0 ) timeout = t;
 		else timeout = 0;
 	}
@@ -124,7 +135,8 @@ final class LPRPort extends ParallelPort {
 
 	/** Receive threshold control */
 	private int threshold = 1;
-	public void enableReceiveThreshold( int t ) {
+	public void enableReceiveThreshold( int t ) 
+	{
 		if( t > 1 ) threshold = t;
 		else threshold = 1;
 	}
@@ -163,11 +175,13 @@ final class LPRPort extends ParallelPort {
 
 	/** Process ParallelPortEvents */
 	native void eventLoop();
-	synchronized void sendEvent( int event, boolean state ) {
+	synchronized void sendEvent( int event, boolean state ) 
+	{
 
 		if ( fd == 0 ) return;  /* close() was called */
 
-		switch( event ) {
+		switch( event ) 
+		{
 			case ParallelPortEvent.PAR_EV_BUFFER:
 				if(  monThread.monBuffer ) break;
 				return;
@@ -176,24 +190,29 @@ final class LPRPort extends ParallelPort {
 				return;
 			default:
 		}
-		ParallelPortEvent e = new ParallelPortEvent(this, event, !state, state );
-		if( PPEventListener != null ) PPEventListener.parallelEvent( e );
+		ParallelPortEvent e = 
+			new ParallelPortEvent(this, event, !state, state );
+		if( PPEventListener != null ) 
+			PPEventListener.parallelEvent( e );
 	}
 
 	/** Add an event listener */
 	public void addEventListener( ParallelPortEventListener lsnr )
 		throws TooManyListenersException
 	{
-		if( PPEventListener != null ) throw new TooManyListenersException();
+		if( PPEventListener != null ) 
+			throw new TooManyListenersException();
 		PPEventListener = lsnr;
 		monThread = new MonitorThread();
 		monThread.start();
 	}
 
 	/** Remove the parallel port event listener */
-	public void removeEventListener() {
+	public void removeEventListener() 
+	{
 		PPEventListener = null;
-		if( monThread != null ) {
+		if( monThread != null ) 
+		{
 			monThread.interrupt();
 			monThread = null;
 		}
@@ -202,57 +221,74 @@ final class LPRPort extends ParallelPort {
 	/** Note: these have to be separate boolean flags because the
 	   ParallelPortEvent constants are NOT bit-flags, they are just
 	   defined as integers from 1 to 10  -DPL */
-	public void notifyOnError( boolean enable ) { 
+	public void notifyOnError( boolean enable ) 
+	{
 		System.out.println("notifyOnError is not implemented yet");
 		monThread.monError = enable; 
 	}
-	public void notifyOnBuffer( boolean enable ) { 
+	public void notifyOnBuffer( boolean enable ) 
+	{
 		System.out.println("notifyOnBuffer is not implemented yet");
 		monThread.monBuffer = enable; 
 	}
 
 
 	/** Finalize the port */
-	protected void finalize() {
+	protected void finalize() 
+	{
 		if ( fd > 0 ) close();
 	}
 
         /** Inner class for ParallelOutputStream */
-        class ParallelOutputStream extends OutputStream {
-                public void write( int b ) throws IOException {
+        class ParallelOutputStream extends OutputStream 
+	{
+                public void write( int b ) throws IOException 
+		{
                         writeByte( b );
                 }
-                public void write( byte b[] ) throws IOException {
+                public void write( byte b[] ) throws IOException 
+		{
                         writeArray( b, 0, b.length );
                 }
-                public void write( byte b[], int off, int len ) throws IOException {
+                public void write( byte b[], int off, int len ) 
+			throws IOException 
+		{
                         writeArray( b, off, len );
                 }
-                public void flush() throws IOException {
+                public void flush() throws IOException 
+		{
                         //drain();
                 }
         }
 
 	/** Inner class for ParallelInputStream */
-	class ParallelInputStream extends InputStream {
-		public int read() throws IOException {
+	class ParallelInputStream extends InputStream 
+	{
+		public int read() throws IOException 
+		{
 			return readByte();
 		}
-		public int read( byte b[] ) throws IOException {
+		public int read( byte b[] ) throws IOException 
+		{
 			return readArray( b, 0, b.length );
 		}
-		public int read( byte b[], int off, int len ) throws IOException {
+		public int read( byte b[], int off, int len ) 
+			throws IOException 
+		{
 			return readArray( b, off, len );
 		}
-		public int available() throws IOException {
+		public int available() throws IOException 
+		{
 			return nativeavailable();
 		}
 	}
-class MonitorThread extends Thread {
+class MonitorThread extends Thread 
+{
 	private boolean monError = false;
 	private boolean monBuffer = false; 
                 MonitorThread() { }
-                public void run() {
+                public void run() 
+		{
                         eventLoop();
                 }
 	}

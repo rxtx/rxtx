@@ -42,41 +42,54 @@ final class RXTXPort extends SerialPort
 
 	/** Actual SerialPort wrapper class */
 
+	/** Port Name  */
+	private String PortName;
 
 	/** Open the named port */
-	public RXTXPort( String name )
+	public RXTXPort( String name )  throws IOException
 	{
 		if (debug) System.out.println("RXTXPort:RXTXPort("+name+")");
 		try {
 			fd = open( name );
 		} catch ( PortInUseException e ){}
 		System.out.println("RXTXPort:RXTXPort("+name+") fd = " + fd);
+		PortName=name;
 	}
+
 	private native synchronized int open( String name )
 		throws PortInUseException;
 
 	/** File descriptor */
-	private int fd;
+	private int fd = 0;
 
 	/** DSR flag **/
 	static boolean dsrFlag = false;
 
 	/** Output stream */
 	private final SerialOutputStream out = new SerialOutputStream();
-	public OutputStream getOutputStream() { return out; }
-
+	public OutputStream getOutputStream() throws IOException
+	{ 
+		if (fd > 0)
+			return out; 
+		else
+			throw new IllegalStateException("No File Descriptor");
+	}
 
 	/** Input stream */
 	private final SerialInputStream in = new SerialInputStream();
-	public InputStream getInputStream() { return in; }
-
-
-
+	public InputStream getInputStream() throws IOException
+	{ 
+		if (fd == 0 )
+			throw new IllegalStateException("No File Descriptor");
+		return in; 
+	}
 
 	/** Set the SerialPort parameters */
 	public void setSerialPortParams( int b, int d, int s, int p )
 		throws UnsupportedCommOperationException
 	{
+		if (fd == 0 )
+			throw new IllegalStateException("No File Descriptor");
 		nativeSetSerialPortParams( b, d, s, p );
 		speed = b;
 		dataBits = d;
@@ -91,25 +104,48 @@ final class RXTXPort extends SerialPort
 
 	/** Line speed in bits-per-second */
 	private int speed=9600;
-	public int getBaudRate() { return speed; }
+	public int getBaudRate() 
+	{ 
+		if (fd == 0 )
+			throw new IllegalStateException("No File Descriptor");
+		return speed; 
+	}
 
 	/** Data bits port parameter */
 	private int dataBits=DATABITS_8;
-	public int getDataBits() { return dataBits; }
+	public int getDataBits() 
+	{ 
+		if (fd == 0 )
+			throw new IllegalStateException("No File Descriptor");
+		return dataBits; 
+	}
 
 	/** Stop bits port parameter */
 	private int stopBits=SerialPort.STOPBITS_1;
-	public int getStopBits() { return stopBits; }
+	public int getStopBits() 
+	{ 
+		if (fd == 0 )
+			throw new IllegalStateException("No File Descriptor");
+		return stopBits; 
+	}
 
 	/** Parity port parameter */
 	private int parity= SerialPort.PARITY_NONE;
-	public int getParity() { return parity; }
+	public int getParity() 
+	{ 
+		if (fd == 0 )
+			throw new IllegalStateException("No File Descriptor");
+		return parity; 
+	}
 
 
 	/** Flow control */
 	private int flowmode = SerialPort.FLOWCONTROL_NONE;
 	public void setFlowControlMode( int flowcontrol )
+		throws UnsupportedCommOperationException
 	{
+		if (fd == 0 )
+			throw new IllegalStateException("No File Descriptor");
 		try { setflowcontrol( flowcontrol ); }
 		catch( IOException e )
 		{
@@ -118,7 +154,14 @@ final class RXTXPort extends SerialPort
 		}
 		flowmode=flowcontrol;
 	}
-	public int getFlowControlMode() { return flowmode; }
+
+	public int getFlowControlMode() 
+	{ 
+		if (fd == 0 )
+			throw new IllegalStateException("No File Descriptor");
+		return flowmode; 
+	}
+
 	native void setflowcontrol( int flowcontrol ) throws IOException;
 
 
@@ -131,11 +174,28 @@ final class RXTXPort extends SerialPort
 	public void enableReceiveFraming( int f )
 		throws UnsupportedCommOperationException
 	{
+		if (fd == 0 )
+			throw new IllegalStateException("No File Descriptor");
 		throw new UnsupportedCommOperationException( "Not supported" );
 	}
-	public void disableReceiveFraming() {}
-	public boolean isReceiveFramingEnabled() { return false; }
-	public int getReceiveFramingByte() { return 0; }
+	public void disableReceiveFraming() 
+	{
+		if (fd == 0 )
+			throw new IllegalStateException("No File Descriptor");
+	}
+	public boolean isReceiveFramingEnabled() 
+	{ 
+		if (fd == 0 )
+			throw new IllegalStateException("No File Descriptor");
+		return false; 
+	}
+
+	public int getReceiveFramingByte() 
+	{ 
+		if (fd == 0 )
+			throw new IllegalStateException("No File Descriptor");
+		return 0; 
+	}
 
 
 	/** Receive timeout control */
@@ -147,10 +207,14 @@ final class RXTXPort extends SerialPort
 		int threshold,int InputBuffer);
 	public void disableReceiveTimeout()
 	{
+		if (fd == 0 )
+			throw new IllegalStateException("No File Descriptor");
 		enableReceiveTimeout(0);
 	}
 	public void enableReceiveTimeout( int time )
 	{
+		if (fd == 0 )
+			throw new IllegalStateException("No File Descriptor");
 		if( time >= 0 )
 		{
 			timeout = time;
@@ -167,10 +231,14 @@ final class RXTXPort extends SerialPort
 	}
 	public boolean isReceiveTimeoutEnabled()
 	{
+		if (fd == 0 )
+			throw new IllegalStateException("No File Descriptor");
 		return(NativeisReceiveTimeoutEnabled());
 	}
 	public int getReceiveTimeout()
 	{
+		if (fd == 0 )
+			throw new IllegalStateException("No File Descriptor");
 		return(NativegetReceiveTimeout( ));
 	}
 
@@ -180,6 +248,8 @@ final class RXTXPort extends SerialPort
 
 	public void enableReceiveThreshold( int thresh )
 	{
+		if (fd == 0 )
+			throw new IllegalStateException("No File Descriptor");
 		if(thresh >=0)
 		{
 			threshold=thresh;
@@ -195,14 +265,20 @@ final class RXTXPort extends SerialPort
 		}
 	}
 	public void disableReceiveThreshold() {
+		if (fd == 0 )
+			throw new IllegalStateException("No File Descriptor");
 		enableReceiveThreshold(0);
 	}
 	public int getReceiveThreshold()
 	{
+		if (fd == 0 )
+			throw new IllegalStateException("No File Descriptor");
 		return threshold;
 	}
 	public boolean isReceiveThresholdEnabled()
 	{
+		if (fd == 0 )
+			throw new IllegalStateException("No File Descriptor");
 		return(threshold>0);
 	}
 
@@ -217,6 +293,8 @@ final class RXTXPort extends SerialPort
 	private int OutputBuffer=0;
 	public void setInputBufferSize( int size )
 	{
+		if (fd == 0 )
+			throw new IllegalStateException("No File Descriptor");
 		if( size < 0 )
 			throw new IllegalArgumentException
 			(
@@ -226,10 +304,14 @@ final class RXTXPort extends SerialPort
 	}
 	public int getInputBufferSize()
 	{
+		if (fd == 0 )
+			throw new IllegalStateException("No File Descriptor");
 		return(InputBuffer);
 	}
 	public void setOutputBufferSize( int size )
 	{
+		if (fd == 0 )
+			throw new IllegalStateException("No File Descriptor");
 		if( size < 0 )
 			throw new IllegalArgumentException
 			(
@@ -239,6 +321,8 @@ final class RXTXPort extends SerialPort
 	}
 	public int getOutputBufferSize()
 	{
+		if (fd == 0 )
+			throw new IllegalStateException("No File Descriptor");
 		return(OutputBuffer);
 	}
 
@@ -284,6 +368,8 @@ final class RXTXPort extends SerialPort
 		/* Let the native side know its time to die */
 
 		if ( SPEventListener == null || monThread == null) return(true);  
+		if (fd == 0 )
+			throw new IllegalStateException("No File Descriptor");
 
 		switch( event )
 		{
@@ -346,9 +432,11 @@ final class RXTXPort extends SerialPort
 	}
 
 	/** Add an event listener */
-	public void addEventListener( SerialPortEventListener lsnr )
-		throws TooManyListenersException
+	public synchronized void addEventListener( 
+		SerialPortEventListener lsnr ) throws TooManyListenersException
 	{
+		if (fd == 0 )
+			throw new IllegalStateException("No File Descriptor");
 		if( SPEventListener != null )
 			throw new TooManyListenersException();
 		SPEventListener = lsnr;
@@ -359,6 +447,9 @@ final class RXTXPort extends SerialPort
 	/** Remove the serial port event listener */
 	public synchronized void removeEventListener()
 	{
+		if (fd == 0 )
+			throw new IllegalStateException("No File Descriptor");
+
 		SPEventListener = null;
 		if( monThread != null )
 		{
@@ -367,47 +458,77 @@ final class RXTXPort extends SerialPort
 		}
 	}
 
-	public void notifyOnDataAvailable( boolean enable )
+	public synchronized void notifyOnDataAvailable( boolean enable )
 	{
-		monThread.Data = enable;
+		if (fd > 0)
+			monThread.Data = enable;
+		else
+			throw new IllegalStateException("No File Descriptor");
 	}
 
-	public void notifyOnOutputEmpty( boolean enable )
+	public synchronized void notifyOnOutputEmpty( boolean enable )
 	{
-		monThread.Output = enable;
+		if (fd > 0)
+			monThread.Output = enable;
+		else
+			throw new IllegalStateException("No File Descriptor");
 	}
 
-	public void notifyOnCTS( boolean enable )
+	public synchronized void notifyOnCTS( boolean enable )
 	{
-		monThread.CTS = enable;
+		if (fd > 0)
+			monThread.CTS = enable;
+		else
+			throw new IllegalStateException("No File Descriptor");
 	}
-	public void notifyOnDSR( boolean enable )
+	public synchronized void notifyOnDSR( boolean enable )
 	{
-		monThread.DSR = enable;
+		if (fd > 0)
+			monThread.DSR = enable;
+		else
+			throw new IllegalStateException("No File Descriptor");
 	}
-	public void notifyOnRingIndicator( boolean enable )
+	public synchronized void notifyOnRingIndicator( boolean enable )
 	{
-		monThread.RI = enable;
+		if (fd > 0)
+			monThread.RI = enable;
+		else
+			throw new IllegalStateException("No File Descriptor");
 	}
-	public void notifyOnCarrierDetect( boolean enable )
+	public synchronized void notifyOnCarrierDetect( boolean enable )
 	{
-		monThread.CD = enable;
+		if (fd > 0)
+			monThread.CD = enable;
+		else
+			throw new IllegalStateException("No File Descriptor");
 	}
-	public void notifyOnOverrunError( boolean enable )
+	public synchronized void notifyOnOverrunError( boolean enable )
 	{
-		monThread.OE = enable;
+		if (fd > 0)
+			monThread.OE = enable;
+		else
+			throw new IllegalStateException("No File Descriptor");
 	}
-	public void notifyOnParityError( boolean enable )
+	public synchronized void notifyOnParityError( boolean enable )
 	{
-		monThread.PE = enable;
+		if (fd > 0)
+			monThread.PE = enable;
+		else
+			throw new IllegalStateException("No File Descriptor");
 	}
-	public void notifyOnFramingError( boolean enable )
+	public synchronized void notifyOnFramingError( boolean enable )
 	{
-		monThread.FE = enable;
+		if (fd > 0)
+			monThread.FE = enable;
+		else
+			throw new IllegalStateException("No File Descriptor");
 	}
-	public void notifyOnBreakInterrupt( boolean enable )
+	public synchronized void notifyOnBreakInterrupt( boolean enable )
 	{
-		monThread.BI = enable;
+		if (fd > 0)
+			monThread.BI = enable;
+		else
+			throw new IllegalStateException("No File Descriptor");
 	}
 
 
@@ -424,9 +545,11 @@ final class RXTXPort extends SerialPort
 
 
 	/** Finalize the port */
-	protected void finalize()
+	protected void finalize() throws Throwable
 	{
 		if( fd > 0 ) close();
+		else
+			throw new IllegalStateException("No File Descriptor");
 	}
 
 
@@ -435,19 +558,31 @@ final class RXTXPort extends SerialPort
 	{
                 public void write( int b ) throws IOException
 		{
+			if (fd == 0 )
+				throw new IllegalStateException(
+					"No File Descriptor");
                         writeByte( b );
                 }
                 public void write( byte b[] ) throws IOException
 		{
+			if (fd == 0 )
+				throw new IllegalStateException(
+					"No File Descriptor");
                         writeArray( b, 0, b.length );
                 }
                 public void write( byte b[], int off, int len )
 			throws IOException
 		{
+			if (fd == 0 )
+				throw new IllegalStateException(
+					"No File Descriptor");
                         writeArray( b, off, len );
                 }
                 public void flush() throws IOException
 		{
+			if (fd == 0 )
+				throw new IllegalStateException(
+					"No File Descriptor");
                         drain();
                 }
         }
@@ -457,6 +592,9 @@ final class RXTXPort extends SerialPort
 	{
 		public int read() throws IOException
 		{
+			if (fd == 0 )
+				throw new IllegalStateException(
+					"No File Descriptor");
 			dataAvailable=0;
 			return readByte();
 		}
@@ -474,6 +612,9 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 			/*
 			 * Some sanity checks
 			 */
+			if (fd == 0 )
+				throw new IllegalStateException(
+					"No File Descriptor");
 			if( b==null )
 				throw new NullPointerException();
 
@@ -523,6 +664,9 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 		}
 		public int available() throws IOException
 		{
+			if (fd == 0 )
+				throw new IllegalStateException(
+					"No File Descriptor");
 			return nativeavailable();
 		}
 	}

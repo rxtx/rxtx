@@ -16,7 +16,7 @@
 |   License along with this library; if not, write to the Free
 |   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --------------------------------------------------------------------------*/
-/* 
+/*
    fear he who enter here.  It appears that things have changed.  An attempt
    has been made to put things the way the should be.
 
@@ -28,7 +28,7 @@
 
         Some errors may have occured during the change.  It compiles and
         ParallelBlackBox runs.  No further garantees.
-   
+
         - Trent Jarvi
 */
 
@@ -71,18 +71,19 @@ extern int errno;
 
 #include "ParallelImp.h"
 
-
+#define LPRPort_ Java_javax_comm_LPRPort_
 
 /*----------------------------------------------------------
 LPRPort.getOutputBufferFree
-   accept:    none  
-   perform:     
-   return:    number of bytes available in buffer.  
-   exceptions: none 
-   comments:  have not seen how to do this in the kernel yet.  
-----------------------------------------------------------*/ 
-JNIEXPORT jint JNICALL Java_javax_comm_LPRPort_getOutputBufferFree(JNIEnv *env,
-        jclass jclazz) {
+   accept:    none
+   perform:
+   return:    number of bytes available in buffer.
+   exceptions: none
+   comments:  have not seen how to do this in the kernel yet.
+----------------------------------------------------------*/
+JNIEXPORT jint JNICALL LPRPort_getOutputBufferFree(JNIEnv *env,
+        jclass jclazz)
+{
 	printf("getOutputBufferFree is not implemented yet\n");
 
 	return(0);
@@ -90,22 +91,24 @@ JNIEXPORT jint JNICALL Java_javax_comm_LPRPort_getOutputBufferFree(JNIEnv *env,
 }
 /*----------------------------------------------------------
 LPRPort.setLPRMode
-   accept:     mode 
-   perform:    set the Printer communication mode 
+   accept:     mode
+   perform:    set the Printer communication mode
 	LPT_MODE_ANY:     pick the best possible mode
 	LPT_MODE_SPP:     compatibility mode/unidirectional
 	LPT_MODE_PS2:     byte mode/bidirectional
 	LPT_MODE_EPP:     extended parallel port
 	LPT_MODE_ECP:     enhanced capabilities port
-	LPT_MODE_NIBBLE:  Nibble Mode. Bi-directional. HP Bi-tronics. 
+	LPT_MODE_NIBBLE:  Nibble Mode. Bi-directional. HP Bi-tronics.
 	                  4 bits at a time.
-   return:     none 
+   return:     none
    exceptions: UnsupportedCommOperationException
-   comments:    
-----------------------------------------------------------*/ 
-JNIEXPORT jboolean JNICALL Java_javax_comm_LPRPort_setLPRMode(JNIEnv *env,
-        jclass jclazz, jint mode) {
-	switch(mode){
+   comments:
+----------------------------------------------------------*/
+JNIEXPORT jboolean JNICALL LPRPort_setLPRMode(JNIEnv *env,
+        jclass jclazz, jint mode)
+{
+	switch(mode)
+	{
 		case LPT_MODE_ANY:
 			break;
 		case LPT_MODE_SPP:
@@ -115,23 +118,24 @@ JNIEXPORT jboolean JNICALL Java_javax_comm_LPRPort_setLPRMode(JNIEnv *env,
 		case LPT_MODE_NIBBLE:
 		default:
 			throw_java_exception( env, UNSUPPORTED_COMM_OPERATION,
-				"nativeSetSerialPortParams", 
+				"nativeSetSerialPortParams",
 				"setLPRMode was unable to proced the requested \
-				mode" 
+				mode"
 			);
 	}
 	return(JNI_TRUE);
 }
 /*----------------------------------------------------------
 LPRPort.isPaperOut
-   accept:      none   
-   perform:     check if printer reports paper is out   
-   return:      Paper Out: JNI_TRUE  Not Paper Out: JNI_FALSE     
+   accept:      none
+   perform:     check if printer reports paper is out
+   return:      Paper Out: JNI_TRUE  Not Paper Out: JNI_FALSE
    exceptions:  none
    comments:    LP_NOPA    unchanged out-of-paper input, active high
-----------------------------------------------------------*/ 
-JNIEXPORT jboolean JNICALL Java_javax_comm_LPRPort_isPaperOut(JNIEnv *env,
-	jobject jobj){
+----------------------------------------------------------*/
+JNIEXPORT jboolean JNICALL LPRPort_isPaperOut(JNIEnv *env,
+	jobject jobj)
+{
 
 	int status;
 	int fd = get_java_var( env, jobj,"fd","I" );
@@ -145,14 +149,15 @@ JNIEXPORT jboolean JNICALL Java_javax_comm_LPRPort_isPaperOut(JNIEnv *env,
 }
 /*----------------------------------------------------------
 LPRPort.isPrinterBusy
-   accept:      none   
-   perform:     Check to see if the printer is printing.   
-   return:      JNI_TRUE if the printer is Busy, JNI_FALSE if its idle   
+   accept:      none
+   perform:     Check to see if the printer is printing.
+   return:      JNI_TRUE if the printer is Busy, JNI_FALSE if its idle
    exceptions:  none
    comments:    LP_BUSY     inverted busy input, active high
-----------------------------------------------------------*/ 
-JNIEXPORT jboolean JNICALL Java_javax_comm_LPRPort_isPrinterBusy(JNIEnv *env,
-	jobject jobj){
+----------------------------------------------------------*/
+JNIEXPORT jboolean JNICALL LPRPort_isPrinterBusy(JNIEnv *env,
+	jobject jobj)
+{
 	int status;
 	int fd = get_java_var( env, jobj,"fd","I" );
 #if defined (__linux__)
@@ -174,10 +179,11 @@ LPRPort.isPrinterError
    perform:     check for printer error
    return:      JNI_TRUE if there is an printer error otherwise JNI_FALSE
    exceptions:  none
-   comments:    LP_ERR   unchanged error input, active low 
-----------------------------------------------------------*/ 
-JNIEXPORT jboolean JNICALL Java_javax_comm_LPRPort_isPrinterError(JNIEnv *env,
-	jobject jobj){
+   comments:    LP_ERR   unchanged error input, active low
+----------------------------------------------------------*/
+JNIEXPORT jboolean JNICALL LPRPort_isPrinterError(JNIEnv *env,
+	jobject jobj)
+{
 	int status;
 	int fd = get_java_var( env, jobj,"fd","I" );
 #if defined (__linux__)
@@ -194,10 +200,11 @@ LPRPort.isPrinterSelected
    perform:     check if printer is selected
    return:      JNI_TRUE if printer is selected other wise JNI_FALSE
    exceptions:  none
-   comments:    LP_SELEC   unchanged selected input, active high 
-----------------------------------------------------------*/ 
-JNIEXPORT jboolean JNICALL Java_javax_comm_LPRPort_isPrinterSelected(JNIEnv *env,
-	jobject jobj){
+   comments:    LP_SELEC   unchanged selected input, active high
+----------------------------------------------------------*/
+JNIEXPORT jboolean JNICALL LPRPort_isPrinterSelected(JNIEnv *env,
+	jobject jobj)
+{
 	int status;
 	int fd = get_java_var( env, jobj,"fd","I" );
 #if defined (__linux__)
@@ -217,9 +224,10 @@ LPRPort.isPrinterTimedOut
    exceptions:   none
    comments:     Is this documented right in the javadocs?
 	         not sure this is correct FIXME
-----------------------------------------------------------*/ 
-JNIEXPORT jboolean JNICALL Java_javax_comm_LPRPort_isPrinterTimedOut(JNIEnv *env,
-	jobject jobj){
+----------------------------------------------------------*/
+JNIEXPORT jboolean JNICALL LPRPort_isPrinterTimedOut(JNIEnv *env,
+	jobject jobj)
+{
 	int status;
 	int fd = get_java_var( env, jobj,"fd","I" );
 #if defined(__linux__)
@@ -240,8 +248,8 @@ LPRPort.Initialize
    perform:     Initialize the native library
    return:      none
    comments:    lots of reading to do here. FIXME
-----------------------------------------------------------*/ 
-JNIEXPORT void JNICALL Java_javax_comm_LPRPort_Initialize( JNIEnv *env,
+----------------------------------------------------------*/
+JNIEXPORT void JNICALL LPRPort_Initialize( JNIEnv *env,
 	jclass jclazz )
 {
 	/* This bit of code checks to see if there is a signal handler installed
@@ -262,10 +270,10 @@ LPRPort.open
    return:      fd
    exceptions:  PortInUseException
    comments:    Very often people complain about not being able to get past
-                this function and it turns out to be permissions on the 
+                this function and it turns out to be permissions on the
                 device file or bios has the device disabled.
-----------------------------------------------------------*/ 
-JNIEXPORT jint JNICALL Java_javax_comm_LPRPort_open( JNIEnv *env, jobject jobj,
+----------------------------------------------------------*/
+JNIEXPORT jint JNICALL LPRPort_open( JNIEnv *env, jobject jobj,
 	jstring jstr )
 {
 	/*struct termios ttyset;*/
@@ -276,7 +284,7 @@ JNIEXPORT jint JNICALL Java_javax_comm_LPRPort_open( JNIEnv *env, jobject jobj,
 	return (jint)fd;
 
 fail:
-	throw_java_exception( env, PORT_IN_USE_EXCEPTION, "open", 
+	throw_java_exception( env, PORT_IN_USE_EXCEPTION, "open",
 		strerror( errno ) );
 	return -1;
 }
@@ -289,8 +297,8 @@ LPRPort.nativeClose
    perform:     get the fd from the java end and close it
    return:      none
    exceptions:  none
-----------------------------------------------------------*/ 
-JNIEXPORT void JNICALL Java_javax_comm_LPRPort_nativeClose( JNIEnv *env,
+----------------------------------------------------------*/
+JNIEXPORT void JNICALL LPRPort_nativeClose( JNIEnv *env,
 	jobject jobj )
 {
 	int fd = get_java_var( env, jobj,"fd","I" );
@@ -306,9 +314,9 @@ LPRPort.writeByte
    perform:     write a single byte to the port
    return:      none
    exceptions:  IOException
-----------------------------------------------------------*/ 
-JNIEXPORT void JNICALL Java_javax_comm_LPRPort_writeByte( JNIEnv *env,
-	jobject jobj, jint ji ) 
+----------------------------------------------------------*/
+JNIEXPORT void JNICALL LPRPort_writeByte( JNIEnv *env,
+	jobject jobj, jint ji )
 {
 	unsigned char byte = (unsigned char)ji;
 	int fd = get_java_var( env, jobj,"fd","I" );
@@ -322,14 +330,14 @@ JNIEXPORT void JNICALL Java_javax_comm_LPRPort_writeByte( JNIEnv *env,
 /*----------------------------------------------------------
 LPRPort.writeArray
 
-   accept:      jbarray: bytes used for writing 
+   accept:      jbarray: bytes used for writing
                 offset: offset in array to start writing
                 count: Number of bytes to write
    perform:     write length bytes of jbarray
    return:      none
    exceptions:  IOException
-----------------------------------------------------------*/ 
-JNIEXPORT void JNICALL Java_javax_comm_LPRPort_writeArray( JNIEnv *env,
+----------------------------------------------------------*/
+JNIEXPORT void JNICALL LPRPort_writeArray( JNIEnv *env,
 	jobject jobj, jbyteArray jbarray, jint offset, jint count )
 {
 	int fd = get_java_var( env, jobj,"fd","I" );
@@ -360,7 +368,7 @@ read_byte_array
                 >0 number of bytes read
    comments:    According to the Communications API spec, a receive threshold
                 of 1 is the same as having the threshold disabled.
-----------------------------------------------------------*/ 
+----------------------------------------------------------*/
 int read_byte_array( int fd, unsigned char *buffer, int length, int threshold,
 	int timeout )
 {
@@ -374,8 +382,10 @@ int read_byte_array( int fd, unsigned char *buffer, int length, int threshold,
 	sleep.tv_usec = 1000 * ( timeout % 1000 );
 	left = length;
 
-	while( bytes < length && bytes < threshold ) {
-		if( timeout > 0 ) {
+	while( bytes < length && bytes < threshold )
+	{
+		if( timeout > 0 )
+		{
          /* FIXME: In Linux, select updates the timeout automatically, so
             other OSes will need to update it manually if they want to have
             the same behavior.  For those OSes, timeouts will occur after no
@@ -403,10 +413,10 @@ LPRPort.readByte
    perform:     Read a single byte from the port
    return:      The byte read
    exceptions:  IOException
-----------------------------------------------------------*/ 
-JNIEXPORT jint JNICALL Java_javax_comm_LPRPort_readByte( JNIEnv *env,
+----------------------------------------------------------*/
+JNIEXPORT jint JNICALL LPRPort_readByte( JNIEnv *env,
 	jobject jobj )
-{ 
+{
 	int bytes, fd, timeout;
 	unsigned char buffer[ 1 ];
 
@@ -414,7 +424,8 @@ JNIEXPORT jint JNICALL Java_javax_comm_LPRPort_readByte( JNIEnv *env,
 	timeout = get_java_var( env, jobj, "timeout","I");
 
 	bytes = read_byte_array( fd, buffer, 1, 1, timeout );
-	if( bytes < 0 ) {
+	if( bytes < 0 )
+	{
 		throw_java_exception( env, IO_EXCEPTION, "readByte",
 			strerror( errno ) );
 
@@ -433,10 +444,10 @@ LPRPort.readArray
                  0 on read timeout
    exceptions:   IOException
    comments:     throws IOException if asked to read > SSIZE_MAX
-----------------------------------------------------------*/ 
-JNIEXPORT jint JNICALL Java_javax_comm_LPRPort_readArray( JNIEnv *env,
+----------------------------------------------------------*/
+JNIEXPORT jint JNICALL LPRPort_readArray( JNIEnv *env,
 	jobject jobj, jbyteArray jbarray, jint offset, jint length )
-{  
+{
 	int bytes, i, fd, threshold, timeout;
 	jbyte *body;
 	unsigned char *buffer;
@@ -444,14 +455,16 @@ JNIEXPORT jint JNICALL Java_javax_comm_LPRPort_readArray( JNIEnv *env,
 	threshold = get_java_var( env, jobj,"threshold","I" );
 	timeout = get_java_var( env, jobj,"threshold","I" );
 
-	if( length < 1 || length > SSIZE_MAX ) {
+	if( length < 1 || length > SSIZE_MAX )
+	{
 		throw_java_exception( env, IO_EXCEPTION, "readArray",
 			"Invalid length" );
 		return -1;
 	}
 
 	buffer = (unsigned char *)malloc( sizeof( unsigned char ) * length );
-	if( buffer == 0 ) {
+	if( buffer == 0 )
+	{
 		throw_java_exception( env, IO_EXCEPTION, "writeByte",
 			"Unable to allocate buffer" );
 
@@ -459,7 +472,8 @@ JNIEXPORT jint JNICALL Java_javax_comm_LPRPort_readArray( JNIEnv *env,
 	}
 
 	bytes = read_byte_array( fd, buffer, length, threshold, timeout );
-	if( bytes < 0 ) {
+	if( bytes < 0 )
+	{
 		free( buffer );
 		throw_java_exception( env, IO_EXCEPTION, "readArray",
 			strerror( errno ) );
@@ -483,8 +497,8 @@ LPRPort.nativeavailable
    return:      available bytes
                 -1 on error
    exceptions:  none
-----------------------------------------------------------*/ 
-JNIEXPORT jint JNICALL Java_javax_comm_LPRPort_nativeavailable( JNIEnv *env,
+----------------------------------------------------------*/
+JNIEXPORT jint JNICALL LPRPort_nativeavailable( JNIEnv *env,
 	jobject jobj )
 {
 	int fd = get_java_var( env, jobj,"fd","I" );
@@ -503,7 +517,7 @@ LPRPort.setHWFC
    return:      none
    exceptions:  IOException
 ----------------------------------------------------------*/
-JNIEXPORT void JNICALL Java_javax_comm_LPRPort_setHWFC( JNIEnv *env,
+JNIEXPORT void JNICALL LPRPort_setHWFC( JNIEnv *env,
 	jobject jobj, jboolean state )
 {
 	/* int fd = get_java_var( env, jobj,"fd","I" ); */
@@ -519,7 +533,8 @@ LPRPort.eventLoop
    return:      none
    exceptions:  none
    comments:    lots of work needed here
-struct lp_stats {
+struct lp_stats
+{
         unsigned long chars;
         unsigned long sleeps;
         unsigned int maxrun;
@@ -528,11 +543,11 @@ struct lp_stats {
         unsigned int mdev;
 };
 
-----------------------------------------------------------*/ 
-JNIEXPORT void JNICALL Java_javax_comm_LPRPort_eventLoop( JNIEnv *env,
+----------------------------------------------------------*/
+JNIEXPORT void JNICALL LPRPort_eventLoop( JNIEnv *env,
 	jobject jobj )
 {
-	int fd, ret; 
+	int fd, ret;
 	/*int change; */
 	unsigned int pflags;
 	fd_set rfds;
@@ -548,11 +563,12 @@ JNIEXPORT void JNICALL Java_javax_comm_LPRPort_eventLoop( JNIEnv *env,
 	interrupt = (*env)->GetStaticMethodID( env, jthread, "interrupted", "()Z" );
 
 	FD_ZERO( &rfds );
-	while( !interrupted ) {
+	while( !interrupted )
+	{
 		FD_SET( fd, &rfds );
 		sleep.tv_sec = 1;	/* Check every 1 second, or on receive data */
 		sleep.tv_usec = 0;
-		do { 
+		do {
 			ret = select( fd + 1, &rfds, NULL, NULL, &sleep );
 		}
 		while (ret < 0 && errno == EINTR);
@@ -577,9 +593,9 @@ JNIEXPORT void JNICALL Java_javax_comm_LPRPort_eventLoop( JNIEnv *env,
 			(*env)->CallVoidMethod( env, jobj, method, (jint)PAR_EV_ERROR, JNI_TRUE );
 /*  FIXME  this has moved into the ifdef __kernel__?  Need to get the
            posix documentation on this.
-		if (pflags&LP_ACK)   
+		if (pflags&LP_ACK)
 			(*env)->CallVoidMethod( env, jobj, method, (jint)PAR_EV_ERROR, JNI_TRUE );
-*/  
+*/
 #if defined (__linux__)
 /* unchanged input, active low */
 		if (pflags&LP_NOPA)   /* unchanged input, active high */
@@ -610,7 +626,7 @@ JNIEXPORT void JNICALL Java_javax_comm_LPRPort_eventLoop( JNIEnv *env,
                 state has changed, we can send a ParallelPortEvent for each
                 interrupt (change) that has occured.  If we don't do this,
                 we'll miss a whole bunch of events.
-----------------------------------------------------------*/ 
+----------------------------------------------------------*/
 void send_printer_events( JNIEnv *env, jobject jobj, jmethodID method,
 	int event, int change, int state )
 {
@@ -619,40 +635,44 @@ void send_printer_events( JNIEnv *env, jobject jobj, jmethodID method,
 	if( state ) s = 1;
 	else s = 0;
 
-	for( i = 0; i < change; i++ ) {
+	for( i = 0; i < change; i++ )
+	{
 		if( ( change + s + i ) % 2 ) flag = JNI_FALSE;
 		else flag = JNI_TRUE;
 		(*env)->CallVoidMethod( env, jobj, method, (jint)event, flag );
 	}
 }
 
-JNIEXPORT void JNICALL Java_javax_comm_LPRPort_setInputBufferSize(JNIEnv *env, jobject jobj,  jint size )
+JNIEXPORT void JNICALL LPRPort_setInputBufferSize(JNIEnv *env,
+	jobject jobj, jint size )
 {
 #ifdef DEBUG
 	printf("setInputBufferSize is not implemented\n");
 #endif
 }
-JNIEXPORT jint JNICALL Java_javax_comm_LPRPort_getInputBufferSize(JNIEnv *env, jobject jobj)
+JNIEXPORT jint JNICALL LPRPort_getInputBufferSize(JNIEnv *env,
+	jobject jobj)
 {
 #ifdef DEBUG
 	printf("getInputBufferSize is not implemented\n");
 #endif
 	return(1);
 }
-JNIEXPORT void JNICALL Java_javax_comm_LPRPort_setOutputBufferSize(JNIEnv *env, jobject jobj, jint size )
+JNIEXPORT void JNICALL LPRPort_setOutputBufferSize(JNIEnv *env,
+	jobject jobj, jint size )
 {
 #ifdef DEBUG
 	printf("setOutputBufferSize is not implemented\n");
 #endif
 }
-JNIEXPORT jint JNICALL Java_javax_comm_LPRPort_getOutputBufferSize(JNIEnv *env, jobject jobj)
+JNIEXPORT jint JNICALL LPRPort_getOutputBufferSize(JNIEnv *env,
+	jobject jobj)
 {
 #ifdef DEBUG
 	printf("getOutputBufferSize is not implemented\n");
 #endif
 	return(1);
 }
-
 /*----------------------------------------------------------
 throw_java_exception
 
@@ -669,7 +689,8 @@ void throw_java_exception( JNIEnv *env, char *exc, char *foo, char *msg )
 {
 	char buf[ 60 ];
 	jclass clazz = (*env)->FindClass( env, exc );
-	if( !clazz ) {
+	if( !clazz )
+	{
 		(*env)->ExceptionDescribe( env );
 		(*env)->ExceptionClear( env );
 		return;
@@ -698,7 +719,8 @@ int get_java_var( JNIEnv *env, jobject jobj, char *id, char *type )
 	int result = 0;
 	jclass jclazz = (*env)->GetObjectClass( env, jobj );
 	jfieldID jfd = (*env)->GetFieldID( env, jclazz, id, type );
-	if( !jfd ) {
+	if( !jfd )
+	{
 		(*env)->ExceptionDescribe( env );
 		(*env)->ExceptionClear( env );
 		return result;
@@ -708,6 +730,3 @@ int get_java_var( JNIEnv *env, jobject jobj, char *id, char *type )
 	(*env)->DeleteLocalRef( env, jclazz );
 	return result;
 }
-
-
-
