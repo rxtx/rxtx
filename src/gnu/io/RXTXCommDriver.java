@@ -63,7 +63,7 @@ public class RXTXCommDriver implements CommDriver
 			System.out.println("Java lib Version   = " + LibVersion );
 		}
 
-		if ( ! JarVersion.equals( JarVersion ) )
+		if ( ! JarVersion.equals( LibVersion ) )
 		{
 			System.out.println( "WARNING:  RXTX Version mismatch\n\tJar version = " + JarVersion + "\n\tnative lib Version = " + LibVersion );
 		}

@@ -1178,6 +1178,16 @@ final public class RXTXPort extends SerialPort
 	*  @return int the int read
 	*  @throws IOException
 	*  @see java.io.InputStream
+*
+*timeout threshold       Behavior
+*------------------------------------------------------------------------
+*0       0       blocks until 1 byte is available timeout > 0,
+*                threshold = 0, blocks until timeout occurs, returns -1
+*                on timeout
+*>0      >0      blocks until timeout, returns - 1 on timeout, magnitude
+*                of threshold doesn't play a role.
+*0       >0      Blocks until 1 byte, magnitude of  threshold doesn't
+*                play a role
 	*/
 		public int read() throws IOException
 		{
@@ -1196,6 +1206,14 @@ final public class RXTXPort extends SerialPort
 	*  @param b[]
 	*  @return int  number of bytes read
 	*  @throws IOException
+*
+*timeout threshold       Behavior
+*------------------------------------------------------------------------
+*0       0       blocks until 1 byte is available
+*>0      0       blocks until timeout occurs, returns 0 on timeout
+*>0      >0      blocks until timeout or reads threshold bytes,
+                 returns 0 on timeout
+*0       >0      blocks until reads threshold bytes
 	*/
 		public int read( byte b[] ) throws IOException
 		{
@@ -1224,6 +1242,15 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	*  @param len
 	*  @return int  number of bytes read
 	*  @throws IOException
+*
+*timeout threshold       Behavior
+*------------------------------------------------------------------------
+*0       0       blocks until 1 byte is available
+*>0      0       blocks until timeout occurs, returns 0 on timeout
+*>0      >0      blocks until timeout or reads threshold bytes,
+                 returns 0 on timeout
+*0       >0      blocks until either threshold # of bytes or len bytes,
+                 whichever was lower.
 	*/
 		public int read( byte b[], int off, int len )
 			throws IOException

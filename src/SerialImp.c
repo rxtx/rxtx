@@ -999,7 +999,7 @@ JNIEXPORT jint JNICALL RXTXPort(nativeGetParity)(JNIEnv *env, jobject jobj, jint
 /*----------------------------------------------------------
  translate_parity
 
-   accept:     javx.comm.SerialPort.PARITY_* constant
+   accept:     javax.comm.SerialPort.PARITY_* constant
    perform:    set proper termios c_cflag bits
    return:     1 on error
    exceptions: UnsupportedCommOperationException
