@@ -1571,7 +1571,15 @@ int cfsetospeed( struct termios *s_termios, speed_t speed )
 	s_termios->c_ispeed = s_termios->c_ospeed = speed;
 	/* clear baudrate */
 	s_termios->c_cflag &= ~CBAUD;
-	s_termios->c_cflag |= speed;
+	if( speed )
+	{
+		s_termios->c_cflag |= speed;
+	}
+	else 
+	{
+		/* PC blows up with speed 0 handled in Java */
+		s_termios->c_cflag |= B9600;
+	}
 	LEAVE( "cfsetospeed" );
 	return 1;
 }
@@ -2483,7 +2491,9 @@ int ioctl( int fd, int request, ... )
 
 		case TIOCMGET:
 			arg = va_arg( ap, int * );
-			GetCommModemStatus( index->hComm, &dwStatus );
+		/* DORITOS */
+			if ( !GetCommModemStatus( index->hComm, &dwStatus ) )
+				report_error("GetCommMOdemStatus failed!\n");
 			if ( dwStatus & MS_RLSD_ON ) *arg |= TIOCM_CAR;
 			else *arg &= ~TIOCM_CAR;
 			if ( dwStatus & MS_RING_ON ) *arg |= TIOCM_RNG;
@@ -2505,11 +2515,14 @@ int ioctl( int fd, int request, ... )
 			else *arg &= ~TIOCM_RTS;
 
 /*
+
 			TIOCM_LE
 			TIOCM_ST
 			TIOCM_SR
 */
-			break;
+			*arg = 0;
+			va_end( ap );
+			return( 0 );
 		/* TIOCMIS, TIOCMBIC and TIOCMSET all do the same thing... */
 		case TIOCMBIS:
 			arg = va_arg( ap, int * );
