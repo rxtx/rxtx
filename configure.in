@@ -645,7 +645,7 @@ Mac\ OS\ X)
 	LDFLAGS="$LDFLAGS -module -framework JavaVM -framework IOKit -framework CoreFoundation"
 	CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/ext/comm.jar:$CLASSPATH"
 	#  email trentjarvi@yahoo.com if you know a nicer fix.
-	LIBTOOL_FIX="sed s/then\ echo\ so/then\ echo\ jnilib/g libtool > tmp; mv tmp libtool; chmod +x libtool;"
+	LIBTOOL_FIX="sed s/echo\ so/echo\ jnilib/g libtool > tmp; mv tmp libtool; chmod +x libtool;"
 ;;
 
 Solaris*)
