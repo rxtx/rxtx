@@ -129,6 +129,13 @@ Win95/98 with mingw32
 		use cygwin.dll and release rxtx under the GPL
 		replace SerialImp.c/h with something that does not use termios.
 
+	win32 API documentation:
+		ftp://ftp.cs.virginia.edu/pub/lcc-win32/win32hlp.exe
+	Microsoft Online Library:
+		http://msdn.microsoft.com/
+	Serial API doc:
+		http://msdn.microsoft.com/library/techart/msdn_serial.htm
+
 BeOS
 	BeOS support is in the early stages.  It should read and write bytes
 	See the BeOS documentation for more information.  See rxtx-1.5 for 
