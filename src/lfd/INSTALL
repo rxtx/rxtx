@@ -1,0 +1,55 @@
+1. BUILDING LFD
+
+  In the src/lfd directory edit lockdaemon.c and specify the following defines:
+
+#define LOCK fhs_lock
+#define UNLOCK fhs_unlock
+#define LOCKDIR "/var/lock"
+
+   LOCK may be fhs_lock (linux) or uucp_lock (Solaris)
+   UNLOCK may be fhs_unlock (Linux) or fhs_unlock (Solaris)
+   LOCkDIR may be /var/lock (Linux) or /var/spool/lock (Solaris)
+
+   After setting up the defines type make to build lfd.
+
+2. INSTALLING.
+
+   daemons are usually placed in the /usr/sbin directory.
+   in.lfd will need to be setup for inetd or xinetd support.
+
+2.1 xinetd support on RedHat Linux:
+
+   edit /etc/services and add the following lines:
+
+lockfiled	50001/tcp			# lock file daemon
+lockfiled	50001/ucp			# lock file daemon
+
+
+   create a file /etc/xinetd.d/lfd with the folowing contents:
+
+# default: on
+# description: The lockfiled server serves lockfiles; it uses \
+#	
+service lfd
+{
+	flags		= REUSE
+	socket_type	= stream        
+	wait		= no
+	user		= uucp
+	server		= /usr/sbin/in.lfd
+	log_on_failure	+= USERID
+	disable		= no
+}
+
+2.2 inetd support on Solaris:
+
+   edit /etc/services and add the following lines:
+
+lfd       50001/tcp                       # lock file daemon
+lfd       50001/ucp                       # lock file daemon
+
+   add the following line to /etc/inetd.conf
+
+lockfiled   stream tcp nowait  uucp  /usr/sbin/in.lfd lfd
+
+
