@@ -2838,11 +2838,13 @@ int read_byte_array( JNIEnv *env,
 		}
 	}
 
+/*
 	if( count > 19 )
 	{
 		throw_java_exception( env, IO_EXCEPTION, "read_byte_array",
 			"No data available" );
 	}
+*/
 
 	sprintf(msg, "read_byte_array returns %i\n", bytes);
 	report( msg );
