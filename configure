@@ -1940,7 +1940,7 @@ else
 fi
 done
 
-for ac_hdr in sys/signal.h
+for ac_hdr in sys/time.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
@@ -1980,7 +1980,7 @@ else
 fi
 done
 
-for ac_hdr in signal.h
+for ac_hdr in sys/signal.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
@@ -2020,7 +2020,7 @@ else
 fi
 done
 
-for ac_hdr in termios.h
+for ac_hdr in signal.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
@@ -2060,15 +2060,55 @@ else
 fi
 done
 
+for ac_hdr in termios.h
+do
+ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
+echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
+echo "configure:2068: checking for $ac_hdr" >&5
+if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 2073 "configure"
+#include "confdefs.h"
+#include <$ac_hdr>
+EOF
+ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
+{ (eval echo configure:2078: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
+if test -z "$ac_err"; then
+  rm -rf conftest*
+  eval "ac_cv_header_$ac_safe=yes"
+else
+  echo "$ac_err" >&5
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  eval "ac_cv_header_$ac_safe=no"
+fi
+rm -f conftest*
+fi
+if eval "test \"`echo '$ac_cv_header_'$ac_safe`\" = yes"; then
+  echo "$ac_t""yes" 1>&6
+    ac_tr_hdr=HAVE_`echo $ac_hdr | sed 'y%abcdefghijklmnopqrstuvwxyz./-%ABCDEFGHIJKLMNOPQRSTUVWXYZ___%'`
+  cat >> confdefs.h <<EOF
+#define $ac_tr_hdr 1
+EOF
+ 
+else
+  echo "$ac_t""no" 1>&6
+fi
+done
+
 if test $ac_cv_prog_gcc = yes; then
     echo $ac_n "checking whether ${CC-cc} needs -traditional""... $ac_c" 1>&6
-echo "configure:2066: checking whether ${CC-cc} needs -traditional" >&5
+echo "configure:2106: checking whether ${CC-cc} needs -traditional" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_gcc_traditional'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
     ac_pattern="Autoconf.*'x'"
   cat > conftest.$ac_ext <<EOF
-#line 2072 "configure"
+#line 2112 "configure"
 #include "confdefs.h"
 #include <sgtty.h>
 Autoconf TIOCGETP
@@ -2086,7 +2126,7 @@ rm -f conftest*
 
   if test $ac_cv_prog_gcc_traditional = no; then
     cat > conftest.$ac_ext <<EOF
-#line 2090 "configure"
+#line 2130 "configure"
 #include "confdefs.h"
 #include <termio.h>
 Autoconf TCGETA
@@ -2474,6 +2514,9 @@ elif  test -d $JPATH/jre/lib/ext
 elif  test -d $JPATH/lib  
 	then fix_comm_jar $JPATH/lib/comm.jar
 fi
+
+#  http://www.tolstoy.com/samizdat/sysprops.html
+
  case $OS_NAME in 
 Linux)
 	check_kernel_headers
@@ -2544,10 +2587,11 @@ Linux)
 	;;
 	esac
 ;;
-irix*)
+Irix*)
 	JHOME=$JPATH/"lib"
 	CFLAGS="$CFLAGS -D_NO_POSIX=1 -D_NO_XOPEN4=1 -I/usr/include"
 	CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/comm.jar:$CLASSPATH"
+	RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
 	TARGETLIB="\$(target_alias)/libSerial.la"
 ;;
 HP-UX)
@@ -2645,8 +2689,74 @@ WIN32)
 	fi
 	TARGETLIB="\$(target_alias)/Serial.dll"
 ;;
+Mac*OS)
+# Place marker only
+	TARGETLIB="\$(target_alias)/libSerial.la"
+	RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
+	JHOME=$JPATH/"lib"
+	CFLAGS="$CFLAGS -D_NO_POSIX=1 -D_NO_XOPEN4=1"
+	CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/comm.jar:$CLASSPATH"
+
+;;
+
+Solaris*)
+	TARGETLIB="\$(target_alias)/libSerial.la"
+	RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
+	JHOME=$JPATH/"lib"
+	CFLAGS="$CFLAGS -D_NO_POSIX=1 -D_NO_XOPEN4=1"
+	CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/comm.jar:$CLASSPATH"
+
+;;
+
+OS*2)
+# Place marker only
+	TARGETLIB="\$(target_alias)/libSerial.la"
+	RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
+	JHOME=$JPATH/"lib"
+	CFLAGS="$CFLAGS -D_NO_POSIX=1 -D_NO_XOPEN4=1"
+	CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/comm.jar:$CLASSPATH"
+
+;;
+
+AIX)
+	TARGETLIB="\$(target_alias)/libSerial.la"
+	RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
+	JHOME=$JPATH/"lib"
+	CFLAGS="$CFLAGS -D_NO_POSIX=1 -D_NO_XOPEN4=1"
+	CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/comm.jar:$CLASSPATH"
+
+;;
+
+Digital\ Unix)
+	TARGETLIB="\$(target_alias)/libSerial.la"
+	RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
+	JHOME=$JPATH/"lib"
+	CFLAGS="$CFLAGS -D_NO_POSIX=1 -D_NO_XOPEN4=1"
+	CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/comm.jar:$CLASSPATH"
+
+;;
+
+NetWare*)
+# Place marker only
+	TARGETLIB="\$(target_alias)/libSerial.la"
+	RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
+	JHOME=$JPATH/"lib"
+	CFLAGS="$CFLAGS -D_NO_POSIX=1 -D_NO_XOPEN4=1"
+	CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/comm.jar:$CLASSPATH"
+
+;;
+
+MPE*)
+	TARGETLIB="\$(target_alias)/libSerial.la"
+	RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
+	JHOME=$JPATH/"lib"
+	CFLAGS="$CFLAGS -D_NO_POSIX=1 -D_NO_XOPEN4=1"
+	CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/comm.jar:$CLASSPATH"
+;;
+
 *)
 	TARGETLIB="\$(target_alias)/libSerial.la"
+	RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
 	JHOME=$JPATH/"lib"
 	CFLAGS="$CFLAGS -D_NO_POSIX=1 -D_NO_XOPEN4=1"
 	CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/comm.jar:$CLASSPATH"

@@ -27,6 +27,7 @@ AC_PROG_CC
 AC_CHECK_HEADERS(fcntl.h)
 AC_CHECK_HEADERS(sys/fcntl.h)
 AC_CHECK_HEADERS(sys/file.h)
+AC_CHECK_HEADERS(sys/time.h)
 AC_CHECK_HEADERS(sys/signal.h)
 AC_CHECK_HEADERS(signal.h)
 AC_CHECK_HEADERS(termios.h)
@@ -601,7 +602,7 @@ AIX)
 
 ;;
 
-Digital Unix)
+Digital\ Unix)
 	TARGETLIB="\$(target_alias)/libSerial.la"
 	RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
 	JHOME=$JPATH/"lib"

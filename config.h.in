@@ -15,6 +15,9 @@
 /* Define if you have the <sys/signal.h> header file.  */
 #undef HAVE_SYS_SIGNAL_H
 
+/* Define if you have the <sys/time.h> header file.  */
+#undef HAVE_SYS_TIME_H
+
 /* Define if you have the <termios.h> header file.  */
 #undef HAVE_TERMIOS_H
 
