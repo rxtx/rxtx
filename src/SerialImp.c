@@ -230,8 +230,8 @@ JNIEXPORT void JNICALL RXTXPort(Initialize)(
 	} 
 #endif /* !WIN32 */
 	ENTER( "RXTXPort:Initialize" );
+	mexPrintf("RXTX Prerelease for testing  Tue Feb  5 13:53:33 MST 2002\n");
 #ifdef DEBUG_MW
-	mexPrintf("RXTX Prerelease for testing  Sat Jan 26 15:32:04 MST 2002\n");
 #endif /* DEBUG_MW */
 #if DEBUG_TIMING
 	gettimeofday(&seloop, NULL);
@@ -603,6 +603,7 @@ JNIEXPORT void JNICALL RXTXPort(nativeSetSerialPortParams)(
 	{
 		/* hang up the modem aka drop DTR  */
 		/* Unix should handle this */
+		mexPrintf("dropping DTR\n");
 		ioctl( fd, TIOCMGET, &result );
 		result &= ~TIOCM_DTR;
 		ioctl( fd, TIOCMSET, &result );
@@ -943,10 +944,8 @@ int init_threads( struct event_info_struct *eis )
 
 	sigfillset(&newmask);
 	sigprocmask( SIG_SETMASK, &newmask, &oldmask );
-*/
-#ifndef __APPLE__
 	pthread_sigmask( SIG_BLOCK, &newmask, &oldmask );
-#endif
+*/
 	sigprocmask( SIG_SETMASK, &newmask, &oldmask );
 
 	report("init_threads: get eis\n");
@@ -3637,7 +3636,11 @@ int check_lock_status( const char *filename )
 
 	if ( check_group_uucp() )
 	{
+<<<<<<< SerialImp.c
+		report_error( "check_lock_status: No permission to create lock file.  please see: How can I use Lock Files with rxtx? in INSTALL\n" );
+=======
 		report_error( "check_lock_status: No permission to create lock file.\nplease see: How can I use Lock Files with rxtx? in INSTALL\n" );
+>>>>>>> 1.46.2.112
 		exit(0);
 	}
 
