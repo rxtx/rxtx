@@ -518,7 +518,8 @@ JNIEXPORT jint JNICALL LPRPort(nativeavailable)( JNIEnv *env,
 	int result;
 	char message[80];
 
-//	ENTER( "RXTXPort:nativeavailable" );
+/*	ENTER( "LPRPort:nativeavailable" );
+*/
 /*
     On SCO OpenServer FIONREAD always fails for serial devices,
     so try ioctl FIORDCHK instead; will only tell us whether
@@ -539,15 +540,18 @@ JNIEXPORT jint JNICALL LPRPort(nativeavailable)( JNIEnv *env,
 	}
 	if( result )
 	{
-		sprintf(message, "    nativeavailable: FIORDCHK result %d, \
+/*		sprintf(message, "    nativeavailable: FIORDCHK result %d, \
 				errno %d\n", result , result == -1 ? errno : 0);
 		report( message );
+*/
 	}
-//	LEAVE( "RXTXPort:nativeavailable" );
+//	LEAVE( "LPRPort:nativeavailable" );
 	return (jint)result;
 fail:
-	report("RXTXPort:nativeavailable:  ioctl() failed\n");
-//	LEAVE( "RXTXPort:nativeavailable" );
+/*
+	report("LPRPort:nativeavailable:  ioctl() failed\n");
+	LEAVE( "LPRPort:nativeavailable" );
+*/
 	throw_java_exception( env, IO_EXCEPTION, "nativeavailable",
 		strerror( errno ) );
 	return (jint)result;
