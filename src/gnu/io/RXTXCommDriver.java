@@ -185,7 +185,7 @@ public class RXTXCommDriver implements CommDriver
 			for( i = 0;i<CandidateDeviceNames.length; i++ ) {
 				for( p = 0;p<ValidPortPrefixes.length; p++ ) {
 					/* this determines:
-					 * device file         Valid ports   
+					 * device file         Valid ports
 					 * /dev/ttyR[0-9]*  != /dev/ttyS[0-9]*
 					 * /dev/ttySI[0-9]* != /dev/ttyS[0-9]*
 					 * /dev/ttyS[0-9]*  == /dev/ttyS[0-9]*
@@ -308,7 +308,7 @@ public class RXTXCommDriver implements CommDriver
     * Register ports specified in the file "gnu.io.rxtx.properties"
     * Key system properties:
     *                   gnu.io.rxtx.SerialPorts
-    * 			gnu.io.rxtx.ParallelPorts 
+    * 			gnu.io.rxtx.ParallelPorts
     *
     * Tested only with sun jdk1.3
     * The file gnu.io.rxtx.properties must reside in the java extension dir
@@ -316,7 +316,7 @@ public class RXTXCommDriver implements CommDriver
     * Example: /usr/local/java/jre/lib/ext/gnu.io.rxtx.properties
     *
     * The file contains the following key properties:
-    * 
+    *
     *  gnu.io.rxtx.SerialPorts=/dev/ttyS0:/dev/ttyS1:
     *  gnu.io.rxtx.ParallelPorts=/dev/lp0:
     *
@@ -324,15 +324,15 @@ public class RXTXCommDriver implements CommDriver
 	private boolean registerSpecifiedPorts(int PortType)
 	{
 		String val = null;
-				
+
 		try
 		    {
-		     
+
 		     String ext_dir=System.getProperty("java.ext.dirs")+System.getProperty("file.separator");
 		     FileInputStream rxtx_prop=new FileInputStream(ext_dir+"gnu.io.rxtx.properties");
 		     Properties p=new Properties(System.getProperties());
 		     p.load(rxtx_prop);
-		     System.setProperties(p); 
+		     System.setProperties(p);
 		    }catch(Exception e){
 			if (debug){
 			    System.out.println("The file: gnu.io.rxtx.properties doesn't exists.");
@@ -379,7 +379,7 @@ public class RXTXCommDriver implements CommDriver
 			System.out.println("scanning device directory "+deviceDirectory+" for ports of type "+PortType);
 		if(osName.equals("Windows CE"))
 		{
-			String[] temp = 
+			String[] temp =
 			{ "COM1:", "COM2:","COM3:","COM4:",
 			"COM5:", "COM6:", "COM7:", "COM8:" };
 			CandidateDeviceNames=temp;
@@ -388,13 +388,13 @@ public class RXTXCommDriver implements CommDriver
 		{
 			/* //./name is supposed to work for port numbers > 8 */
 			/*
-					{ "//./COM1:", "//./COM2:", "//./COM3:",
-					"//./COM4:", "//./COM5:", "//./COM6:",
-					"//./COM7:", "//./COM8:" };
+					{ "//./COM1", "//./COM2", "//./COM3",
+					"//./COM4", "//./COM5", "//./COM6",
+					"//./COM7", "//./COM8" };
 			*/
-			String[] temp = 
-			{ "COM1:", "COM2:","COM3:","COM4:",
-			"COM5:", "COM6:", "COM7:", "COM8:" };
+			String[] temp =
+			{ "COM1", "COM2","COM3","COM4",
+			"COM5", "COM6", "COM7", "COM8" };
 			CandidateDeviceNames=temp;
 		}
 		else if ( osName.equals("Solaris") || osName.equals("SunOS"))
@@ -412,7 +412,7 @@ public class RXTXCommDriver implements CommDriver
 			String devb[] = dev.list();
 			String[] temp = new String[ deva.length + devb.length ];
 			for(int j =0;j<deva.length;j++)
-				deva[j] = "term/" + deva[j]; 
+				deva[j] = "term/" + deva[j];
 			for(int j =0;j<devb.length;j++)
 				devb[j] = "cua/" + devb[j];
 			System.arraycopy( deva, 0, temp, 0, deva.length );
@@ -437,7 +437,7 @@ public class RXTXCommDriver implements CommDriver
 			String term[] = new String[2];
 			int l = 0;
 			File dev = null;
-			
+
 			dev = new File( "/dev/term" );
 			if( dev.list().length > 0 );
 				term[l++] = new String( "term/" );
@@ -567,7 +567,7 @@ public class RXTXCommDriver implements CommDriver
 						"tty00s", // UW7/OU8 serial ports
 						"tty01s",
 						"tty02s",
-						"tty03s" 
+						"tty03s"
 					};
 					CandidatePortPrefixes=Temp;
 				}
