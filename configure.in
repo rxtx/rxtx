@@ -160,7 +160,7 @@ fi
 
 run_conftest()
 {
-	echo $ac_n checking $1   " " 1>&6
+	echo $ECHO_N checking $1   " " 1>&6
 	if test x$JPATH = x; then
 		VAR=`java -classpath .:$CLASSPATH:\`which java\`../lib/RXTXcomm.jar conftest $1`
 	else
@@ -183,7 +183,6 @@ if test x$JPATH = x; then
 	AC_MSG_ERROR([Make sure java is in your path before running configure])
 fi
 echo adjusted java.home is $JPATH
-echo ====================== $target_alias ========================
 if test "$target_alias" = i386-mingw32 ;then
 	OS_NAME=WIN32
 else
@@ -197,7 +196,7 @@ JAVA_VERSION=`run_conftest java.version`
 rm -f conftest.java
 rm -f conftest.class
 
-echo $ac_n checking os.version   " " 1>&6
+echo $ECHO_N checking os.version   " " 1>&6
 OS_VERSION=`uname -r`
 echo $OS_VERSION 1>&6
 
@@ -475,9 +474,9 @@ Linux)
 	esac 
 
 	# Cross Compilers
-		echo ----------------------------
-		echo $target_os
-		echo ----------------------------
+		#echo ----------------------------
+		#echo $target_os
+		#echo ----------------------------
 	case $target_os in 
 	linux*)
 	;;
@@ -485,17 +484,17 @@ Linux)
 		TARGETLIB="\$(target_triplet)/librxtxSerial.la"
 		EXTENSION="cpp"
 		LDFLAGS="-ldevice"
-		echo ----------------------------
-		echo $target_os
-		echo ----------------------------
+		#echo ----------------------------
+		#echo $target_os
+		#echo ----------------------------
 	;;
 	freebsd*)
 	;;
 	solaris*)
 		TARGETLIB="\$(target_triplet)/librxtxSerial.la"
-		echo ----------------------------
-		echo $target_os
-		echo ----------------------------
+		#echo ----------------------------
+		#echo $target_os
+		#echo ----------------------------
 	;;
 	esac
 ;;
@@ -642,7 +641,6 @@ BeOS)
 ;;
 
 WIN32)
-	echo  "going through" 
 	case $JAVA_VERSION in
 	1.2*|1.3*|1.4*)
 		CLASSPATH=".:\$(TOP):\$(TOP)/src:`find $JPATH/ -name RXTXcomm.jar |head -n1`:$CLASSPATH"
@@ -797,9 +795,9 @@ AC_OUTPUT(Makefile)
 
 
 # Toys.  Gota lovem.
-#echo $ac_n checking java.library.path   " "
+#echo $ECHO_N checking java.library.path   " "
 #JAVA_LIBRARY_PATH=`java conftest "java.library.path"`
 #echo $JAVA_LIBRARY_PATH
-#echo $ac_n checking java.class.version   " "
+#echo $ECHO_N checking java.class.version   " "
 #JAVA_CLASS_VERSION=`java conftest "java.class.version"`
 #echo $JAVA_CLASS_VERSION
