@@ -394,11 +394,6 @@ JNIEXPORT void JNICALL RXTXPort(nativeSetSerialPortParams)(
 
 
 	ENTER( "RXTXPort:nativeSetSerialPortParams" );
-	if( !cspeed )
-	{
-		report( "nativeSetSerialPortParams: Invalid Speed Selected\n" );
-		goto fail;
-	}
 
 	if( tcgetattr( fd, &ttyset ) < 0 )
 	{
@@ -410,7 +405,6 @@ JNIEXPORT void JNICALL RXTXPort(nativeSetSerialPortParams)(
 	{
 		report( "nativeSetSerialPortParams: Invalid Data Bits Selected\n" );
 		goto fail;
-		return;
 	}
 
 	if( !translate_stop_bits( env, &(ttyset.c_cflag), stopBits ) )
