@@ -145,6 +145,32 @@ int cfmakeraw ( struct termios *term )
 }
 #endif /* __sun__  || __hpux__ */
 
+#ifdef DEBUG_TIMING
+#define report_time( ) \
+{ \
+	struct timeval now; \
+	gettimeofday(&now, NULL); \
+	mexPrintf("%8s : %5i : %8i sec : %8i usec\n", __TIME__, __LINE__, now.tv_sec, now.tv_usec); \
+}
+struct timeval snow, enow;
+#define report_time_start( ) \
+{ \
+	gettimeofday(&snow, NULL); \
+	mexPrintf("%8s : %5i : %8i sec : %8i usec", __TIME__, __LINE__, snow.tv_sec, snow.tv_usec); \
+}
+#define report_time_end( ) \
+{ \
+	gettimeofday(&enow, NULL); \
+	mexPrintf("%8i sec : %8i usec\n", enow.tv_sec - snow.tv_sec, enow.tv_usec - snow.tv_usec); \
+}
+#else
+#define report_time( ) {}
+#define report_time_start( ) {}
+#define report_time_end( ) {}
+
+#endif /* DEBUG_TIMING */
+
+
 struct event_info_struct *master_index = NULL;
 
 /*----------------------------------------------------------
@@ -507,7 +533,6 @@ JNIEXPORT void JNICALL RXTXPort(nativeSetSerialPortParams)(
 #ifdef WIN32
 	}
 #endif /* WIN32 */
-	if( !cspeed )
 #endif  /* __FreeBSD__ */
 
 	if( tcsetattr( fd, TCSANOW, &ttyset ) < 0 )
@@ -866,6 +891,7 @@ JNIEXPORT void JNICALL RXTXPort(writeByte)( JNIEnv *env,
 	int result;
 	char msg[80];
 
+	report_time_start();
 	ENTER( "RXTXPort:writeByte" );
 	do {
 		sprintf( msg, "writeByte %c>>\n", byte );
@@ -887,6 +913,7 @@ JNIEXPORT void JNICALL RXTXPort(writeByte)( JNIEnv *env,
 	LEAVE( "RXTXPort:writeByte" );
 	if(result >= 0)
 	{
+		report_time_end();
 		return;
 	}
 	throw_java_exception( env, IO_EXCEPTION, "writeByte",
@@ -918,6 +945,7 @@ JNIEXPORT void JNICALL RXTXPort(writeArray)( JNIEnv *env,
 	retspec.tv_nsec = 50000;
 #endif /* __sun__ */
 
+	report_time_start();
 	ENTER( "writeArray" );
 	/* warning Will Rogers */
 	//sprintf( message, "::::RXTXPort:writeArray(%s);\n", (char *) body );
@@ -953,6 +981,7 @@ JNIEXPORT void JNICALL RXTXPort(writeArray)( JNIEnv *env,
 		Things just start spinning out of control after that.
 	*/
 	LEAVE( "RXTXPort:writeArray" );
+	report_time_end();
 	if( result < 0 ) throw_java_exception( env, IO_EXCEPTION,
 		"writeArray", strerror( errno ) );
 }
@@ -1608,6 +1637,7 @@ int read_byte_array(	JNIEnv *env,
 	long now, start = 0;
 	char msg[80];
 
+	report_time_start();
 	ENTER( "read_byte_array" );
 	sprintf(msg, "read_byte_array requests %i\n", length);
 	report( msg );
@@ -1635,6 +1665,7 @@ RETRY:	if ((ret = READ( fd, buffer + bytes, left )) < 0 )
 	sprintf(msg, "read_byte_array returns %i\n", bytes);
 	report( msg );
 	LEAVE( "read_byte_array" );
+	report_time_end();
 	return bytes;
 }
 #ifdef asdf
