@@ -1766,7 +1766,6 @@ registerKnownSerialPorts(JNIEnv *env, jobject jobj, jint portType)//dima
             {
 //begin dima
             	jstring	tempJstring;
-
 				tempJstring = (*env)->NewStringUTF(env,getRegistryString(theObject, kIODialinDeviceKey));
                 (*env)->CallStaticVoidMethod(env, cls, mid,tempJstring,portType,jobj);//dima
  				(*env)->DeleteLocalRef(env,tempJstring);
