@@ -487,11 +487,28 @@ public class RXTXCommDriver implements CommDriver
 				case CommPortIdentifier.PORT_SERIAL:
 					if (debug)
 						System.out.println("scanning for serial ports for os "+osName);
+
+
+			/*  There are _many_ possible ports that can be used
+			    on Linux.  See below in the fake Linux-all-ports  
+			    case for a list.  You may add additional ports
+			    here but be warned that too many will significantly
+			    slow down port enumeration.  Linux 2.6 has udev
+			    support which should be faster as only ports the
+			    kernel finds should be exposed in /dev
+
+			    See also how to override port enumeration and
+			    specifying port in INSTALL.
+
+			    taj
+			*/
+
 					if(osName.equals("Linux"))
 					{
 						String[] Temp = {
 						"ttyS", // linux Serial Ports
-						"ttySA" // for the IPAQs
+						"ttySA", // for the IPAQs
+						"ttyUSB" // for USB frobs
 						};
 						CandidatePortPrefixes=Temp;
 					}
