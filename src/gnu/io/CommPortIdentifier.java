@@ -151,8 +151,7 @@ public class CommPortIdentifier
 	public String getCurrentOwner() 
 	{ 
 		if(debug) System.out.println("CommPortIdentifier:getCurrentOwner()");
-		String s=new String();
-		return(s);
+		return(Owner);
 	}
 /*------------------------------------------------------------------------------
 	getName()
@@ -283,13 +282,8 @@ public class CommPortIdentifier
 		commport = RXTXDriver.getCommPort(PortName,PortType);
 		if(Available)
 		{
-			if (debug) System.out.println("RXTXDriver.getCommPort() Worked!");
 			Available = false;
 			Owner = TheOwner;
-			if (commport==null)
-			{
-				if (debug) System.out.println("RXTXDriver.getCommPort() failed");
-			}
 			return commport;
 		}
 		/* 
@@ -311,38 +305,9 @@ public class CommPortIdentifier
 	public void removePortOwnershipListener(CommPortOwnershipListener c) 
 	{ 
 		Available=true;
+		Owner="";
 		if(debug) System.out.println("CommPortIdentifier:removePortOwnershipListener()");
 	}
 
 }
 
-class CommPortEnumerator implements Enumeration {
-	private CommPortIdentifier CPI;
-	private boolean debug=true;
-/*------------------------------------------------------------------------------
-        nextElement()
-        accept:
-        perform:
-        return:
-        exceptions:
-        comments:
-------------------------------------------------------------------------------*/
-	public Object nextElement() 
-	{ 
-		if(debug) System.out.println("CommPortEnumerator:nextElement()");
-		return(CPI);
-	}
-/*------------------------------------------------------------------------------
-        hasMoreElements()
-        accept:
-        perform:
-        return:
-        exceptions:
-        comments:
-------------------------------------------------------------------------------*/
-	public boolean hasMoreElements() 
-	{ 
-		if(debug) System.out.println("CommPortEnumerator:hasMoreElements");
-		return(false); 
-	}
-}
