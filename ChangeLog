@@ -1,9 +1,10 @@
-This is ChangeLog Tue Aug 13 20:43:55 MDT 2002
+This is ChangeLog Thu Aug 15 13:52:03 MDT 2002
 
 rxtx-2.1 and rxtx-2.0 changes are kept in the same file.  skip to the version
 you downloaded.
 
-2.1-[2-4] Aug 13, 2002 A serial of minor bug fixes compile fixes
+2.1-5 Aug 15, 2002    AM_MAINTAINER_MODE for auto* fixes
+2.1-[2-4] Aug 13, 2002 A series of minor bug fixes compile fixes
 		      Custom speed fixes
 		      Unix control of buadbase and divisor
 		      updated tools for builds
@@ -118,6 +119,7 @@ you downloaded.
 		      Stallion Card support
 		      Greg Luck <gluck@tempo-services.com.au>
 		      CommPort enumeration with rxtx's comm.jar
+2.0-4 Aug 15 2002     see rxtx-2.1-5
 2.0-[23] Aug 13 2002  see rxtx-2.1-[2-4]
 2.0-1  Apr 5, 2002    see rxtx-2.1-1
 1.4-15 Dec 4, 2001    see rxtx-1.5-8
