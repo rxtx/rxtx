@@ -432,7 +432,7 @@ $(target_triplet)/librxtx%.@LIB_EXTENSION@: $(SPATH)/%Imp.c $(CLASSES) $(SPATH)/
 $(CLASSES): $(javafiles) $(TOP)/Makefile
 	$(JAVAH_FIX)
 	$(JAVAC) $(javafiles)
-	@$(JAVAH) `(for i in $(javahfiles);do \
+	$(JAVAH) `(for i in $(javahfiles);do \
 		if grep > /dev/null native.*\( $(SPATH)/$$i.java; then \
 			echo $(CLASSDIR).$$i; \
 		fi; \

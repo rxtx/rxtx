@@ -666,7 +666,7 @@ WIN32)
 	else
 	WINDOWS_JAVA_INCLUDE="-I$WIN32INCLUDE -I$WIN32INCLUDE/win32"
 	fi
-	TARGETLIB="\$(target_triplet)/rxtxSerial.dll"
+	TARGETLIB="\$(target_triplet)/rxtxSerial.dll \$(target_triplet)/rxtxParallel.dll"
 	echo  "$WINDOWS_JAVA_INCLUDE" 
 ;;
 
