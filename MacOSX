@@ -31,7 +31,7 @@ CodeWarrior 7
 	open LibSerial.pbproj project
 	choose libSerial.jnilib target
         build
-	after build you will find RXTXcomm.jar and libSerial.jnilib files in 
+	after build you will find RXTXcomm.jar and libSerial.jnilib files in the
 build directory
 	(if you can't find RXTXcomm.jar (unlikely) build RXTXcomm target manually)
 
@@ -39,9 +39,9 @@ build directory
 	open libSerial.mcp project
 	goto jnilib target
 	build
-	after build you will find RXTXcomm.jar and libSerial.jnilib files in 
+	after build you will find RXTXcomm.jar and libSerial.jnilib files in the
 project's directory
-	(if you can't found RXTXcomm.jar (unlikely) build java target manually)
+	(if you can't find RXTXcomm.jar (unlikely) build java target manually)
 	
 
 INSTALLATION:
