@@ -25,8 +25,9 @@
 
 package gnu.io;
 
-import java.io.*;
 import java.util.*;
+import java.io.*;
+import gnu.io.*;
 import java.util.StringTokenizer;
 
 /**
@@ -222,7 +223,7 @@ public class RXTXCommDriver implements CommDriver
 	 First try to register ports specified in the properties
 	 file.  If that doesn't exist, then scan for ports.
 	*/
-		for (int PortType=CommPortIdentifier.PORT_SERIAL;PortType<=CommPortIdentifier.PORT_RAW;PortType++) {
+		for (int PortType=CommPortIdentifier.PORT_SERIAL;PortType<=CommPortIdentifier.PORT_PARALLEL;PortType++) {
 			if (!registerSpecifiedPorts(PortType)) {
 				if (!registerKnownPorts(PortType)) {
 					registerScannedPorts(PortType);
@@ -299,22 +300,6 @@ public class RXTXCommDriver implements CommDriver
 				if ((val = System.getProperty("gnu.io.rxtx.ParallelPorts")) == null)
 				val = System.getProperty("gnu.io.ParallelPorts");
 				break;
-
-			case CommPortIdentifier.PORT_I2C:
-				if ((val = System.getProperty("gnu.io.rxtx.I2CPorts")) == null)
-				val = System.getProperty("gnu.io.I2CPorts");
-				break;
-
-			case CommPortIdentifier.PORT_RS485:
-				if ((val = System.getProperty("gnu.io.rxtx.RS485Ports")) == null)
-				val = System.getProperty("gnu.io.RS485Ports");
-				break;
-
-			case CommPortIdentifier.PORT_RAW:
-				if ((val = System.getProperty("gnu.io.rxtx.RawPorts")) == null)
-				val = System.getProperty("gnu.io.RawPorts");
-				break;
-
 			default:
 				if (debug)
 				System.out.println("unknown port type "+PortType+" passed to RXTXCommDriver.registerSpecifiedPorts()");
@@ -450,6 +435,57 @@ public class RXTXCommDriver implements CommDriver
 					};
 					CandidatePortPrefixes=Temp;
 				}
+
+				else if(osName.equals("UnixWare") ||
+						osName.equals("OpenUNIX"))
+				{
+					String[] Temp = {
+						"tty00s", // UW7/OU8 serial ports
+						"tty01s",
+						"tty02s",
+						"tty03s" 
+					};
+					CandidatePortPrefixes=Temp;
+				}
+
+			else if	(osName.equals("OpenServer"))
+				{
+					String[] Temp = {
+						"tty1A",  // OSR5 serial ports
+						"tty2A",
+						"tty3A",
+						"tty4A",
+						"tty5A",
+						"tty6A",
+						"tty7A",
+						"tty8A",
+						"tty9A",
+						"tty10A",
+						"tty11A",
+						"tty12A",
+						"tty13A",
+						"tty14A",
+						"tty15A",
+						"tty16A",
+						"ttyu1A", // OSR5 USB-serial ports
+						"ttyu2A",
+						"ttyu3A",
+						"ttyu4A",
+						"ttyu5A",
+						"ttyu6A",
+						"ttyu7A",
+						"ttyu8A",
+						"ttyu9A",
+						"ttyu10A",
+						"ttyu11A",
+						"ttyu12A",
+						"ttyu13A",
+						"ttyu14A",
+						"ttyu15A",
+						"ttyu16A"
+					};
+					CandidatePortPrefixes=Temp;
+				}
 				else if (osName.equals("Compaq's Digital UNIX"))
 				{
 					String[] Temp = {
@@ -533,22 +569,6 @@ public class RXTXCommDriver implements CommDriver
 					CandidatePortPrefixes=temp;
 				}
 				break;
-
-			case CommPortIdentifier.PORT_I2C:
-				if (debug)
-					System.out.println("scanning for I2C ports for os "+osName);
-				break;
-
-			case CommPortIdentifier.PORT_RS485:
-				if (debug)
-					System.out.println("scanning for RS485 ports for os "+osName);
-				break;
-
-			case CommPortIdentifier.PORT_RAW:
-				if (debug)
-					System.out.println("scanning for RAW ports for os "+osName);
-				break;
-
 			default:
 				if (debug)
 					System.out.println("Unknown PortType "+PortType+" passed to RXTXCommDriver.registerScannedPorts()");
@@ -579,12 +599,6 @@ public class RXTXCommDriver implements CommDriver
 					return new RXTXPort( PortName );
 				case CommPortIdentifier.PORT_PARALLEL:
 					return new LPRPort( PortName );
-				case CommPortIdentifier.PORT_I2C:
-					return new I2C( PortName );
-				case CommPortIdentifier.PORT_RS485:
-					return new RS485( PortName );
-				case CommPortIdentifier.PORT_RAW:
-					return new Raw( PortName );
 				default:
 					if (debug)
 						System.out.println("unknown PortType  "+PortType+" passed to RXTXCommDriver.getCommPort()");

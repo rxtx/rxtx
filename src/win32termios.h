@@ -47,7 +47,7 @@
 		16, \
 		NULL ); \
 	sprintf( message, "Error 0x%x at %s(%d): %s\n", errorCode, __FILE__, __LINE__, allocTextBuf); \
-	report( message ); \
+	report_warning( message ); \
 	LocalFree(allocTextBuf); \
 }
 
@@ -154,6 +154,8 @@ int tcsendbreak ( int , int );
 int ioctl(int fd, int request, ... );
 //int fstat(int fd, ... );
 void cfmakeraw(struct termios *s_termios);
+int termiosGetParityErrorChar( int );
+void termiosSetParityError( int, char );
 
 #define O_NOCTTY	0400	/* not for fcntl */
 #define O_NONBLOCK	 00004

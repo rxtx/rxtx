@@ -28,5 +28,13 @@ import java.util.*;
 
 public class NoSuchPortException extends Exception
 {
+	NoSuchPortException( String str )
+	{
+		super( str );
+	}
+	public NoSuchPortException()
+	{
+		super();
+	}
 }
 

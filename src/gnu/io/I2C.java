@@ -23,7 +23,7 @@ import java.lang.Math;
 
 /**
 * @author Trent Jarvi
-* @version %I%, %G%
+* @version,
 * @since JDK1.0
 */
 

@@ -40,7 +40,12 @@ the owner of the port requested.
 */
 	PortInUseException( String str )
 	{
+		super( str );
 		currentOwner=str;
+	}
+	public PortInUseException()
+	{
+		super();
 	}
 }
 

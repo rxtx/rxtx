@@ -56,13 +56,38 @@
 
 /* glue for unsupported linux speeds see also win32termios.h */
 
-#if !defined(__APPLE__) //dima
+#if !defined(__APPLE__) /* dima */
 #define B14400		1010001
 #define B28800		1010002
 #define B128000		1010003
 #define B256000		1010004
-#endif //dima
+#endif /* dima */
 
+struct event_info_struct
+{
+	int fd;
+	/* flags for events */
+	int eventflags[11];
+	
+	int initialised;
+	fd_set rfds;
+	struct timeval tv_sleep;
+	int ret, change;
+	unsigned int omflags;
+	char message[80];
+	int has_tiocsergetlsr;
+	int has_tiocgicount;
+	int eventloop_interrupted;
+	JNIEnv *env;
+	jobject *jobj;
+	jclass jclazz;
+	jmethodID send_event;
+	jmethodID checkMonitorThread;
+#if defined(TIOCGICOUNT)
+	struct serial_icounter_struct osis;
+#endif /* TIOCGICOUNT */
+	struct event_info_struct *next, *prev;
+};
 
 /*  Ports known on the OS */
 #if defined(__linux__)
@@ -95,6 +120,57 @@
 #	define LOCKFILEPREFIX "LK."
 #	define UUCP
 #endif /* __NetBSD__ */
+#if defined(__unixware__)
+#	define DEVICEDIR "/dev/"
+/* really this only fully works for OpenServer */
+#	define LOCKDIR "/var/spool/uucp/"
+#	define LOCKFILEPREFIX "LK."
+/* 
+this needs work....
+
+Jonathan Schilling <jls@caldera.com> writes:
+
+This is complicated because as I said in my previous mail, there are
+two kinds of SCO operating systems.
+
+The one that most people want gnu.io for, including the guy who
+asked the mailing list about SCO support a few days ago, is Open Server
+(a/k/a "SCO UNIX"), which is SVR3-based.  This uses old-style uucp locks, 
+of the form LCK..tty0a.  That's what I implemented in the RXTX port I did,
+and it works correctly.
+
+The other SCO/Caldera OS, UnixWare/Open UNIX, uses the new-style
+SVR4 locks, of the form LK.123.123.123.  These OSes are a lot like
+Solaris (UnixWare/Open UNIX come from AT&T SVR4 which had a joint
+
+The other SCO/Caldera OS, UnixWare/Open UNIX, uses the new-style
+SVR4 locks, of the form LK.123.123.123.  These OSes are a lot like
+Solaris (UnixWare/Open UNIX come from AT&T SVR4 which had a joint
+heritage with Sun way back when).  I saw that you added support
+for this form of lock by RXTX 1.4-10 ... but it gets messy because,
+as I said before, we use the same binary gnu.io files for both
+UnixWare/Open UNIX and OpenServer.  Thus we can't #ifdef one or the
+other; it would have to be a runtime test.  Your code and your macros
+aren't set up for doing this (understandably!).  So I didn't implement
+these; the gnu.io locks won't fully work on UnixWare/Open UNIX
+as a result, which I mentioned in the Release Notes.
+
+
+What I would suggest is that you merge in the old-style LCK..tty0a lock
+code that I used, since this will satisfy 90% of the SCO users.  Then
+I'll work on some way of getting UnixWare/Open UNIX locking to work
+correctly, and give you those changes at a later date.
+
+Jonathan
+
+FIXME  The lock type could be passed with -DOLDUUCP or -DUUCP based on
+os.name in configure.in or perhaps system defines could determine the lock
+type.
+
+Trent
+*/
+#	define OLDUUCP
+#endif
 #if defined(__hpux__)
 /* modif cath */
 #	define DEVICEDIR "/dev/"
@@ -128,11 +204,13 @@
 #	define CLOSE serial_close
 #	define WRITE serial_write
 #	define READ serial_read
+#	define SELECT serial_select
 #else /* use the system calls for Unix */
 #	define OPEN open
 #	define CLOSE close
 #	define WRITE write
 #	define READ read
+#	define SELECT select
 #ifdef TRACE
 #define ENTER(x) report("entering "x" \n");
 #define LEAVE(x) report("leaving "x" \n");
@@ -143,11 +221,29 @@
 
 #endif /* WIN32 */
 
+/* allow people to override the directories */
+
+#ifdef USER_LOCK_DIRECTORY
+#	define LOCKDIR USER_LOCK_DIRECTORY
+#endif /* USER_LOCK_DIRECTORY */
+
 
 /*  That should be all you need to look at in this file for porting */
 #ifdef UUCP
 #	define LOCK uucp_lock
 #	define UNLOCK uucp_unlock
+#elif defined(OLDUUCP)
+/*
+   We can handle the old style if needed here see __unixware__ above.
+   defaulting to rxtx-1.4-8 behavior for now.
+
+   see also __sco__ in SerialImp.c when changing this for a possible
+   bug
+
+   FIXME
+*/
+#	define LOCK fhs_lock
+#	define UNLOCK fhs_unlock
 #elif defined(FHS)
 #	define LOCK fhs_lock
 #	define UNLOCK fhs_unlock
@@ -219,11 +315,14 @@ int translate_data_bits( JNIEnv *, tcflag_t *, jint );
 int translate_stop_bits( JNIEnv *, tcflag_t *, jint );
 int translate_parity( JNIEnv *, tcflag_t *, jint );
 #endif
-int read_byte_array( int, unsigned char *, int, int );
+void system_wait();
+void finalize_event_info_struct( struct event_info_struct * );
+int read_byte_array( JNIEnv *, jobject *, int, unsigned char *, int, int );
 int get_java_var( JNIEnv *, jobject, char *, char * );
-jboolean is_interrupted(JNIEnv *, jobject );
-int send_event(JNIEnv *, jobject, jint, int );
+jboolean is_interrupted( struct event_info_struct * );
+int send_event(struct event_info_struct *, jint, int );
 void dump_termios(char *,struct termios *);
+void report_verbose(char *);
 void report_error(char *);
 void report_warning(char *);
 void report(char *);

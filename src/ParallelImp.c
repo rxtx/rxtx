@@ -66,6 +66,9 @@
 #if defined(__FreeBSD__)
 #	include <machine/lpt.h>
 #endif
+#ifdef __unixware__
+#	include  <sys/filio.h>
+#endif
 
 extern int errno;
 
