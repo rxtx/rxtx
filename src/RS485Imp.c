@@ -1,6 +1,6 @@
 /*-------------------------------------------------------------------------
 |   rxtx is a native interface to RS485 ports in java.
-|   Copyright 1997-2001 by Trent Jarvi trentjarvi@yahoo.com
+|   Copyright 1997-2002 by Trent Jarvi taj@parcelfarce.linux.theplanet.co.uk
 |
 |   This library is free software; you can redistribute it and/or
 |   modify it under the terms of the GNU Library General Public

@@ -1,6 +1,6 @@
 /*-------------------------------------------------------------------------
 |   rxtx is a native interface to RS485 ports in java.
-|   Copyright 1997-2001 by Trent Jarvi trentjarvi@yahoo.com.
+|   Copyright 1997-2002 by Trent Jarvi taj@parcelfarce.linux.theplanet.co.uk.
 |
 |   This library is free software; you can redistribute it and/or
 |   modify it under the terms of the GNU Library General Public
@@ -117,7 +117,7 @@ final class RS485  extends  RS485Port {
 
 	/*
 	linux/drivers/char/n_hdlc.c? FIXME
-		trentjarvi@yahoo.com
+		taj@parcelfarce.linux.theplanet.co.uk
 	*/
 	/** Receive framing control 
 	*/
@@ -184,7 +184,7 @@ final class RS485  extends  RS485Port {
 	/** Input/output buffers */
 	/** FIXME I think this refers to 
 		FOPEN(3)/SETBUF(3)/FREAD(3)/FCLOSE(3) 
-		trentjarvi@yahoo.com
+		taj@parcelfarce.linux.theplanet.co.uk
 
 		These are native stubs...
 	*/

@@ -1,7 +1,7 @@
 /*-------------------------------------------------------------------------
 |   A wrapper to convert RXTX into Linux Java Comm
 |   Copyright 1998 Kevin Hester, kevinh@acm.org
-|   Copyright 2000-2001 Trent Jarvi, trentjarvi@yahoo.com
+|   Copyright 2000-2002 Trent Jarvi, taj@parcelfarce.linux.theplanet.co.uk
 |
 |   This library is free software; you can redistribute it and/or
 |   modify it under the terms of the GNU Library General Public
