@@ -3,6 +3,8 @@ This is ChangeLog Thu Mar 27 08:13:33 EST 2003
 rxtx-2.1 and rxtx-2.0 changes are kept in the same file.  skip to the version
 you downloaded.
 
+2.1-7pre17 Oct 17, 2003
+		merged with 2.0 and took small changes from cvs.
 2.1-7pre16 Mar 27, 2003
 		remove debug "Condition" warnings used to debug NT4 issues.
 2.1-7pre15a
@@ -218,6 +220,8 @@ you downloaded.
 		      Stallion Card support
 		      Greg Luck <gluck@tempo-services.com.au>
 		      CommPort enumeration with rxtx's comm.jar
+2.0-7 Oct 17, 2003    see rxtx-2.1-7
+2.0-6                 skipped to sync with 2.1
 2.0-5 Sep 7, 2002     see rxtx-2.1-6
 2.0-4 Aug 15, 2002    see rxtx-2.1-5
 2.0-[23] Aug 13, 2002 see rxtx-2.1-[2-4]
