@@ -3,7 +3,10 @@ This is ChangeLog Thu Mar 27 08:13:33 EST 2003
 rxtx-2.1 and rxtx-2.0 changes are kept in the same file.  skip to the version
 you downloaded.
 
-2.1-7pre18
+2.1-7pre18 Oct 12 2004
+		Thread safer nativeDrain()/flush() method.
+		Philip Gladstone <philip@gladstonefamily.net>
+2.1-7pre18 Oct 11 2004
 		release locks when device is unavailable.
 		Tico Ballagas <ballagas@cs.rwth-aachen.de>
 		J2SE java.util.loggin and property file to match

@@ -12,7 +12,7 @@ extern void report_warning( char * );
 extern void report_error( char * );
 /*-------------------------------------------------------------------------
 |   rxtx is a native interface to serial ports in java.
-|   Copyright 1997-2002 by Trent Jarvi taj@www.linux.org.uk.
+|   Copyright 1997-2004 by Trent Jarvi taj@www.linux.org.uk.
 |   Copyright 1998-2002 by Wayne roberts wroberts1@home.com
 |
 |   This library is free software; you can redistribute it and/or

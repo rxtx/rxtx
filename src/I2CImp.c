@@ -1,6 +1,6 @@
 /*-------------------------------------------------------------------------
 |   rxtx is a native interface to i2c ports in java.
-|   Copyright 1997-2002 by Trent Jarvi taj@www.linux.org.uk
+|   Copyright 1997-2004 by Trent Jarvi taj@www.linux.org.uk
 |
 |   This library is free software; you can redistribute it and/or
 |   modify it under the terms of the GNU Library General Public
@@ -958,7 +958,7 @@ JNIEXPORT void JNICALL Java_gnu_io_I2CPort_eventLoop( JNIEnv *env,
 	jboolean interrupted = 0;
 	jclass jclazz, jthread;
 	jclazz = (*env)->GetObjectClass( env, jobj );
-	fd = fd = get_java_var(env, jobj, "fd", "I");
+	fd = get_java_var(env, jobj, "fd", "I");
 	method = (*env)->GetMethodID( env, jclazz, "sendEvent", "(IZ)V" );
 	jthread = (*env)->FindClass( env, "java/lang/Thread" );
 	interrupt = (*env)->GetStaticMethodID( env, jthread, "interrupted", "()Z" );

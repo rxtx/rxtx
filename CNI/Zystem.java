@@ -1,6 +1,6 @@
 /*------------------------------------------------------------------------
 |   Zystem is a native interface for message reporting in java.
-|   Copyright 2003 by Trent Jarvi taj@www.linux.org.uk.
+|   Copyright 2003-2004 by Trent Jarvi taj@www.linux.org.uk.
 |
 |   This library is free software; you can redistribute it and/or
 |   modify it under the terms of the GNU Library General Public
