@@ -27,6 +27,7 @@
 
         - Trent Jarvi
 */
+
 #if defined(__MWERKS__)//dima
 #include "LPRPort.h"
 #else//dima
