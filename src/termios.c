@@ -450,7 +450,7 @@ termios_to_bytesize()
 int termios_to_bytesize( int cflag )
 {
 	ENTER( "termios_to_bytesize" );
-	switch ( cflag )
+	switch ( cflag & CSIZE )
 	{
 		case CS5: return( 5 );
 		case CS6: return( 6 );
