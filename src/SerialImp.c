@@ -106,8 +106,8 @@
 
 extern int errno;
 #ifdef TRENT_IS_HERE
-#define TRACE
 #define DEBUG
+#define TRACE
 #define DEBUG_MW
 #define DEBUG_VERBOSE
 #undef TIOCSERGETLSR
@@ -235,6 +235,7 @@ JNIEXPORT void JNICALL RXTXPort(Initialize)(
 	mexPrintf("RXTX Prerelease for testing  Tue Feb  5 13:53:33 MST 2002\n");
 #endif /* PRERELEASE */
 #ifdef DEBUG_MW
+	mexPrintf("RXTX Prerelease for testing  Tue Feb  5 21:15:02 EST 2002\n");
 #endif /* DEBUG_MW */
 #if DEBUG_TIMING
 	gettimeofday(&seloop, NULL);
@@ -851,7 +852,7 @@ void *drain_loop( void *arg )
 
 	for(i=0;;i++)
 	{
-		report("drain_loop:  looping\n");
+		report_verbose("drain_loop:  looping\n");
 		usleep(10000);
 		// system_wait();
 		if( eis->eventloop_interrupted )
@@ -873,7 +874,7 @@ void *drain_loop( void *arg )
 				{
 					goto end;
 				}
-				report("drain_loop:  writing not set\n");
+				report_verbose("drain_loop:  writing not set\n");
 			}
 		}
 		else
@@ -2159,7 +2160,7 @@ JNIEXPORT jint JNICALL RXTXPort(nativeavailable)( JNIEnv *env,
 #endif /* FIORDCHK */
 	sprintf(message, "    nativeavailable: FIORDCHK result %d, \
 		errno %d\n", result , result == -1 ? errno : 0);
-	report( message );
+	report_verbose( message );
 	if (result == -1) {
 		goto fail;
 	}
