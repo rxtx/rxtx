@@ -28,6 +28,10 @@ CommAPI but out of respect for our friends at Sun the package name of 1.5 has
 been moved to gnu.io.  A script is offered in contrib/ChangePackage.sh that
 will switch source tree's between javax.comm and gnu.io.
 
+A not on Mac OS X:
+
+go to the MacOSX file for install instructions. 
+
 See Sun's CommAPI license for more details on why this decision was made.
 
 If you would like to use javax.comm, use rxtx 1.4 with Sun's CommAPI.
@@ -41,7 +45,7 @@ If you would like to use javax.comm, use rxtx 1.4 with Sun's CommAPI.
 	A.  Quick Install
 	B.  Uninstalling Sun's comm.jar
 	C.  installing javax.comm.properties.
-	D.  Add comm.jar to your CLASSPATH.
+	D.  Add RXTXcomm.jar to your CLASSPATH.
 	E.  Build and Install the jar.
 	F.  Where did everything end up?
 	G.  Compiling for Win32 support
@@ -133,17 +137,17 @@ A.  Japanese
 
 		javax.comm.properties is not currently required by rxtx-1.5
 
-	D.  Add comm.jar to your CLASSPATH.
+	D.  Add RXTXcomm.jar to your CLASSPATH.
 
 		jdk-1.1:
 
-			make sure /usr/local/java/lib/comm.jar is in your
+			make sure /usr/local/java/lib/RXTXcomm.jar is in your
 			CLASSPATH.  If you want to use apps that require
-			comm.jar.
+			RXTXcomm.jar.
 
 			in bash:
 
-			$ export CLASSPATH=/usr/local/java/lib/comm.jar:.
+			$ export CLASSPATH=/usr/local/java/lib/RXTXcomm.jar:.
 
 		jdk-1.2 and newer:
 
@@ -155,7 +159,7 @@ A.  Japanese
 				configure requires javac in its path or
 				JAVA_HOME set to grab some java system
 				properties.
-		make    	to build comm.jar and the libraries
+		make    	to build RXTXcomm.jar and the libraries
 		make install 	to place the jar and libraries in the correct 
 				location
 
@@ -170,14 +174,14 @@ A.  Japanese
 
 		jdk-1.2 the files go in
 		
-			/usr/local/java/jre/lib/ext/comm.jar
+			/usr/local/java/jre/lib/ext/RXTXcomm.jar
 			/usr/local/java/jre/lib/$(ARCH)/libSerial.so.
 			/usr/local/java/jre/lib/$(ARCH)/libParallel.so.
 			/usr/local/java/jre/lib/$(ARCH)/lib/...
 
 		jdk-1.1.* the files go in 
 
-			/usr/local/java/lib/comm.jar
+			/usr/local/java/lib/RXTXcomm.jar
 			/usr/lib/libSerial.so.
 			/usr/lib/libParallel.so.
 			/usr/lib/...
@@ -352,10 +356,10 @@ C.  I Can Not Open the Port.
 
 D.  java.lang.NoClassDefFoundError: gnu/io/CommPort
 
-	comm.jar is probably not in your classpath or not located in
+	RXTXcomm.jar is probably not in your classpath or not located in
 	the proper directory.
 
-	for example, lets not include comm.jar
+	for example, lets not include RXTXcomm.jar
 
 	export CLASSPATH=../java/lib/classes.zip
 	$ java BlackBoxException in thread "main"

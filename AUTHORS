@@ -1,7 +1,10 @@
-This is AUTHORS Thu Jan 18 17:37:47 MST 2001
+This is AUTHORS Thu Oct  4 19:34:31 MDT 2001
 
 This package is not the result of one persons time.  Recognition is given
 to the following people for their assistance.
+
+Dmitry Markman <dimitry.markman@verizon.net> Mac OS X builds with CW lots of
+fixes
 
 Joseph Goldstone <joseph@lp.com>  Mac OS X port.
 
