@@ -2721,7 +2721,7 @@ int read_byte_array( JNIEnv *env,
 			tvP = NULL;
 		}
 
-		ret = select(fd + 1, &rset, NULL, NULL, tvP);
+		ret = SELECT(fd + 1, &rset, NULL, NULL, tvP);
 		if (ret == -1){
 			report( "read_byte_array: select returned -1\n" );
 			LEAVE( "read_byte_array" );
