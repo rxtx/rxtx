@@ -1,0 +1,459 @@
+# Makefile.in generated automatically by automake 1.4a from Makefile.am
+
+# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
+# This Makefile.in is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY, to the extent permitted by law; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
+
+#-------------------------------------------------------------------------
+#   rxtx is a native interface to serial ports in java.
+#   Copyright 1997-2000 by Trent Jarvi trentjarvi@yahoo.com.
+#
+#   This library is free software; you can redistribute it and/or
+#   modify it under the terms of the GNU Library General Public
+#   License as published by the Free Software Foundation; either
+#   version 2 of the License, or (at your option) any later version.
+#
+#   This library is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+#   Library General Public License for more details.
+#
+#   You should have received a copy of the GNU Library General Public
+#   License along with this library; if not, write to the Free
+#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#-------------------------------------------------------------------------
+
+
+SHELL = @SHELL@
+
+srcdir = @srcdir@
+top_srcdir = @top_srcdir@
+VPATH = @srcdir@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+
+bindir = @bindir@
+sbindir = @sbindir@
+libexecdir = @libexecdir@
+datadir = @datadir@
+sysconfdir = @sysconfdir@
+sharedstatedir = @sharedstatedir@
+localstatedir = @localstatedir@
+libdir = @libdir@
+infodir = @infodir@
+mandir = @mandir@
+includedir = @includedir@
+oldincludedir = /usr/include
+
+DESTDIR =
+
+pkgdatadir = $(datadir)/@PACKAGE@
+pkglibdir = $(libdir)/@PACKAGE@
+pkgincludedir = $(includedir)/@PACKAGE@
+
+top_builddir = .
+
+ACLOCAL = @ACLOCAL@
+AUTOCONF = @AUTOCONF@
+AUTOMAKE = @AUTOMAKE@
+AUTOHEADER = @AUTOHEADER@
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_SCRIPT = @INSTALL_SCRIPT@
+INSTALL_STRIP_FLAG =
+transform = @program_transform_name@
+
+NORMAL_INSTALL = :
+PRE_INSTALL = :
+POST_INSTALL = :
+NORMAL_UNINSTALL = :
+PRE_UNINSTALL = :
+POST_UNINSTALL = :
+build_alias = @build_alias@
+build_triplet = @build@
+host_alias = @host_alias@
+host_triplet = @host@
+target_alias = @target_alias@
+target_triplet = @target@
+AS = @AS@
+CATALOGS = @CATALOGS@
+CATOBJEXT = @CATOBJEXT@
+CC = @CC@
+CFLAGS = @CFLAGS@
+DATADIRNAME = @DATADIRNAME@
+DLLTOOL = @DLLTOOL@
+GENCAT = @GENCAT@
+GMOFILES = @GMOFILES@
+GMSGFMT = @GMSGFMT@
+GT_NO = @GT_NO@
+GT_YES = @GT_YES@
+IDENTIFIERS = @IDENTIFIERS@
+INCLUDE_LOCALE_H = @INCLUDE_LOCALE_H@
+INSTOBJEXT = @INSTOBJEXT@
+INTLDEPS = @INTLDEPS@
+INTLLIBS = @INTLLIBS@
+INTLOBJS = @INTLOBJS@
+JAVAH_FIX = @JAVAH_FIX@
+JAVAINCLUDE = @JAVAINCLUDE@
+JAVANATINC = @JAVANATINC@
+JAVA_CLASS_PATH = @JAVA_CLASS_PATH@
+JAVA_CLASS_VERSION = @JAVA_CLASS_VERSION@
+JAVA_HOME = @JAVA_HOME@
+JAVA_H_CLASSPATH = @JAVA_H_CLASSPATH@
+JAVA_LIBRARY_PATH = @JAVA_LIBRARY_PATH@
+JAVA_VENDOR = @JAVA_VENDOR@
+JAVA_VERSION = @JAVA_VERSION@
+JCLASSPATH = @JCLASSPATH@
+LD = @LD@
+LDFLAG = @LDFLAG@
+LN_S = @LN_S@
+MAKEINFO = @MAKEINFO@
+MKINSTALLDIRS = @MKINSTALLDIRS@
+MSGFMT = @MSGFMT@
+NM = @NM@
+OS_ARCH = @OS_ARCH@
+OS_NAME = @OS_NAME@
+OS_VERSION = @OS_VERSION@
+PACKAGE = @PACKAGE@
+POFILES = @POFILES@
+POSUB = @POSUB@
+RANLIB = @RANLIB@
+RXTX_PATH = @RXTX_PATH@
+TARGETLIB = @TARGETLIB@
+THREAD_FLAG = @THREAD_FLAG@
+USE_INCLUDED_LIBINTL = @USE_INCLUDED_LIBINTL@
+USE_NLS = @USE_NLS@
+USE_SYMBOL_UNDERSCORE = @USE_SYMBOL_UNDERSCORE@
+VERBOSE_IOEXCEPTIONS = @VERBOSE_IOEXCEPTIONS@
+VERSION = @VERSION@
+WINDOWS_JAVA_INCLUDE = @WINDOWS_JAVA_INCLUDE@
+l = @l@
+
+WJI = -I @WINDOWS_JAVA_INCLUDE@ -I @WINDOWS_JAVA_INCLUDE@/win32 
+AUTOMAKE_OPTIONS = foreign
+TOP = @TOP@
+JPATH = @JPATH@
+JCL_PATH = @JCL_PATH@
+INCLUDES = -I $(TOP) -I $(TOP)/$(target_alias) -I . -I $(JAVAINCLUDE) -I $(JAVANATINC)
+JAVAC = $(JPATH)/bin/javac $(JCLASSPATH):$(COMM_JAR_PATH):$(JCL_JAR_PATH) -d $(TOP)/ -O 
+JAVAH = $(JPATH)/bin/javah $(JAVA_H_CLASSPATH) -d $(TOP)/$(target_alias) -jni
+JAVA = $(JPATH)/bin/java $(JCLASSPATH)
+JAR = $(JPATH)/bin/jar 
+JAVADOC = $(JPATH)/bin/javadoc $(JCLASSPATH)
+LIBTOOL = $(SHELL) $(TOP)/libtool
+LINK = $(LIBTOOL) --mode=link $(CC) $(CFLAGS) $(LDFLAGS) -version-info 1:0:1
+SERIAL_HEADER = $(TOP)/$(target_alias)/javax_comm_RXTXPort.h $(TOP)/$(target_alias)/javax_comm_RXTXCommDriver.h
+PARALLEL_HEADER = $(TOP)/$(target_alias)/javax_comm_LPRPort.h
+CLEANFILES = $(TOP)/*.class $(TOP)/javax/comm/*.class $(TOP)/jcl.jar
+SUFFIXES = .class .h
+ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
+mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
+CONFIG_HEADER = config.h
+CONFIG_CLEAN_FILES = 
+DIST_COMMON =  README ./stamp-h.in AUTHORS COPYING ChangeLog INSTALL \
+Makefile.am Makefile.in TODO acconfig.h acinclude.m4 aclocal.m4 \
+config.guess config.h.in config.sub configure configure.in install-sh \
+ltconfig ltmain.sh missing mkinstalldirs
+
+
+DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
+
+TAR = gtar
+GZIP_ENV = --best
+all: all-redirect
+.SUFFIXES:
+.SUFFIXES: .class .h
+$(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
+	cd $(top_srcdir) && $(AUTOMAKE) --foreign Makefile
+
+Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status $(BUILT_SOURCES)
+	cd $(top_builddir) \
+	  && CONFIG_FILES=$@ CONFIG_HEADERS= $(SHELL) ./config.status
+
+$(ACLOCAL_M4):  configure.in  acinclude.m4
+	cd $(srcdir) && $(ACLOCAL)
+
+config.status: $(srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
+	$(SHELL) ./config.status --recheck
+$(srcdir)/configure: $(srcdir)/configure.in $(ACLOCAL_M4) $(CONFIGURE_DEPENDENCIES)
+	cd $(srcdir) && $(AUTOCONF)
+
+config.h: stamp-h
+	@if test ! -f $@; then \
+		rm -f stamp-h; \
+		$(MAKE) stamp-h; \
+	else :; fi
+stamp-h: $(srcdir)/config.h.in $(top_builddir)/config.status
+	cd $(top_builddir) \
+	  && CONFIG_FILES= CONFIG_HEADERS=config.h \
+	     $(SHELL) ./config.status
+	@echo timestamp > stamp-h 2> /dev/null
+$(srcdir)/config.h.in: $(srcdir)/stamp-h.in
+	@if test ! -f $@; then \
+		rm -f $(srcdir)/stamp-h.in; \
+		$(MAKE) $(srcdir)/stamp-h.in; \
+	else :; fi
+$(srcdir)/stamp-h.in: $(top_srcdir)/configure.in $(ACLOCAL_M4) acconfig.h
+	cd $(top_srcdir) && $(AUTOHEADER)
+	@echo timestamp > $(srcdir)/stamp-h.in 2> /dev/null
+
+mostlyclean-hdr:
+
+clean-hdr:
+
+distclean-hdr:
+	-rm -f config.h
+
+maintainer-clean-hdr:
+tags: TAGS
+TAGS:
+
+
+distdir = $(PACKAGE)-$(VERSION)
+top_distdir = $(distdir)
+
+# This target untars the dist file and tries a VPATH configuration.  Then
+# it guarantees that the distribution is self-contained by making another
+# tarfile.
+distcheck: dist
+	-rm -rf $(distdir)
+	GZIP=$(GZIP_ENV) $(TAR) zxf $(distdir).tar.gz
+	mkdir $(distdir)/=build
+	mkdir $(distdir)/=inst
+	dc_install_base=`cd $(distdir)/=inst && pwd`; \
+	cd $(distdir)/=build \
+	  && ../configure --srcdir=.. --prefix=$$dc_install_base \
+	  && $(MAKE) $(AM_MAKEFLAGS) \
+	  && $(MAKE) $(AM_MAKEFLAGS) dvi \
+	  && $(MAKE) $(AM_MAKEFLAGS) check \
+	  && $(MAKE) $(AM_MAKEFLAGS) install \
+	  && $(MAKE) $(AM_MAKEFLAGS) installcheck \
+	  && $(MAKE) $(AM_MAKEFLAGS) dist
+	-rm -rf $(distdir)
+	@banner="$(distdir).tar.gz is ready for distribution"; \
+	dashes=`echo "$$banner" | sed s/./=/g`; \
+	echo "$$dashes"; \
+	echo "$$banner"; \
+	echo "$$dashes"
+dist: distdir
+	-chmod -R a+r $(distdir)
+	GZIP=$(GZIP_ENV) $(TAR) chozf $(distdir).tar.gz $(distdir)
+	-rm -rf $(distdir)
+dist-all: distdir
+	-chmod -R a+r $(distdir)
+	GZIP=$(GZIP_ENV) $(TAR) chozf $(distdir).tar.gz $(distdir)
+	-rm -rf $(distdir)
+distdir: $(DISTFILES)
+	-rm -rf $(distdir)
+	mkdir $(distdir)
+	-chmod 777 $(distdir)
+	here=`cd $(top_builddir) && pwd`; \
+	top_distdir=`cd $(distdir) && pwd`; \
+	distdir=`cd $(distdir) && pwd`; \
+	cd $(top_srcdir) \
+	  && $(AUTOMAKE) --include-deps --build-dir=$$here --srcdir-name=$(top_srcdir) --output-dir=$$top_distdir --foreign Makefile
+	@for file in $(DISTFILES); do \
+	  d=$(srcdir); \
+	  if test -d $$d/$$file; then \
+	    cp -pr $$d/$$file $(distdir)/$$file; \
+	  else \
+	    test -f $(distdir)/$$file \
+	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+	  fi; \
+	done
+info-am:
+info: info-am
+dvi-am:
+dvi: dvi-am
+check-am: all-am
+check: check-am
+installcheck-am:
+installcheck: installcheck-am
+all-recursive-am: config.h
+	$(MAKE) $(AM_MAKEFLAGS) all-recursive
+
+install-exec-am:
+install-exec: install-exec-am
+
+install-data-am:
+install-data: install-data-am
+
+install-am: all-am
+	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
+install: install-am
+uninstall-am:
+uninstall: uninstall-am
+all-am: Makefile config.h
+all-redirect: all-am
+install-strip:
+	$(MAKE) $(AM_MAKEFLAGS) INSTALL_STRIP_FLAG=-s install
+installdirs:
+
+
+mostlyclean-generic:
+
+distclean-generic:
+	-rm -f Makefile $(CONFIG_CLEAN_FILES)
+	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
+
+maintainer-clean-generic:
+mostlyclean-am:  mostlyclean-hdr mostlyclean-generic
+
+mostlyclean: mostlyclean-am
+
+clean-am:  clean-hdr clean-generic mostlyclean-am
+
+clean: clean-am
+
+distclean-am:  distclean-hdr distclean-generic clean-am
+	-rm -f libtool
+
+distclean: distclean-am
+	-rm -f config.status
+
+maintainer-clean-am:  maintainer-clean-hdr maintainer-clean-generic \
+		distclean-am
+	@echo "This command is intended for maintainers to use;"
+	@echo "it deletes files that may require special tools to rebuild."
+
+maintainer-clean: maintainer-clean-am
+	-rm -f config.status
+
+.PHONY: mostlyclean-hdr distclean-hdr clean-hdr maintainer-clean-hdr \
+tags distdir info-am info dvi-am dvi check check-am installcheck-am \
+installcheck all-recursive-am install-exec-am install-exec \
+install-data-am install-data install-am install uninstall-am uninstall \
+all-redirect all-am all installdirs mostlyclean-generic \
+distclean-generic clean-generic maintainer-clean-generic clean \
+mostlyclean distclean maintainer-clean
+
+export NSJAVA=1
+export THREADS_FLAG=@THREAD_FLAG@
+
+install: all jcl install-lib
+
+clean-generic:
+	rm -rf $(TOP)/$(target_alias) $(TOP)/javax 
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
+	@echo -e "\n\nMake distclean will remove the remaining files\n\n"
+install-lib:
+	( cd $(TOP)/$(target_alias) ; \
+	if [ -f libSerial.la ];then \
+	$(LIBTOOL) --mode=install $(INSTALL_PROGRAM) libSerial.la $(RXTX_PATH);\
+	fi; \
+	if [ -f libParallel.la ];then \
+	$(LIBTOOL) --mode=install $(INSTALL_PROGRAM) libParallel.la $(RXTX_PATH);\
+	fi; \
+	)
+	$(INSTALL_PROGRAM) jcl.jar $(JPATH)/$(JCL_PATH)/
+run: $(TOP)/test.class all jcl
+	(cd $(TOP)/;chmod 755 *.class;\
+	LD_LIBRARY_PATH="$(target_alias)";\
+	export LD_LIBRARY_PATH;\
+	$(JAVA) test)
+
+all: $(IDENTIFIERS) $(TARGETLIB)
+	@echo -e "\n\nIf you have javax.comm.* and java.comm.* in your CLASSPATH, type make jcl to"
+	@echo -e "build the javacomm20-x86.tar.Z supporting classes.\n"
+	@echo "Note: CLASSPATH was grabbed during the configure stage.  Modification of the"
+	@echo "environment variable will not change the behavior of make without rerunning" 
+	@echo  -e "configure or editing the Makefile. \n"
+
+jcl:  $(TOP)/javax/comm/RXTXCommDriver.class $(TOP)/javax/comm/RXTXPort.class $(TOP)/javax/comm/RXTXPort.class $(IDENTIFIERS)
+	$(JAR) cf jcl.jar javax/comm/*
+	@echo "make install will install RxTx"
+
+comm:  $(TOP)/javax/comm/RXTXCommDriver.class $(TOP)/javax/comm/RXTXPort.class $(TOP)/javax/comm/RXTXPort.class $(IDENTIFIERS)
+	$(JAR) cf comm.jar javax/comm/*
+	@echo "make install will install RxTx"
+
+$(TOP)/javax/comm/RXTXCommDriver.class $(TOP)/javax/comm/RXTXPort.class \
+		$(TOP)/javax/comm/LPRPort.class \
+		: $(srcdir)/src/RXTXCommDriver.java \
+		$(srcdir)/src/LPRPort.java \
+		$(srcdir)/src/RXTXPort.java 
+# handle java quirks here.
+	$(JAVAH_FIX) \
+	$(JAVAC) $(srcdir)/src/RXTXPort.java $(srcdir)/src/LPRPort.java $(srcdir)/src/RXTXCommDriver.java
+
+$(TOP)/$(target_alias)/libParallel.la: $(TOP)/$(target_alias)/ParallelImp.lo
+	( cd $(TOP)/$(target_alias); \
+	$(LINK) -o libParallel.la -rpath $(RXTX_PATH) $(<F); \
+	for I in .libs/*.so*;do cp $$I . ;done;)
+
+$(TOP)/$(target_alias)/ParallelImp.lo: $(srcdir)/src/ParallelImp.c \
+                                  $(PARALLEL_HEADER) \
+				  $(TOP)/Makefile
+	(cd $(TOP)/$(target_alias); \
+	$(LIBTOOL) --mode=compile $(CC) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) @VERBOSE_IOEXCEPTIONS@ -c ../$< )
+
+$(TOP)/$(target_alias)/libSerial.la: $(TOP)/$(target_alias)/SerialImp.lo
+	( cd $(TOP)/$(target_alias); \
+	$(LINK) -o libSerial.la -rpath $(RXTX_PATH) $(<F); \
+	for I in .libs/*.so*;do cp $$I . ;done;)
+
+$(TOP)/$(target_alias)/SerialImp.lo: $(srcdir)/src/SerialImp.c \
+                                  $(SERIAL_HEADER) \
+				  $(TOP)/Makefile
+	(cd $(TOP)/$(target_alias); \
+	$(LIBTOOL) --mode=compile $(CC) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) @VERBOSE_IOEXCEPTIONS@ -c ../$< )
+
+$(TOP)/javax/comm/ParallelPort.class $(TOP)/javax/comm/ParallelPortEvent.class $(TOP)/javax/comm/ParallelPortEventListener.class: $(srcdir)/src/ParallelPort.java $(srcdir)/src/ParallelPortEvent.java $(srcdir)/src/ParallelPortEventListener.java
+	$(JAVAC) $(srcdir)/src/ParallelPort.java $(srcdir)/src/ParallelPortEvent.java $(srcdir)/src/ParallelPortEventListener.java
+
+PARALLEL: $(TOP)/javax/comm/ParallelPort.class $(TOP)/javax/comm/ParallelPortEvent.class $(TOP)/javax/comm/ParallelPortEventListener.class
+
+$(TOP)/javax/comm/SerialPort.class $(TOP)/javax/comm/SerialPortEvent.class $(TOP)/javax/comm/SerialPortEventListener.class: $(srcdir)/src/SerialPort.java $(srcdir)/src/SerialPortEvent.java $(srcdir)/src/SerialPortEventListener.java
+	$(JAVAC) $(srcdir)/src/SerialPort.java $(srcdir)/src/SerialPortEvent.java $(srcdir)/src/SerialPortEventListener.java
+
+RS232: $(TOP)/javax/comm/SerialPort.class $(TOP)/javax/comm/SerialPortEvent.class $(TOP)/javax/comm/SerialPortEventListener.class
+
+$(TOP)/javax/comm/RS485Port.class $(TOP)/javax/comm/RS485PortEvent.class $(TOP)/javax/comm/RS485PortEventListener.class: $(srcdir)/src/RS485Port.java $(srcdir)/src/RS485PortEvent.java $(srcdir)/src/RS485PortEventListener.java 
+	$(JAVAC) $(srcdir)/src/RS485Port.java $(srcdir)/src/RS485PortEvent.java $(srcdir)/src/RS485PortEventListener.java
+
+RS485: $(TOP)/javax/comm/RS485Port.class $(TOP)/javax/comm/RS485PortEvent.class $(TOP)/javax/comm/RS485PortEventListener.class
+
+$(TOP)/javax/comm/I2CPort.class $(TOP)/javax/comm/I2CPortEvent.class $(TOP)/javax/comm/I2CPortEventListener.class: $(srcdir)/src/I2CPort.java $(srcdir)/src/I2CPortEvent.java $(srcdir)/src/I2CPortEventListener.java 
+	$(JAVAC) $(srcdir)/src/I2CPort.java $(srcdir)/src/I2CPortEvent.java $(srcdir)/src/I2CPortEventListener.java
+
+I2C: $(TOP)/javax/comm/I2CPort.class $(TOP)/javax/comm/I2CPortEvent.class $(TOP)/javax/comm/I2CPortEventListener.class 
+
+$(TOP)/%.class $(TOP)/javax/comm/%.class: $(srcdir)/src/%.java 
+	$(JAVAC) $< 
+
+$(SERIAL_HEADER) $(PARALLEL_HEADER): $(TOP)/javax/comm/RXTXPort.class
+	$(JAVAH) javax.comm.`echo $(@F) | sed s#\.h##|sed s#javax_comm_##`
+	touch $(TOP)/$(target_alias)/$(@F)
+
+borg: $(TOP)/javax/comm/RXTXCommDriver.class $(TOP)/javax/comm/RXTXPort.class $(TOP)/javax/comm/LPRPort.class $(SERIAL_HEADER)
+	gcc -DWIN32 -D  __int64="long long"  -mno-fp-ret-in-387 -b$(target_alias) -I $(TOP) -I $(TOP)/$(target_alias) -I . $(WJI) -I ../src/ -Wall -c ../src/SerialImp.c -o  $(TOP)/$(target_alias)/SerialImp.o
+	gcc -DWIN32 -D  __int64="long long"  -mno-fp-ret-in-387 -b$(target_alias) -I $(TOP) -I $(TOP)/$(target_alias) -I . $(WJI) -I ../src/ -Wall -c ../src/termios.c -o  $(TOP)/$(target_alias)/termios.o
+	gcc -DWIN32 -D  __int64="long long"  -mno-fp-ret-in-387 -b$(target_alias) -I $(TOP) -I $(TOP)/$(target_alias) -I . $(WJI) -I ../src/ -Wall -c ../src/fixup.c -o  $(TOP)/$(target_alias)/fixup.o
+	gcc -DWIN32 -D  __int64="long long"  -mno-fp-ret-in-387 -b$(target_alias) -I $(TOP) -I $(TOP)/$(target_alias) -I . $(WJI) -I ../src/ -Wall -c ../src/init.cc -o  $(TOP)/$(target_alias)/init.o
+	ld --base-file $(target_alias)/Serial.base  --dll -o  $(target_alias)/Serial.dll $(target_alias)/termios.o $(target_alias)/SerialImp.o $(target_alias)/fixup.o $(target_alias)/init.o  -luser32 -lgdi32 -lcomdlg32 -lkernel32 -ladvapi32 -lmingw32 -lmoldname -lcrtdll -e _dll_entry@12 --base-file $(target_alias)/Serial.base
+	 echo EXPORTS >$(target_alias)/Serial.def;for i in `nm i386-mingw32/Serial.dll | grep "T _Java"|cut -b 13-`;do echo -n $$i|sed s#@.*##;echo "="$$i;done >> $(target_alias)/Serial.def
+	dlltool  -b$(target_alias) --as=as --dllname $(target_alias)/Serial.dll  --def $(target_alias)/Serial.def --base-file $(target_alias)/Serial.base --output-exp $(target_alias)/Serial.exp
+	ld --base-file $(target_alias)/Serial.base $(target_alias)/Serial.exp -dll -o  $(target_alias)/Serial.dll $(target_alias)/termios.o $(target_alias)/SerialImp.o $(target_alias)/fixup.o $(target_alias)/init.o  -luser32 -lgdi32 -lcomdlg32 -lkernel32 -ladvapi32 -lmingw32 -lmoldname -lcrtdll -e _dll_entry@12 --base-file $(target_alias)/Serial.base
+	dlltool   -b$(target_alias) --as=as --dllname $(target_alias)/Serial.dll  --def $(target_alias)/Serial.def --base-file $(target_alias)/Serial.base --output-exp $(target_alias)/Serial.exp
+	ld $(target_alias)/Serial.exp -dll -o  $(target_alias)/Serial.dll $(target_alias)/termios.o $(target_alias)/SerialImp.o $(target_alias)/fixup.o $(target_alias)/init.o  -luser32 -lgdi32 -lcomdlg32 -lkernel32 -ladvapi32 -lmingw32 -lmoldname -lcrtdll -e _dll_entry@12 --base-file $(target_alias)/Serial.base
+
+docs:
+	mkdir javax;
+	cd javax;ln -s $(srcdir)/src io
+	cd ..
+	rm -rf javax
+
+# END
+
+# Tell versions [3.59,3.63) of GNU make to not export all variables.
+# Otherwise a system limit (for SysV at least) may be exceeded.
+.NOEXPORT:
