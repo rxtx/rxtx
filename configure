@@ -2446,6 +2446,7 @@ Linux)
 			#fix_parameters $JPATH/lib/javax.comm.properties
 			check_prefix
 			RXTX_PATH="\$(prefix)/lib/"
+			JAVAH_FIX="if [ ! -d com ]; then if [ ! -f \$(JPATH)/lib/comm.jar ]; then echo \"Please install comm.jar from CommAPI in \$(JPATH)/java/lib/ 1>&2\"; else mkdir -p com/sun/comm;\$(JAR) -xf \$(JPATH)/lib/comm.jar;  fi; fi;";
 		else
 			# Kaffe
 			CLASSPATH=$CLASSPATH:`find $JHOME -name RXTXcomm.jar`	
