@@ -1300,21 +1300,25 @@ serial_read()
 
 int serial_read( int fd, void *vb, int size )
 {
+	long start, now;
 	unsigned long nBytes = 0, total = 0, error;
 	/* unsigned long waiting = 0; */
-	int err, vmin;
+	int err, vmin, i;
 	struct termios_list *index;
 	char message[80];
 	COMSTAT stat;
 	clock_t c;
 	
 
+	start = GetTickCount();
 #ifdef DEBUG
 	ENTER( "serial_read" );
 #endif /* DEBUG */
 
-	if ( fd <= 0 )
+	if ( fd <= 0 ) {
+		printf("serial_read fd=%d\n", fd);
 		return 0;
+	}
 	index = find_port( fd );
 	if ( !index )
 	{
@@ -1333,16 +1337,21 @@ int serial_read( int fd, void *vb, int size )
 
 	if ( index->open_flags & O_NONBLOCK  )
 	{
+		int ret;
 		vmin = 0;
+		/* pull mucho-cpu here? */
 		do {
 #ifdef DEBUG_VERBOSE
 			report("vmin=0\n");
 #endif /* DEBUG_VERBOSE */
-			error = ClearCommError( index->hComm, &error, &stat);
+			ret = ClearCommError( index->hComm, &error, &stat);
 			//usleep(1000);
 			//usleep(50);
-		}
-		while( stat.cbInQue < size && size > 1 );
+			now = GetTickCount();
+			if (now-start >= (index->ttyset->c_cc[VTIME]*100)) {
+				return total;	/* read timeout */
+			}
+		} while( stat.cbInQue < size && size > 1 );
 	}
 	else
 	{
@@ -1359,17 +1368,17 @@ int serial_read( int fd, void *vb, int size )
 			usleep(1000);
 			//mexPrintf("%i/n", CLOCKS_PER_SEC/40);
 		} while ( c > clock() );
-
 	}
 	
 
 	total = 0;
 	MexPrintf("R");
-	//while ( ( ( nBytes <= vmin ) || ( size > 0 ) ) && !waiting )
-	//{
+	while ( size > 0 )
+	{
 		nBytes = 0;
 		err = ReadFile( index->hComm, vb + total, size, &nBytes, &index->rol ); 
 		WaitForSingleObject( index->wol.hEvent, INFINITE );
+
 #ifdef DEBUG_VERBOSE
 	/* warning Will Rogers! */
 		sprintf(message, " ========== ReadFile = %i %s\n",
@@ -1378,20 +1387,23 @@ int serial_read( int fd, void *vb, int size )
 #endif /* DEBUG_VERBOSE */
 		size -= nBytes;
 		total += nBytes;
-		
+
+
 		if ( !err )
 		{
-			switch ( GetLastError() )
+			i = GetLastError();
+			switch ( i )
 			{
 				case ERROR_BROKEN_PIPE:
-					report("ERROR_BROKEN_PIPE\n");
+					report("ERROR_BROKEN_PIPE ");
 					nBytes = 0;
 					break;
 				case ERROR_MORE_DATA:
 					//usleep(1000);
-					report("ERROR_MORE_DATA\n");
+					report("ERROR_MORE_DATA ");
 					break;
 				case ERROR_IO_PENDING:
+//					printf("[ERROR_IO_PENDING ");
 					while( ! GetOverlappedResult(
 							index->hComm,
 							&index->rol,
@@ -1405,14 +1417,27 @@ int serial_read( int fd, void *vb, int size )
 								index->hComm,
 								&error,
 								&stat);
-							return( total );
+							printf("ERROR_IO_INCOMPLETE] ");
+//							return( total );
+							break;
 						}
 					}
+					size -= nBytes;
+					total += nBytes;
+					if (size > 0) {
+						now = GetTickCount();
+						printf("size > 0: spent=%ld have=%d\n", now-start, index->ttyset->c_cc[VTIME]*100);
+						if (now-start >= (index->ttyset->c_cc[VTIME]*100)) {
+							printf("TO ");
+							return total;	/* read timeout */
+						}
+					}
+//					printf("end nBytes=%ld] ", nBytes);
 					//usleep(1000);
-					report("ERROR_IO_PENDING\n");
 					break;
 				default:
 					//usleep(1000);
+					printf("[uknown error %d] ", i);
 					YACK();
 					return -1;
 			}
@@ -1421,12 +1446,15 @@ int serial_read( int fd, void *vb, int size )
 		{
 			//usleep(1000);
 			ClearCommError( index->hComm, &error, &stat);
+//			printf("cce=%ld ", total);
 			return( total );
 		}
-	//}
+	}
 #ifdef DEBUG
 	LEAVE( "serial_read" );
 #endif /* DEBUG */
+	now = GetTickCount();
+//	printf("srr=%ld in %ldms ", total, now-start);
 	return total;
 }
 
@@ -2013,10 +2041,10 @@ int tcsetattr( int fd, int when, struct termios *s_termios )
 #endif /* DEBUG_VERBOSE */
 	vtime = s_termios->c_cc[VTIME] * 100;
 	timeouts.ReadTotalTimeoutConstant = vtime;
-	timeouts.ReadIntervalTimeout = vtime;
+	timeouts.ReadIntervalTimeout = 0;
 	timeouts.ReadTotalTimeoutMultiplier = 0;
 	timeouts.WriteTotalTimeoutConstant = vtime;
-	timeouts.ReadTotalTimeoutMultiplier = 0;
+	timeouts.WriteTotalTimeoutMultiplier = 0;
 	/* max between bytes */
 	if ( s_termios->c_cc[VMIN] > 0 && vtime > 0 )
 	{
