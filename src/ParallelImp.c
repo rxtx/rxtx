@@ -22,7 +22,7 @@
 
 	basic problem is LP_P* appears to be ifdefed __KERNEL__ in the
         lp.h header file on linux.  It also looks as if LP_P* should be
-        LP_* for POSOX compliance.  So... Some P's got chopped out.
+        LP_* for POSIX compliance.  So... Some P's got chopped out.
         Its not clear what LP_PACK is supposed to become so its commented out
         below.
 
@@ -71,7 +71,7 @@ extern int errno;
 
 #include "ParallelImp.h"
 
-#define LPRPort(foo) Java_gniu_io_LPRPort_ ## foo
+#define LPRPort(foo) Java_javax_comm_LPRPort_ ## foo
 
 /*----------------------------------------------------------
 LPRPort.getOutputBufferFree
