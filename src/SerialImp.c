@@ -1239,6 +1239,7 @@ JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 	}
 	return;
 }
+
 /*----------------------------------------------------------
 RXTXCommDriver.testRead
 
@@ -1251,8 +1252,12 @@ RXTXCommDriver.testRead
 		support for non serial ports Trent
 ----------------------------------------------------------*/
 
-JNIEXPORT jboolean  JNICALL RXTXCommDriver(testRead)(JNIEnv *env,
-	jobject jobj, jstring tty_name, jint port_type )
+JNIEXPORT jboolean  JNICALL RXTXCommDriver(testRead)(
+	JNIEnv *env,
+	jobject jobj,
+	jstring tty_name,
+	jint port_type
+)
 {
 	struct termios ttyset;
 	char c;
@@ -1260,8 +1265,9 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(testRead)(JNIEnv *env,
 	const char *name = (*env)->GetStringUTFChars(env, tty_name, 0);
 	int ret = JNI_TRUE;
 
-	if (!LOCK(name))
+	if ( LOCK( name ) )
 	{
+		fprintf( stderr, "testRead is failing. No Lock file\n" );
 		(*env)->ReleaseStringUTFChars(env, tty_name, name);
 		return JNI_FALSE;
 	}
@@ -1269,13 +1275,14 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(testRead)(JNIEnv *env,
 	/* CLOCAL eliminates open blocking on modem status lines */
 /*
 	if ((fd = open(name, O_RDONLY | CLOCAL)) <= 0) {
+		fprintf( stderr "testRead() open failed\n" );
 		ret = JNI_FALSE;
 		goto END;
 	}
 */
 	do {
-		fd=open (name, O_RDWR | O_NOCTTY | O_NONBLOCK );
-	}  while (fd < 0 && errno==EINTR);
+		fd=open ( name, O_RDWR | O_NOCTTY | O_NONBLOCK );
+	}  while ( fd < 0 && errno==EINTR );
 	if( fd < 0 )
 	{
 		ret = JNI_FALSE;
@@ -1293,14 +1300,16 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(testRead)(JNIEnv *env,
 		}
 
 		/* save, restore later */
-		if ((saved_flags = fcntl(fd, F_GETFL)) < 0) {
+		if ( ( saved_flags = fcntl(fd, F_GETFL ) ) < 0) {
+			fprintf( stderr, "testRead() fcntl(F_GETFL) failed\n" );
 			ret = JNI_FALSE;
 			goto END;
 		}
 
-		memcpy(&saved_termios, &ttyset, sizeof(struct termios));
+		memcpy( &saved_termios, &ttyset, sizeof( struct termios ) );
 
-		if (fcntl(fd, F_SETFL, O_NONBLOCK) < 0) {
+		if ( fcntl( fd, F_SETFL, O_NONBLOCK ) < 0 ) {
+			fprintf( stderr, "testRead() fcntl(F_SETFL) failed\n" );
 			ret = JNI_FALSE;
 			goto END;
 		}
@@ -1308,16 +1317,18 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(testRead)(JNIEnv *env,
 		cfmakeraw(&ttyset);
 		ttyset.c_cc[VMIN] = ttyset.c_cc[VTIME] = 0;
 
-		if (tcsetattr(fd, TCSANOW, &ttyset) < 0) {
+		if ( tcsetattr( fd, TCSANOW, &ttyset) < 0 ) {
+			fprintf( stderr, "testRead() tcsetattr failed\n" );
 			ret = JNI_FALSE;
-			tcsetattr(fd, TCSANOW, &saved_termios);
+			tcsetattr( fd, TCSANOW, &saved_termios );
 			goto END;
 		}
-		if (read(fd, &c, 1) < 0)
+		if ( read( fd, &c, 1 ) < 0 )
 		{
 #ifdef EWOULDBLOCK
 			if ( errno != EWOULDBLOCK )
 			{
+				fprintf( stderr, "testRead() read failed\n" );
 				ret = JNI_FALSE;
 			}
 #else
@@ -1326,13 +1337,13 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(testRead)(JNIEnv *env,
 		}
 
 		/* dont walk over unlocked open devices */
-		tcsetattr(fd, TCSANOW, &saved_termios);
-		fcntl(fd, F_SETFL, saved_flags);
+		tcsetattr( fd, TCSANOW, &saved_termios );
+		fcntl( fd, F_SETFL, saved_flags );
 	}
 END:
-	(*env)->ReleaseStringUTFChars(env, tty_name, name);
 	UNLOCK(name);
-	close(fd);
+	(*env)->ReleaseStringUTFChars( env, tty_name, name );
+	close( fd );
 	return ret;
 }
 #if defined(__APPLE__)
@@ -1785,19 +1796,26 @@ int fhs_lock( const char *filename )
 	 * Problem lockfiles will be dealt with.  Some may not even be in use.
 	 *
 	 */
-	int fd;
+	int fd,i;
 	char lockinfo[12], message[80];
+	char file[80], *p;
 
+	i = strlen( filename );
+	p = ( char * ) filename + i;
+	/*  FIXME  need to handle subdirectories /dev/cua/... */
+	while( *( p - 1 ) != '/' && i-- != 1 ) p--;
+	sprintf( file, "%s/LCK..%s", LOCKDIR, p );
 	if ( check_lock_status( filename ) )
 	{
+		fprintf(stderr, "lockstatus fail\n");
 		return 1;
 	}
-	fd = open( filename, O_CREAT | O_WRONLY | O_EXCL, 0666 );
+	fd = open( file, O_CREAT | O_WRONLY | O_EXCL, 0666 );
 	if( fd < 0 )
 	{
 		snprintf( message, 80,
-			"RXTX Error: Unable to create lock file: %s\n\n",
-			filename);
+			"RXTX fhs_lock() Error: Unable to create lock file: %s\n\n",
+			file );
 		fprintf(stderr, message);
 		return 1;
 	}
@@ -1873,7 +1891,7 @@ int uucp_lock( const char *filename )
 	if( fd < 0 )
 	{
 		snprintf( message, 80,
-			"RXTX Error: Unable to create lock file: %s\n\n",
+			"RXTX uucp_lock() Error: Unable to create lock file: %s\n\n",
 			lockfilename );
 		fprintf( stderr, message );
 		return 1;
@@ -1935,6 +1953,7 @@ int check_lock_status( const char *filename )
 
 	if ( check_group_uucp() )
 	{
+		report("No permission to create lock file\n");
 		return 1;
 	}
 
@@ -1942,6 +1961,7 @@ int check_lock_status( const char *filename )
 
 	if ( is_device_locked( filename ) )
 	{
+		report("device is locked by another application\n");
 		return 1;	
 	}
 	return 0;
@@ -1961,20 +1981,19 @@ int check_lock_status( const char *filename )
 ----------------------------------------------------------*/
 void fhs_unlock( const char *filename )
 {
-#ifdef LOCKFILES
 	char file[80],*p;
 	int i;
 
-	i = strlen(filename);
-	p = (char *) filename + i;
-	while( *(p-1) != '/' && i-- != 0) p--;
-	sprintf(file, "%s/LCK..%s", LOCKDIR, p);
+	i = strlen( filename );
+	p = ( char * ) filename + i;
+	/*  FIXME  need to handle subdirectories /dev/cua/... */
+	while( *( p - 1 ) != '/' && i-- != 1 ) p--;
+	sprintf( file, "%s/LCK..%s", LOCKDIR, p );
 
-	if( !check_lock_pid( file ))
+	if( !check_lock_pid( file ) )
 	{
 		unlink(file);
 	}
-#endif
 }
 
 /*----------------------------------------------------------
@@ -2098,14 +2117,19 @@ int is_device_locked( const char *filename )
 	struct stat buf;
 	struct stat buf2;
 
+	i = strlen( filename );
+	p = ( char * ) filename+i;
+	while( *( p-1 ) != '/' && i-- !=1 ) p--;
+	sprintf( file, "%s/LCK..%s", LOCKDIR, p );
+
 	while( lockdirs[i] )
 	{
 		/*
 		   Look for lockfiles in all known places other than the
 		   defined lock directory for this system
 		*/
-		if( ( stat( file, &buf ) == 0 ) &&
-			strncmp( lockdirs[i],LOCKDIR,strlen( lockdirs[i] ) )
+		if( ( stat( file, &buf2 ) == 0 ) &&
+			strncmp( lockdirs[i], LOCKDIR, strlen( lockdirs[i] ) )
 		)
 		{
 			if ( ( buf2.st_dev != buf.st_dev ) ||
@@ -2113,6 +2137,7 @@ int is_device_locked( const char *filename )
 			{
 				j = strlen( filename );
 				p = ( char *  ) filename + j;
+				
 		/*
 		   FIXME
 		   SCO Unix use lowercase all the time
