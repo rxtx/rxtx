@@ -36,19 +36,19 @@ SRC=../src
 DOSSRC=..\\\src
 
 # path to the jdk directory that has include, bin, lib, ... Unix style path
-JDKHOME=C:/jdk1.1.8
+JDKHOME=C:/jdk13
 
 #path to mingw32
 MINGHOME="D:/mingw"
 
 # path to install RXTXcomm.jar DOS style path
-COMMINSTALL="C:\jdk1.1.8\lib"
+COMMINSTALL="C:\jdk13\lib"
 
 # path to install the shared libraries DOS style path
-LIBINSTALL="C:\jdk1.1.8\bin"
+LIBINSTALL="C:\jdk13\bin"
 
 # path to the mingw32 libraries (directory with libmingw32.a) DOS style path
-LIBDIR="D:\mingw\lib"
+LIBDIR="c:\cygwin\lib\mingw"
 
 ######################
 #  End of user defined variables
@@ -66,7 +66,7 @@ DLLTOOL=dlltool
 # this looks like a nice tool but I was not able to get symbols in the dll.
 DLLWRAP=dllwrap
 
-CLASSPATH=-classpath ".;C:\jdk1..18\lib\RXTXcomm.jar;c:\BlackBox.jar;c:\jdk1.1.8\lib\classes.zip"
+CLASSPATH=-classpath ".;C:\jdk13\lib\RXTXcomm.jar;c:\BlackBox.jar;c:\jdk13\lib\classes.zip"
 JAVAH=javah $(CLASSPATH)
 JAR=jar 
 JAVAC=javac $(CLASSPATH)
@@ -75,18 +75,20 @@ JAVAC=javac $(CLASSPATH)
 #  Tool Flags
 ######################
 
-CFLAGS= -O2 $(INCLUDE) -mno-cygwin -DWIN32 -D __int64="long long" -mno-fp-ret-in-387 -Wall -D TRENT_IS_HERE_DEBUGGING_ENUMERATION -DTRENT_IS_HERE_DEBUGGING_THREADS
-INCLUDE= -I . -I $(JDKINCLUDE) -I $(JDKINCLUDE)/win32 -I $(SRC) -I include -I $(MINGINCLUDE)
+CFLAGS= -O2 $(INCLUDE) -mno-cygwin -DWIN32 -D __int64="long long" -mno-fp-ret-in-387 -Wall -DTRENT_IS_HERE_DEBUGGING_THREADS
+#CFLAGS= -O2 $(INCLUDE) -mno-cygwin -DWIN32 -D __int64="long long" -mno-fp-ret-in-387 -Wall -D TRENT_IS_HERE_DEBUGGING_ENUMERATION -DTRENT_IS_HERE_DEBUGGING_THREADS
+INCLUDE= -I c:\matlab6p5/extern/include/ -I . -I $(JDKINCLUDE) -I $(JDKINCLUDE)/win32 -I $(SRC) -I include -I $(MINGINCLUDE)
 JAVAHFLAGS= -jni -d include
-LIBS=-L $(LIBDIR) -luser32 -lgdi32 -lcomdlg32 -lkernel32 -ladvapi32 -lmingw32 -lmoldname -lcrtdll
+LIBS=-L $(LIBDIR) -LC:/rxtx/build -luser32 -lgdi32 -lcomdlg32 -lkernel32 -ladvapi32 -lmingw32 -lmoldname -lcrtdll -lmex
 
 # path to the java native interface headers (directory with jni.h)
 JDKINCLUDE=$(JDKHOME)/include
 MINGINCLUDE=$(MINGHOME)/include
 JAVAFILES = $(wildcard $(SRC)/*.java)
 CFILES=$(wildcard $(SRC)/*.c) $(wildcard $(SRC)/*.cc)
-TARGETLIBS= rxtxSerial.dll 
+TARGETLIBS= rxtxSerial.dll rxtxParallel.dll
 DLLOBJECTS= fixup.o SerialImp.o termios.o init.o fuserImp.o
+PARALLELOBJECTS= ParallelImp.o termios.o init.o
 
 all:  $(TARGETLIBS) # rebuild  rebuild will force everything to be built.
 
@@ -102,7 +104,7 @@ gnu:
 
 # yayaya We should have put the files in gnu.io to start with
 gnutimestamp:	$(JAVAFILES) $(CFILES) include gnu
-	xcopy $(DOSSRC)\\*.* gnu\\io\\
+	xcopy /Y $(DOSSRC)\\*.* gnu\\io\\
 	echo > gnutimestamp
 
 # FIXME make 3.79.1 behaves really strage if we use %.o rules.
@@ -113,7 +115,7 @@ init.o:
 fixup.o:
 	$(CC) $(CFLAGS) -c $(SRC)/$*.c -o fixup.o
 
-SerialImp.o:
+SerialImp.o:  include/config.h
 	$(CC) $(CFLAGS) -c $(SRC)/SerialImp.c -o SerialImp.o
 
 fuserImp.o:
@@ -122,17 +124,26 @@ fuserImp.o:
 termios.o:
 	$(CC) $(CFLAGS) -c $(SRC)/$*.c -o termios.o
 
+ParallelImp.o:  include/config.h
+	$(CC) $(CFLAGS) -c $(SRC)/$*.c -o ParallelImp.o
+
 #  This file is a pain in the rear to generate.  If your looking at this you
 #  need to install cygwin.
 
 $(SRC)/Serial.def:	$(DLLOBJECTS)
 	$(LD) --base-file Serial.base --dll -o rxtxSerial.dll $(DLLOBJECTS) $(LIBS) -e _dll_entry@12
-	xcopy  $(DOSSRC)\\Serial.def gnu\\io\\
+	xcopy /Y  $(DOSSRC)\\Serial.def gnu\\io\\
 
 #	echo EXPORTS >$(SRC)/Serial.def;for i in `nm rxtxSerial.dll | grep "T _Java"|cut -b 13-`;do echo -n $$i|sed s#@.*##;echo "="$$i;done >> $(SRC)/Serial.def
 
 
-$(TARGETLIBS):	RXTXcomm.jar $(DLLOBJECTS)  $(SRC)/Serial.def
+$(SRC)/Parallel.def:	$(PARALLELOBJECTS)
+	$(LD) --base-file Parallel.base --dll -o rxtxParallel.dll $(PARALLELOBJECTS) $(LIBS) -e _dll_entry@12
+	xcopy  $(DOSSRC)\\Parallel.def gnu\\io\\
+#	echo EXPORTS >$(SRC)/Parallel.def;for i in `nm rxtxParallel.dll | grep "T _Java"|cut -b 13-`;do echo -n $$i|sed s#@.*##;echo "="$$i;done >> $(SRC)/Parallel.def
+
+
+rxtxSerial.dll:	RXTXcomm.jar $(DLLOBJECTS)  $(SRC)/Serial.def
 	$(LD) --base-file Serial.base --dll -o rxtxSerial.dll $(DLLOBJECTS) \
 		$(LIBS) -e _dll_entry@12
 	$(DLLTOOL) --as=$(AS) --dllname rxtxSerial.dll --def $(SRC)/Serial.def \
@@ -150,6 +161,18 @@ $(TARGETLIBS):	RXTXcomm.jar $(DLLOBJECTS)  $(SRC)/Serial.def
 #		--add-stdcall-alias --driver-name gcc -mwindows \
 #		--target=i386-mingw32 -o $*.dll $(DLLOBJECTS) $(LIBS) -s
 #		-mno-cygwin
+
+rxtxParallel.dll: $(PARALLELOBJECTS)
+	$(LD) --base-file Parallel.base --dll -o rxtxParallel.dll $(PARALLELOBJECTS) \
+		$(LIBS) -e _dll_entry@12
+	$(DLLTOOL) --as=$(AS) --dllname rxtxParallel.dll --def $(SRC)/Parallel.def \
+		--base-file Parallel.base --output-exp Parallel.exp
+	$(LD) --base-file Parallel.base Parallel.exp -dll -o rxtxParallel.dll \
+		$(PARALLELOBJECTS) $(LIBS) -e _dll_entry@12
+	$(DLLTOOL) --as=$(AS) --dllname rxtxParallel.dll --def $(SRC)/Parallel.def \
+		--base-file Parallel.base --output-exp Parallel.exp
+	$(LD) --base-file Parallel.base Parallel.exp -dll -o rxtxParallel.dll \
+		$(PARALLELOBJECTS) $(LIBS) -e _dll_entry@12
 
 RXTXcomm.jar:	gnutimestamp
 	$(JAVAC) gnu\\io\\*.java
