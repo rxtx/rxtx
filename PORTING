@@ -1,14 +1,16 @@
-Jun 13 2000
+This is PORTING  Thu Jun 14 12:48:33 MDT 2001
 
 If you want to port rxtx to a new Unix platform do the following.
 
 *IMPORTANT* you will need gnu make.
 
-There are probably two areas you will need to focus on:
+There are probably three areas you will need to focus on:
 
-configure.in
+	configure.in
 
-src/SerialImp.c src/ParallelImp.c
+	src/SerialImp.c src/SerialImp.h src/ParallelImp.c
+
+	RXTXCommDriver.java  (just add the ports for your OS)
 
 configure.in grabs information about the OS, Java, ... and tries to set sane
 values for the Makefile.  Look towards the bottom of configure.in and just
@@ -18,7 +20,8 @@ Edit configure.in, run autoconf, run configure, run make.  repeat. An endless
 loop analagous to shampoo instructions.
 
 SerialImp.c and ParallelImp.c may require system specific includes and possibly
-a small amount of #ifdef's in the code.  
+a small amount of #ifdef's in the code.  Lock file information will need to
+be added to SerialImp.h
 
 Finally, I've got this beast compiling on hp-ux but I think the compile flags
 need adjusting.  Keep that in mind while looking through the files.

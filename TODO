@@ -1,4 +1,4 @@
-This is TODO  Thu Jan 18 17:37:47 MST 2001
+This is TODO  Thu Jun 21 13:42:32 MDT 2001
 
 The system crashes with a NullPointException if you enable notifications
 before your register a listener.
@@ -26,7 +26,7 @@ really want printer support.  Here is a chance to put it in themselves.
 ParallelPort and CommPortIdentifier files are provided so you can start 
 implementing right away without worrying about how automake works.  They are 
 not written in stone.  If you want to do it differently feel free.
-The good side is the stuff compiles as is.  
+The good side is the stuff compiles as is.  Write was tested on a printer.
 
 Currently (rxtx-1.4-5) sun's jdk (version 1.2.2_006) with native threads is 
 locking up with multiple open()/closes().  Its ugly.   The stack trace is 
@@ -104,8 +104,9 @@ ParallelPort support.  Needs some code.
                       A  large fraction of the stubs are filled in now.
 		ParallelImp.h
 		LPRPort.java simular to RXTXPort.java + stubs.
-	Printer support was working earlier.  Recent kernel changes have 
-	probably broken the printer support.  More comments in ParallelImp.c
+	Printer support is working with simiple print tests.
+	Full support for printing will be put in when 2.4 linux kernels
+	are mainstream.
 	
 ----------------------------------------------------------------------------
 From This point on, You need to use rxtx 1.5.  All of this work is 

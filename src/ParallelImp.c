@@ -1,6 +1,6 @@
 /*-------------------------------------------------------------------------
 |   rxtx is a native interface to serial ports in java.
-|   Copyright 1997-2000 by Trent Jarvi trentjarvi@yahoo.com
+|   Copyright 1997-2001 by Trent Jarvi trentjarvi@yahoo.com
 |
 |   This library is free software; you can redistribute it and/or
 |   modify it under the terms of the GNU Library General Public
@@ -68,7 +68,7 @@ extern int errno;
 #include "ParallelImp.h"
 
 #define LPRPort(foo) Java_javax_comm_LPRPort_ ## foo
-#define DEBUG
+/* #define DEBUG */
 
 /*----------------------------------------------------------
 LPRPort.getOutputBufferFree
@@ -276,6 +276,7 @@ LPRPort.open
    comments:    Very often people complain about not being able to get past
                 this function and it turns out to be permissions on the
                 device file or bios has the device disabled.
+		FIXME  Lock Files?
 ----------------------------------------------------------*/
 JNIEXPORT jint JNICALL LPRPort(open)( JNIEnv *env, jobject jobj,
 	jstring jstr )

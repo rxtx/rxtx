@@ -1,6 +1,6 @@
 /*-------------------------------------------------------------------------
 |   rxtx is a native interface to serial ports in java.
-|   Copyright 1997-2000 by Trent Jarvi trentjarvi@yahoo.com
+|   Copyright 1997-2001 by Trent Jarvi trentjarvi@yahoo.com
 |
 |   This library is free software; you can redistribute it and/or
 |   modify it under the terms of the GNU Library General Public
@@ -18,11 +18,11 @@
 --------------------------------------------------------------------------*/
 #include "config.h"
 #include "javax_comm_RXTXPort.h"
-#ifndef __LCC__ 
+#ifndef __LCC__
 #   include <unistd.h>
 #else /* windows lcc compiler for fd_set. probably wrong */
 #   include<winsock.h>
-#endif
+#endif /* __LCC__ */
 #include <time.h>
 #include <stdio.h>
 #include <string.h>
@@ -43,33 +43,39 @@
 #endif /* WIN32 */
 #ifdef HAVE_TERMIOS_H
 #	include <termios.h>
-#endif
+#endif /* HAVE_TERMIOS_H */
 #ifdef HAVE_SIGNAL_H
 #   include <signal.h>
-#endif
+#endif /* HAVE_SIGNAL_H */
 #ifdef HAVE_SYS_SIGNAL_H
 #   include <sys/signal.h>
-#endif
+#endif /* HAVE_SYS_SIGNAL_H */
 #include <sys/types.h>
 #ifdef HAVE_SYS_TIME_H
 #   include <sys/time.h>
-#endif
+#endif /* HAVE_SYS_TIME_H */
 #   include <fcntl.h>
 #ifdef HAVE_SYS_FCNTL_H
 #   include <sys/fcntl.h>
-#endif
+#endif /* HAVE_SYS_FCNTL_H */
 #ifdef HAVE_SYS_FILE_H
 #   include <sys/file.h>
-#endif
+#endif /* HAVE_SYS_FILE_H */
 
 #if defined(__linux__)
 #	include <linux/types.h> /* fix for linux-2.3.4? kernels */
 #	include <linux/serial.h>
 #	include <linux/version.h>
-#endif
+#endif /* __linux__ */
 #if defined(__hpux__)
 #include <sys/modem.h>
-#endif
+#endif /* __hpux__ */
+#ifdef HAVE_PWD_H
+#include	<pwd.h>
+#endif /* HAVE_PWD_H */
+#ifdef HAVE_GRP_H
+#include 	<grp.h>
+#endif /* HAVE_GRP_H */
 
 extern int errno;
 #include "SerialImp.h"
@@ -768,7 +774,7 @@ read_byte_array
 int read_byte_array( int fd, unsigned char *buffer, int length, int timeout )
 {
 	int ret, left, bytes = 0;
-        fd_set rfds;
+	fd_set rfds;
 	struct timeval sleep;
 	struct timeval *psleep=&sleep;
 
@@ -1104,6 +1110,63 @@ JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 	}
 	return;
 }
+/*----------------------------------------------------------
+RXTXCommDriver.testRead
+
+   accept:      tty_name The device to be tested
+   perform:     test if the device can be read from
+   return:      JNI_TRUE if the device can be read from
+   exceptions:  none
+   comments:    From Wayne Roberts wroberts1@home.com
+   		check tcget/setattr returns.
+		support for non serial ports Trent
+----------------------------------------------------------*/
+
+JNIEXPORT jboolean  JNICALL RXTXCommDriver(testRead)(JNIEnv *env,
+	jobject jobj, jstring tty_name, jint port_type )
+{
+	struct termios ttyset;
+	char c;
+	int fd;
+	const char *name = (*env)->GetStringUTFChars(env, tty_name, 0);
+	int ret = JNI_TRUE;
+
+	if (!fhs_lock(name))
+		return JNI_FALSE;
+
+	if ((fd = open(name, O_RDONLY | O_NONBLOCK)) < 0) {
+		ret = JNI_FALSE;
+		goto END;
+	}
+
+	if ( port_type == PORT_SERIAL )
+	{
+		if (tcgetattr(fd, &ttyset) < 0) {
+			ret=JNI_FALSE;
+			goto END;
+		}
+		ttyset.c_cc[VMIN] = ttyset.c_cc[VTIME] = 0;
+		if (tcsetattr(fd, TCSANOW, &ttyset) < 0) {
+			ret=JNI_FALSE;
+			goto END;
+		}
+		if (read(fd, &c, 1) < 0)
+		{
+#ifdef EWOULDBLOCK
+			if ( errno != EWOULDBLOCK )
+			{
+				ret = JNI_FALSE;
+			}
+#else
+			ret = JNI_FALSE;
+#endif /* EWOULDBLOCK */
+		}
+	}
+END:
+	fhs_unlock(name);
+	close(fd);
+	return ret;
+}
 
 /*----------------------------------------------------------
  isDeviceGood
@@ -1123,7 +1186,6 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(isDeviceGood)(JNIEnv *env,
 	int fd,i;
 	const char *name = (*env)->GetStringUTFChars(env, tty_name, 0);
 
-
 	for(i=0;i<64;i++){
 #if defined(_GNU_SOURCE)
 		snprintf(teststring, 256, "%s%s%i",DEVICEDIR,name, i);
@@ -1140,7 +1202,7 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(isDeviceGood)(JNIEnv *env,
 				result=JNI_TRUE;
 				break;
 			}
-			else 
+			else
 				result=JNI_FALSE;
 		}
 		else
@@ -1163,7 +1225,6 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(isDeviceGood)(JNIEnv *env,
 		}
 	}
 	(*env)->ReleaseStringUTFChars(env, tty_name, name);
-	return( JNI_TRUE );
 	return(result);
 }
 
@@ -1247,7 +1308,7 @@ JNIEXPORT jint JNICALL RXTXPort(getOutputBufferSize)(JNIEnv *env,
  is_interrupted
 
    accept:      
-   perform:     see if the port is being closed. 
+   perform:     see if the port is being closed.
    return:      a positive value if the port is being closed.
    exceptions:  none
    comments:
@@ -1283,7 +1344,7 @@ jboolean is_interrupted(JNIEnv *env, jobject jobj)
 /*----------------------------------------------------------
  send_event
 
-   accept:      The event type and the event state     
+   accept:      The event type and the event state
    perform:     if state is > 0 send a JNI_TRUE event otherwise send JNI_FALSE
    return:      a positive value if the port is being closed.
    exceptions:  none
@@ -1377,7 +1438,7 @@ void throw_java_exception( JNIEnv *env, char *exc, char *foo, char *msg )
 /*----------------------------------------------------------
  report
 
-   accept:      string to send to stderr     
+   accept:      string to send to stderr
    perform:     if DEBUG is defined send the string to stderr.
    return:      none
    exceptions:  none
@@ -1396,7 +1457,7 @@ void report(char *msg)
    accept:      The name of the device to try to lock
                 termios struct
    perform:     Create a lock file if there is not one already.
-   return:      1 on failure 0 on success
+   return:      0 on failure 1 on success
    exceptions:  none
    comments:    This is for linux and freebsd only currently.  I see SVR4 does
                 this differently and there are other proposed changes to the
@@ -1423,11 +1484,32 @@ int fhs_lock(const char *filename)
 	int i,j,fd, pid;
 	char lockinfo[12], file[80], pid_buffer[20], message[80],*p;
 	struct stat buf;
-	const char *lockdirs[]={ "/etc/locks", "/usr/spool/kermit", 
+	const char *lockdirs[]={ "/etc/locks", "/usr/spool/kermit",
 		"/usr/spool/locks", "/usr/spool/uucp", "/usr/spool/uucp/",
-		"/usr/spool/uucp/LCK", "/var/lock", "/var/lock/modem", 
+		"/usr/spool/uucp/LCK", "/var/lock", "/var/lock/modem",
 		"/var/spool/lock", "/var/spool/locks", "/var/spool/uucp",NULL
 	};
+	struct group *g=getgrnam("uucp");
+	struct passwd *user=getpwuid(geteuid());
+
+	/*  This checks if the effective user is in group uucp so we can
+	 *  create lock files.  If not we give them a warning and bail.
+	 *  If its root we just skip the test.
+	 */
+	if(strcmp(user->pw_name,"root"))
+	{
+		while(*g->gr_mem)
+		{
+			if(!strcmp(*g->gr_mem,user->pw_name))
+				break;
+			*g->gr_mem++;
+		}
+		if(!*g->gr_mem)
+		{
+			printf(UUCP_ERROR);
+			return 0;
+		}
+	}
 
 	/* no lock dir? just return success */
 
@@ -1437,7 +1519,7 @@ int fhs_lock(const char *filename)
 		return 1;
 	}
 
-	/* 
+	/*
 	 * There is a zoo of lockdir possibilities
 	 * Its possible to check for stale processes with most of them.
 	 * for now we will just check for the lockfile on most
@@ -1468,7 +1550,7 @@ int fhs_lock(const char *filename)
 		j++;
 	}
 	
-	/* 
+	/*
 	check if the device is already locked
 
 	There is much to do here.
@@ -1504,14 +1586,15 @@ int fhs_lock(const char *filename)
 
 		if( kill((pid_t) pid, 0) && errno==ESRCH )
 		{
-			report("RXTX Warning:  Removing stale lock file.\n");
+			fprintf(stderr,
+				"RXTX Warning:  Removing stale lock file.\n");
 			if(unlink(file) != 0)
 			{
 				snprintf(message, 80, "RXTX Error:  Unable to \
 					remove stale lock file: %s\n",
 					file
 				);
-				report(message);
+				fprintf(stderr, message);
 				return 0;
 			}
 		}
@@ -1522,7 +1605,7 @@ int fhs_lock(const char *filename)
 	{
 		snprintf(message, 80,
 			"RXTX Error: Unable to create lock file: %s\n\n", file);
-		report(message);
+		fprintf(stderr, message);
 		return 0;
 	}
 	sprintf(lockinfo,"%10d\n",getpid());

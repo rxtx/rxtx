@@ -1,7 +1,7 @@
 rm -f config.cache config.h config.status
-export WIN32INCLUDE=/home/jarvi/tools/win32-include
-export PATH=/usr/local/cross-tools/i386-mingw32/bin/:/usr/kerberos/sbin:/usr/kerberos/bin:/sbin:/bin:/usr/sbin:/usr/bin:/usr/X11R6/bin:/usr/local/java/bin:/usr/local/java/jre/bin/:/usr/local/sniff/bin:/usr/local/cross-tools/i386-mingw32/bin/:/root/bin:/usr/X11R6/bin:/usr/local/java/bin:/usr/local/java/jre/bin/:/usr/local/sniff/bin
+export WIN32INCLUDE=/home/jarvi/RXTX/tools/win32-include
+export PATH=/usr/local/cross-tools/i386-mingw32/bin/:/bin:/usr/bin:/usr/java/jdk1.3/bin/:
 ../configure --target=i386-mingw32 --host=i386-redhat-linux
 make
-export PATH=/usr/kerberos/sbin:/usr/kerberos/bin:/sbin:/bin:/usr/sbin:/usr/bin:/usr/X11R6/bin:/usr/local/java/bin:/usr/local/java/jre/bin/:/usr/local/sniff/bin:/usr/local/cross-tools/i386-mingw32/bin/:/root/bin:/usr/X11R6/bin:/usr/local/java/bin:/usr/local/java/jre/bin/:/usr/local/sniff/bin:/usr/local/cross-tools/i386-mingw32/bin
+#export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/java/jdk1.3/bin:/usr/local/cross-tools/i386-mingw32/bin/:/usr/local/cross-tools/i386-mingw32/bin
 

@@ -1,6 +1,6 @@
 /*-------------------------------------------------------------------------
 |   rxtx is a native interface to serial ports in java.
-|   Copyright 1997-2000 by Trent Jarvi trentjarvi@yahoo.com
+|   Copyright 1997-2001 by Trent Jarvi trentjarvi@yahoo.com
 |
 |   This library is free software; you can redistribute it and/or
 |   modify it under the terms of the GNU Library General Public
@@ -50,6 +50,12 @@
 #define SPE_FE                   9
 #define SPE_BI                  10
 
+#define PORT_SERIAL		 1
+#define PORT_PARALLEL		 2
+#define PORT_I2C		 3
+#define PORT_RS485		 4
+#define PORT_RAW		 5
+
 /*  Ports known on the OS */
 #if defined(__linux__)
 #	define DEVICEDIR "/dev/"
@@ -62,6 +68,12 @@
 #endif /* __sgi__ || sgi */
 #if defined(__FreeBSD__)
 #	define DEVICEDIR "/dev/"
+/* see SerialImp.c fhs_lock() & fhs_unlock() */
+#	define LOCKDIR "/var/spool/uucp/"
+#endif
+#if defined(__APPLE__)
+#	define DEVICEDIR "/dev/"
+/* see SerialImp.c fhs_lock() & fhs_unlock() */
 #	define LOCKDIR "/var/spool/uucp/"
 #endif /* __FreeBSD__ */
 #if defined(__NetBSD__)
@@ -73,6 +85,10 @@
 #	define DEVICEDIR "/dev/"
 #	define LOCKDIR "/usr/spool/uucp"
 #endif /* __hpux__ */
+#if defined(__osf__)  /* Digital Unix */
+#	define DEVICEDIR "/dev/"
+#	define LOCKDIR ""
+#endif /* __osf__ */
 #if defined(__BEOS__)
 #	define DEVICEDIR "/dev/ports/"
 #	define LOCKDIR ""
@@ -153,3 +169,4 @@ void fhs_unlock(const char *);
 int fhs_lock(const char *);
 
 #define LINUX_KERNEL_VERSION_ERROR "\n\n\nRXTX WARNING:  This library was compiled to run with OS release %s and you are currently running OS release %s.  In some cases this can be a problem.  Try recompiling RXTX if you notice strange behavior.  If you just compiled RXTX make sure /usr/include/linux is a symbolic link to the include files that came with the kernel source and not an older copy.\n\n\npress enter to continue\n"
+#define UUCP_ERROR "\n\n\nRXTX WARNING:  This library requires the user running applications to be in\ngroup uucp.  Please consult the INSTALL documentation.  More information is\navaiable under the topic 'How can I use Lock Files with rxtx?'\n" 

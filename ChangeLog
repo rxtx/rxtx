@@ -1,9 +1,13 @@
-This is ChangeLog  Fri Jan 26 13:44:30 MST 2001
+This is ChangeLog Wed Jun 20 10:47:21 MDT 2001
 
 rxtx-1.5 and rxtx-1.4 changes are kept in the same file.  skip to the version
 you downloaded.
 
-1.5-4  Jan 26, 2000   Irix build fixes (still needs CFLAGS fixed?)
+1.5-5  Jun 28, 2001   Merged with rxtx-1.4
+		      More work on Mac OS X port
+		      Joseph Goldstone <joseph@lp.com>
+		      minor cleanups
+1.5-4  Jan 26, 2001   Irix build fixes (still needs CFLAGS fixed?)
 		      Michael Delgadillo <delgadil@ymi.com>
 		      Windows build support with lcc
 		      Valentin Pavlov <v_valchev@prosyst.bg>
@@ -30,8 +34,14 @@ you downloaded.
 		      Stallion Card support 
 		      Greg Luck <gluck@tempo-services.com.au>
 		      CommPort enumeration with rxtx's comm.jar
-1.4-9                 Steve Drach <drach@eng.sun.com>
+1.4-9  Jun 21, 2001   Steve Drach <drach@eng.sun.com>
                       Minor fix of error reporting in lockfiles
+		      Mac OS X port Joseph Goldstone <joseph@lp.com>
+		      enumeration speedups Wayne Roberts <wroberts1@home.com>
+		      Documentation changes for lockfiles
+		      build fixes for jdk 1.1.8, kaffe 0.61
+		      automation of build tests with support for $JAVA_HOME
+		      sync with 1.5
 1.4-8  Jan  8, 2001   irix build fixes (fine tuning required)
 		      Tom Mander <tom@proximity.com.au>
 		      more lockfile code with testing from

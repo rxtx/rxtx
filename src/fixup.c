@@ -1,6 +1,6 @@
-/*--------------------------------------------------------------------------
+/*-------------------------------------------------------------------------
 |   rxtx is a native interface to serial ports in java.
-|   Copyright 1997-2001 by Trent Jarvi trentjarvi@yahoo.com.
+|   Copyright 1997-2001 by Trent Jarvi trentjarvi@yahoo.com
 |
 |   This library is free software; you can redistribute it and/or
 |   modify it under the terms of the GNU Library General Public
@@ -16,19 +16,4 @@
 |   License along with this library; if not, write to the Free
 |   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --------------------------------------------------------------------------*/
-package javax.comm;
-import java.util.*;
-
-/**
-* @author Trent Jarvi
-* @version %I%, %G%
-* @since JDK1.0
-*/
-
-
-public interface CommDriver
-{
-	public abstract CommPort getCommPort(String portName,int portType);
-	public abstract void initialize();
-}
-
+asm(".section .idata$3\n" ".long 0,0,0,0, 0,0,0,0");

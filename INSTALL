@@ -1,6 +1,6 @@
 /*-------------------------------------------------------------------------
 |   rxtx is a native interface to serial ports in Java.
-|   Copyright 1997-2000 by Trent Jarvi trentjarvi@yahoo.com.
+|   Copyright 1997-2001 by Trent Jarvi trentjarvi@yahoo.com.
 |
 |   This library is free software; you can redistribute it and/or
 |   modify it under the terms of the GNU Library General Public
@@ -16,7 +16,7 @@
 |   License along with this library; if not, write to the Free
 |   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --------------------------------------------------------------------------*/
-This is the INSTALL file for RXTX.  Thu Jan 18 17:37:47 MST 2001
+This is the INSTALL file for RXTX.  Thu Jun 21 13:42:32 MDT 2001
 
 If, while following the instructions, you find this file unclear or incorrect 
 please make a note and email the details to trentjarvi@yahoo.com.  
@@ -100,6 +100,7 @@ A.  Japanese
 		$ cd rxtx-1.5
 		$ ./configure  (follow the instructions)
 		$ make install
+		Read "R.  How can I use Lock Files with rxtx?"
 
 	If that does not work or you do not want a script messing with the 
 	system, read on..
@@ -134,9 +135,18 @@ A.  Japanese
 
 	E.  Build and Install the jar.
 
+		configure       configure supports build directories.
+				configure requires javac in its path or
+				JAVA_HOME set to grab some java system
+				properties.
 		make    	to build comm.jar and the libraries
 		make install 	to place the jar and libraries in the correct 
-		                location
+				location
+
+		You may select the JDK you wish to build with using $JAVA_HOME
+		For example:
+			export JAVA_HOME=/usr/local/java
+		Otherwise, configure grabs the JDK from your PATH.
 
 	F.  Where did everything end up?
 
@@ -224,7 +234,7 @@ A.  I get java.lang.UnsatisfiedLinkError: nSetOwner while loading driver
     gnu.io.RXTXCommDriver when using rxtx.
 
 	SetOwner appears to be some win32 call.
-	Do not use the Sun's win32 CommAPI files.  Get the Solaris version.
+	Do not use Sun's win32 CommAPI files.  Get the Solaris version.
 	"javacomm20-x86.tar.Z" and rxtx-1.4 if you want Sun's solution.
 
 	See Also: 2-B.  Installing Sun's comm.jar (IE its not needed at all)
@@ -467,15 +477,16 @@ device nodes.
 
 R.  How can I use Lock Files with rxtx?
 
-Lock files are used to prevent more than one program accessing a port at a
-time.  Rxtx intentionally avoids defaulting to lock files at this point because
-the code has not been well tested and requires a bit of sysadmin most people
-do not want to deal with.
+RXTX uses lock files by default.  configure --disable-lockfiles to generate
+rxtx libraries without lock files.  Its strongly recommended that you do
+use lock files to prevent rxtx from stomping on other programs using serial
+ports.
 
-Rxtx has preliminary support for lock files on Linux.  It may work on other
-platforms but read the source before blindly trying it.  In order to use lock 
-files you will need to configure rxtx with --enable-lockfiles.
-ie  ./configure --enable-lockfiles
+Lock files are used to prevent more than one program accessing a port at a
+time.  Lock files require a bit of sysadmin to work properly..
+
+Rxtx has support for lock files on Linux only.  It may work on other
+platforms but read the source before blindly trying it. 
 
 Before you use lock files you need to do one of two things:
 
@@ -493,9 +504,9 @@ Do not change the number (14).  Whatever is in your group file is correct.
 
 User jarvi in this case can now use rxtx with lock files.
 
-Be careful.  The lock file code does not support kermit style lock files or
-lock files in /var/spool.  Its sure to fail if your using subdirectories in
-/dev or do not have /dev.
+The lock file code does not support kermit style lock files or lock files in
+/var/spool.  Its sure to fail if your using subdirectories in /dev or do not
+have /dev.
 
 S.  How can I tell which version of rxtx is installed?
 

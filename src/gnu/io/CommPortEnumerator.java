@@ -1,6 +1,6 @@
 /*-------------------------------------------------------------------------
 |   rxtx is a native interface to serial ports in java.
-|   Copyright 1997-2000 by Trent Jarvi trentjarvi@yahoo.com
+|   Copyright 1997-2001 by Trent Jarvi trentjarvi@yahoo.com
 |
 |   This library is free software; you can redistribute it and/or
 |   modify it under the terms of the GNU Library General Public
@@ -30,10 +30,11 @@ import java.util.Enumeration;
 class CommPortEnumerator implements Enumeration
 {
 	private CommPortIdentifier index;
-	private boolean debug=false;
+	private static boolean debug=false;
 	static
 	{
-		System.out.println("CommPortEnumerator:{}");
+		if (debug)
+			System.out.println("CommPortEnumerator:{}");
 	}
 
 	CommPortEnumerator()
