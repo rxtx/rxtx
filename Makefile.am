@@ -86,7 +86,7 @@ jcl:  $(TOP)/javax/comm/RXTXCommDriver.class $(TOP)/javax/comm/RXTXPort.class $(
 	$(JAR) cf jcl.jar javax/comm/*
 	@echo "make install will install RxTx"
 
-comm:  $(TOP)/javax/comm/RXTXCommDriver.class $(TOP)/javax/comm/RXTXPort.class $(TOP)/javax/comm/RXTXPort.class @IDENTIFIERS@
+comm:  all
 	$(JAR) cf comm.jar javax/comm/*
 	@echo "make install will install RxTx"
 

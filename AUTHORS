@@ -1,6 +1,12 @@
 This package is not the result of one persons time.  Recognition is given
 to the following people for their assistance.
 
+Chris Portal <cportal@mathworks.com> Joey Armstrong <joeya@mathworks.com>
+did some intense testing and debugging of RS232 on Linux.
+
+"Bertrand Renuart" <bertrand.renuart@itma.lu> provided a java side read()
+which appears to have resolved many problems.
+
 W. Craig Trader <ct7@vitelinc.com> and Gareth Lee <gareth@ee.uwa.edu.au> Added
 Calls to DeleteLocalRef to functions get_java_var and throw_java_exception to 
 avoid FATAL ERROR in native method: Out of memory when expanding local ref 
