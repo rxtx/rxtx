@@ -106,7 +106,7 @@ A.  Japanese
 	The following packages are used to build rxtx:
 
 		autoconf-2.53
-		automake-1.6.2
+		automake-1.6.3
 		libtool-1.4.2
 		gnu make-3.79.1         On some systems like FreeBSD this is
 					called gmake
@@ -494,7 +494,7 @@ make --version
 
 		java 1.4
 		autoconf-2.53
-		automake-1.6.2
+		automake-1.6.3
 		libtool-1.4.2
 		gnu make-3.79.1  
 
