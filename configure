@@ -7148,7 +7148,7 @@ fi
 
 # Define the identity of the package.
  PACKAGE=Serial
- VERSION=2.1-3
+ VERSION=2.1-4
 
 
 cat >>confdefs.h <<_ACEOF
