@@ -959,7 +959,7 @@ final class RXTXPort extends SerialPort
 			if (debug)
 				System.out.println("RXTXPort:SerialOutputStream:flush() enter");
 			if ( fd == 0 ) throw new IOException();
-				nativeDrain();
+			nativeDrain();
 			if (debug)
 				System.out.println("RXTXPort:SerialOutputStream:flush() leave");
 		}
