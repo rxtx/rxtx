@@ -22,9 +22,7 @@
 #include "config.h"
 #include "gnu_io_RXTXPort.h"
 #endif /* dima */
-#ifndef __LCC__
-#   include <unistd.h>
-#else /* windows lcc compiler for fd_set. probably wrong */
+#ifdef __LCC__ /* windows lcc compiler for fd_set. probably wrong */
 #   include<winsock.h>
 #endif /* __LCC__ */
 #include <time.h>
@@ -35,6 +33,7 @@
 #include <limits.h>
 #include <sys/stat.h>
 #ifndef WIN32
+#include <unistd.h>
 #include <sys/ioctl.h>
 #include <sys/param.h>
 #include <sys/utsname.h>
@@ -570,7 +569,6 @@ JNIEXPORT jint JNICALL RXTXPort(open)(
 	return (jint)fd;
 
 fail:
-	UNLOCK( filename, pid );
 	(*env)->ReleaseStringUTFChars( env, jstr, filename );
 	LEAVE( "RXTXPort:open" );
 	throw_java_exception( env, PORT_IN_USE_EXCEPTION, "open",
@@ -3901,10 +3899,10 @@ RXTXPort.eventLoop
 ----------------------------------------------------------*/
 JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 {
-	struct event_info_struct eis;
 #ifdef WIN32
 	int i = 0;
 #endif /* WIN32 */
+	struct event_info_struct eis;
 	eis.jclazz = (*env)->GetObjectClass( env, jobj );
 	eis.env = env;
 	eis.jobj = &jobj;
