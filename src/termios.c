@@ -327,9 +327,10 @@ close()
 
 int close(int fd) {
 	int ret;
-	ret=CloseHandle(tl[fd]->hComm);
+	if (fd < 0) return 0;
+	ret = CloseHandle(tl[fd]->hComm);
 	free(tl[fd]);
-	return(ret);
+	return ret;
 }
 
 /*----------------------------------------------------------
@@ -399,16 +400,15 @@ serial_open()
 int serial_open(const char *filename, int flags) {
 	int fd;
 	COMMPROP cp;
+	HANDLE hComm;
 	DCB	dcb;
 #ifdef DEBUG
 	printf("serial open() %s\n",filename);
 #endif /* DEBUG */
 	for (fd = 0; fd<SIZE; fd++) {
 		if (!tl[fd]) continue;
-		if (!strcmp(filename, tl[fd]->filename)) {
-			printf("open: %s already open\n", filename);
-			return -1;
-		}
+		if (!strcmp(filename, tl[fd]->filename))
+			return fd;	/* do nothing */
 	}
 
 	/* find next free */
@@ -419,28 +419,29 @@ int serial_open(const char *filename, int flags) {
 	printf("fd: %d\n", fd);
 #endif /* DEBUG */
 	if (fd == SIZE) {
-		printf("open: no more free ports");
+		errno = EMFILE;
 		return -1;
 	}
-	tl[fd] = malloc(sizeof(struct termios_list));
 
-	if (!tl[fd]) {
-		printf("open: out of memory\n");
-		return -1;
-	}
-	tl[fd]->filename = strdup(filename);
-	tl[fd]->hComm = CreateFile(filename,
+	hComm = CreateFile(filename,
 		GENERIC_READ | GENERIC_WRITE,
 		0,
 		0,
 		OPEN_EXISTING,
 		0,	//		FILE_FLAG_OVERLAPPED,
 		0);
-	if (tl[fd]->hComm == INVALID_HANDLE_VALUE) {
-		printf("cannot open %s\n", filename);
-		free(tl[fd]);
+	if (hComm == INVALID_HANDLE_VALUE) {
+		errno = EINVAL;
 		return -1;
 	}
+
+	tl[fd] = malloc(sizeof(struct termios_list));
+	if (tl[fd] == NULL) {
+		errno = ENOMEM;
+		return -1;
+	}
+	tl[fd]->filename = strdup(filename);
+	tl[fd]->hComm = hComm;
 	SetupComm(tl[fd]->hComm, 2048, 1024);
 	GetCommProperties(tl[fd]->hComm, &cp);
 	/* check for capabilities */
@@ -976,8 +977,9 @@ int tcsetattr(int fd, int when, struct termios *s_termios) {
 			timeouts.ReadIntervalTimeout);
 	} else if (s_termios->c_cc[VMIN] == 0 && vtime == 0) {
 		/* read returns immediately */
-		timeouts.ReadIntervalTimeout = 1;
-		printf("vmin & vtime == 0\n");
+		timeouts.ReadIntervalTimeout = MAXDWORD;
+		timeouts.ReadTotalTimeoutConstant = 0;
+		timeouts.ReadTotalTimeoutMultiplier= 0;
 	}
 #ifdef DEBUG
 	printf("c_cc[VTIME] = %d, c_cc[VMIN] = %d\n",
