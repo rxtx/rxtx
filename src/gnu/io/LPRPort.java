@@ -181,15 +181,15 @@ final class LPRPort extends ParallelPort
 
 	public native int getOutputBufferFree();
 	/** Write to the port */
-	private native void writeByte( int b ) throws IOException;
-	private native void writeArray( byte b[], int off, int len )
+	protected native void writeByte( int b ) throws IOException;
+	protected native void writeArray( byte b[], int off, int len )
 		throws IOException;
-	private native void drain() throws IOException;
+	protected native void drain() throws IOException;
 
 	/** LPRPort read methods */
-	private native int nativeavailable() throws IOException;
-	private native int readByte() throws IOException;
-	private native int readArray( byte b[], int off, int len )
+	protected native int nativeavailable() throws IOException;
+	protected native int readByte() throws IOException;
+	protected native int readArray( byte b[], int off, int len )
 		throws IOException;
 
 	/** Parallel Port Event listener */
