@@ -368,6 +368,105 @@ fail:
 /*----------------------------------------------------------
 RXTXPort.open
 
+   accept:      the native speed setting
+   perform:     translate the native speed to a Java speed
+   return:      the Java speed
+   exceptions:  none
+   comments:    This is used by open() (indirectly) and
+		nativeStaticGetBaudRate()
+----------------------------------------------------------*/
+int get_java_baudrate( int native_speed )
+{
+	switch( native_speed )
+	{
+		case B0:     return 0;
+		case B50:    return 50;
+		case B75:    return 75;
+		case B110:   return 110;
+		case B134:   return 134;
+		case B150:   return 150;
+		case B200:   return 200;
+		case B300:   return 300;
+		case B600:   return 600;
+		case B1200:  return 1200;
+		case B1800:  return 1800;
+		case B2400:  return 2400;
+		case B4800:  return 4800;
+		case B9600:  return 9600;
+		case B19200: return 19200;
+		case B38400: return 38400;
+		case B57600: return 57600;
+		default: return -1;
+	}
+}
+
+/*----------------------------------------------------------
+RXTXPort.open
+
+   accept:      fd of the preopened device
+   perform:     Now that the object is instatiated, set the Java variables
+		to the preopened states.
+   return:      none
+   exceptions:  none
+   comments:    preopened referes to the fact that the serial port has
+		been configured before the Java open() has been called.
+----------------------------------------------------------*/
+		
+void set_java_vars( JNIEnv *env, jobject jobj, int fd )
+{
+	struct termios ttyset;
+	int databits = -1;
+	int jparity = -1;
+	int stop_bits = STOPBITS_1_5;
+	jclass jclazz = (*env)->GetObjectClass( env, jobj );
+	jfieldID jfspeed = (*env)->GetFieldID( env, jclazz, "speed", "I" );
+	jfieldID jfdataBits =
+		(*env)->GetFieldID( env, jclazz, "dataBits", "I" );
+	jfieldID jfstopBits =
+		(*env)->GetFieldID( env, jclazz, "stopBits", "I" );
+	jfieldID jfparity =
+		(*env)->GetFieldID( env, jclazz, "parity", "I" );
+	(*env)->DeleteLocalRef( env, jclazz );
+	if( tcgetattr( fd, &ttyset ) < 0 )
+	{
+		report( "Cannot Get Serial Port Settings\n" );
+		(*env)->DeleteLocalRef( env, jclazz );
+		return;
+	}
+
+	
+	switch( ttyset.c_cflag&CSIZE ) {
+		case CS5:  databits = JDATABITS_5; break;
+		case CS6:  databits = JDATABITS_6; break;
+		case CS7:  databits = JDATABITS_7; break;
+		case CS8:  databits = JDATABITS_8; break;
+	}
+#ifdef CMSPAR
+	switch( ttyset.c_cflag&(PARENB|PARODD|CMSPAR ) ) {
+#else
+	switch( ttyset.c_cflag&(PARENB|PARODD) ) {
+#endif /* CMSPAR */
+		case 0: jparity = JPARITY_NONE; break;
+		case PARENB: jparity = JPARITY_EVEN; break;
+		case PARENB | PARODD: jparity = JPARITY_ODD; break;
+#ifdef CMSPAR
+		case PARENB | PARODD | CMSPAR: jparity = JPARITY_MARK; break;
+		case PARENB | CMSPAR: jparity = JPARITY_SPACE; break;
+#endif /* CMSPAR */
+	}
+        switch( ttyset.c_cflag&(CSTOPB) ) {
+                case 0: stop_bits = STOPBITS_1; break;
+                case CSTOPB:  stop_bits = STOPBITS_2; break;
+        }
+	(*env)->SetIntField(env, jobj, jfspeed,
+		( jint ) get_java_baudrate( ttyset.c_cflag&CBAUD ) );
+	(*env)->SetIntField(env, jobj, jfdataBits, ( jint ) databits );
+	(*env)->SetIntField(env, jobj, jfstopBits, ( jint ) stop_bits );
+	(*env)->SetIntField(env, jobj, jfparity, ( jint ) jparity );
+}
+/*----------------------------------------------------------
+RXTXPort.open
+
    accept:      The device to open.  ie "/dev/ttyS0"
    perform:     open the device, set the termios struct to sane settings and
                 return the filedescriptor
@@ -432,6 +531,7 @@ JNIEXPORT jint JNICALL RXTXPort(open)(
 	fd = find_preopened_ports( filename );
 	if( fd )
 	{
+		set_java_vars( env, jobj, fd );
 		(*env)->ReleaseStringUTFChars( env, jstr, filename );
 		return (jint)fd;
 	}
@@ -2057,27 +2157,7 @@ JNIEXPORT jint JNICALL RXTXPort(nativeStaticGetBaudRate)( JNIEnv *env, jobject j
 		return(-1);
 	}
 	printf("speed = %i %i\n", ttyset.c_cflag, ttyset.c_cflag&CBAUD);
-	switch( ttyset.c_cflag&CBAUD )
-	{
-		case B0:     return 0;
-		case B50:    return 50;
-		case B75:    return 75;
-		case B110:   return 110;
-		case B134:   return 134;
-		case B150:   return 150;
-		case B200:   return 200;
-		case B300:   return 300;
-		case B600:   return 600;
-		case B1200:  return 1200;
-		case B1800:  return 1800;
-		case B2400:  return 2400;
-		case B4800:  return 4800;
-		case B9600:  return 9600;
-		case B19200: return 19200;
-		case B38400: return 38400;
-		case B57600: return 57600;
-		default: return -1;
-	}
+	return( get_java_baudrate( ttyset.c_cflag&CBAUD ) );
 }
 /*----------------------------------------------------------
 RXTXPort.nativeStaticGetDataBits
