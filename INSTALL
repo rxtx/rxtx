@@ -1,6 +1,6 @@
 /*-------------------------------------------------------------------------
 |   rxtx is a native interface to serial ports in Java.
-|   Copyright 1997-2002 by Trent Jarvi taj@parcelfarce.linux.theplanet.co.uk.
+|   Copyright 1997-2002 by Trent Jarvi taj@www.linux.org.uk
 |
 |   This library is free software; you can redistribute it and/or
 |   modify it under the terms of the GNU Library General Public
@@ -16,10 +16,10 @@
 |   License along with this library; if not, write to the Free
 |   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --------------------------------------------------------------------------*/
-This is the INSTALL file for RXTX.  Mon Mar 11 09:47:34 MST 2002
+This is the INSTALL file for RXTX.  Fri Apr  5 13:00:22 EST 2002  
 
 If, while following the instructions, you find this file unclear or incorrect 
-please make a note and email the details to taj@parcelfarce.linux.theplanet.co.uk.  
+please make a note and email the details to taj@www.linux.org.uk.
 
 A note about rxtx 1.5:
 
@@ -55,7 +55,7 @@ A note on Mac OS X:
 	A.  java.lang.UnsatisfiedLinkError: nSetOwner while loading driver
 	    gnu.io.RXTXCommDriver
 	B.  Exception in thread "main" java.lang.UnsatisfiedLinkError: 
-	    no Serial in java.library.path
+	    no rxtxSerial in java.library.path
 	C.  I Can Not Open the Port.
 	D.  java.lang.NoClassDefFoundError: gnu/io/CommPort
 	E.  The Compiler Cannot Find Java Include Files
@@ -177,18 +177,18 @@ A.  Japanese
 		jdk-1.2 the files go in
 		
 			/usr/local/java/jre/lib/ext/RXTXcomm.jar
-			/usr/local/java/jre/lib/$(ARCH)/libSerial.so.
-			/usr/local/java/jre/lib/$(ARCH)/libParallel.so.
+			/usr/local/java/jre/lib/$(ARCH)/librxtxSerial.so.
+			/usr/local/java/jre/lib/$(ARCH)/librxtxParallel.so.
 			/usr/local/java/jre/lib/$(ARCH)/lib/...
 
 		jdk-1.1.* the files go in 
 
 			/usr/local/java/lib/RXTXcomm.jar
-			/usr/lib/libSerial.so.
-			/usr/lib/libParallel.so.
+			/usr/lib/librxtxSerial.so.
+			/usr/lib/librxtxParallel.so.
 			/usr/lib/...
 
-			The libSerial.so libParallel.so are placed in 
+			The librxtxSerial.so librxtxParallel.so are placed in 
 			/usr/lib so people don't have to change with their 
 			LD_LIBRARY_PATH.
 
@@ -316,15 +316,15 @@ A.  I get java.lang.UnsatisfiedLinkError: nSetOwner while loading driver
 
 	See Also: 2-B.  Installing Sun's comm.jar (IE its not needed at all)
 
-B.  Exception in thread "main" java.lang.UnsatisfiedLinkError: no Serial in 
+B.  Exception in thread "main" java.lang.UnsatisfiedLinkError: no rxtxSerial in 
     java.library.path
 
-	libSerial.so is located in the wrong directory.  Here is an example
+	librxtxSerial.so is located in the wrong directory.  Here is an example
 
-	$ mv /usr/local/java/jre/lib/i386/libSerial* /usr/local/lib
+	$ mv /usr/local/java/jre/lib/i386/librxtxSerial* /usr/local/lib
 	$ java BlackBox
-	Exception in thread "main" java.lang.UnsatisfiedLinkError: no Serial in
-	java.library.path
+	Exception in thread "main" java.lang.UnsatisfiedLinkError: no rxtxSerial
+	in java.library.path
 		at java.lang.ClassLoader.loadLibrary(Compiled Code)
 		at java.lang.Runtime.loadLibrary0(Compiled Code)
 		at java.lang.System.loadLibrary(Compiled Code)
@@ -339,7 +339,7 @@ B.  Exception in thread "main" java.lang.UnsatisfiedLinkError: no Serial in
 
 		... lets fix it.
 
-	$ mv /usr/local/lib/libSerial.* /usr/local/java/jre/lib/i386/
+	$ mv /usr/local/lib/librxtxSerial.* /usr/local/java/jre/lib/i386/
 
 C.  I Can Not Open the Port.
 
@@ -499,7 +499,7 @@ make --version
    		make 3.77
 
 
-	mail any bugs to taj@parcelfarce.linux.theplanet.co.uk.  
+	mail any bugs to taj@www.linux.org.uk.
 
 P.  Which jdk should be used? 
 

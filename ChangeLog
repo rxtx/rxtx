@@ -1,9 +1,9 @@
-This is ChangeLog Mon Mar 11 09:47:34 MST 2002
+This is ChangeLog Fri Apr  5 13:00:22 EST 2002
 
-rxtx-1.5 and rxtx-1.4 changes are kept in the same file.  skip to the version
+rxtx-2.1 and rxtx-2.0 changes are kept in the same file.  skip to the version
 you downloaded.
 
-1.5-9  Mar 11, 2002
+2.1-1  Apr 5, 2002    'Works for me' release.  Results of QA.
 		      Win CE port Michal Hobot <Michal_Hobot@drq.pl>
 		      Mac OS X fixes Dmitry Markman <dmarkman@mac.com>
 		      Multiple runtime fixes.
@@ -113,6 +113,7 @@ you downloaded.
 		      Stallion Card support
 		      Greg Luck <gluck@tempo-services.com.au>
 		      CommPort enumeration with rxtx's comm.jar
+2.0-1  Apr 5, 2002    see rxtx-2.1-1
 1.4-15 Dec 4, 2001    see rxtx-1.5-8
 1.4-14 Oct 18, 2001   see rxtx-1.5-7
 1.4-13 Oct 14, 2001   see rxtx-1.5-6
@@ -328,7 +329,7 @@ you downloaded.
 		      common.  Added comments from Suns NullDriver sample, 
 		      giving credit where necessary.  (Sheldon Young - 
 		      sheldon_young@yahoo.com)
-		      Commented SerialImp.c (taj@parcelfarce.linux.theplanet.co.uk
+		      Commented SerialImp.c (taj@www.linux.org.uk)
 1.2pre4 Aug 12, 1998  The CommAPI has changed in the newest beta from Sun,
 		      now named "javacomm20-ea".  I have attached RXTXPort.java,
 		      which I have modified so it now compiles.

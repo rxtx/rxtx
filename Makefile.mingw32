@@ -1,6 +1,6 @@
 #-------------------------------------------------------------------------
 #   rxtx is a native interface to serial ports in java.
-#   Copyright 1997-2002 by Trent Jarvi taj@parcelfarce.linux.theplanet.co.uk.
+#   Copyright 1997-2002 by Trent Jarvi taj@www.linux.org.uk.
 #
 #   This library is free software; you can redistribute it and/or
 #   modify it under the terms of the GNU Library General Public
