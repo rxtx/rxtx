@@ -1522,6 +1522,7 @@ int fhs_lock(const char *filename)
 	{
 		snprintf(message, 80,
 			"RXTX Error: Unable to create lock file: %s\n\n", file);
+		report(message);
 		return 0;
 	}
 	sprintf(lockinfo,"%10d\n",getpid());

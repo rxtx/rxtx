@@ -30,6 +30,8 @@ you downloaded.
 		      Stallion Card support 
 		      Greg Luck <gluck@tempo-services.com.au>
 		      CommPort enumeration with rxtx's comm.jar
+1.4-9                 Steve Drach <drach@eng.sun.com>
+                      Minor fix of error reporting in lockfiles
 1.4-8  Jan  8, 2001   irix build fixes (fine tuning required)
 		      Tom Mander <tom@proximity.com.au>
 		      more lockfile code with testing from
