@@ -321,7 +321,7 @@ int find_preopened_ports( const char *filename )
 }
 
 /*----------------------------------------------------------
-RXTXPort.open
+configure_port
 
    accept:      env, file descriptor
    perform:     set the termios struct to sane settings and
@@ -366,7 +366,7 @@ fail:
 }
 
 /*----------------------------------------------------------
-RXTXPort.open
+get_java_baudrate
 
    accept:      the native speed setting
    perform:     translate the native speed to a Java speed
@@ -401,7 +401,7 @@ int get_java_baudrate( int native_speed )
 }
 
 /*----------------------------------------------------------
-RXTXPort.open
+set_java_vars
 
    accept:      fd of the preopened device
    perform:     Now that the object is instatiated, set the Java variables
@@ -755,14 +755,11 @@ int set_port_params( JNIEnv *env, int fd, int cspeed, int dataBits,
 		result &= ~TIOCM_DTR;
 		ioctl( fd, TIOCMSET, &result );
 	}
-	else {
-	if(
-		cfsetispeed( &ttyset, cspeed ) < 0 ||
+	if(     cfsetispeed( &ttyset, cspeed ) < 0 ||
 		cfsetospeed( &ttyset, cspeed ) < 0 )
 	{
 		report( "nativeSetSerialPortParams: Cannot Set Speed\n" );
 		return( 1 );
-	}
 	}
 
 	if( tcsetattr( fd, TCSANOW, &ttyset ) < 0 )
@@ -3039,9 +3036,10 @@ check_tiocmget_changes
 ----------------------------------------------------------*/
 void check_tiocmget_changes( struct event_info_struct * eis )
 {
-	unsigned int mflags;
+	unsigned int mflags = 0;
 	int change;
 
+	/* DORITO */
 	if( !eis ) return;
 	change  = eis->change;
 
@@ -3206,7 +3204,9 @@ int initialise_event_info_struct( struct event_info_struct *eis )
 	if( index )
 	{
 		while( index->next )
+		{
 			index = index->next;
+		}
 		index->next = eis;
 		eis->prev = index;
 		eis->next = NULL;
@@ -3928,7 +3928,10 @@ JNIEXPORT void JNICALL RXTXPort(nativeSetEventFlag)( JNIEnv *env,
 		report_error("nativeSetEventFlag !index\n");
 		return;
 	}
-	while( index->fd != fd && index->next ) index = index->next;
+	while( index->fd != fd && index->next )
+	{
+		index = index->next;
+	}
 	if( index->fd != fd )
 	{
 		report_error("nativeSetEventFlag !fd\n");
