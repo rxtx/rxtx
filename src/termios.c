@@ -167,8 +167,11 @@ BOOL FillDCB(DCB *dcb) {
     return ( TRUE ) ;
 } */
 
-int serial_close(int fd) {
-	return CloseHandle(tl[fd]->hComm);
+int close(int fd) {
+	int ret;
+	ret=CloseHandle(tl[fd]->hComm);
+	free(tl[fd]);
+	return(ret);
 }
 
 void cfmakeraw(struct termios *s_termios) {
@@ -208,6 +211,7 @@ int serial_open(const char *filename, int flags) {
 	int fd;
 	COMMPROP cp;
 	DCB	dcb;
+	printf("serial open() %s\n",filename);
 	for (fd = 0; fd<SIZE; fd++) {
 		if (!tl[fd]) continue;
 		if (!strcmp(filename, tl[fd]->filename)) {
@@ -697,8 +701,20 @@ int ioctl(int fd, int request, unsigned int *arg) {
 			TIOCM_ST
 			TIOCM_SR	*/
 			break;
+		case FIONREAD: 
+			printf("FIXME:  ioctl(FIONREAD) not Implemented in termios.c\n"); 
+			return -1;
+		case TIOCGICOUNT: 
+			printf("FIXME:  ioctl(TIOCGICOUNT) not Implemented in termios.c\n"); 
+			return -1;
+		case TIOCMWAIT: 
+			printf("FIXME:  ioctl(TIOCMWAIT) not Implemented in termios.c\n"); 
+			return -1;
+		case TIOCSERGETLSR: 
+			printf("FIXME:  ioctl(TIOCSERGETLSR) not Implemented in termios.c\n"); 
+			return -1;
 		default:
-			printf("ioctl: unknown request: %#x\n", request);
+			printf("FIXME:  ioctl: unknown request: %#x\n", request);
 			return -1;
 	}
 	return 0;
