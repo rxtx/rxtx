@@ -560,7 +560,7 @@ public class RXTXCommDriver implements CommDriver
 					};
 					CandidatePortPrefixes=Temp;
 				}
-				else if (osName.equals("Compaq's Digital UNIX"))
+				else if (osName.equals("Compaq's Digital UNIX") || osName.equals("OSF1"))
 				{
 					String[] Temp = {
 						"tty0"  //  Digital Unix serial ports
