@@ -2921,7 +2921,7 @@ JNIEXPORT jint JNICALL RXTXPort(readByte)( JNIEnv *env,
 
 	ENTER( "RXTXPort:readByte" );
 	report_time_start( );
-	bytes = read_byte_array( env, &jobj, fd, buffer, 1, 0 );
+	bytes = read_byte_array( env, &jobj, fd, buffer, 1, -1 );
 	if( bytes < 0 ) {
 		LEAVE( "RXTXPort:readByte" );
 		throw_java_exception( env, IO_EXCEPTION, "readByte",
