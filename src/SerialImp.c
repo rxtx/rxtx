@@ -1813,10 +1813,9 @@ int fhs_lock( const char *filename )
 	fd = open( file, O_CREAT | O_WRONLY | O_EXCL, 0666 );
 	if( fd < 0 )
 	{
-		snprintf( message, 80,
-			"RXTX fhs_lock() Error: Unable to create lock file: %s\n\n",
+		fprintf(stderr, 
+			"RXTX fhs_lock() Error: creating lock file: %s\n",
 			file );
-		fprintf(stderr, message);
 		return 1;
 	}
 	sprintf( lockinfo, "%10d\n",(int) getpid() );
@@ -1868,7 +1867,7 @@ int fhs_lock( const char *filename )
 ----------------------------------------------------------*/
 int uucp_lock( const char *filename )
 {
-	char lockfilename[80], lockinfo[12], message[80];
+	char lockfilename[80], lockinfo[12];
 	int fd;
 	struct stat buf;
 
@@ -1878,7 +1877,7 @@ int uucp_lock( const char *filename )
 	}
 	if ( stat( LOCKDIR, &buf ) != 0 )
 	{
-		report("could not find lock directory.\n");
+		report("RXTX uucp_lock() could not find lock directory.\n");
 		return 1;
 	}
         sprintf( lockfilename, "%s/LK.%03d.%03d.%03d",
@@ -1891,10 +1890,9 @@ int uucp_lock( const char *filename )
 	fd = open( lockfilename, O_CREAT | O_WRONLY | O_EXCL, 0666 );
 	if( fd < 0 )
 	{
-		snprintf( message, 80,
-			"RXTX uucp_lock() Error: Unable to create lock file: %s\n\n",
+		fprintf( stderr,
+			"RXTX uucp_lock() Error: creating lock file: %s\n",
 			lockfilename );
-		fprintf( stderr, message );
 		return 1;
 	}
 	write( fd, lockinfo,11 );
