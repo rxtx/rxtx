@@ -100,8 +100,8 @@
 
 extern int errno;
 #ifdef TRENT_IS_HERE
-/*
 #undef TIOCSERGETLSR
+/*
 #define DEBUG
 #define DEBUG_MW
 #define DONT_USE_OUTPUT_BUFFER_EMPTY_CODE
@@ -901,6 +901,12 @@ struct tpid_info_struct *add_tpid( struct tpid_info_struct *p )
 }
 #endif /* TIOCSERGETLSR */
 
+static void warn_sig_abort( int signo )
+{
+	char msg[80];
+	sprintf( msg, "RXTX Recieved Signal %i\n", signo );
+	report_error( msg );
+}
 /*----------------------------------------------------------
 init_thread_write( )
 
@@ -921,7 +927,9 @@ int init_thread_write( struct event_info_struct *eis )
 	report("init_thread_write:  start\n");
 	sigemptyset(&newmask);
 	sigaddset(&newmask, SIGCHLD);
-	newaction.sa_sigaction = warn_sig_abort;
+	newaction.sa_handler = warn_sig_abort;
+	sigemptyset( &newaction.sa_mask );
+	newaction.sa_flags = SA_INTERRUPT;
 	sigaction(SIGABRT, &newaction, &oldaction);
 	pthread_sigmask( SIG_BLOCK, &newmask, &oldmask );
 	sigprocmask( SIG_SETMASK, &newmask, &oldmask );
@@ -1038,7 +1046,7 @@ JNIEXPORT void JNICALL RXTXPort(writeArray)( JNIEnv *env,
 	*/
 
 	do {
-#if defined TIOCSERGETLSR
+#ifdef TIOCSERGETLSR
 		result=WRITE (fd, body + total + offset, count - total); /* dima */
 #else
 		result=spawn_write_thread (fd, body + total + offset,
