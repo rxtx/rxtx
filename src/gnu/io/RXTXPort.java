@@ -31,8 +31,8 @@ import java.lang.Math;
 final class RXTXPort extends SerialPort
 {
 
-	private static boolean debug = true;
-	private static boolean debug_verbose = true;
+	private static boolean debug = false;
+	private static boolean debug_verbose = false;
 	static
 	{
 		if(debug ) 
