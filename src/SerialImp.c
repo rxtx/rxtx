@@ -3977,7 +3977,7 @@ RXTXCommDriver.nativeGetVersion
 JNIEXPORT jstring JNICALL RXTXCommDriver(nativeGetVersion) (JNIEnv *env,
 	jclass jclazz )
 {
-	return (*env)->NewStringUTF( env, "RXTX-2.1-7pre17" );
+	return (*env)->NewStringUTF( env, "RXTX-2.1-7pre18" );
 }
 
 /*----------------------------------------------------------
@@ -5667,9 +5667,9 @@ JNI_OnLoad
 ----------------------------------------------------------*/
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *java_vm, void *reserved)
 {
-     javaVM = java_vm;
-     printf("Experimental:  JNI_OnLoad called.\n");
-     return JNI_VERSION_1_4;  /* JNI API used */
+	javaVM = java_vm;
+	printf("Experimental:  JNI_OnLoad called.\n");
+	return JNI_VERSION_1_4;  /* JNI API used */
 }
 
 /*----------------------------------------------------------
@@ -5685,8 +5685,8 @@ JNI_OnUnload
 ----------------------------------------------------------*/
 JNIEXPORT void JNICALL JNI_OnUnload(JavaVM *vm, void *reserved)
 {
-     /* never called it appears */
-     printf("Experimental:  JNI_OnUnload called.\n");
+	/* never called it appears */
+	printf("Experimental:  JNI_OnUnload called.\n");
 }
 
 #ifdef asdf
