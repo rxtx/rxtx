@@ -16,52 +16,45 @@
 |   License along with this library; if not, write to the Free
 |   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --------------------------------------------------------------------------*/
-package  javax.comm;
+package javax.comm;
 
-import java.util.*;
+//import  java.io.*;
+//import  java.util.*;
 
-class CommPortEnumerator implements Enumeration {
-	private CommPortIdentifier CPI;
-	private boolean debug=true;
-	static 
-	{
-		System.out.println("CommPortEnumerator:{}");
-	}
+
+class OwnershipEventThread extends Thread 
+{
+	CommPortIdentifier cpi;
+	static boolean debug=true;
+
 /*------------------------------------------------------------------------------
-        nextElement()
-        accept:
-        perform:
-        return:
-        exceptions:
+        OwnershipEventThread()
+        accept:      the ComPortIdentifier
+        perform:     set the CommPortIdentifier
+        return:      None
+        exceptions:  None
         comments:
 ------------------------------------------------------------------------------*/
-	public Object nextElement() 
+	OwnershipEventThread(CommPortIdentifier c) 
 	{ 
-		if(debug) System.out.println("CommPortEnumerator:nextElement()");
-		synchronized (CommPortIdentifier.Sync)
-		{
-			if(CPI != null) CPI = CPI.next;
-			else CPI=CommPortIdentifier.CommPortIndex;
-			return(CPI);
-		}
+		cpi=c;
+		if(debug) System.out.println("OwnershipEventThread:OwnershipEventThread()");
 	}
 /*------------------------------------------------------------------------------
-        hasMoreElements()
-        accept:
-        perform:
-        return:
-        exceptions:
+        run()
+        accept:       None
+        perform:      Spawn a thread waiter;
+        return:       None
+        exceptions:   None
         comments:
 ------------------------------------------------------------------------------*/
-	public boolean hasMoreElements() 
+	public void run() 
 	{ 
-		if(debug) System.out.println("CommPortEnumerator:hasMoreElements");
-		synchronized (CommPortIdentifier.Sync)
+		if(debug) System.out.println("OwnershipEventThread:run()");
+		while (!cpi.cpoList.isEmpty())
 		{
-			if(CPI != null) return CPI == null ? false : true;
-			else return CommPortIdentifier.CommPortIndex == null ? 
-				false : true;
+			cpi.ownershipThreadWaiter();
 		}
-			
+		cpi.oeThread = null;
 	}
 }

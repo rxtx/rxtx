@@ -16,52 +16,25 @@
 |   License along with this library; if not, write to the Free
 |   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --------------------------------------------------------------------------*/
-package  javax.comm;
+package javax.comm;
 
-import java.util.*;
-
-class CommPortEnumerator implements Enumeration {
-	private CommPortIdentifier CPI;
-	private boolean debug=true;
-	static 
-	{
-		System.out.println("CommPortEnumerator:{}");
-	}
+class CpoListEntry 
+{
+	static boolean debug = true;
+	CommPortOwnershipListener CpoListener;
+	CpoListEntry next;
 /*------------------------------------------------------------------------------
-        nextElement()
-        accept:
-        perform:
-        return:
-        exceptions:
+        CpoListEntry()
+        accept:       The CommPortOwnershipListener 
+        perform:      create a new Entry with the Listener
+        return:       None
+        exceptions:   None
         comments:
 ------------------------------------------------------------------------------*/
-	public Object nextElement() 
+	CpoListEntry(CommPortOwnershipListener c) 
 	{ 
-		if(debug) System.out.println("CommPortEnumerator:nextElement()");
-		synchronized (CommPortIdentifier.Sync)
-		{
-			if(CPI != null) CPI = CPI.next;
-			else CPI=CommPortIdentifier.CommPortIndex;
-			return(CPI);
-		}
-	}
-/*------------------------------------------------------------------------------
-        hasMoreElements()
-        accept:
-        perform:
-        return:
-        exceptions:
-        comments:
-------------------------------------------------------------------------------*/
-	public boolean hasMoreElements() 
-	{ 
-		if(debug) System.out.println("CommPortEnumerator:hasMoreElements");
-		synchronized (CommPortIdentifier.Sync)
-		{
-			if(CPI != null) return CPI == null ? false : true;
-			else return CommPortIdentifier.CommPortIndex == null ? 
-				false : true;
-		}
-			
+		if(debug) System.out.println("CpoListEntry:CpoListEntry()");
+		CpoListener = c;
+		next = null;
 	}
 }

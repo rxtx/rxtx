@@ -2476,14 +2476,11 @@ fi
 \$(TOP)/javax/comm/NoSuchPortException.class  \
 \$(TOP)/javax/comm/PortInUseException.class \
 IDENT \
-\$(TOP)/javax/comm/CpoList.class \
-\$(TOP)/javax/comm/CpoListEntry.class \
 I2C \
 RS485 \
 RS232 \
 \$(TOP)/javax/comm/RS485.class  \
 \$(TOP)/javax/comm/I2C.class  \
-\$(TOP)/javax/comm/OwnershipEventThread.class \
 PARALLEL \
 \$(TOP)/javax/comm/ParallelPortEventListener.class \
 \$(TOP)/\$(target_alias)/libSerial.la \

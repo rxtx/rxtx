@@ -1,5 +1,5 @@
 
-The system crashes with a NullPointException if you enable notifications
+The VM crashes with a NullPointException if you enable notifications
 before your register a listener.
  
 Example:
@@ -97,6 +97,12 @@ I2C Support
 
 CommPortIdentifier support. Needs some code.
 
+	This is starting to shape up.  Maybe 100 lines from a the full
+	montey.  Grep for FIXME for known bad spots.
+
+	Ownership needs work.  BlackBox fires up, finds the ports and
+	read/writes with the rxtx implemented comm.jar.
+	
 	This has actually expanded to a complete comm.jar implementation.
 	Contact the maintainer if you have interest in working on this.
 	While automatic enumeration of ports needs some work you can
@@ -104,9 +110,6 @@ CommPortIdentifier support. Needs some code.
 
 	Plenty of example code can be found in commapi/samples/porting
 	Please dont send in Sun's code.  
-
-	Comm Port Ownership is mostly stubs.  Should be easy to implement
-	if someone is interested.  See Cpo*
 
 	files:
 		CommDriver.java
