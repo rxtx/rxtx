@@ -16,11 +16,6 @@
 |   License along with this library; if not, write to the Free
 |   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --------------------------------------------------------------------------*/
-#ifdef TRENT_IS_HERE
-#define DEBUG_MW
-#define SIGNALS
-#define DEBUG
-#endif /* TRENT_IS_HERE */
 #if defined(__MWERKS__) /* dima */
 #include "RXTXPort.h" /* dima */
 #else  /* dima */
@@ -104,6 +99,15 @@
 #endif /* HAVE_GRP_H */
 
 extern int errno;
+#ifdef TRENT_IS_HERE
+#undef TIOCSERGETLSR
+#define DEBUG
+#define USE_OUTPUT_BUFFER_EMPTY_CODE
+/*
+#define SIGNALS
+#define DEBUG_MW
+*/
+#endif /* TRENT_IS_HERE */
 #include "SerialImp.h"
 
 /* this is so diff will not generate noise when merging 1.4 and 1.5 changes
@@ -678,8 +682,6 @@ thread_write()
 ----------------------------------------------------------*/
 
 #ifndef TIOCSERGETLSR
-
-
 void *thread_write( void *arg )
 {
 	struct event_info_struct *eis = ( struct event_info_struct * ) arg;
@@ -695,16 +697,22 @@ void *thread_write( void *arg )
 	report("thread_write: have jclazz\n");
 	if( !t->closing )
 	{
-		//report("thread_write: write( %i, %i, %i);\n",eis->fd, t->buff[0], t->length);
+/*
+		printf("thread_write: write( %i, %i, %i);\n",eis->fd, t->buff[0], t->length);
+*/
 		result = write( eis->fd, t->buff, t->length );
 		t->length = result;
-	//	printf("---\n---\nthread_write: wrote %i bytes length is now %i\n", result, t->length);
+/*
+		printf("---\n---\nthread_write: wrote %i bytes length is now %i\n", result, t->length);
+*/
 	}
 	else
 	{
 		t->length = 0;
 #ifdef SIGNALS
 		pthread_cond_signal( t->cpt );
+#else
+		t->done = 1;
 #endif
 		return( NULL );
 	}
@@ -712,6 +720,8 @@ void *thread_write( void *arg )
 #ifdef SIGNALS
 	report("thread_write: cond_signal\n");
 	pthread_cond_signal( t->cpt );
+#else
+		t->done = 1;
 #endif
 	if( t->closing)
 	{
@@ -726,7 +736,6 @@ void *thread_write( void *arg )
 		eis->output_buffer_empty_flag = 1;
 	}
 	else report("thread_write: NOT sending the blasted OUTPUT_BUFFER_EMPTY\n" );
-	//for(;;) usleep(1000);
 	report("thread_write: return(NULL)\n" );
 	return( NULL );
 }
@@ -749,6 +758,9 @@ int spawn_write_thread( int fd, char *buff, int length,
 
 	report("spawn_write_thread: entering\n");
 
+#ifndef USE_OUTPUT_BUFFER_EMPTY_CODE
+	return(write( fd, buff, length )); 
+#else
 	eis = (struct event_info_struct * )
 		get_java_var( env, *jobj, "eis", "I" );
 	//report("spawn_write_thread: got eis %i\n", (int) eis);
@@ -759,21 +771,24 @@ int spawn_write_thread( int fd, char *buff, int length,
 	*/
 	if ( ! eis )
 	{
-		return;
-		report( "NO EVENT LOOP!!\n");
-		write( fd, buff, length ); 
+		report_error( "NO EVENT LOOP!!\n");
+		return( write( fd, buff, length )); 
 	}
 
 	t = eis->tpid;
 
-	report("spawn_write_thread: lock mutex\n");
 #ifdef SIGNALS
+	report("spawn_write_thread: lock mutex\n");
 	while( t->write_counter && !t->closing && pthread_mutex_trylock( t->mutex ))
 	{
 		report("spawn_write_thread: mutex locked\n");
 		pthread_cond_wait( t->cpt, t->mutex );
 	}
+#else
+	while( t->write_counter && !t->closing ) usleep(10000);
+	t->done = 0;
 #endif
+
 	if( t->closing ) return( 0 );
 
 	/* info for the thread to write and send event when output is empty */
@@ -792,13 +807,18 @@ int spawn_write_thread( int fd, char *buff, int length,
 #ifdef SIGNALS
 	report(">spawn_write_thread: cond_wait\n");
 	pthread_cond_wait( t->cpt, t->mutex );
+#else
+	while(! t->done ) usleep(100);
 #endif
 	t->write_counter--;
+#ifdef SIGNALS
 	report("spawn_write_thread: unlock mutex\n");
 	pthread_mutex_unlock( t->mutex );
 	report("<spawn_write_thread: cond_wait\n");
-	//report("spawn_write_thread: exiting! return = %i\n", t->length );
+#endif
+	//printf("spawn_write_thread: exiting! return = %i\n", t->length );
 	return(t->length);
+#endif /* USE_OUTPUT_BUFFER_EMPTY_CODE */
 }
 #endif /* TIOCSERGETLSR */
 
@@ -820,17 +840,18 @@ void finalize_thread_write( struct event_info_struct *eis )
 	if( ! eis ) return;
 	if( ! eis->tpid ) return;
 	eis->tpid->closing = 1;
+#ifdef SIGNALS
 	while( eis->tpid->write_counter && pthread_mutex_trylock( eis->tpid->mutex ))
 	{
 		report("finalize_thread_write: mutex locked\n");
-#ifdef SIGNALS
 		pthread_cond_wait( eis->tpid->cpt, eis->tpid->mutex );
-#endif
 	}
 	report(">mutex_unlock\n");
 	pthread_mutex_unlock( eis->tpid->mutex );
 	report("<mutex_unlock\n");
-	report("2\n");
+#else
+	while( eis->tpid->write_counter ) usleep(100);
+#endif
 	if ( eis->tpid->cpt )
 	{
 		pthread_cond_destroy( eis->tpid->cpt );
@@ -838,11 +859,9 @@ void finalize_thread_write( struct event_info_struct *eis )
 		free( eis->tpid->cpt );
 		report("<free cpt\n");
 	}
-	report("3\n");
 	report(">free tpid\n");
 	if ( eis->tpid ) free( eis->tpid );
 	report("<free tpid\n");
-	report("4\n");
 
 	/* need to clean up again after working events */
 	report("leaving finalize_thread_write\n");
@@ -862,7 +881,7 @@ add_tpid
 #ifndef TIOCSERGETLSR
 struct tpid_info_struct *add_tpid( struct tpid_info_struct *p )
 {
-	struct tpid_info_struct *q, *r = p;
+	struct tpid_info_struct *q;
 
 	/* FIXME TRENT.  Do we need to use key funcitons here? */
 	q = malloc( sizeof(struct tpid_info_struct) );
@@ -891,17 +910,21 @@ int init_thread_write( struct event_info_struct *eis )
 {
 #ifndef TIOCSERGETLSR
 	struct tpid_info_struct *t = add_tpid( NULL);
+#ifdef SIGNALS
 	sigset_t newmask, oldmask;
+#endif /* SIGNALS */
 	jfieldID jeis;
 
 	report("init_thread_write:  start\n");
-//#ifdef SIGNALS
+#ifdef SIGNALS
+/*
 	sigemptyset(&newmask);
 	sigaddset(&newmask, SIGCHLD);
 	sigfillset(&newmask);
 	pthread_sigmask( SIG_BLOCK, &newmask, &oldmask );
 	sigprocmask( SIG_SETMASK, &newmask, &oldmask );
-//#endif SIGNALS
+*/
+#endif /* SIGNALS */
 
 	eis->tpid = t;
 	t->mutex = malloc(sizeof(pthread_mutex_t));
@@ -3184,12 +3207,14 @@ int check_lock_status( const char *filename )
 		return 1;
 	}
 
-	/*  OK.  Are we able to write to it? */
+	/*  OK.  Are we able to write to it?  If not lets bail */
 
 	if ( check_group_uucp() )
 	{
-		report( "No permission to create lock file\n" );
-		return 1;
+		report_error( "No permission to create lock file.
+
+		please see: How can I use Lock Files with rxtx? in INSTALL\n" );
+		exit(0);
 	}
 
 	/* is the device alread locked */

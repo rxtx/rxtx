@@ -73,6 +73,7 @@ struct tpid_info_struct
 	//pthread_attr_t *attr;
 
 	int length;
+	int done;
 	char *buff;
 };
 
