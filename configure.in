@@ -108,7 +108,7 @@ AC_ARG_ENABLE(DEBUG,
 )
 find_java_native_include()
 {
-JAVANATINC="-I \$(JAVAINCLUDEDIR)/`cd $JAVAINCLUDEDIR; find . -name $1|sed s#$1##|head -n1`"
+JAVANATINC="-I\$(JAVAINCLUDEDIR)/`cd $JAVAINCLUDEDIR; find . -name $1|sed s#$1##|head -n1`"
 if [ test `cd $JAVAINCLUDEDIR; find . -name $1|wc -l` != "1" ]; then
 	echo 1>&2
 	echo WARNING:  configure is having a hard time determining which  1>&2
@@ -375,7 +375,7 @@ fix_comm_jar()
         ;;
 esac ]
 
-JAVAINCLUDE="-I \$(JAVAINCLUDEDIR)"
+JAVAINCLUDE="-I\$(JAVAINCLUDEDIR)"
 if test "$CC" = "gcc" || test "$CC"="egcs"; then
 	case $JAVA_VENDOR in
 	Tran*)
@@ -621,9 +621,9 @@ WIN32)
 	echo "example /home/jarvi/win32java/include"
 	echo
 	read REPLY
-	WINDOWS_JAVA_INCLUDE="-I $REPLY -I $REPLY/win32"
+	WINDOWS_JAVA_INCLUDE="-I$REPLY -I$REPLY/win32"
 	else
-	WINDOWS_JAVA_INCLUDE="-I $WIN32INCLUDE -I $WIN32INCLUDE/win32"
+	WINDOWS_JAVA_INCLUDE="-I$WIN32INCLUDE -I$WIN32INCLUDE/win32"
 	fi
 	TARGETLIB="\$(target_alias)/Serial.dll"
 ;;
@@ -678,7 +678,7 @@ AIX)
 
 ;;
 
-Digital\ Unix)
+Compaq\'s\ Digital\ Unix)
 	TARGETLIB="\$(target_alias)/libSerial.la"
 	RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
 	JHOME=$JPATH/"lib"

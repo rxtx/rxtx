@@ -20,7 +20,7 @@ srcdir = @srcdir@
 VPATH = @srcdir@
 
 AUTOMAKE_OPTIONS = foreign
-INCLUDES= -I $(TOP) -I $(DEST) -I . $(JAVAINCLUDE) $(JAVANATINC)
+INCLUDES= -I$(TOP) -I$(DEST) -I. $(JAVAINCLUDE) $(JAVANATINC)
 ####################### vars for rxtx-1.4->1.5 transition
 JARTARGET=RXTXcomm.jar
 CLASSDIR=gnu.io
