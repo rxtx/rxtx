@@ -37,7 +37,7 @@ final public class RXTXPort extends SerialPort
 	{
 		if(debug ) 
 			System.out.println("RXTXPort {}");
-		System.loadLibrary( "Serial" );
+		System.loadLibrary( "rxtxSerial" );
 		Initialize();
 	}
 

@@ -35,7 +35,7 @@ final class I2C  extends  I2CPort {
 
 	static 
 	{
-		System.loadLibrary( "I2C" );
+		System.loadLibrary( "rxtxI2C" );
 		Initialize();
 	}
 
