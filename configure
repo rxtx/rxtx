@@ -2589,9 +2589,9 @@ Linux)
 ;;
 Irix*)
 	JHOME=$JPATH/"lib"
-	CFLAGS="$CFLAGS -D_NO_POSIX=1 -D_NO_XOPEN4=1 -I/usr/include"
+	CFLAGS="$CFLAGS -I/usr/include"
 	CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/comm.jar:$CLASSPATH"
-	RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
+	RXTX_PATH="\$(JPATH)/lib/\$(OS_ARCH)"
 	TARGETLIB="\$(target_alias)/libSerial.la"
 ;;
 HP-UX)
