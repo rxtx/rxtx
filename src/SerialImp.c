@@ -383,7 +383,7 @@ JNIEXPORT void JNICALL RXTXPort(nativeSetSerialPortParams)(
 	struct termios ttyset;
 	int fd = get_java_var( env, jobj,"fd","I" );
 	int cspeed = translate_speed( env, speed );
-#if !defined(TIOCGSERIAL) && !defined( WIN32 )
+#if defined(TIOCGSERIAL) && !defined( WIN32 )
 	struct serial_struct sstruct;
 #endif /* TIOCGSERIAL && !WIN32 */
 	if (cspeed == -1)
