@@ -1217,7 +1217,7 @@ void gnu::io::RXTXPort::writeByte(
 	struct event_info_struct *index = master_index;
 #endif
 	unsigned char byte = (unsigned char)ji;
-	int fd = ( int ) this-fd;
+	int fd = ( int ) this->fd;
 	int result;
 	char msg[80];
 #if defined ( __sun__ )

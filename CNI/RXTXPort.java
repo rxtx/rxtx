@@ -170,6 +170,7 @@ final public class RXTXPort extends SerialPort
 		else dataBits = d;
 		stopBits = s;
 		parity = p;
+                if (debug)
 			z.reportln( "RXTXPort:setSerialPortParams(" +
 				b + " " + d + " " + s + " " + p +
 				") returning");
@@ -844,7 +845,8 @@ final public class RXTXPort extends SerialPort
 		Runtime.getRuntime().gc();
 		MonitorThreadLock = false;
 		MonitorThreadAlive=false;
-		z.reportln( "RXTXPort:removeEventListener() returning");
+                if (debug)
+		  z.reportln( "RXTXPort:removeEventListener() returning");
 	}
 	/**
 	 *	Give the native code a chance to start listening to the hardware
