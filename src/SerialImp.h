@@ -137,11 +137,11 @@
 #endif /* UUCP */
 
 /* java exception class names */
-#define UNSUPPORTED_COMM_OPERATION "gnu.io/UnsupportedCommOperationException"
+#define UNSUPPORTED_COMM_OPERATION "gnu/io/UnsupportedCommOperationException"
 #define ARRAY_INDEX_OUT_OF_BOUNDS "java/lang/ArrayIndexOutOfBoundsException"
 #define OUT_OF_MEMORY "java/lang/OutOfMemoryError"
 #define IO_EXCEPTION "java/io/IOException"
-#define PORT_IN_USE_EXCEPTION "gnu.io/PortInUseException"
+#define PORT_IN_USE_EXCEPTION "gnu/io/PortInUseException"
 
 /* some popular releases of Slackware do not have SSIZE_MAX */
 
