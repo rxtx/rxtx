@@ -65,6 +65,7 @@ struct termios_list
 	/* for DTR DSR */
 	unsigned char MSR;
 	struct async_struct *astruct;
+	struct serial_icounter_struct *sis;
 	int open_flags;
 	OVERLAPPED rol;
 	OVERLAPPED wol;
@@ -476,22 +477,70 @@ const char *get_dos_port( char const *name )
 }
 
 /*----------------------------------------------------------
-ClearError()
+ClearErrors()
 
-   accept:      
-   perform:     
-   return:      
+   accept:       
+   perform:      keep track of errors for the eventLoop() (SerialImp.c)
+   return:       the return value of ClearCommError()
    exceptions:  
    win32api:     ClearCommError()
    comments:    
 ----------------------------------------------------------*/
 
-static BOOL ClearError( unsigned long *hComPort )
+int ClearErrors( struct termios_list *index, COMSTAT *Stat )
 {
-	COMSTAT Stat;
 	unsigned long ErrCode;
+	int ret;
 
-	return ClearCommError( hComPort, &ErrCode, &Stat );
+	ret = ClearCommError( index->hComm, &ErrCode, Stat );
+	if ( ret == 0 )
+	{
+		YACK();
+		return( ret );
+	}
+#ifdef DEBUG_ERRORS
+	if ( ErrCode )
+	{
+		printf("%i frame %i %i overrun %i %i  parity %u %i brk %i %i\n",
+			(int) ErrCode,
+			(int) ErrCode & CE_FRAME,
+			index->sis->frame,
+			(int) (ErrCode & CE_OVERRUN) | ( ErrCode & CE_RXOVER ),
+			index->sis->overrun,
+			(int) ErrCode & CE_RXPARITY,
+			index->sis->parity,
+			(int) ErrCode & CE_BREAK,
+			index->sis->brk
+		);
+	}
+#endif /* DEBUG_ERRORS */
+	if( ErrCode & CE_FRAME )
+	{
+		index->sis->frame++;
+		ErrCode &= ~CE_FRAME;
+	}
+	if( ErrCode & CE_OVERRUN )
+	{
+		index->sis->overrun++;
+		ErrCode &= ~CE_OVERRUN;
+	}
+	/* should this be here? */
+	else if( ErrCode & CE_RXOVER )
+	{
+		index->sis->overrun++;
+		ErrCode &= ~CE_OVERRUN;
+	}
+	if( ErrCode & CE_RXPARITY )
+	{
+		index->sis->parity++;
+		ErrCode &= ~CE_RXPARITY;
+	}
+	if( ErrCode & CE_BREAK )
+	{
+		index->sis->brk++;
+		ErrCode &= ~CE_BREAK;
+	}
+	return( ret );
 }
 
 /*----------------------------------------------------------
@@ -630,6 +679,7 @@ int serial_close( int fd )
 		if ( index->ttyset )   free( index->ttyset );
 		if ( index->astruct )  free( index->astruct );
 		if ( index->sstruct )  free( index->sstruct );
+		if ( index->sis )      free( index->sis );
 		/* had problems with strdup
 		if ( index->filename ) free( index->filename );
 		*/
@@ -999,6 +1049,10 @@ struct termios_list *add_port( const char *filename )
 	if( ! port->sstruct )
 		goto fail;
 	memset( port->sstruct, 0, sizeof( struct serial_struct ) );
+	port->sis = malloc( sizeof( struct serial_icounter_struct ) );
+	if( ! port->sis )
+		goto fail;
+	memset( port->sis, 0, sizeof( struct serial_icounter_struct ) );
 
 /*	FIXME  the async_struct is being defined by mingw32 headers?
 	port->astruct = malloc( sizeof( struct async_struct ) );
@@ -1047,6 +1101,7 @@ fail:
 	if ( port->ttyset )   free( port->ttyset );
 	if ( port->astruct )  free( port->astruct );
 	if ( port->sstruct )  free( port->sstruct );
+	if ( port->sis )      free( port->sis );
 	/* had problems with strdup
 	if ( port->filename ) free( port->filename );
 	*/
@@ -1189,7 +1244,7 @@ serial_write()
    perform:     
    return:      
    exceptions:  
-   win32api:     WriteFile(), GetLastError(), ClearError(),
+   win32api:     WriteFile(), GetLastError(),
                  WaitForSingleObject(),  GetOverlappedResult(),
                  FlushFileBuffers(), Sleep()
    comments:    
@@ -1197,7 +1252,7 @@ serial_write()
 
 int serial_write( int fd, char *Str, int length )
 {
-	unsigned long nBytes, comm_error;
+	unsigned long nBytes;
 	struct termios_list *index;
 	char message[80];
 	COMSTAT Stat;
@@ -1229,7 +1284,7 @@ int serial_write( int fd, char *Str, int length )
 	/* FIXME: ONOEOT: discard ^D (004) */
 
 #ifdef DEBUG_VERBOSE
-	/* warning Will Rogers! */
+	/* warning Roy Rogers! */
 	sprintf( message, "===== trying to write %s\n", Str );
 	report( message );
 #endif /* DEBUG_VERBOSE */
@@ -1241,7 +1296,7 @@ int serial_write( int fd, char *Str, int length )
 		*/
 		if ( GetLastError() != ERROR_IO_PENDING )
 		{
-			ClearError( index->hComm );
+			ClearErrors( index, &Stat );
 			set_errno(EIO);
 			report( "serial_write error\n" );
 			nBytes=-1;
@@ -1254,9 +1309,7 @@ int serial_write( int fd, char *Str, int length )
 			{
 				if ( GetLastError() != ERROR_IO_INCOMPLETE )
 				{
-					ClearCommError( index->hComm,
-							&comm_error,
-							&Stat );
+					ClearErrors( index, &Stat );
 					//usleep(1000);
 				}
 			}
@@ -1264,7 +1317,7 @@ int serial_write( int fd, char *Str, int length )
 	}
 	else
 	{
-		ClearCommError( index->hComm, &comm_error, &Stat );
+		ClearErrors( index, &Stat );
 		set_errno(EIO);
 		//usleep(1000);
 		report( "serial_write bailing!\n" );
@@ -1278,7 +1331,7 @@ end:
 	index->event_flag |= EV_TXEMPTY;
 	SetCommMask( index->hComm, index->event_flag );
 	index->event_flag = old_flag;
-	//index->tx_happened = 1; 
+	index->tx_happened = 1; 
 #ifdef DEBUG
 	//sprintf( message, "serial_write: returning %i\n", (int) nBytes );
 	LEAVE( "serial_write" );
@@ -1342,7 +1395,7 @@ int serial_read( int fd, void *vb, int size )
 #ifdef DEBUG_VERBOSE
 			report("vmin=0\n");
 #endif /* DEBUG_VERBOSE */
-			ret = ClearCommError( index->hComm, &error, &stat);
+			ret = ClearErrors( index, &stat);
 			//usleep(1000);
 			//usleep(50);
 			/* we should use -1 instead of 0 for disabled timeout */
@@ -1366,7 +1419,7 @@ int serial_read( int fd, void *vb, int size )
 
 		c = clock() + index->ttyset->c_cc[VTIME] * CLOCKS_PER_SEC / 10;
 		do {
-			error = ClearCommError( index->hComm, &error, &stat);
+			error = ClearErrors( index, &stat);
 			usleep(1000);
 			//mexPrintf("%i/n", CLOCKS_PER_SEC/40);
 		} while ( c > clock() );
@@ -1384,7 +1437,7 @@ int serial_read( int fd, void *vb, int size )
 		err = ReadFile( index->hComm, vb + total, size, &nBytes, &index->rol ); 
 		WaitForSingleObject( index->wol.hEvent, INFINITE );
 #ifdef DEBUG_VERBOSE
-	/* warning Will Rogers! */
+	/* warning Roy Rogers! */
 		sprintf(message, " ========== ReadFile = %i %s\n",
 			( int ) nBytes, (char *) vb + total );
 		report( message );
@@ -1414,9 +1467,8 @@ int serial_read( int fd, void *vb, int size )
 						if( GetLastError() !=
 							ERROR_IO_INCOMPLETE )
 						{
-							ClearCommError(
-								index->hComm,
-								&error,
+							ClearErrors(
+								index,
 								&stat);
 							return( total );
 						}
@@ -1449,7 +1501,7 @@ int serial_read( int fd, void *vb, int size )
 		else
 		{
 			//usleep(1000);
-			ClearCommError( index->hComm, &error, &stat);
+			ClearErrors( index, &stat);
 			return( total );
 		}
 	}
@@ -2568,7 +2620,7 @@ int ioctl( int fd, int request, ... )
 				wait = WaitForSingleObject( index->sol.hEvent, 5000 );
 			} while ( wait == WAIT_TIMEOUT );
 			*/
-			ret = ClearCommError( index->hComm, &ErrCode, &Stat );
+			ret = ClearErrors( index, &Stat );
 			if ( ret == 0 )
 			{
 				/* FIXME ? */
@@ -2641,7 +2693,7 @@ int ioctl( int fd, int request, ... )
 #ifdef TIOCGICOUNT
 		case TIOCGICOUNT:
 			sistruct= va_arg( ap, struct  serial_icounter_struct * );
-			ret = ClearCommError( index->hComm, &ErrCode, &Stat );
+			ret = ClearErrors( index, &Stat );
 			if ( ret == 0 )
 			{
 				/* FIXME ? */
@@ -2650,16 +2702,27 @@ int ioctl( int fd, int request, ... )
 				va_end( ap );
 				return -1;
 			}
-			if( ErrCode & CE_FRAME ) sistruct->frame++;
-			else sistruct->frame = 0;
-			if( ErrCode & CE_OVERRUN ) sistruct->overrun++;
-			/* should this be here? */
-			else if( ErrCode & CE_RXOVER ) sistruct->overrun++;
-			else sistruct->overrun = 0;
-			if( ErrCode & CE_RXPARITY ) sistruct->parity++;
-			else sistruct->parity = 0;
-			if( ErrCode & CE_BREAK ) sistruct->brk++;
-			else sistruct->brk = 0;
+			if( sistruct->frame != index->sis->frame )
+			{
+				sistruct->frame = index->sis->frame;
+			//	printf("---------------frame = %i\n", sistruct->frame++);
+			}
+			if( sistruct->overrun != index->sis->overrun )
+			{
+			//	printf("---------------overrun\n");
+				sistruct->overrun = index->sis->overrun;
+				ErrCode &= ~CE_OVERRUN;
+			}
+			if( sistruct->parity != index->sis->parity )
+			{
+			//	printf("---------------parity\n");
+				sistruct->parity = index->sis->parity;
+			}
+			if( sistruct->brk != index->sis->brk )
+			{
+			//	printf("---------------brk\n");
+				sistruct->brk = index->sis->brk;
+			}
 			va_end( ap );
 			return 0;
 		/* abolete ioctls */
@@ -2672,7 +2735,7 @@ int ioctl( int fd, int request, ... )
 		/*  number of bytes available for reading */
 		case FIONREAD:
 			arg = va_arg( ap, int * );
-			ret = ClearCommError( index->hComm, &ErrCode, &Stat );
+			ret = ClearErrors( index, &Stat );
 			if ( ret == 0 )
 			{
 				/* FIXME ? */
@@ -2813,11 +2876,10 @@ int  serial_select( int  n,  fd_set  *readfds,  fd_set  *writefds,
 			fd_set *exceptfds, struct timeval *timeout )
 {
 
-	unsigned long nBytes, dwCommEvent, ErrCode, wait = WAIT_TIMEOUT;
+	unsigned long nBytes, dwCommEvent, wait = WAIT_TIMEOUT;
 	int fd = n-1;
 	struct termios_list *index;
 	char message[80];
-	COMSTAT Stat;
 	int loopcount = 0;
 
 #ifdef DEBUG_VERBOSE
@@ -2904,12 +2966,13 @@ int  serial_select( int  n,  fd_set  *readfds,  fd_set  *writefds,
 				}
 				else if( index->tx_happened == 1 )
 				{
-					ClearCommError( index->hComm,
-						&ErrCode, &Stat );
+				/*
+					ClearErrors( index, &Stat );
 					if ( (int ) Stat.cbOutQue == 0 )
 					{
 						MexPrintf(".");
 					}
+				*/
 					goto end;
 				}
 				else
