@@ -16,13 +16,13 @@
 |   License along with this library; if not, write to the Free
 |   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --------------------------------------------------------------------------*/
-This is README  Tue Sep 18 11:01:54 MDT 2001
+This is README  Tue Nov 13 14:40:51 MST 2001
 
 See Also:
 
 INSTALL:   install instructions and solutions to common problems
 TODO:      Comments for developers
-COPYING:   The GPL license
+COPYING:   The LGPL license
 PORTING:   hints for people trying to port rxtx
 Authors:   who wrote what.
 ChangeLog: when they wrote it.
@@ -35,6 +35,8 @@ Send back stories.
 
 Copies of the latest RXTX will be on http://www.rxtx.org/download
 The primary source for information/support is http://www.rxtx.org.
+The rxtx mail-list is at Majordomo@hex.linuxgrrls.org.
+Send email with "subscribe rxtx" in the subject without the quotes to join. 
 
 This is a native lib for jdk 1.1.* and newer.  If you find changes required
 for different platforms or OS's please pass them back this way so we may share
