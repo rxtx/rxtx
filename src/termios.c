@@ -2630,7 +2630,21 @@ int ioctl( int fd, int request, ... )
 #ifdef TIOCGICOUNT
 		case TIOCGICOUNT:
 			sistruct= va_arg( ap, struct  serial_icounter_struct * );
-			return -ENOIOCTLCMD;
+			ret = ClearCommError( index->hComm, &ErrCode, &Stat );
+			if ( ret == 0 )
+			{
+				/* FIXME ? */
+				report("TIOCGICOUNT failed\n");
+				set_errno( EBADFD );
+				return -1;
+			}
+			if( ErrCode & CE_FRAME ) sistruct.frame++;
+			if( ErrCode & CE_OVERRUN ) sistruct.overrun++;
+			/* should this be here? */
+			if( ErrCode & CE_RXOVER ) sistruct.overrun++;
+			if( ErrCode & CE_RXPARITY ) sistruct.parity++;
+			if( ErrCode & CE_BREAK ) sistruct.brk++;
+			return 0;
 		/* abolete ioctls */
 #endif /* TIOCGICOUNT */
 		case TIOCSERGWILD:
