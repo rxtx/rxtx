@@ -475,7 +475,7 @@ CBAUD is for SYSV compatibility.  It is considerably inferior to POSIX's
 cf{get,set}{i,o}speed and shouldn't be provided or used.
 
 */
-#if defined(CBAUD)//dima
+#if defined(CBAUD)/* dima */
     	baudrate = ttyset.c_cflag&CBAUD;
 #else
     	baudrate = cfgetispeed(&ttyset);
@@ -597,7 +597,9 @@ JNIEXPORT void JNICALL RXTXPort(nativeClose)( JNIEnv *env,
 	pid = get_java_var( env, jobj,"pid","I" );
 
 	report(">nativeClose pid\n");
-	//usleep(10000);
+	/*
+	usleep(10000);
+	*/
 	if( !pid ) {
 		(*env)->ExceptionDescribe( env );
 		(*env)->ExceptionClear( env );
@@ -975,7 +977,7 @@ int translate_parity( JNIEnv *env, tcflag_t *cflag, jint parity )
 			return 1;
 #endif /* CMSPAR */
 		default:
-			printf("Parity missed %i\n", parity );
+			printf("Parity missed %i\n", (int) parity );
 	}
 
 	LEAVE( "translate_parity" );
@@ -996,15 +998,17 @@ drain_loop()
 void *drain_loop( void *arg )
 {
 	struct event_info_struct *eis = ( struct event_info_struct * ) arg;
-	char msg[80];
+	/* char msg[80]; */
 	int i;
 	pthread_detach( pthread_self() );
 
 	for(i=0;;i++)
 	{
 		report_verbose("drain_loop:  looping\n");
-		usleep(10000);
-		// system_wait();
+		usleep(1000000);
+		/*
+		system_wait();
+		*/
 		if( eis->eventloop_interrupted )
 		{
 			goto end;
@@ -1013,8 +1017,10 @@ void *drain_loop( void *arg )
 		{
 			if( eis && eis->writing )
 			{
-				//sprintf(msg, "drain_loop: setting OUTPUT_BUFFER_EMPTY\n" );
-				//report( msg );
+				/*
+				sprintf(msg, "drain_loop: setting OUTPUT_BUFFER_EMPTY\n" );
+				report( msg );
+				*/
 				eis->output_buffer_empty_flag = 1;
 				eis->writing=JNI_FALSE;
 			}
@@ -1076,7 +1082,9 @@ static void warn_sig_abort( int signo )
 {
 	char msg[80];
 	sprintf( msg, "RXTX Recieved Signal %i\n", signo );
-	//report_error( msg );
+	/*
+	report_error( msg );
+	*/
 }
 #endif /* TIOCSERGETLSR */
 
@@ -1208,7 +1216,9 @@ JNIEXPORT void JNICALL RXTXPort(writeArray)( JNIEnv *env,
 	int fd;
 	int result=0,total=0;
 	jbyte *body;
-	//char message[1000];
+	/*
+	char message[1000];
+	*/
 #if defined ( __sun__ )
 	struct timespec retspec;
 
@@ -1221,8 +1231,10 @@ JNIEXPORT void JNICALL RXTXPort(writeArray)( JNIEnv *env,
 	report_time_start();
 	ENTER( "writeArray" );
 	/* warning Will Rogers */
-	//sprintf( message, "::::RXTXPort:writeArray(%s);\n", (char *) body );
-	//report_verbose( message );
+	/*
+	sprintf( message, "::::RXTXPort:writeArray(%s);\n", (char *) body );
+	report_verbose( message );
+	*/
 
 	do {
 		result=WRITE (fd, body + total + offset, count - total); /* dima */
@@ -2201,7 +2213,7 @@ CBAUD is for SYSV compatibility.  It is considerably inferior to POSIX's
 cf{get,set}{i,o}speed and shouldn't be provided or used.
 
 */
-#if defined(CBAUD)//dima
+#if defined(CBAUD)/* dima */
     	baudrate = ttyset.c_cflag&CBAUD;
 #else
     	if(cfgetispeed(&ttyset) != cfgetospeed(&ttyset)) return -1;
@@ -2432,7 +2444,7 @@ RXTXPort.nativeSetEndOfInputChar
 		See termios.c for the windows bits.
 
 		EofChar = val;
-		fBinary = false;  //winapi docs say always use true. ?
+		fBinary = false;  winapi docs say always use true. ?
 ----------------------------------------------------------*/
 JNIEXPORT jboolean JNICALL RXTXPort(nativeSetEndOfInputChar)( JNIEnv *env,
 	jobject jobj, jbyte value )
@@ -2736,8 +2748,9 @@ JNIEXPORT jint JNICALL RXTXPort(nativeavailable)( JNIEnv *env,
 	int result;
 	char message[80];
 
-//	ENTER( "RXTXPort:nativeavailable" );
 /*
+	ENTER( "RXTXPort:nativeavailable" );
+
     On SCO OpenServer FIONREAD always fails for serial devices,
     so try ioctl FIORDCHK instead; will only tell us whether
     bytes are available, not how many, but better than nothing.
@@ -2764,11 +2777,15 @@ JNIEXPORT jint JNICALL RXTXPort(nativeavailable)( JNIEnv *env,
 				errno %d\n", result , result == -1 ? errno : 0);
 		report( message );
 	}
-//	LEAVE( "RXTXPort:nativeavailable" );
+/*
+	LEAVE( "RXTXPort:nativeavailable" );
+*/
 	return (jint)result;
 fail:
 	report("RXTXPort:nativeavailable:  ioctl() failed\n");
-//	LEAVE( "RXTXPort:nativeavailable" );
+/*
+	LEAVE( "RXTXPort:nativeavailable" );
+*/
 	throw_java_exception( env, IO_EXCEPTION, "nativeavailable",
 		strerror( errno ) );
 	return (jint)result;
@@ -2876,13 +2893,17 @@ int check_line_status_register( struct event_info_struct *eis )
 		send_event( eis, SPE_OUTPUT_BUFFER_EMPTY, 1 );
 	}
 #else
-	//printf("test %i\n",  eis->output_buffer_empty_flag );
+/*
+	printf("test %i\n",  eis->output_buffer_empty_flag );
+*/
 	if( eis && eis->output_buffer_empty_flag == 1 && 
 		eis->eventflags[SPE_OUTPUT_BUFFER_EMPTY] )
 	{
 		report_verbose("check_line_status_register: sending SPE_OUTPUT_BUFFER_EMPTY\n");
 		send_event( eis, SPE_OUTPUT_BUFFER_EMPTY, 1 );
-		//send_event( eis, SPE_DATA_AVAILABLE, 1 );
+/*
+		send_event( eis, SPE_DATA_AVAILABLE, 1 );
+*/
 		eis->output_buffer_empty_flag = 0;
 	}
 #endif /* TIOCSERGETLSR */
@@ -3131,7 +3152,9 @@ void report_serial_events( struct event_info_struct *eis )
 		if(!eis->eventflags[SPE_DATA_AVAILABLE] )
 		{
 			report_verbose("report_serial_events: ignoring DATA_AVAILABLE\n");
-			//report(".");
+/*
+			report(".");
+*/
 			usleep(20000);
 			return;
 		}
@@ -3140,7 +3163,9 @@ void report_serial_events( struct event_info_struct *eis )
 		{
 			/* select wont block */
 			usleep(20000);
-			//system_wait();
+/*
+			system_wait();
+*/
 		}
 	}
 }
@@ -3288,7 +3313,9 @@ JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 				return;
 			}
 			usleep(20000);
-			// Trent system_wait();
+/*
+			 Trent system_wait();
+*/
 		}  while ( eis.ret < 0 && errno == EINTR );
 		if( eis.ret >= 0 )
 		{
@@ -3964,7 +3991,9 @@ int get_java_var( JNIEnv *env, jobject jobj, char *id, char *type )
 	jclass jclazz = (*env)->GetObjectClass( env, jobj );
 	jfieldID jfd = (*env)->GetFieldID( env, jclazz, id, type );
 
-//	ENTER( "get_java_var" );
+/*
+	ENTER( "get_java_var" );
+*/
 	if( !jfd ) {
 		(*env)->ExceptionDescribe( env );
 		(*env)->ExceptionClear( env );
@@ -3977,7 +4006,9 @@ int get_java_var( JNIEnv *env, jobject jobj, char *id, char *type )
 	(*env)->DeleteLocalRef( env, jclazz );
 	if(!strncmp( "fd",id,2) && result == 0)
 		report_error( "get_java_var: invalid file descriptor\n" );
-//	LEAVE( "get_java_var" );
+/*
+	LEAVE( "get_java_var" );
+*/
 	return result;
 }
 

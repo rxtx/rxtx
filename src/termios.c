@@ -1,7 +1,7 @@
 #ifdef TRENT_IS_HERE
-//#define TRACE
-//#define DEBUG
-//#define DEBUG_MW
+#define TRACE
+#define DEBUG
+#define DEBUG_MW
 #ifdef DEBUG_MW
 	extern void mexWarMsgTxt( const char * );
 	extern void mexPrintf( const char *, ... );
@@ -76,7 +76,9 @@ struct termios_list
 };
 struct termios_list *first_tl = NULL;
 
-//#define DEBUG_SELECT
+/*
+#define DEBUG_SELECT
+*/
 #ifdef DEBUG_SELECT
 void MexPrintf( char *string )
 {
@@ -116,12 +118,16 @@ void termios_setflags( int fd, int termios_flags[] )
 	struct termios_list *index = find_port( fd );
 	int i, result;
 	int windows_flags[11] = { 0, EV_RXCHAR, EV_TXEMPTY, EV_CTS, EV_DSR,
-					//EV_RING, EV_RLSD, EV_ERR,
+/*
+					EV_RING, EV_RLSD, EV_ERR,
+*/
 					EV_RING|0x2000, EV_RLSD, EV_ERR,
 					EV_ERR, EV_ERR, EV_BREAK
 				};
-					//EV_RING|0x2000, EV_RLSD, EV_ERR,
-					// NT service pack 4+ breaks 0x2000
+/*
+					EV_RING|0x2000, EV_RLSD, EV_ERR,
+					 NT service pack 4+ breaks 0x2000
+*/
 	if( index == NULL ) report_error("index=null termois_setflags\n");
 	index->event_flag = 0;
 	for(i=0;i<11;i++)
@@ -632,7 +638,9 @@ int serial_close( int fd )
 	if ( !index )
 	{
 		report( "close !index" );
-		//fprintf( stderr, "No info known about the port being closed %i\n", fd );
+/*
+		fprintf( stderr, "No info known about the port being closed %i\n", fd );
+*/
 		return -1;
 	}
 
@@ -685,7 +693,9 @@ int serial_close( int fd )
 		*/
 		free( index );
 	}
-	//dump_termios_list( "close" );
+/*
+	dump_termios_list( "close" );
+*/
 	LEAVE( "close" );
 	return 0;
 }
@@ -804,7 +814,9 @@ BOOL init_termios(struct termios *ttyset )
 	ttyset->c_cc[VSUSP] = 0x1a;	/* 10: C-z */
 	ttyset->c_cc[VEOL] = '\r';	/* 11: */
 	ttyset->c_cc[VREPRINT] = 0x12;	/* 12: C-r */
-//	ttyset->c_cc[VDISCARD] = 0x;	/* 13: IEXTEN only */
+/*
+	ttyset->c_cc[VDISCARD] = 0x;	/* 13: IEXTEN only */
+*/
 	ttyset->c_cc[VWERASE] = 0x17;	/* 14: C-w */
 	ttyset->c_cc[VLNEXT] = 0x16;	/* 15: C-w */
 	ttyset->c_cc[VEOL2] = '\n';	/* 16: */
@@ -878,7 +890,9 @@ int open_port( struct termios_list *port )
 	{
 		YACK();
 		set_errno( EINVAL );
-		//printf( "open failed %s\n", port->filename );
+/*
+		printf( "open failed %s\n", port->filename );
+*/
 		return -1;
 	}
 	if( !SetupComm( port->hComm, 2048, 1024 ) )
@@ -1223,7 +1237,9 @@ int serial_open( const char *filename, int flags, ... )
 		index->open_flags = 0;
 
 
-	//dump_termios_list( "open filename" );
+/*
+	dump_termios_list( "open filename" );
+*/
 	if( !first_tl->hComm )
 	{
 		sprintf( message, "open():  Invalid Port Reference for %s\n",
@@ -1275,8 +1291,8 @@ int serial_write( int fd, char *Str, int length )
 /*
 	index->event_flag &= ~EV_TXEMPTY;
 	SetCommMask( index->hComm, index->event_flag );
+	index->tx_happened = 1; 
 */
-	//index->tx_happened = 1; 
 	/***** output mode flags (c_oflag) *****/
 	/* FIXME: OPOST: enable ONLCR, OXTABS & ONOEOT */
 	/* FIXME: ONLCR: convert newline char to CR & LF */
@@ -1288,7 +1304,9 @@ int serial_write( int fd, char *Str, int length )
 	sprintf( message, "===== trying to write %s\n", Str );
 	report( message );
 #endif /* DEBUG_VERBOSE */
-	//index->tx_happened = 1; 
+/*
+	index->tx_happened = 1; 
+*/
 	if ( !WriteFile( index->hComm, Str, length, &nBytes, &index->wol ) )
 	{
 		/* this causes problems just do it async
@@ -1310,7 +1328,9 @@ int serial_write( int fd, char *Str, int length )
 				if ( GetLastError() != ERROR_IO_INCOMPLETE )
 				{
 					ClearErrors( index, &Stat );
-					//usleep(1000);
+/*
+					usleep(1000);
+*/
 				}
 			}
 		}
@@ -1319,7 +1339,9 @@ int serial_write( int fd, char *Str, int length )
 	{
 		ClearErrors( index, &Stat );
 		set_errno(EIO);
-		//usleep(1000);
+/*
+		usleep(1000);
+*/
 		report( "serial_write bailing!\n" );
 		return(-1);
 		
@@ -1333,7 +1355,9 @@ end:
 	index->event_flag = old_flag;
 	index->tx_happened = 1; 
 #ifdef DEBUG
-	//sprintf( message, "serial_write: returning %i\n", (int) nBytes );
+/*
+	sprintf( message, "serial_write: returning %i\n", (int) nBytes );
+*/
 	LEAVE( "serial_write" );
 #endif /* DEBUG */
 	return nBytes;
@@ -1356,7 +1380,7 @@ int serial_read( int fd, void *vb, int size )
 	long start, now;
 	unsigned long nBytes = 0, total = 0, error;
 	/* unsigned long waiting = 0; */
-	int err, vmin; //, i;
+	int err, vmin; 
 	struct termios_list *index;
 	char message[80];
 	COMSTAT stat;
@@ -1396,14 +1420,18 @@ int serial_read( int fd, void *vb, int size )
 			report("vmin=0\n");
 #endif /* DEBUG_VERBOSE */
 			ret = ClearErrors( index, &stat);
-			//usleep(1000);
-			//usleep(50);
+/*
+			usleep(1000);
+			usleep(50);
+*/
 			/* we should use -1 instead of 0 for disabled timeout */
 			now = GetTickCount();
 			if ( index->ttyset->c_cc[VTIME] &&
 				now-start >= (index->ttyset->c_cc[VTIME]*100)) {
-				//sprintf( message, "now = %i start = %i time = %i total =%i\n", now, start, index->ttyset->c_cc[VTIME]*100, total);
-				//report( message );
+/*
+				sprintf( message, "now = %i start = %i time = %i total =%i\n", now, start, index->ttyset->c_cc[VTIME]*100, total);
+				report( message );
+*/
 				return total;	/* read timeout */
 			}
 		} while( stat.cbInQue < size && size > 1 );
@@ -1421,7 +1449,9 @@ int serial_read( int fd, void *vb, int size )
 		do {
 			error = ClearErrors( index, &stat);
 			usleep(1000);
-			//mexPrintf("%i/n", CLOCKS_PER_SEC/40);
+/*
+			mexPrintf("%i/n", CLOCKS_PER_SEC/40);
+*/
 		} while ( c > clock() );
 
 	}
@@ -1431,8 +1461,6 @@ int serial_read( int fd, void *vb, int size )
 	MexPrintf("R");
 	while ( size > 0 )
 	{
-	//while ( ( ( nBytes <= vmin ) || ( size > 0 ) ) && !waiting )
-	//{
 		nBytes = 0;
 		err = ReadFile( index->hComm, vb + total, size, &nBytes, &index->rol ); 
 		WaitForSingleObject( index->wol.hEvent, INFINITE );
@@ -1454,7 +1482,9 @@ int serial_read( int fd, void *vb, int size )
 					nBytes = 0;
 					break;
 				case ERROR_MORE_DATA:
-					//usleep(1000);
+/*
+					usleep(1000);
+*/
 					report("ERROR_MORE_DATA\n");
 					break;
 				case ERROR_IO_PENDING:
@@ -1489,18 +1519,24 @@ int serial_read( int fd, void *vb, int size )
 					}
 					sprintf(message, "end nBytes=%ld] ", nBytes);
 					report( message );
-					//usleep(1000);
+/*
+					usleep(1000);
+*/
 					report("ERROR_IO_PENDING\n");
 					break;
 				default:
-					//usleep(1000);
+/*
+					usleep(1000);
+*/
 					YACK();
 					return -1;
 			}
 		}
 		else
 		{
-			//usleep(1000);
+/*
+			usleep(1000);
+*/
 			ClearErrors( index, &stat);
 			return( total );
 		}
@@ -2190,8 +2226,8 @@ int tcdrain ( int fd )
 /*
 	index->event_flag &= ~EV_TXEMPTY;
 	SetCommMask( index->hComm, index->event_flag );
+	index->tx_happened = 1; 
 */
-	//index->tx_happened = 1; 
 	if ( !FlushFileBuffers( index->hComm ) )
 	{
 		/* FIXME  Need to figure out what the various errors are in
@@ -2215,14 +2251,18 @@ int tcdrain ( int fd )
 		LEAVE( "tcdrain" );
 		return -1;
 	}
-	//sprintf( message,  "FlushFileBuffers() %i\n",
-	//	(int) GetLastError() );
-	//report( message );
+/*
+	sprintf( message,  "FlushFileBuffers() %i\n",
+		(int) GetLastError() );
+	report( message );
+*/
 	LEAVE( "tcdrain success" );
 	index->event_flag |= EV_TXEMPTY;
 	SetCommMask( index->hComm, index->event_flag );
 	index->event_flag = old_flag;
-	//index->tx_happened = 1; 
+/*
+	index->tx_happened = 1; 
+*/
 	return 0;
 }
 
@@ -2252,8 +2292,8 @@ int tcflush( int fd, int queue_selector )
 /*
 	index->event_flag &= ~EV_TXEMPTY;
 	SetCommMask( index->hComm, index->event_flag );
+	index->tx_happened = 1; 
 */
-	//index->tx_happened = 1; 
 	ENTER("tcflush");
 	if ( !index )
 	{
@@ -2291,7 +2331,9 @@ int tcflush( int fd, int queue_selector )
 			}
 			break;
 		default:
-			//set_errno( ENOTSUP );
+/*
+			set_errno( ENOTSUP );
+*/
 			report( "tcflush: Unknown queue_selector\n" );
 			LEAVE("tcflush");
 			return -1;
@@ -2477,61 +2519,56 @@ int ioctl( int fd, int request, ... )
 			return -ENOIOCTLCMD;
 		case TIOCMSET:
 			arg = va_arg( ap, int * );
-			//sprintf( message, "DTR = %i, RTS=%i was DTR = %i RTS = %i\n",
-			//	*arg & TIOCM_DTR,
-			//	*arg & TIOCM_RTS,
-			//	index->MSR &TIOCM_DTR,
-			//	index->MSR &TIOCM_RTS
-			//);
-			//mexPrintf( message );
+/*
+			sprintf( message, "DTR = %i, RTS=%i was DTR = %i RTS = %i\n",
+				*arg & TIOCM_DTR,
+				*arg & TIOCM_RTS,
+				index->MSR &TIOCM_DTR,
+				index->MSR &TIOCM_RTS
+			);
+			mexPrintf( message );
+*/
 			if (( *arg & TIOCM_DTR) == (index->MSR & TIOCM_DTR) )
 			{
 				report("DTR is unchanged\n");
 			}
-			//else
-			//{
-				sprintf(message, "DTR %i %i\n", *arg&TIOCM_DTR, index->MSR & TIOCM_DTR );
-				report( message );
-				if ( *arg & TIOCM_DTR )
-				{
-					index->MSR |= TIOCM_DTR;
-				}
-				else
-				{
-					index->MSR &= ~TIOCM_DTR;
-				}
-				if ( EscapeCommFunction( index->hComm, 
-					( *arg & TIOCM_DTR ) ? SETDTR :
-					CLRDTR ) )
-					report("EscapeCommFunction: True\n");
-				else
-					report("EscapeCommFunction: False\n");
-			//}
+			sprintf(message, "DTR %i %i\n", *arg&TIOCM_DTR, index->MSR & TIOCM_DTR );
+			report( message );
+			if ( *arg & TIOCM_DTR )
+			{
+				index->MSR |= TIOCM_DTR;
+			}
+			else
+			{
+				index->MSR &= ~TIOCM_DTR;
+			}
+			if ( EscapeCommFunction( index->hComm, 
+				( *arg & TIOCM_DTR ) ? SETDTR :
+				CLRDTR ) )
+				report("EscapeCommFunction: True\n");
+			else
+				report("EscapeCommFunction: False\n");
 			if ( (*arg & TIOCM_RTS) == ( index->MSR & TIOCM_RTS) )
 			{
 				report("RTS is unchanged\n");
 			}
-			//else
-			//{
-				sprintf( message, "RTS %i %i\n", *arg&TIOCM_RTS, index->MSR & TIOCM_RTS );
-				report( message );
-				if ( *arg & TIOCM_RTS )
-				{
-					index->MSR |= TIOCM_RTS;
-					result &= SETRTS;
-				}
-				else
-				{
-					index->MSR &= ~TIOCM_RTS;
-					result &= CLRRTS;
-				}
-				if( EscapeCommFunction( index->hComm,
-					( *arg & TIOCM_RTS ) ? SETRTS :
-					CLRRTS ) )
-					report("EscapeCommFunction: True\n");
-				else
-					report("EscapeCommFunction: False\n");
-			//}
+			sprintf( message, "RTS %i %i\n", *arg&TIOCM_RTS, index->MSR & TIOCM_RTS );
+			report( message );
+			if ( *arg & TIOCM_RTS )
+			{
+				index->MSR |= TIOCM_RTS;
+				result &= SETRTS;
+			}
+			else
+			{
+				index->MSR &= ~TIOCM_RTS;
+				result &= CLRRTS;
+			}
+			if( EscapeCommFunction( index->hComm,
+				( *arg & TIOCM_RTS ) ? SETRTS : CLRRTS ) )
+				report("EscapeCommFunction: True\n");
+			else
+				report("EscapeCommFunction: False\n");
 /*
 			if ( *arg & TIOCM_DTR )
 			{
@@ -2634,7 +2671,9 @@ int ioctl( int fd, int request, ... )
 			if ( (int ) Stat.cbOutQue == 0 )
 			{
 				/* output is empty */
-					//&& !index->interrupt ) 
+/*
+					&& !index->interrupt ) 
+*/
 				if( index->tx_happened == 1 )
 				{
 					old_flag = index->event_flag;
@@ -2664,7 +2703,9 @@ int ioctl( int fd, int request, ... )
 				MexPrintf("U");
 				*arg = 0;
 				ret = 0;
-				//*arg = TIOCSER_TEMP;
+/*
+				*arg = TIOCSER_TEMP;
+*/
 			}
 			MexPrintf("T");
 			va_end( ap );
@@ -2705,22 +2746,30 @@ int ioctl( int fd, int request, ... )
 			if( sistruct->frame != index->sis->frame )
 			{
 				sistruct->frame = index->sis->frame;
-			//	printf("---------------frame = %i\n", sistruct->frame++);
+/*
+				printf("---------------frame = %i\n", sistruct->frame++);
+*/
 			}
 			if( sistruct->overrun != index->sis->overrun )
 			{
-			//	printf("---------------overrun\n");
+/*
+				printf("---------------overrun\n");
+*/
 				sistruct->overrun = index->sis->overrun;
 				ErrCode &= ~CE_OVERRUN;
 			}
 			if( sistruct->parity != index->sis->parity )
 			{
-			//	printf("---------------parity\n");
+/*
+				printf("---------------parity\n");
+*/
 				sistruct->parity = index->sis->parity;
 			}
 			if( sistruct->brk != index->sis->brk )
 			{
-			//	printf("---------------brk\n");
+/*
+				printf("---------------brk\n");
+*/
 				sistruct->brk = index->sis->brk;
 			}
 			va_end( ap );
@@ -2848,15 +2897,21 @@ termios_interrupt_event_loop()
 void termios_interrupt_event_loop( int fd, int flag )
 {
 	struct termios_list * index = find_port( fd );
-	//mexPrintf(":>");
+/*
+	mexPrintf(":>");
+*/
 	if ( !index ) return;
-	//index->event_flag = 0;
-	// TRENT SetCommMask( index->hComm, index->event_flag );
-	//usleep(2000);
-	//tcdrain( index->fd );
-	//SetEvent( index->sol.hEvent ); 
+/*
+	index->event_flag = 0;
+	 TRENT SetCommMask( index->hComm, index->event_flag );
+	usleep(2000);
+	tcdrain( index->fd );
+	SetEvent( index->sol.hEvent ); 
+*/
 	index->interrupt = flag;
-	//mexPrintf(":<");
+/*
+	mexPrintf(":<");
+*/
 	return;
 }
 
@@ -2938,7 +2993,9 @@ int  serial_select( int  n,  fd_set  *readfds,  fd_set  *writefds,
 				report( message );
 				MexPrintf("-");
 				return(1);
-				//goto fail;
+/*
+				goto fail;
+*/
 			}
 			return(1);
 		}
@@ -2987,7 +3044,9 @@ int  serial_select( int  n,  fd_set  *readfds,  fd_set  *writefds,
 		}
 	}
 end:
-	//usleep(1000);
+/*
+	usleep(1000);
+*/
 	MexPrintf("<");
 #ifdef DEBUG_VERBOSE
 	LEAVE( "serial_select" );
@@ -3171,7 +3230,9 @@ int main( int argc, char *argv[] )
 	struct termios ttyset;
 	char c;
 	int fd[4];
-	//char *name = "COM3";
+/*
+	char *name = "COM3";
+*/
 	int ret = 1;
 	int port_type = 1;
 
@@ -3284,7 +3345,9 @@ int main( int argc, char *argv[] )
 {
 	struct termios ttyset;
 	int fd = open("COM1", 1);
-	//int cspeed = translate_speed( env, speed );
+/*
+	int cspeed = translate_speed( env, speed );
+*/
 	int cspeed = B9600;
 	for(;;)
 	{
@@ -3448,8 +3511,10 @@ int main( int argc, char *argv[] )
 		{
 			if(!send_event( env, jobj, SPE_DATA_AVAILABLE, 1 ))
 			{
-				//usleep(100000); /* select wont block */
-				//usleep(100); /* select wont block */
+/*
+				usleep(100000); /* select wont block */
+				usleep(100); /* select wont block */
+*/
 			}
 		}
 	}
@@ -3568,7 +3633,9 @@ int main( int argc, char *argv[] )
 					fd[ seed - 1] = res;
 				}
 				res = -1;
-				//serial_read(res, vb,  1);
+/*
+				serial_read(res, vb,  1);
+*/
 				printflag = 1;
 			}
 		}

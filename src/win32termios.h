@@ -155,7 +155,9 @@ int tcdrain ( int );
 int tcflow ( int , int );
 int tcsendbreak ( int , int );
 int ioctl(int fd, int request, ... );
-//int fstat(int fd, ... );
+/*
+int fstat(int fd, ... );
+*/
 void cfmakeraw(struct termios *s_termios);
 int termiosGetParityErrorChar( int );
 void termiosSetParityError( int, char );
@@ -397,7 +399,9 @@ void termiosSetParityError( int, char );
 #define TIOCGSOFTCAR	0x5419
 #define TIOCSSOFTCAR	0x541a
 #define TIOCSER_TEMP	0x01
-// #define FIONREAD	0x541b
+/*
+#define FIONREAD	0x541b
+*/
 #define TIOCGSERIAL	0x541e
 #define TIOCSSERIAL	0x541f
 #define TCSBRKP		0x5425
