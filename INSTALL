@@ -16,7 +16,7 @@
 |   License along with this library; if not, write to the Free
 |   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --------------------------------------------------------------------------*/
-This is the INSTALL file for RXTX.  Tue Aug 13 20:42:11 MDT 2002
+This is the INSTALL file for RXTX.  Fri Aug 23 15:49:49 MDT 2002
 
 If, while following the instructions, you find this file unclear or incorrect 
 please make a note and email the details to taj@www.linux.org.uk.
@@ -567,7 +567,8 @@ Redhat users.  Note that Redhat changed group uucp to group lock with Redhat
 
 Mandrake users.  Note that /var/lock needs to be group uucp for this to work.
 
-Mac OS X users.  Note that you may need to create the lock directory with group uucp ownership.
+Mac OS X users.  Note that you may need to create the lock directory with group uucp ownership.  There is a script in contrib called fixperm.sh to help with
+this on Mac OS X.
 
 RXTX uses lock files by default.  configure --disable-lockfiles to generate
 rxtx libraries without lock files.  Its strongly recommended that you do
