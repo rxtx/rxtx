@@ -939,15 +939,14 @@ struct tpid_info_struct *add_tpid( struct tpid_info_struct *p )
 	q->tcdrain = 0;
 	return( q );
 }
-#endif /* TIOCSERGETLSR */
-/*
 static void warn_sig_abort( int signo )
 {
 	char msg[80];
 	sprintf( msg, "RXTX Recieved Signal %i\n", signo );
 	//report_error( msg );
 }
-*/
+#endif /* TIOCSERGETLSR */
+
 /*----------------------------------------------------------
 init_thread_write( )
 
