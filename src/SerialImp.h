@@ -16,7 +16,6 @@
 |   License along with this library; if not, write to the Free
 |   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --------------------------------------------------------------------------*/
-
 /* gnu.io.SerialPort constants */
 #define JDATABITS_5		5
 #define JDATABITS_6		6
@@ -63,6 +62,20 @@
 #define B256000		1010004
 #endif /* dima */
 
+struct tpid_info_struct
+{
+	/* threads, bean counting, and lifespan */
+	int write_counter, closing;
+	pthread_t tpid;
+
+	pthread_mutex_t *mutex;
+	pthread_cond_t *cpt;
+	//pthread_attr_t *attr;
+
+	int length;
+	char *buff;
+};
+
 struct event_info_struct
 {
 	int fd;
@@ -70,6 +83,7 @@ struct event_info_struct
 	int eventflags[11];
 	
 	int initialised;
+	int output_buffer_empty_flag;
 	fd_set rfds;
 	struct timeval tv_sleep;
 	int ret, change;
@@ -87,6 +101,7 @@ struct event_info_struct
 	struct serial_icounter_struct osis;
 #endif /* TIOCGICOUNT */
 	struct event_info_struct *next, *prev;
+	struct tpid_info_struct *tpid;
 };
 
 /*  Ports known on the OS */
@@ -188,7 +203,9 @@ Trent
 #	define DEVICEDIR "/dev/"
 #	define LOCKDIR "/var/spool/locks"
 #	define LOCKFILEPREFIX "LK."
+/*
 #	define UUCP
+*/
 #endif /* __sun__ */
 #if defined(__BEOS__)
 #	define DEVICEDIR "/dev/ports/"
@@ -223,7 +240,7 @@ Trent
 #endif /* WIN32 */
 
 /* allow people to override the directories */
-/* #define USER_LOCK_DIRECTORY "/home/tjarvi/1.12/build" */
+/* #define USER_LOCK_DIRECTORY "/home/tjarvi/1.5/build" */
 #ifdef USER_LOCK_DIRECTORY
 #	define LOCKDIR USER_LOCK_DIRECTORY
 #endif /* USER_LOCK_DIRECTORY */
@@ -311,6 +328,7 @@ extern int mexPrintf( const char *, ... );
 #	define printf mexPrintf
 #endif /* DEBUG_MW */
 #ifdef __BEOS__
+struct tpid_info_struct *add_tpid( struct tpid_info_struct * );
 data_rate translate_speed( JNIEnv*, jint  );
 int translate_data_bits( JNIEnv *, data_bits *, jint );
 int translate_stop_bits( JNIEnv *, stop_bits *, jint );

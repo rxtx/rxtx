@@ -42,6 +42,7 @@
 #include <sys/ioctl.h>
 #include <sys/param.h>
 #include <sys/utsname.h>
+#include <pthread.h>
 #else
 #	include <win32termios.h>
 /*  FIXME  returns 0 in all cases on win32
@@ -320,10 +321,9 @@ JNIEXPORT void JNICALL RXTXPort(nativeClose)( JNIEnv *env,
 	int fd = get_java_var( env, jobj,"fd","I" );
 	const char *filename = (*env)->GetStringUTFChars( env, jstr, 0 );
 	jclass jclazz = (*env)->GetObjectClass( env, jobj );
-	jfieldID jfid = (*env)->GetFieldID( env, jclazz, "pid", "I" );
+	pid = get_java_var( env, jobj,"pid","I" );
 
-	pid = (int)( (*env)->GetIntField( env, jobj, jfid ) );
-
+	report(">pid\n");
 	if( !pid ) {
 		(*env)->ExceptionDescribe( env );
 		(*env)->ExceptionClear( env );
@@ -331,7 +331,7 @@ JNIEXPORT void JNICALL RXTXPort(nativeClose)( JNIEnv *env,
 		report("Close not detecting thread pid");
 		return;
 	}
-
+	report("<pid\n");
 
 	/* 
 		UNLOCK is one of three functions defined in SerialImp.h
@@ -346,10 +346,12 @@ JNIEXPORT void JNICALL RXTXPort(nativeClose)( JNIEnv *env,
 	{
 		do {
 			result=CLOSE (fd);
-		}  while (result < 0 && errno==EINTR);
-		UNLOCK(filename, pid);
+		}  while ( result < 0 && errno == EINTR );
+		UNLOCK( filename, pid );
 	}
+	report("Delete\n");
 	(*env)->DeleteLocalRef( env, jclazz );
+	report("release\n");
 	(*env)->ReleaseStringUTFChars( env, jstr, filename );
 	LEAVE( "RXTXPort:nativeClose" );
 	return;
@@ -664,6 +666,230 @@ int translate_parity( JNIEnv *env, tcflag_t *cflag, jint parity )
 		"", "parity value not supported" );
 	return 0;
 }
+/*----------------------------------------------------------
+thread_write()
+
+   accept:      
+   perform:     
+   return:      none
+   exceptions:  
+   comments:	
+----------------------------------------------------------*/
+
+#ifndef TIOCSERGETLSR
+
+
+void *thread_write( void *arg )
+{
+	struct event_info_struct *eis = ( struct event_info_struct * ) arg;
+	struct tpid_info_struct *t = eis->tpid;
+	int result;
+	
+	report("thread_write start\n");
+	if( !eis->jclazz )
+	{
+		report("thread_write: jclazz is borked\n");
+		return( NULL );
+	}
+	report("thread_write: have jclazz\n");
+	if( !t->closing )
+	{
+		//report("thread_write: write( %i, %i, %i);\n",eis->fd, t->buff[0], t->length);
+		result = write( eis->fd, t->buff, t->length );
+		t->length = result;
+		//report("thread_write: wrote %i bytes length is now %i\n", result, t->length);
+	}
+	else
+	{
+		t->length = 0;
+		pthread_cond_signal( t->cpt );
+		return( NULL );
+	}
+
+	report("thread_write: cond_signal\n");
+	pthread_cond_signal( t->cpt );
+	if( t->closing)
+	{
+		report("thread_write: thread_write returning before tcdrain\n");
+		return( NULL );
+	}
+	report("thread_write: tcdrain\n");
+	if( tcdrain( eis->fd ) == 0 )
+	{
+		report("thread_write: setting the dang OUTPUT_BUFFER_EMPTY\n" );
+		while(eis->output_buffer_empty_flag == 1 ) usleep(100);
+		eis->output_buffer_empty_flag = 1;
+	}
+	else report("thread_write: NOT sending the blasted OUTPUT_BUFFER_EMPTY\n" );
+	report("thread_write: return(NULL)\n" );
+	return( NULL );
+}
+
+/*----------------------------------------------------------
+spawn_write_thread()
+
+   accept:      
+   perform:     
+   return:      none
+   exceptions:  
+   comments:	
+----------------------------------------------------------*/
+
+int spawn_write_thread( int fd, char *buff, int length,
+			JNIEnv *env, jobject *jobj)
+{
+	struct event_info_struct *eis;
+	struct tpid_info_struct *t;
+
+	report("spawn_write_thread: entering\n");
+
+	eis = (struct event_info_struct * )
+		get_java_var( env, *jobj, "eis", "I" );
+	//report("spawn_write_thread: got eis %i\n", (int) eis);
+
+	/*
+	   The eventLoop has not started. just write and return since
+	   Nothing is there to get OUTPUT_BUFFER_EMPTY
+	*/
+	if ( eis == 0 ) return write( fd, buff, length ); 
+
+	t = eis->tpid;
+
+	report("spawn_write_thread: lock mutex\n");
+	while( t->write_counter && !t->closing && pthread_mutex_trylock( t->mutex ))
+	{
+		report("spawn_write_thread: mutex locked\n");
+		pthread_cond_wait( t->cpt, t->mutex );
+	}
+	if( t->closing ) return( 0 );
+
+	/* info for the thread to write and send event when output is empty */
+	t->length = length;
+	t->buff = buff;
+
+	/* queue next write */
+	t->write_counter++;
+
+	//report("spawn_write_thread: %s %i\n", buff, length);
+
+	/*----------------------------------------------*/
+	report("spawn_write_thread: create thread_write\n");
+	pthread_create( &t->tpid, NULL, thread_write, eis );
+	/*----------------------------------------------*/
+	report(">spawn_write_thread: cond_wait\n");
+	pthread_cond_wait( t->cpt, t->mutex );
+	t->write_counter--;
+	report("spawn_write_thread: unlock mutex\n");
+	pthread_mutex_unlock( t->mutex );
+	report("<spawn_write_thread: cond_wait\n");
+	//report("spawn_write_thread: exiting! return = %i\n", t->length );
+	return(t->length);
+}
+#endif /* TIOCSERGETLSR */
+
+/*----------------------------------------------------------
+finalize_thread_write( )
+
+   accept:      none
+   perform:     
+   return:      none
+   exceptions:  none
+   comments:	
+----------------------------------------------------------*/
+void finalize_thread_write( struct event_info_struct *eis )
+{
+#ifndef TIOCSERGETLSR
+	/* used to shut down any remaining write threads */
+
+	report("entering finalize_thread_write\n");
+	if( ! eis ) return; else printf("have eis\n");
+	if( ! eis->tpid ) return; else printf("have eis->tpid\n");
+	eis->tpid->closing = 1;
+	while( eis->tpid->write_counter && pthread_mutex_trylock( eis->tpid->mutex ))
+	{
+		report("finalize_thread_write: mutex locked\n");
+		pthread_cond_wait( eis->tpid->cpt, eis->tpid->mutex );
+	}
+	report(">mutex_unlock\n");
+	pthread_mutex_unlock( eis->tpid->mutex );
+	report("<mutex_unlock\n");
+	report("2\n");
+	if ( eis->tpid->cpt )
+	{
+		pthread_cond_destroy( eis->tpid->cpt );
+		report(">free cpt\n");
+		free( eis->tpid->cpt );
+		report("<free cpt\n");
+	}
+	report("3\n");
+	report(">free tpid\n");
+	if ( eis->tpid ) free( eis->tpid );
+	report("<free tpid\n");
+	report("4\n");
+
+	/* need to clean up again after working events */
+	report("leaving finalize_thread_write\n");
+#endif /* TIOCSERGETLSR */
+}
+
+/*----------------------------------------------------------
+add_tpid
+
+   accept:      struct tpid_info_struct pointer,,
+   perform:     if p is null set up a linked list for bean counting on writes
+   return:      the last member of the linked list.
+   exceptions:  None
+   comments:    This is used to cleanup threads and make sure the
+		write()'s happen in order on systems without access to the LSR
+----------------------------------------------------------*/
+#ifndef TIOCSERGETLSR
+struct tpid_info_struct *add_tpid( struct tpid_info_struct *p )
+{
+	struct tpid_info_struct *q, *r = p;
+
+	/* FIXME TRENT.  Do we need to use key funcitons here? */
+	q = malloc( sizeof(struct tpid_info_struct) );
+	if( !q )
+	{
+		report_error("RXTX: Out of Memory\n");
+		return( NULL );
+	}
+	q->tpid = 0;
+	q->closing = 0;
+	q->write_counter = 0;
+	return( q );
+}
+#endif /* TIOCSERGETLSR */
+
+/*----------------------------------------------------------
+init_thread_write( )
+
+   accept:      none
+   perform:     
+   return:      none
+   exceptions:  none
+   comments:	
+----------------------------------------------------------*/
+int init_thread_write( struct event_info_struct *eis )
+{
+#ifndef TIOCSERGETLSR
+	struct tpid_info_struct *t = add_tpid( NULL);
+	jfieldID jeis;
+
+	report("init_thread_write:  start\n");
+	eis->tpid = t;
+	t->mutex = malloc(sizeof(pthread_mutex_t));
+	t->cpt = malloc(sizeof(pthread_cond_t));
+	pthread_mutex_init( t->mutex, NULL );
+	pthread_cond_init( t->cpt, NULL );
+	jeis  = (*eis->env)->GetFieldID( eis->env, eis->jclazz, "eis", "I" );
+	(*eis->env)->SetIntField(eis->env, *eis->jobj, jeis, ( jint ) eis );
+#else
+	eis->tpid = NULL;
+#endif /* TIOCSERGETLSR */
+	report("init_thread_write:  stop\n");
+	return( 1 );
+}
 
 /*----------------------------------------------------------
 RXTXPort.writeByte
@@ -681,8 +907,24 @@ JNIEXPORT void JNICALL RXTXPort(writeByte)( JNIEnv *env,
 	int result;
 
 	ENTER( "RXTXPort:writeByte" );
+	/*
+	   jobject and env are passed to the thread_write code above for
+	   systems that do not have access to the LSR used to detect if
+	   output outputbuffer is empty
+
+	   win32 implements its own write in termios.c
+	
+	   other systems use the API write directly
+	*/
 	do {
+#ifdef TIOCGETLSR
 		result=WRITE (fd, &byte, sizeof(unsigned char));
+#else
+		report("writeByte>>\n");
+		result=spawn_write_thread (fd, &byte, sizeof(unsigned char),
+						env, &jobj);
+		report("writeByte<<\n");
+#endif /* TIOCGETLSR */
 	}  while (result < 0 && errno==EINTR);
 	LEAVE( "RXTXPort:writeByte" );
 	if(result >= 0)
@@ -715,7 +957,7 @@ JNIEXPORT void JNICALL RXTXPort(writeArray)( JNIEnv *env,
 	jbyte *body = (*env)->GetByteArrayElements( env, jbarray, 0 );
 	char message[1000];
 #if defined ( __sun__ )
-	struct timespec retspec, tspec;
+	struct timespec retspec;
 
 	retspec.tv_sec = 0;
 	retspec.tv_nsec = 50000;
@@ -725,8 +967,24 @@ JNIEXPORT void JNICALL RXTXPort(writeArray)( JNIEnv *env,
 	/* warning Will Rogers */
 	sprintf( message, "::::RXTXPort:writeArray(%s);\n", (char *) body );
 	report_verbose( message );
+
+	/*
+	   jobject and env are passed to the thread_write code above for
+	   systems that do not have access to the LSR used to detect if
+	   output outputbuffer is empty
+
+	   win32 implements its own write in termios.c
+	
+	   other systems use the API write directly
+	*/
+
 	do {
+#if defined TIOCSERGETLSR
 		result=WRITE (fd, body + total + offset, count - total); /* dima */
+#else
+		result=spawn_write_thread (fd, body + total + offset,
+						count - total, env, &jobj);
+#endif /* TIOCSERGETLSR */
 		if(result >0){
 			total += result;
 		}
@@ -1121,11 +1379,11 @@ JNIEXPORT jint JNICALL RXTXPort(nativeGetParityErrorChar)( JNIEnv *env,
 	jobject jobj )
 {
 	unsigned int result = 0;
-	int fd = get_java_var( env, jobj,"fd","I" );
 
 	ENTER( "nativeGetParityErrorChar" );
 #ifdef WIN32
-	result = ( jint ) termiosGetParityErrorChar( fd );
+	result = ( jint ) termiosGetParityErrorChar(
+			get_javavar(env, jobj, "fd", "I" ) );
 #else
 	/*
 	   arg!  I cant find a way to change it from \0 in Linux.  I think
@@ -1180,14 +1438,15 @@ RXTXPort.nativeSetParityErrorChar
 JNIEXPORT jboolean JNICALL RXTXPort(nativeSetParityErrorChar)( JNIEnv *env,
 	jobject jobj, jbyte value )
 	{
-		int fd = get_java_var( env, jobj,"fd","I" );
 
-		ENTER( "nativeSetParityErrorChar" );
 #ifdef WIN32
+		int fd = get_java_var( env, jobj,"fd","I" );
+		ENTER( "nativeSetParityErrorChar" );
 		termiosSetParityError( fd, ( char ) value );
 		LEAVE( "nativeSetParityErrorChar" );
 		return( JNI_TRUE );
 #else
+		ENTER( "nativeSetParityErrorChar" );
 	/*
 	   arg!  I cant find a way to change it from \0 in Linux.  I think
 	   the frame and parity error characters are hardcoded.
@@ -1261,7 +1520,8 @@ int read_byte_array(	JNIEnv *env,
 			int length,
 			int timeout )
 {
-	int ret, left, bytes = 0, count = 0;
+	int ret, left, bytes = 0;
+	/* int count = 0; */
 	fd_set rfds;
 	struct timeval sleep;
 	struct timeval *psleep=&sleep;
@@ -1557,7 +1817,9 @@ int check_line_status_register( struct event_info_struct *eis )
 	struct stat fstatbuf;
 
 	if( ! eis->eventflags[SPE_OUTPUT_BUFFER_EMPTY] )
+	{
 		return 0;
+	}
 	if ( fstat( eis->fd, &fstatbuf ) )
 	{
 		report( "check_line_status_register: fstat\n" );
@@ -1572,6 +1834,12 @@ int check_line_status_register( struct event_info_struct *eis )
 	{
 		report_verbose( "sending OUTPUT_BUFFER_EMPTY\n" );
 		send_event( eis, SPE_OUTPUT_BUFFER_EMPTY, 1 );
+	}
+#else
+	if( eis->output_buffer_empty_flag == 1 )
+	{
+		send_event( eis, SPE_OUTPUT_BUFFER_EMPTY, 1 );
+		eis->output_buffer_empty_flag = 0;
 	}
 #endif /* TIOCSERGETLSR */
 	return( 0 );
@@ -1590,9 +1858,9 @@ has_line_status_register_access
 ----------------------------------------------------------*/
 int has_line_status_register_access( int fd )
 {
+#if defined(TIOCSERGETLSR)
 	int change;
 
-#if defined(TIOCSERGETLSR)
 	if( !ioctl( fd, TIOCSERGETLSR, &change ) ) {
 		return(1);
 	}
@@ -1790,7 +2058,7 @@ report_serial_events
 void report_serial_events( struct event_info_struct *eis )
 {
 	/* JK00: work around for Multi IO cards without TIOCSERGETLSR */
-	if( eis->has_tiocsergetlsr )
+	/* if( eis->has_tiocsergetlsr ) we have a fix for output empty */
 		if( check_line_status_register( eis ) )
 			return;
 
@@ -1847,6 +2115,7 @@ int initialise_event_info_struct( struct event_info_struct *eis )
 	}
 
 	for( i = 0; i < 11; i++ ) eis->eventflags[i] = 0;
+	eis->output_buffer_empty_flag = 0;
 
 	eis->fd = get_java_var( env, jobj, "fd", "I" );
 	eis->has_tiocsergetlsr = has_line_status_register_access( eis->fd );
@@ -1929,21 +2198,24 @@ JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 	eis.jobj = &jobj;
 	eis.initialised = 0;
 
-	/* nothing goes between this call and select */
 	report( ">RXTXPort:eventLoop\n" );
 	if ( !initialise_event_info_struct( &eis ) ) goto end;
+	if ( !init_thread_write( &eis ) ) goto end;
 	unlock_monitor_thread( &eis );
 	do{
 		/* report( "." ); */
 		do {
 			eis.ret = SELECT( eis.fd + 1, &eis.rfds, NULL, NULL,
 					&eis.tv_sleep );
-			usleep(1000);
+			/* nothing goes between this call and select */
 			if( eis.eventloop_interrupted )
 			{
+				report("got interrupt\n");
+				finalize_thread_write( &eis );
 				finalize_event_info_struct( &eis );
 				return;
 			}
+			usleep(1000);
 		}  while ( eis.ret < 0 && errno == EINTR );
 		if( eis.ret >= 0 )
 			report_serial_events( &eis );
@@ -1973,7 +2245,10 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(testRead)(
 )
 {
 	struct termios ttyset;
-	char c, message[80];
+	char c;
+#ifdef TRENT_IS_HERE_DEBUGGING_ENUMERATION
+	char message[80];
+#endif /* TRENT_IS_HERE_DEBUGGING_ENUMERATION */
 	int fd;
 	const char *name = (*env)->GetStringUTFChars(env, tty_name, 0);
 	int ret = JNI_TRUE;
@@ -2010,7 +2285,7 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(testRead)(
 	/* CLOCAL eliminates open blocking on modem status lines */
 	if ((fd = OPEN(name, O_RDONLY | CLOCAL)) <= 0)
 	{
-		report( "testRead() open failed\n" );
+		report_verbose( "testRead() open failed\n" );
 		ret = JNI_FALSE;
 		goto END;
 	}
@@ -3007,7 +3282,7 @@ int check_lock_pid( const char *file, int openpid )
 	if ( lockpid != getpid() && lockpid != getppid() && lockpid != openpid )
 	{
 		sprintf(message, "lock = %s pid = %i gpid=%i openpid=%i\n",
-			pid_buffer, getpid(), getppid(), openpid );
+			pid_buffer, (int) getpid(), (int) getppid(), openpid );
 		report( message );
 		return( 1 );
 	}
@@ -3090,7 +3365,7 @@ int different_from_LOCKDIR(const char* ld)
    exceptions:  none
    comments:    check if the device is already locked
 ----------------------------------------------------------*/
-int is_device_locked( const char *filename )
+int is_device_locked( const char *port_filename )
 {
 	const char *lockdirs[] = { "/etc/locks", "/usr/spool/kermit",
 		"/usr/spool/locks", "/usr/spool/uucp", "/usr/spool/uucp/",
@@ -3098,81 +3373,73 @@ int is_device_locked( const char *filename )
 		"/var/spool/lock", "/var/spool/locks", "/var/spool/uucp",
 		LOCKDIR, NULL
 	};
-	const char *lockprefixes[] = { "LK..", "lk..", "LK.", NULL }; 
+	const char *lockprefixes[] = { "LCK..", "lk..", "LK.", NULL }; 
 	char *p, file[80], pid_buffer[20], message[80];
 	int i = 0, j, k, fd , pid;
 	struct stat buf;
 	struct stat buf2;
 
-	i = strlen( filename );
-	p = ( char * ) filename+i;
-	while( *( p-1 ) != '/' && i-- !=1 ) p--;
-	sprintf( file, "%s/%s%s", LOCKDIR, LOCKFILEPREFIX, p );
+	j = strlen( port_filename );
+	p = ( char * ) port_filename+j;
+	while( *( p-1 ) != '/' && j-- !=1 ) p--;
 
 	while( lockdirs[i] )
 	{
 		/*
 		   Look for lockfiles in all known places other than the
 		   defined lock directory for this system
+		   report any unexpected lockfiles.
+
+		   Is the suspect lockdir there?
+		   if it is there is it not the expected lock dir?
 		*/
-		if( ( stat( file, &buf2 ) == 0 ) &&
-			strncmp( lockdirs[i], LOCKDIR, strlen( lockdirs[i] ) )
-		)
+		if( !stat( lockdirs[i], &buf2 ) &&
+			strncmp( lockdirs[i], LOCKDIR, strlen( lockdirs[i] ) ) )
 		{
-			/*
-				Here is the check for symbolic links
-				see also:
-
-				 different_from_LOCKDIR()
-			*/
-
-			if ( ( buf2.st_dev != buf.st_dev ) ||
-				( buf2.st_ino != buf.st_ino ) )
-			{
-				j = strlen( filename );
-				p = ( char *  ) filename + j;
-				
+			j = strlen( port_filename );
+			p = ( char *  ) port_filename + j;
 		/*
 		   SCO Unix use lowercase all the time
 			taj
 		*/
-				while( *( p - 1 ) != '/' && j-- != 1 )
-				{
+			while( *( p - 1 ) != '/' && j-- != 1 )
+			{
 #if defined ( __unixware__ )
-					*p = tolower( *p );
+				*p = tolower( *p );
 #endif /* __unixware__ */
-					p--;
-				}
-				k=0;
-				while ( lockprefixes[k] )
+				p--;
+			}
+			k=0;
+			while ( lockprefixes[k] )
+			{
+				/* FHS style */
+				sprintf( file, "%s/%s%s", lockdirs[i],
+					lockprefixes[k], p );
+				if( stat( file, &buf ) == 0 )
 				{
-					/* FHS style */
-					sprintf( file, "%s/%s%s", lockdirs[i],
-						lockprefixes[k], p );
-					if( stat( file, &buf ) == 0 )
-					{
-						sprintf( message,
-							UNEXPECTED_LOCK_FILE );
-						report( message );
-						return 1;
-					}
-
-					/* UUCP style */
-					sprintf( file, "%s/%s%03d.%03d.%03d",
-						lockdirs[i],
-						lockprefixes[k],
-						(int) major( buf.st_dev ),
-						(int) major( buf.st_rdev ),
-						(int) minor( buf.st_rdev )
-					);
-					if( stat( file, &buf ) == 0 )
-					{
-						sprintf( message, UNEXPECTED_LOCK_FILE );
-						report( message );
-						return 1;
-					}
-					k++;
+					sprintf( message, UNEXPECTED_LOCK_FILE,
+						file );
+					report( message );
+					return 1;
 				}
+
+				/* UUCP style */
+				stat(port_filename , &buf );
+				sprintf( file, "%s/%s%03d.%03d.%03d",
+					lockdirs[i],
+					lockprefixes[k],
+					(int) major( buf.st_dev ),
+					(int) major( buf.st_rdev ),
+					(int) minor( buf.st_rdev )
+				);
+				if( stat( file, &buf ) == 0 )
+				{
+					sprintf( message, UNEXPECTED_LOCK_FILE,
+						file );
+					report( message );
+					return 1;
+				}
+				k++;
 			}
 		}
 		i++;
@@ -3186,27 +3453,33 @@ int is_device_locked( const char *filename )
 		 
 #ifdef FHS
 	/*  FHS standard locks */
-		i = strlen( filename );
-		p = ( char * ) filename + i;
-		while( *(p-1) != '/' && i-- != 1) p--;
-		sprintf( file, "%s/%s%s", LOCKDIR, LOCKFILEPREFIX, p );
+	i = strlen( port_filename );
+	p = ( char * ) port_filename + i;
+	while( *(p-1) != '/' && i-- != 1)
+	{
+#if defined ( __unixware__ )
+		*p = tolower( *p );
+#endif /* __unixware__ */
+		p--;
+	}
+	sprintf( file, "%s/%s%s", LOCKDIR, LOCKFILEPREFIX, p );
 #else 
 	/*  UUCP standard locks */
-		if ( stat( filename, &buf ) != 0 )
-		{
-			report( "RXTX is_device_locked() could not find device.\n" );
+	if ( stat( port_filename, &buf ) != 0 )
+	{
+		report( "RXTX is_device_locked() could not find device.\n" );
 			return 1;
-		}
-		sprintf( file, "%s/LK.%03d.%03d.%03d",
-			LOCKDIR,
-			(int) major( buf.st_dev ),
-	 		(int) major( buf.st_rdev ),
-			(int) minor( buf.st_rdev )
-		);
+	}
+	sprintf( file, "%s/LK.%03d.%03d.%03d",
+		LOCKDIR,
+		(int) major( buf.st_dev ),
+ 		(int) major( buf.st_rdev ),
+		(int) minor( buf.st_rdev )
+	);
 
 #endif /* FHS */
 
-	if( stat( file, &buf )==0 )
+	if( stat( file, &buf ) == 0 )
 	{
 
 		/* check if its a stale lock */
