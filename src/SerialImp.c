@@ -946,7 +946,7 @@ finalize_thread_write( )
 ----------------------------------------------------------*/
 void finalize_thread_write( struct event_info_struct *eis )
 {
-#if     defined(TIOCSERGETLSR) && !defined( WIN32 )
+#if     !defined(TIOCSERGETLSR) && !defined( WIN32 )
 	/* used to shut down any remaining write threads */
 
 	eis->tpid->closing = 1;
