@@ -24,7 +24,7 @@ ac_help="$ac_help
 ac_help="$ac_help
   --enable-PRINTER        PRINTER support (experimental) [default=yes]"
 ac_help="$ac_help
-  --enable-lockfiles      enable lock files (experimental) [default=yes]"
+  --disable-lockfiles     disable lock files (experimental) [default=no]"
 ac_help="$ac_help
   --enable-DEBUG          Print debugging info from SerialImp.c [default=no]"
 
@@ -2053,7 +2053,7 @@ LINK="\$(TOP)/libtool --mode=link \$(CC) \$(CFLAGS) \$(LDFLAGS) -release \$(VERS
 
 case "$host_os" in
 	*-gnu)
-	CFLAGS="$CFLAGS -D_POSIX_SOURCE";;
+	CFLAGS=$CFLAGS" -D_POSIX_SOURCE";;
 	*);;
 esac
 # Check whether --enable-PRINTER or --disable-PRINTER was given.
@@ -2078,8 +2078,11 @@ fi
 # Check whether --enable-lockfiles or --disable-lockfiles was given.
 if test "${enable_lockfiles+set}" = set; then
   enableval="$enable_lockfiles"
-  if test x$enable_lockfiles = xyes; then 
-		CFLAGS="$CFLAGS -DLOCKFILES"
+  if test x$lockfiles = xyes; then 
+		echo "Using lock files"
+	else
+		echo "Disabling lock files"
+		CFLAGS=$CFLAGS" -DDISABLE_LOCKFILES"
 	fi
 
 fi
@@ -2089,7 +2092,7 @@ fi
 if test "${enable_DEBUG+set}" = set; then
   enableval="$enable_DEBUG"
   if test x$enable_DEBUG = xyes; then 
-		CFLAGS="$CFLAGS -DDEBUG"
+		CFLAGS=$CFLAGS" -DDEBUG"
 	fi
 
 fi
@@ -2372,7 +2375,7 @@ if test "$CC" = "gcc" || test "$CC"="egcs"; then
 		JAVAC="\$(JPATH)/bin/javac -classpath \$(CLASSPATH) -d \$(TOP)/ -O"
 		JAR="\$(JPATH)/bin/jar"
 		JAVADOC="\$(JPATH)/bin/javadoc -classpath \$(CLASSPATH)"
-		CFLAGS="$CFLAGS -D_BSD_SOURCE"
+		CFLAGS=$CFLAGS" -D_BSD_SOURCE"
 		JAVAINCLUDE=""
 		JAVAH_FIX="if test ! -d \$(target_alias);then  mkdir \$(target_alias);fi;"
 		JHOME=$JPATH"/share/kaffe/"
@@ -2384,7 +2387,7 @@ if test "$CC" = "gcc" || test "$CC"="egcs"; then
 		JAVAC="\$(JPATH)/bin/javac -classpath \$(CLASSPATH) -d \$(TOP)/ -O"
 		JAR="\$(JPATH)/bin/jar"
 		JAVADOC="\$(JPATH)/bin/javadoc"
-		CFLAGS="$CFLAGS -D_BSD_SOURCE"
+		CFLAGS=$CFLAGS" -D_BSD_SOURCE"
 		;;
 	esac
 fi
@@ -2404,7 +2407,7 @@ fi
 Linux)
 	check_kernel_headers
 	check_java_headers
-	CFLAGS="$CFLAGS -D__need_timespec"
+	CFLAGS=$CFLAGS" -D__need_timespec"
 	case $JAVA_VERSION in
 
 	1.2*|1.3*|1.4*) 
@@ -2472,7 +2475,7 @@ Linux)
 *BSD)
 	RXTX_PATH="\$(prefix)/lib"
 	JHOME=$JPATH/"lib"
-	CFLAGS="$CFLAGS -D_NO_POSIX=1 -D_NO_XOPEN4=1"
+	CFLAGS=$CFLAGS" -D_NO_POSIX=1 -D_NO_XOPEN4=1"
 	TARGETLIB="\$(target_alias)/libSerial.la \
 			\$(target_alias)/libParallel.la"
 	case $JAVA_VERSION in
@@ -2519,7 +2522,7 @@ Linux)
 
 Irix*)
 	JHOME=$JPATH/"lib"
-	CFLAGS="$CFLAGS -I/usr/include"
+	CFLAGS=$CFLAGS" -I/usr/include"
 	CLASSPATH=".:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/RXTXcomm.jar:$CLASSPATH"
 	RXTX_PATH="\$(JPATH)/lib/\$(OS_ARCH)"
 	TARGETLIB="\$(target_alias)/libSerial.la"
@@ -2532,7 +2535,7 @@ Irix*)
 
 UnixWare|OpenUNIX)
 	JHOME=$JPATH/"jre/lib"
-	CFLAGS="$CFLAGS -D_NO_POSIX=1 -D_NO_XOPEN4=1 -D__unixware__"
+	CFLAGS=$CFLAGS" -D_NO_POSIX=1 -D_NO_XOPEN4=1 -D__unixware__"
 	CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:\$(JPATH)/jre/lib/rt.jar:\$(JPATH)/jre/lib/ext/comm.jar"
 	TARGETLIB="\$(target_alias)/libSerial.so \
 		\$(target_alias)/libParallel.so"
@@ -2591,7 +2594,7 @@ BeOS)
 	echo WARNING: BeOS support is in RXTX-1.5
 	JHOME=$JPATH"/share/kaffe"
 	RXTX_PATH="\$(JPATH)/lib/"
-	CFLAGS="$CFLAGS -D_NO_POSIX=1 -D_NO_XOPEN4=1"
+	CFLAGS=$CFLAGS" -D_NO_POSIX=1 -D_NO_XOPEN4=1"
 	CLASSPATH=".:\$(TOP):\$(TOP)/../src:\$(JPATH)/share/kaffe/Klasses.jar:\$(JPATH)/lib/RXTXcomm.jar:$CLASSPATH"
 	TARGETLIB="\$(target_alias)/libSerial.la"
 	EXTENSION="cpp"
@@ -2642,7 +2645,7 @@ Mac\ OS\ X)
 	TARGETLIB="\$(target_alias)/libSerial.jnilib"
 	RXTX_PATH="/usr/lib/java"
 	JHOME=$JPATH"/lib/ext"
-	CFLAGS="$CFLAGS -bundle"
+	CFLAGS=$CFLAGS" -bundle"
 	LDFLAGS="$LDFLAGS -module -framework JavaVM -framework IOKit -framework CoreFoundation"
 	CLASSPATH=".:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/ext/RXTXcomm.jar:$CLASSPATH"
 	#  email trentjarvi@yahoo.com if you know a nicer fix.  Needed anymore?
@@ -2653,7 +2656,7 @@ Solaris*)
 	LDFLAGS="-lposix4"
 	TARGETLIB="\$(target_alias)/libSerial.la"
 	JHOME=$JPATH/"lib"
-	CFLAGS="$CFLAGS -D_NO_POSIX=1 -D_NO_XOPEN4=1"
+	CFLAGS=$CFLAGS" -D_NO_POSIX=1 -D_NO_XOPEN4=1"
 	CLASSPATH=".:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/RXTXcomm.jar:$CLASSPATH"
 
 	case $JAVA_VERSION in
@@ -2671,7 +2674,7 @@ OS*2)
 	TARGETLIB="\$(target_alias)/libSerial.la"
 	RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
 	JHOME=$JPATH/"lib"
-	CFLAGS="$CFLAGS -D_NO_POSIX=1 -D_NO_XOPEN4=1"
+	CFLAGS=$CFLAGS" -D_NO_POSIX=1 -D_NO_XOPEN4=1"
 	CLASSPATH=".:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/RXTXcomm.jar:$CLASSPATH"
 
 ;;
@@ -2680,7 +2683,7 @@ AIX)
 	TARGETLIB="\$(target_alias)/libSerial.la"
 	RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
 	JHOME=$JPATH/"lib"
-	CFLAGS="$CFLAGS -D_NO_POSIX=1 -D_NO_XOPEN4=1"
+	CFLAGS=$CFLAGS" -D_NO_POSIX=1 -D_NO_XOPEN4=1"
 	CLASSPATH=".:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/RXTXcomm.jar:$CLASSPATH"
 
 ;;
@@ -2689,7 +2692,7 @@ Compaq\'s\ Digital\ Unix | OSF1 )
 	TARGETLIB="\$(target_alias)/libSerial.la"
 	RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
 	JHOME=$JPATH/"lib"
-	CFLAGS="$CFLAGS -D_NO_POSIX=1 -D_NO_XOPEN4=1 -pthread"
+	CFLAGS=$CFLAGS" -D_NO_POSIX=1 -D_NO_XOPEN4=1 -pthread"
 	CLASSPATH=".:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/RXTXcomm.jar:$CLASSPATH"
 
 ;;
@@ -2699,7 +2702,7 @@ NetWare*)
 	TARGETLIB="\$(target_alias)/libSerial.la"
 	RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
 	JHOME=$JPATH/"lib"
-	CFLAGS="$CFLAGS -D_NO_POSIX=1 -D_NO_XOPEN4=1"
+	CFLAGS=$CFLAGS" -D_NO_POSIX=1 -D_NO_XOPEN4=1"
 	CLASSPATH=".:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/RXTXcomm.jar:$CLASSPATH"
 
 ;;
@@ -2708,7 +2711,7 @@ MPE*)
 	TARGETLIB="\$(target_alias)/libSerial.la"
 	RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
 	JHOME=$JPATH/"lib"
-	CFLAGS="$CFLAGS -D_NO_POSIX=1 -D_NO_XOPEN4=1"
+	CFLAGS=$CFLAGS" -D_NO_POSIX=1 -D_NO_XOPEN4=1"
 	CLASSPATH=".:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/RXTXcomm.jar:$CLASSPATH"
 ;;
 
@@ -2716,7 +2719,7 @@ MPE*)
 	TARGETLIB="\$(target_alias)/libSerial.la"
 	RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
 	JHOME=$JPATH/"lib"
-	CFLAGS="$CFLAGS -D_NO_POSIX=1 -D_NO_XOPEN4=1"
+	CFLAGS=$CFLAGS" -D_NO_POSIX=1 -D_NO_XOPEN4=1"
 	CLASSPATH=".:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/RXTXcomm.jar:$CLASSPATH"
 ;;
 esac 

@@ -228,6 +228,11 @@ Trent
 #	define LOCKDIR USER_LOCK_DIRECTORY
 #endif /* USER_LOCK_DIRECTORY */
 
+#ifdef DISABLE_LOCKFILES
+#undef UUCP
+#undef FHS
+#undef OLDUUCP
+#endif /* DISABLE_LOCKFILES */
 
 /*  That should be all you need to look at in this file for porting */
 #ifdef UUCP
