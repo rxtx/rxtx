@@ -2719,7 +2719,7 @@ int system_does_not_lock( const char * filename )
    exceptions:  none
    comments:    OS's like Win32 may not have lock files.
 ----------------------------------------------------------*/
-void system_does_not_unlock( const char * filename )
+void system_does_not_unlock( const char * filename, int openpid )
 {
 	return;
 }

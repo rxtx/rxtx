@@ -237,7 +237,7 @@ int fhs_lock( const char *);
 void uucp_unlock( const char *, int );
 int uucp_lock( const char * );
 int system_does_not_lock( const char * );
-void system_does_not_unlock( const char * );
+void system_does_not_unlock( const char *, int );
 int check_group_uucp();
 int check_lock_pid( const char *, int );
 
