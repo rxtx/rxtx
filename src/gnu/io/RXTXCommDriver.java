@@ -128,11 +128,21 @@ public class RXTXCommDriver implements CommDriver
 	private boolean accessReadWrite(String portName)
 	{
 		final File port = new File(portName);
+		if(osName.toLowerCase().indexOf("windows") != -1 )
+		{
+			if(debug)
+			{
+				System.out.println(portName + ": canRead="+port.canRead());
+				System.out.println(portName + ": canWrite="+port.canWrite());
+			}
+			/* ? its always false */
+			return(true);
+		}
 		return port.canRead() && port.canWrite();
 	}
 
 
-	private void RegisterValidPorts(
+	private void registerValidPorts(
 		String devs[],
 		String Prefix[],
 		int PortType
@@ -140,8 +150,8 @@ public class RXTXCommDriver implements CommDriver
 		int p =0 ;
 		int i =0;
 		if (debug)
-			System.out.println("Entering RegisterValidPorts()");
-		if ( devs[0]==null || Prefix[0]==null) return;
+			System.out.println("Entering registerValidPorts()");
+		if ( devs==null || Prefix==null) return;
 		for( i = 0;i<devs.length; i++ ) {
 			for( p = 0;p<Prefix.length; p++ ) {
 				String portName = new String(deviceDirectory + devs[ i ]);
@@ -155,8 +165,6 @@ public class RXTXCommDriver implements CommDriver
 				}
 			}
 		}
-		if (debug)
-			System.out.println("Leaving RegisterValidPorts()");
 	}
 
 
@@ -278,8 +286,18 @@ public class RXTXCommDriver implements CommDriver
     */
 	private void registerScannedPorts()
 	{
-		File dev = new File( deviceDirectory );
-		String[] devs = dev.list();
+		String[] devs;
+		if(osName.toLowerCase().indexOf("windows") != -1 )
+		{
+			String[] temp = { "COM1", "COM2","COM3","COM4" };
+			devs=temp;
+		}
+		else
+		{
+			File dev = new File( deviceDirectory );
+			String[] temp = dev.list();
+			devs=temp;
+		}
 		String[] AllKnownSerialPorts;
 		if(osName.equals("Linux"))
 		{
@@ -365,7 +383,8 @@ public class RXTXCommDriver implements CommDriver
 			AllKnownSerialPorts=Temp;
 		}
 
-		else if(osName.equals("WIN32")) // FIXME this is probably wrong
+		
+		else if(osName.toLowerCase().indexOf("windows") != -1 )
 		{
 			String[] Temp = {
 			"COM"    // win32 serial ports
@@ -408,31 +427,31 @@ public class RXTXCommDriver implements CommDriver
 		String[] AllKnownRS485Ports={};
 		String[] AllKnownI2CPorts={};
 		String[] AllKnownRAWPorts={};
-		RegisterValidPorts(
+		registerValidPorts(
 			devs,
 			getPortPrefixes(AllKnownSerialPorts),
 			CommPortIdentifier.PORT_SERIAL
 		);
 
-		RegisterValidPorts(
+		registerValidPorts(
 			devs,
 			getPortPrefixes(AllKnownParallelPorts),
 			CommPortIdentifier.PORT_PARALLEL
 		);
 
-		RegisterValidPorts(
+		registerValidPorts(
 			devs,
 			getPortPrefixes(AllKnownRS485Ports),
 			CommPortIdentifier.PORT_RS485
 		);
 
-		RegisterValidPorts(
+		registerValidPorts(
 			devs,
 			getPortPrefixes(AllKnownI2CPorts),
 			CommPortIdentifier.PORT_I2C
 		);
 
-		RegisterValidPorts(
+		registerValidPorts(
 			devs,
 			getPortPrefixes(AllKnownRAWPorts),
 			CommPortIdentifier.PORT_RAW
