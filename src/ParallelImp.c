@@ -516,9 +516,41 @@ JNIEXPORT jint JNICALL LPRPort(nativeavailable)( JNIEnv *env,
 {
 	int fd = get_java_var( env, jobj,"fd","I" );
 	int result;
+	char message[80];
 
-	if( ioctl( fd, FIONREAD, &result ) ) return -1;
-	else return (jint)result;
+//	ENTER( "RXTXPort:nativeavailable" );
+/*
+    On SCO OpenServer FIONREAD always fails for serial devices,
+    so try ioctl FIORDCHK instead; will only tell us whether
+    bytes are available, not how many, but better than nothing.
+
+    This turns out to be true on Solaris also.  taj.
+*/
+#ifdef FIORDCHK  /* __unixware__ __sun__ probably others */
+	result = ioctl(fd, FIORDCHK, 0);
+#else
+	if( ioctl( fd, FIONREAD, &result ) < 0 )
+	{
+		goto fail;
+	}
+#endif /* FIORDCHK */
+	if (result == -1) {
+		goto fail;
+	}
+	if( result )
+	{
+		sprintf(message, "    nativeavailable: FIORDCHK result %d, \
+				errno %d\n", result , result == -1 ? errno : 0);
+		report( message );
+	}
+//	LEAVE( "RXTXPort:nativeavailable" );
+	return (jint)result;
+fail:
+	report("RXTXPort:nativeavailable:  ioctl() failed\n");
+//	LEAVE( "RXTXPort:nativeavailable" );
+	throw_java_exception( env, IO_EXCEPTION, "nativeavailable",
+		strerror( errno ) );
+	return (jint)result;
 }
 
 
