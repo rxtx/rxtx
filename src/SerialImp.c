@@ -40,7 +40,7 @@
 #endif
 #else
 #	include <win32termios.h>
-#endif
+#endif /* WIN32 */
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/time.h>
@@ -1120,7 +1120,10 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(isDeviceGood)(JNIEnv *env,
 		sprintf(teststring,"%s%s%i",DEVICEDIR,name, i);
 #endif /* _GNU_SOURCE */
 		stat(teststring,&mystat);
-		if(S_ISCHR(mystat.st_mode)){
+#ifndef WIN32
+		if(S_ISCHR(mystat.st_mode))
+#endif /* WIN32 */
+		{
 			fd=open(teststring,O_RDONLY|O_NONBLOCK);
 			if (fd>0){
 				close(fd);
