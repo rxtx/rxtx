@@ -1240,7 +1240,9 @@ int serial_write( int fd, char *Str, int length )
 	ENTER( "serial_write" );
 
 	if ( fd <= 0 )
+	{
 		return 0;
+	}
 	index = find_port( fd );
 	if ( !index )
 	{
@@ -1253,6 +1255,8 @@ int serial_write( int fd, char *Str, int length )
 	SetCommMask( index->hComm, index->event_flag );
 	index->tx_happened = 1; 
 */
+	index->wol.Offset = index->wol.OffsetHigh = 0; 
+	ResetEvent( index->wol.hEvent );
 	if ( !WriteFile( index->hComm, Str, length, &nBytes, &index->wol ) )
 	{
 		WaitForSingleObject( index->wol.hEvent,100 );
@@ -1316,12 +1320,13 @@ int serial_read( int fd, void *vb, int size )
 	clock_t c;
 	unsigned char *dest = vb;
 	
-
 	start = GetTickCount();
 	ENTER( "serial_read" );
 
 	if ( fd <= 0 )
+	{
 		return 0;
+	}
 	index = find_port( fd );
 	if ( !index )
 	{
@@ -1378,14 +1383,17 @@ int serial_read( int fd, void *vb, int size )
 		} while ( c > clock() );
 
 	}
-	
 
 	total = 0;
 	while ( size > 0 )
 	{
 		nBytes = 0;
+		//ret = ClearErrors( index, &stat);
+
+		index->rol.Offset = index->rol.OffsetHigh = 0;
+		ResetEvent( index->rol.hEvent );
+
 		err = ReadFile( index->hComm, dest + total, size, &nBytes, &index->rol ); 
-		WaitForSingleObject( index->wol.hEvent, INFINITE );
 #ifdef DEBUG_VERBOSE
 	/* warning Roy Rogers! */
 		sprintf(message, " ========== ReadFile = %i %s\n",
@@ -2166,6 +2174,7 @@ int tcsetattr( int fd, int when, struct termios *s_termios )
 	timeouts.ReadTotalTimeoutConstant = vtime;
 	timeouts.ReadIntervalTimeout = 0;
 	timeouts.ReadTotalTimeoutMultiplier = 0;
+
 	timeouts.WriteTotalTimeoutConstant = vtime;
 	timeouts.WriteTotalTimeoutMultiplier = 0;
 	/* max between bytes */
@@ -2941,7 +2950,10 @@ int  serial_select( int  n,  fd_set  *readfds,  fd_set  *writefds,
 		{
 			goto end;
 		}
-		if( !index->sol.hEvent ) return 1;
+		if( !index->sol.hEvent )
+		{
+			return 1;
+		}
 		if ( !WaitCommEvent( index->hComm, &dwCommEvent,
 			&index->sol ) )
 		{
