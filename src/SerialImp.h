@@ -138,7 +138,8 @@ struct event_info_struct
 #endif /* __APPLE__ */
 #if defined(__NetBSD__)
 #	define DEVICEDIR "/dev/"
-#	define LOCKDIR "/usr/spool/uucp"
+#	define LOCKDIR "/var/lock"
+/*#	define LOCKDIR "/usr/spool/uucp"*/
 #	define LOCKFILEPREFIX "LK."
 #	define UUCP
 #endif /* __NetBSD__ */
