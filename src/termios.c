@@ -54,7 +54,7 @@ extern void report_error( char * );
 int my_errno;
 struct termios_list
 {
-	char *filename;
+	char filename[80];
 	int my_errno;
 	int interrupt;
 	int event_flag;
@@ -607,7 +607,9 @@ int serial_close( int fd )
 		if ( index->ttyset )   free( index->ttyset );
 		if ( index->astruct )  free( index->astruct );
 		if ( index->sstruct )  free( index->sstruct );
+		/* had problems with strdup
 		if ( index->filename ) free( index->filename );
+		*/
 		free( index );
 	}
 	//dump_termios_list( "close" );
@@ -983,7 +985,8 @@ struct termios_list *add_port( const char *filename )
 */
 	port->MSR = 0;
 
-	port->filename=strdup( filename );
+	strcpy(port->filename, filename );
+	/* didnt free well? strdup( filename ); */
 	if( ! port->filename )
 		goto fail;
 
@@ -1021,7 +1024,9 @@ fail:
 	if ( port->ttyset )   free( port->ttyset );
 	if ( port->astruct )  free( port->astruct );
 	if ( port->sstruct )  free( port->sstruct );
+	/* had problems with strdup
 	if ( port->filename ) free( port->filename );
+	*/
 	if ( port ) free( port );
 	return port;
 }
@@ -1329,7 +1334,7 @@ int serial_read( int fd, void *vb, int size )
 		do {
 			error = ClearCommError( index->hComm, &error, &stat);
 			usleep(1000);
-			mexPrintf("%i/n", CLOCKS_PER_SEC/40);
+			//mexPrintf("%i/n", CLOCKS_PER_SEC/40);
 		} while ( c > clock() );
 
 	}
