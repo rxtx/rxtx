@@ -1440,7 +1440,7 @@ fi
 
 PACKAGE=Serial
 
-VERSION=1.5.9pre5
+VERSION=1.5.9pre6
 
 if test "`cd $srcdir && pwd`" != "`pwd`" && test -f $srcdir/config.status; then
   { echo "configure: error: source directory already configured; run "make distclean" there first" 1>&2; exit 1; }
@@ -2068,13 +2068,13 @@ else
 fi
 
 	if test x$enable_PRINTER = xyes; then  
-		TARGETLIB="\$(target_alias)/libSerial.la \
-			\$(target_alias)/libParallel.la \
-			\$(target_alias)/libI2C.la \
-			\$(target_alias)/libRaw.la \
-			\$(target_alias)/libRS485.la"
+		TARGETLIB="\$(target_alias)/librxtxSerial.la \
+			\$(target_alias)/librxtxParallel.la \
+			\$(target_alias)/librxtxI2C.la \
+			\$(target_alias)/librxtxRaw.la \
+			\$(target_alias)/librxtxRS485.la"
 	else
-		TARGETLIB="\$(target_alias)/libSerial.la"
+		TARGETLIB="\$(target_alias)/librxtxSerial.la"
 	fi
 
 # Check whether --enable-lockfiles or --disable-lockfiles was given.
@@ -2466,7 +2466,7 @@ Linux)
 	linux*)
 	;;
 	beos*)
-		TARGETLIB="\$(target_alias)/libSerial.la"
+		TARGETLIB="\$(target_alias)/librxtxSerial.la"
 		EXTENSION="cpp"
 		LDFLAGS="-ldevice"
 		echo ----------------------------
@@ -2476,7 +2476,7 @@ Linux)
 	freebsd*)
 	;;
 	solaris*)
-		TARGETLIB="\$(target_alias)/libSerial.la"
+		TARGETLIB="\$(target_alias)/librxtxSerial.la"
 		echo ----------------------------
 		echo $target_os
 		echo ----------------------------
@@ -2489,7 +2489,7 @@ Linux)
 	RXTX_PATH="\$(prefix)/lib"
 	JHOME=$JPATH/"lib"
 	CFLAGS=$CFLAGS" -D_NO_POSIX=1 -D_NO_XOPEN4=1"
-	TARGETLIB="\$(target_alias)/libSerial.la \
+	TARGETLIB="\$(target_alias)/librxtxSerial.la \
 			\$(target_alias)/libParallel.la"
 	case $JAVA_VERSION in
 	1.2*|1.3*|1.4*) 
@@ -2538,7 +2538,7 @@ Irix*)
 	CFLAGS=$CFLAGS" -I/usr/include"
 	CLASSPATH=".:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/RXTXcomm.jar:$CLASSPATH"
 	RXTX_PATH="\$(JPATH)/lib/\$(OS_ARCH)"
-	TARGETLIB="\$(target_alias)/libSerial.la"
+	TARGETLIB="\$(target_alias)/librxtxSerial.la"
 ;;
 
 #  since the os.name is different for UnixWare and OpenUNIX we could use it to
@@ -2551,7 +2551,7 @@ UnixWare|OpenUNIX)
 	JHOME=$JPATH/"jre/lib"
 	CFLAGS=$CFLAGS" -D_NO_POSIX=1 -D_NO_XOPEN4=1 -D__unixware__"
 	CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:\$(JPATH)/jre/lib/rt.jar:\$(JPATH)/jre/lib/ext/comm.jar"
-	TARGETLIB="\$(target_alias)/libSerial.so \
+	TARGETLIB="\$(target_alias)/librxtxSerial.so \
 		\$(target_alias)/libParallel.so"
 	COMPILE="\$(CC) \$(INCLUDES) \$(CPPFLAGS) \$(CFLAGS) \$(VERBOSE_IOEXCEPTIONS) -c "
 	LINK="\$(CC) \$(CFLAGS) \$(LDFLAGS)"
@@ -2562,7 +2562,7 @@ HP-UX)
 	LDFLAGS=-lpthread_this_may_be_wrong__trent
 	CFLAGS=$CFLAGS" -g -Aa +e -D__hpux__ -D_HPUX_SOURCE -D_NO_POSIX=1 -D_NO_XOPEN4=1"
 	RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
-	TARGETLIB="\$(target_alias)/libSerial.la"
+	TARGETLIB="\$(target_alias)/librxtxSerial.la"
 	case $JAVA_VERSION in
 		HP-UX\ Java\ C.01.2*|HP-UX\ Java\ C.01.3*) 
 			#fix_parameters $JPATH/jre/lib/javax.comm.properties
@@ -2611,7 +2611,7 @@ BeOS)
 	RXTX_PATH="\$(JPATH)/lib/"
 	CFLAGS=$CFLAGS" -D_NO_POSIX=1 -D_NO_XOPEN4=1"
 	CLASSPATH=".:\$(TOP):\$(TOP)/../src:\$(JPATH)/share/kaffe/Klasses.jar:\$(JPATH)/lib/RXTXcomm.jar:$CLASSPATH"
-	TARGETLIB="\$(target_alias)/libSerial.la"
+	TARGETLIB="\$(target_alias)/librxtxSerial.la"
 	EXTENSION="cpp"
 	LDFLAGS="-ldevice"
 #  sigh, from ltconfig 
@@ -2649,7 +2649,7 @@ WIN32)
 	else
 	WINDOWS_JAVA_INCLUDE="-I$WIN32INCLUDE -I$WIN32INCLUDE/win32"
 	fi
-	TARGETLIB="\$(target_alias)/Serial.dll"
+	TARGETLIB="\$(target_alias)/rxtxSerial.dll"
 ;;
 
 Mac\ OS\ X)
@@ -2657,7 +2657,7 @@ Mac\ OS\ X)
 	LINK="cc -bundle -framework CoreFoundation -framework IOKit -o lib\$*.jnilib "
 	OBJECT_EXTENSION="o"
 	LIB_EXTENSION="jnilib"
-	TARGETLIB="\$(target_alias)/libSerial.jnilib"
+	TARGETLIB="\$(target_alias)/librxtxSerial.jnilib"
 	RXTX_PATH="/usr/lib/java"
 	JHOME=$JPATH"/lib/ext"
 	CFLAGS=$CFLAGS" -bundle"
@@ -2669,7 +2669,7 @@ Mac\ OS\ X)
 
 Solaris*)
 	LDFLAGS=-lpthread
-	TARGETLIB="\$(target_alias)/libSerial.la \
+	TARGETLIB="\$(target_alias)/librxtxSerial.la \
 		\$(target_alias)/libParallel.la"
 	JHOME=$JPATH/"lib"
 	CFLAGS=$CFLAGS" -D_NO_POSIX=1 -D_NO_XOPEN4=1"
@@ -2687,7 +2687,7 @@ Solaris*)
 
 OS*2)
 # Place marker only
-	TARGETLIB="\$(target_alias)/libSerial.la"
+	TARGETLIB="\$(target_alias)/librxtxSerial.la"
 	RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
 	JHOME=$JPATH/"lib"
 	CFLAGS=$CFLAGS" -D_NO_POSIX=1 -D_NO_XOPEN4=1"
@@ -2696,7 +2696,7 @@ OS*2)
 ;;
 
 AIX)
-	TARGETLIB="\$(target_alias)/libSerial.la"
+	TARGETLIB="\$(target_alias)/librxtxSerial.la"
 	RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
 	JHOME=$JPATH/"lib"
 	CFLAGS=$CFLAGS" -D_NO_POSIX=1 -D_NO_XOPEN4=1"
@@ -2706,7 +2706,7 @@ AIX)
 
 Compaq\'s\ Digital\ Unix | OSF1 )
 	LDFLAGS=-lpthread
-	TARGETLIB="\$(target_alias)/libSerial.la"
+	TARGETLIB="\$(target_alias)/librxtxSerial.la"
 	RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
 	JHOME=$JPATH/"lib"
 	CFLAGS=$CFLAGS" -D_NO_POSIX=1 -D_NO_XOPEN4=1"
@@ -2716,7 +2716,7 @@ Compaq\'s\ Digital\ Unix | OSF1 )
 
 NetWare*)
 # Place marker only
-	TARGETLIB="\$(target_alias)/libSerial.la"
+	TARGETLIB="\$(target_alias)/librxtxSerial.la"
 	RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
 	JHOME=$JPATH/"lib"
 	CFLAGS=$CFLAGS" -D_NO_POSIX=1 -D_NO_XOPEN4=1"
@@ -2725,7 +2725,7 @@ NetWare*)
 ;;
 
 MPE*)
-	TARGETLIB="\$(target_alias)/libSerial.la"
+	TARGETLIB="\$(target_alias)/librxtxSerial.la"
 	RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
 	JHOME=$JPATH/"lib"
 	CFLAGS=$CFLAGS" -D_NO_POSIX=1 -D_NO_XOPEN4=1"
@@ -2733,7 +2733,7 @@ MPE*)
 ;;
 
 *)
-	TARGETLIB="\$(target_alias)/libSerial.la"
+	TARGETLIB="\$(target_alias)/librxtxSerial.la"
 	RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
 	JHOME=$JPATH/"lib"
 	CFLAGS=$CFLAGS" -D_NO_POSIX=1 -D_NO_XOPEN4=1"
