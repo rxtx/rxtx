@@ -2003,7 +2003,7 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(testRead)(
 	if ( LOCK( name ) )
 	{
 		(*env)->ReleaseStringUTFChars(env, tty_name, name);
-		LEAVE( "RXTXPort:testRead" );
+		LEAVE( "RXTXPort:testRead no lock" );
 		return JNI_FALSE;
 	}
 
@@ -2280,12 +2280,19 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(isPortPrefixValid)(JNIEnv *env,
 
 	ENTER( "RXTXCommDriver:isPortPrefixValid" );
 	for(i=0;i<64;i++){
+#if defined(__sun__)
+		/* Solaris uses /dev/cua/a instead of /dev/cua0 */
+		if( i > 25 ) break;
+		sprintf(teststring,"%s%s%c",DEVICEDIR, name, i + 97 );
+		fprintf(stderr, "testing: %s\n", teststring);
+#else 
 #if defined(_GNU_SOURCE)
 		snprintf(teststring, 256, "%s%s%i",DEVICEDIR,name, i);
 #else
 		sprintf(teststring,"%s%s%i",DEVICEDIR,name, i);
 #endif /* _GNU_SOURCE */
 		stat(teststring,&mystat);
+#endif /* __sun__ */
 /* XXX the following hoses freebsd when it tries to open the port later on */
 #ifndef __FreeBSD__
 		if(S_ISCHR(mystat.st_mode)){
@@ -3018,12 +3025,15 @@ int check_lock_pid( const char *file, int openpid )
 		This checks if the effective user is in group uucp so we can
 		create lock files.  If not we give them a warning and bail.
 		If its root we just skip the test.
+
+		if someone really wants to override this they can use the			USER_LOCK_DIRECTORY --not recommended.
 ----------------------------------------------------------*/
 int check_group_uucp()
 {
 	struct group *g = getgrnam( "uucp" );
 	struct passwd *user = getpwuid( geteuid() );
 
+#ifndef USER_LOCK_DIRECTORY
 	if( strcmp( user->pw_name, "root" ) )
 	{
 		while( *g->gr_mem )
@@ -3040,6 +3050,7 @@ int check_group_uucp()
 			return 1;
 		}
 	}
+#endif /* USER_LOCK_DIRECTORY */
 	return 0;
 }
 

@@ -98,16 +98,34 @@ public class RXTXCommDriver implements CommDriver
 		{
 			if (debug)
 				System.out.println("\nRXTXCommDriver:getValidPortPrefixes()\nThe following port prefixes have been identified as valid on " + osName + ":\n");
+/*
 			for(int j=0;j<returnArray.length;j++)
 			{
 				if (debug)
 					System.out.println("\t" + j + " " +
 						returnArray[j]);
 			}
+*/
 		}
 		return returnArray;
 	}
 
+	/** handle solaris/sunos /dev/cua/a convention */
+	private void checkSolaris(String PortName, int PortType)
+	{
+		char p[] =  { 91 };
+		for( p[0] =91 ;p[0] < 123; p[0]++ )
+		{
+			if (testRead(PortName.concat(new String(p)),PortType))
+			{
+				CommPortIdentifier.addPortName(
+					PortName.concat(new String(p)),
+					PortType,
+					this
+				);
+			}
+		}
+	}
 	private void registerValidPorts(
 		String CandidateDeviceNames[],
 		String ValidPortPrefixes[],
@@ -118,7 +136,7 @@ public class RXTXCommDriver implements CommDriver
 		if (debug)
 		{
 			System.out.println("Entering registerValidPorts()");
-	/*
+	/* */
 			System.out.println(" Candidate devices:");
 			for (int dn=0;dn<CandidateDeviceNames.length;dn++)
 				System.out.println("  "	+
@@ -126,7 +144,7 @@ public class RXTXCommDriver implements CommDriver
 			System.out.println(" valid port prefixes:");
 			for (int pp=0;pp<ValidPortPrefixes.length;pp++)
 				System.out.println("  "+ValidPortPrefixes[pp]);
-	*/
+	/* */
 		}
 		if ( CandidateDeviceNames!=null && ValidPortPrefixes!=null)
 		{
@@ -170,7 +188,10 @@ public class RXTXCommDriver implements CommDriver
 						System.out.println( CU +
 								" " + Cl );
 					}
-					if (testRead(PortName, PortType))
+					if( osName.equals("Solaris") ||
+						osName.equals("SunOS"))
+						checkSolaris(PortName,PortType);
+					else if (testRead(PortName, PortType))
 					{
 						CommPortIdentifier.addPortName(
 								PortName,
@@ -325,6 +346,59 @@ public class RXTXCommDriver implements CommDriver
 		if(osName.toLowerCase().indexOf("windows") != -1 )
 		{
 			String[] temp = { "COM1", "COM2","COM3","COM4" };
+			/*FIXME Untested , "COM5", COM6", COM7", "COM8"  */
+			CandidateDeviceNames=temp;
+		}
+		else if ( osName.equals("Solaris") || osName.equals("SunOS"))
+		{
+		/* Solaris uses a few different ways to identify ports.
+		   They could be /dev/term/a /dev/term0 /dev/cua/a /dev/cuaa
+		   the /dev/???/a appears to be on more systems.
+
+		   The uucp lock files should not cause problems.
+		*/
+/*
+			File dev = new File( "/dev/term" );
+			String deva[] = dev.list();
+			dev = new File( "/dev/cua" );
+			String devb[] = dev.list();
+			String[] temp = new String[ deva.length + devb.length ];
+			for(int j =0;j<deva.length;j++)
+				deva[j] = "term/" + deva[j]; 
+			for(int j =0;j<devb.length;j++)
+				devb[j] = "cua/" + devb[j];
+			System.arraycopy( deva, 0, temp, 0, deva.length );
+			System.arraycopy( devb, 0, temp,
+					deva.length, devb.length );
+			if( debug ) {
+				for( int j = 0; j< temp.length;j++)
+					System.out.println( temp[j] );
+			}
+			CandidateDeviceNames=temp;
+*/
+
+		/*
+
+			ok..  Look the the dirctories representing the port
+			kernel driver interface.
+
+			If there are entries there are possibly ports we can
+			use and need to enumerate.
+		*/
+
+			String term[] = new String[2];
+			int l = 0;
+			File dev = null;
+			
+			dev = new File( "/dev/term" );
+			if( dev.list().length > 0 );
+				term[l++] = new String( "term/" );
+			dev = new File( "/dev/cua0" );
+			if( dev.list().length > 0 );
+				term[l++] = new String( "cua/" );
+			String[] temp = new String[l];
+			for(l--;l >= 0;l--)
+				temp[l] = term[l];
 			CandidateDeviceNames=temp;
 		}
 		else
@@ -333,7 +407,6 @@ public class RXTXCommDriver implements CommDriver
 			String[] temp = dev.list();
 			CandidateDeviceNames=temp;
 		}
-
 		if (CandidateDeviceNames==null)
 		{
 			if (debug)
@@ -419,11 +492,12 @@ public class RXTXCommDriver implements CommDriver
 					};
 					CandidatePortPrefixes=Temp;
 				}
-				else if(osName.equals("Solaris"))
+				else if ( osName.equals("Solaris")
+						|| osName.equals("SunOS"))
 				{
 					String[] Temp = {
-						"term",
-						"cua"
+						"term/",
+						"cua/"
 					};
 					CandidatePortPrefixes=Temp;
 				}
