@@ -1183,11 +1183,11 @@ JNIEXPORT jboolean JNICALL RXTXPort(nativeSetParityErrorChar)( JNIEnv *env,
 		int fd = get_java_var( env, jobj,"fd","I" );
 
 		ENTER( "nativeSetParityErrorChar" );
-	#ifdef WIN32
+#ifdef WIN32
 		termiosSetParityError( fd, ( char ) value );
 		LEAVE( "nativeSetParityErrorChar" );
 		return( JNI_TRUE );
-	#else
+#else
 	/*
 	   arg!  I cant find a way to change it from \0 in Linux.  I think
 	   the frame and parity error characters are hardcoded.

@@ -64,7 +64,8 @@
 #	include <linux/lp.h>
 #endif
 #if defined(__FreeBSD__)
-#	include <machine/lpt.h>
+/* #	include <machine/lpt.h> ? is this changed or wrong */
+#	include <dev/ppbus/lpt.h>
 #endif
 #ifdef __unixware__
 #	include  <sys/filio.h>
