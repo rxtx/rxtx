@@ -978,10 +978,12 @@ final public class RXTXPort extends SerialPort
 		{
 			if (debug_verbose)
 				System.out.println("RXTXPort:SerialOutputStream:write(int)");
+	/* hmm this turns out to be a very bad idea
 			if ( monThreadisInterrupted == true )
 			{
 				throw new IOException( "Port has been Closed" );
 			}
+	*/
 			waitForTheNativeCodeSilly();
 			if ( fd == 0 ) throw new IOException();
 			writeByte( b );
@@ -996,10 +998,12 @@ final public class RXTXPort extends SerialPort
 			{
 				System.out.println("Entering RXTXPort:SerialOutputStream:write(" + b.length + ") "/* + new String(b)*/ );
 			}
+	/* hmm this turns out to be a very bad idea
 			if ( monThreadisInterrupted == true )
 			{
 				throw new IOException( "Port has been Closed" );
 			}
+	*/
 			if ( fd == 0 ) throw new IOException();
 			waitForTheNativeCodeSilly();
 			writeArray( b, 0, b.length );
@@ -1029,10 +1033,12 @@ final public class RXTXPort extends SerialPort
 				System.out.println("Entering RXTXPort:SerialOutputStream:write(" + send.length + " " + off + " " + len + " " +") " /*+  new String(send) */ );
 			}
 			if ( fd == 0 ) throw new IOException();
+	/* hmm this turns out to be a very bad idea
 			if ( monThreadisInterrupted == true )
 			{
 				throw new IOException( "Port has been Closed" );
 			}
+	*/
 			waitForTheNativeCodeSilly();
 			writeArray( send, 0, len );
 			if( debug )
@@ -1045,6 +1051,7 @@ final public class RXTXPort extends SerialPort
 			if (debug)
 				System.out.println("RXTXPort:SerialOutputStream:flush() enter");
 			if ( fd == 0 ) throw new IOException();
+	/* hmm this turns out to be a very bad idea
 			if ( monThreadisInterrupted == true )
 			{
 				return;
@@ -1054,6 +1061,7 @@ final public class RXTXPort extends SerialPort
 				*/
 				//throw new IOException( "flush() Port has been Closed" );
 			}
+	*/
 			waitForTheNativeCodeSilly();
 			nativeDrain();
 			if (debug)
@@ -1073,12 +1081,16 @@ final public class RXTXPort extends SerialPort
 		{
 			if (debug_verbose)
 				System.out.println("RXTXPort:SerialInputStream:read()");
+	/* hmm this turns out to be a very bad idea
 			if ( monThreadisInterrupted ) return( -1 ) ;
+	*/
 			if ( fd == 0 ) throw new IOException();
+	/* hmm this turns out to be a very bad idea
 			if ( monThreadisInterrupted == true )
 			{
 				throw new IOException( "Port has been Closed" );
 			}
+	*/
 			waitForTheNativeCodeSilly();
 			int result = readByte();
 			if (debug)
@@ -1095,10 +1107,12 @@ final public class RXTXPort extends SerialPort
 			int result;
 			if (debug_verbose)
 				System.out.println("RXTXPort:SerialInputStream:read(" + b.length + ")");
+	/* hmm this turns out to be a very bad idea
 			if ( monThreadisInterrupted == true )
 			{
 				throw new IOException( "Port has been Closed" );
 			}
+	*/
 			waitForTheNativeCodeSilly();
 			result = read( b, 0, b.length);
 			if (debug)
@@ -1166,10 +1180,12 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 			 */
 				Minimum = Math.min(Minimum, threshold);
 			}
+	/* hmm this turns out to be a very bad idea
 			if ( monThreadisInterrupted == true )
 			{
 				throw new IOException( "Port has been Closed" );
 			}
+	*/
 			waitForTheNativeCodeSilly();
 			result = readArray( b, off, Minimum);
 			if (debug)
@@ -1182,10 +1198,12 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	*/
 		public int available() throws IOException
 		{
+	/* hmm this turns out to be a very bad idea
 			if ( monThreadisInterrupted == true )
 			{
 				throw new IOException( "Port has been Closed" );
 			}
+	*/
 			int r = nativeavailable();
 			if ( debug_verbose && r > 0 )
 				System.out.println("available() returning " +
