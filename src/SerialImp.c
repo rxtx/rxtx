@@ -379,6 +379,12 @@ JNIEXPORT void JNICALL RXTXPort(nativeSetSerialPortParams)(
 	struct termios ttyset;
 	int fd = get_java_var( env, jobj,"fd","I" );
 	int cspeed = translate_speed( env, speed );
+	if (cspeed == -1)
+	{
+		throw_java_exception( env, UNSUPPORTED_COMM_OPERATION,
+			"nativeSetSerialPortParams", "Unsupported BaudRate" );
+		return;
+	}
 #ifdef TIOCGSERIAL
 	struct serial_struct sstruct;
 #endif /* TIOCGSERIAL */
@@ -508,7 +514,8 @@ fail:
    accept:     speed in bits-per-second
    perform:    convert bits-per-second to a speed_t constant
    return:     speed_t constant
-   exceptions: UnsupportedCommOperationException
+   exceptions: returns -1 and the calling method throws the exception so
+	       it may be caught in java.
    comments:   Only the lowest level code should know about
                the magic constants.
 ----------------------------------------------------------*/
@@ -554,10 +561,8 @@ int translate_speed( JNIEnv *env, jint speed )
 #endif  /* dima */
 	}
 
-	LEAVE( "RXTXPort:translate_speed" );
-	throw_java_exception( env, UNSUPPORTED_COMM_OPERATION,
-		"", "Baud rate not supported" );
-	return 0;
+	LEAVE( "RXTXPort:translate_speed: Error condition" );
+	return -1;
 }
 
 /*----------------------------------------------------------
