@@ -1,4 +1,4 @@
-This is PORTING  Thu Jun 14 12:48:33 MDT 2001
+This is PORTING  Tue Sep 18 11:01:54 MDT 2001
 
 If you want to port rxtx to a new Unix platform do the following.
 
@@ -23,8 +23,8 @@ SerialImp.c and ParallelImp.c may require system specific includes and possibly
 a small amount of #ifdef's in the code.  Lock file information will need to
 be added to SerialImp.h
 
-Finally, I've got this beast compiling on hp-ux but I think the compile flags
-need adjusting.  Keep that in mind while looking through the files.
+SerialImp.h will need defines for the location of lock files and the lock file
+type if they are used.  See BSD or Linux as examples.
 
 Common problems include the following varibles in the Makefile
 
