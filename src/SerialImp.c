@@ -72,6 +72,18 @@
 #if defined(__sun__)
 #	include <sys/filio.h>
 #	include <sys/mkdev.h>
+
+/*----------------------------------------------------------
+cfmakeraw
+
+   accept:      termios to be set to raw
+   perform:     initializes the termios structure.
+   return:      int 0 on success
+   exceptions:  none
+   comments:    this is how linux cfmakeraw works.
+		termios(3) manpage
+----------------------------------------------------------*/
+
 int cfmakeraw ( struct termios *term )
 {
 	term->c_iflag &= ~(IGNBRK|BRKINT|PARMRK|ISTRIP|INLCR|IGNCR|ICRNL|IXON);
@@ -185,6 +197,15 @@ JNIEXPORT jint JNICALL RXTXPort(open)(
 	struct termios ttyset;
 	int fd;
 	const char *filename = (*env)->GetStringUTFChars( env, jstr, 0 );
+	char message[80];
+
+	/* 
+		LOCK is one of three functions defined in SerialImp.h
+
+			uucp_lock		Solaris
+			fhs_lock		Linux
+			system_does_not_lock	Win32
+	*/
 
 	if ( LOCK( filename) )
 	{
@@ -194,7 +215,8 @@ JNIEXPORT jint JNICALL RXTXPort(open)(
 	}
 	else
 	{
-		fprintf( stderr, "locking worked for %s\n", filename );
+		sprintf( message, "locking worked for %s\n", filename );
+		report( message );
 	}
 
 	do {
@@ -225,7 +247,8 @@ JNIEXPORT jint JNICALL RXTXPort(open)(
 	fcntl( fd, F_SETFL, FASYNC );
 #endif /* FASYNC */
 
-	fprintf( stderr, "fd returned is %i\n", fd );
+	sprintf( message, "fd returned is %i\n", fd );
+	report( message );
 	return (jint)fd;
 
 fail:
@@ -249,6 +272,14 @@ JNIEXPORT void JNICALL RXTXPort(nativeClose)( JNIEnv *env,
 	int result;
 	int fd = get_java_var( env, jobj,"fd","I" );
 	const char *filename = (*env)->GetStringUTFChars( env, jstr, 0 );
+
+	/* 
+		UNLOCK is one of three functions defined in SerialImp.h
+
+			uucp_unlock		Solaris
+			fhs_unlock		Linux
+			system_does_not_unlock	Win32
+	*/
 
 	if (fd > 0)
 	{
@@ -586,12 +617,14 @@ JNIEXPORT void JNICALL RXTXPort(writeArray)( JNIEnv *env,
 {
 	int fd = get_java_var( env, jobj,"fd","I" );
 	int result=0,total=0,i;
-	struct timespec tspec,retspec;
 	unsigned char *bytes = (unsigned char *)malloc( count );
 	jbyte *body = (*env)->GetByteArrayElements( env, jbarray, 0 );
+#if defined ( __sun__ )
+	struct timespec retspec, tspec;
 
 	retspec.tv_sec = 0;
 	retspec.tv_nsec = 50000;
+#endif /* __sun */
 
 	for( i = 0; i < count; i++ ) bytes[ i ] = body[ i + offset ];
 	(*env)->ReleaseByteArrayElements( env, jbarray, body, 0 );
@@ -602,14 +635,29 @@ JNIEXPORT void JNICALL RXTXPort(writeArray)( JNIEnv *env,
 		}
 	}  while ((total<count)||(result < 0 && errno==EINTR));
 	free( bytes );
+	/*
+		50 ms sleep to make sure read can get in
+
+		what I think is happening here is the data writen is causing
+		signals, the event loop can't select with data available
+
+		I think things like BlackBox with 2 ports open are getting
+		signals for both the reciever and transmitter since they
+		are the same PID.
+
+		Things just start spinning out of control after that.
+	*/
+#if defined (__sun__ )
 	//do {
 	//	tspec = retspec;
 		nanosleep( &tspec, &retspec );
 	//} while( tspec.tv_nsec != 0 );
+#else
+	usleep(50000);
+#endif /* __sun__ */
 	if( result < 0 ) throw_java_exception( env, IO_EXCEPTION,
 		"writeArray", strerror( errno ) );
 }
-
 
 /*----------------------------------------------------------
 RXTXPort.drain
@@ -1156,9 +1204,11 @@ JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 	int has_tiocsergetlsr = 1;
 #endif /* TIOCSERGETLSR */
 	struct timeval tv_sleep;
-	struct timespec tspec,retspec;
+#if defined (__sun__)
+	struct timespec retspec, tspec;
 	retspec.tv_sec = 0;
 	retspec.tv_nsec = 100000000;
+#endif  /* __sun__ */
 
 	fd = get_java_var(env, jobj, "fd", "I");
 
@@ -1259,16 +1309,31 @@ JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 		omflags = mflags;
 
 		ioctl( fd, FIONREAD, &change );
+	/*
+		50 ms sleep to make sure read can get in
+
+		what I think is happening here is the data writen is causing
+		signals, the event loop can't select with data available
+
+		I think things like BlackBox with 2 ports open are getting
+		signals for both the reciever and transmitter since they
+		are the same PID.
+
+		Things just start spinning out of control after that.
+	*/
 		if( change )
 		{
 			if(!send_event( env, jobj, SPE_DATA_AVAILABLE, 1 ))
 			{
 				/* select wont block */
+#if defined (__sun__ )
 			//	do {
 			//		tspec = retspec;
 					nanosleep( &tspec, &retspec );
 			//	} while( tspec.tv_nsec != 0 );
-					/* usleep(100000); wont work on Solaris  */
+#else
+				usleep(100000);
+#endif /* __sun__ */
 			}
 		}
 	}
@@ -1299,6 +1364,14 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(testRead)(
 	int fd;
 	const char *name = (*env)->GetStringUTFChars(env, tty_name, 0);
 	int ret = JNI_TRUE;
+
+	/* 
+		LOCK is one of three functions defined in SerialImp.h
+
+			uucp_lock		Solaris
+			fhs_lock		Linux
+			system_does_not_lock	Win32
+	*/
 
 	if ( LOCK( name ) )
 	{
@@ -1374,6 +1447,15 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(testRead)(
 		tcsetattr( fd, TCSANOW, &saved_termios );
 		fcntl( fd, F_SETFL, saved_flags );
 	}
+
+	/* 
+		UNLOCK is one of three functions defined in SerialImp.h
+
+			uucp_unlock		Solaris
+			fhs_unlock		Linux
+			system_does_not_unlock	Win32
+	*/
+
 END:
 	UNLOCK(name);
 	(*env)->ReleaseStringUTFChars( env, tty_name, name );
@@ -1465,7 +1547,7 @@ registerKnownSerialPorts(JNIEnv *env, jobject jobj)
     } else {
         jclass cls = (*env)->GetObjectClass(env,jobj);
         jmethodID mid = (*env)->GetMethodID(
-            env, cls, "addPortName", "(Ljava/lang/String;I;Lgnu.io/CommDriver)Z");
+            env, cls, "addPortName", "(Ljava/lang/String;I;Lgnu/io/CommDriver)Z");
         if (mid == 0) {
             printf("getMethodID of CommDriver.addPortName failed\n");
         } else {
@@ -1806,6 +1888,7 @@ void report(char *msg)
 #endif /* DEBUG */
 }
 
+#ifndef WIN32
 /*----------------------------------------------------------
  fhs_lock
 
@@ -1823,7 +1906,6 @@ void report(char *msg)
 ----------------------------------------------------------*/
 int fhs_lock( const char *filename )
 {
-#ifndef WIN32
 	/*
 	 * There is a zoo of lockdir possibilities
 	 * Its possible to check for stale processes with most of them.
@@ -1842,7 +1924,7 @@ int fhs_lock( const char *filename )
 	sprintf( file, "%s/LCK..%s", LOCKDIR, p );
 	if ( check_lock_status( filename ) )
 	{
-		fprintf(stderr, "lockstatus fail\n");
+		fprintf(stderr, "fhs_lock() lockstatus fail\n");
 		return 1;
 	}
 	fd = open( file, O_CREAT | O_WRONLY | O_EXCL, 0666 );
@@ -1856,7 +1938,6 @@ int fhs_lock( const char *filename )
 	sprintf( lockinfo, "%10d\n",(int) getpid() );
 	write( fd, lockinfo, 11 );
 	close( fd );
-#endif /* !WIN32 */
 	return 0;
 }
 /*----------------------------------------------------------
@@ -1903,11 +1984,13 @@ int fhs_lock( const char *filename )
 ----------------------------------------------------------*/
 int uucp_lock( const char *filename )
 {
-#ifndef WIN32
-	char lockfilename[80], lockinfo[12];
+	char lockfilename[80], lockinfo[12], message[80];
 	char name[80];
 	int fd;
 	struct stat buf;
+
+	sprintf( message, "uucp_lock( %s );\n", filename ); 
+	report( message );
 
 	if ( check_lock_status( filename ) )
 	{
@@ -1947,36 +2030,7 @@ int uucp_lock( const char *filename )
 	}
 	write( fd, lockinfo,11 );
 	close( fd );
-#endif /* WIN32 */
 	return 0;
-}
-
-/*----------------------------------------------------------
- system_does_not_lock
-
-   accept:      the filename the system thinks should be locked.
-   perform:     avoid trying to create lock files on systems that dont use them
-   return:      0 for success ;)
-   exceptions:  none
-   comments:    OS's like Win32 may not have lock files.
-----------------------------------------------------------*/
-int system_does_not_lock( const char * filename )
-{
-	return 0;
-}
-
-/*----------------------------------------------------------
- system_does_not_unlock
-
-   accept:      the filename the system thinks should be locked.
-   perform:     avoid trying to create lock files on systems that dont use them
-   return:      none
-   exceptions:  none
-   comments:    OS's like Win32 may not have lock files.
-----------------------------------------------------------*/
-void system_does_not_unlock( const char * filename )
-{
-	return;
 }
 
 /*----------------------------------------------------------
@@ -2057,25 +2111,44 @@ void fhs_unlock( const char *filename )
 ----------------------------------------------------------*/
 void uucp_unlock( const char *filename )
 {
-#ifndef WIN32
 	struct stat buf;
-	char file[80],*p;
+	char file[80],*p, message[80];
 	int i;
 	/* FIXME */
 
+	sprintf( message, "uucp_unlock( %s );\n", filename );
+	report( message );
 	i = strlen(filename);
 	p = (char *) filename+i;
 	while( *(p-1) != '/' && i-- != 0) p--;
+	if ( stat( filename, &buf ) != 0 ) 
+	{
+		/* hmm the file is not there? */
+		report("uucp() unlock no such device\n");
+		return;
+	}
 	sprintf( file, LOCKDIR"/LK.%03d.%03d.%03d",
 		(int) major( buf.st_dev ),
 	 	(int) major( buf.st_rdev ),
 		(int) minor( buf.st_rdev )
 	);
+	if ( stat( file, &buf ) != 0 ) 
+	{
+		/* hmm the file is not there? */
+		report("uucp() unlock no such lockfile\n");
+		return;
+	}
 	if( !check_lock_pid( file ) )
 	{ 
+		sprintf( message, "uucp unlinking %s\n", file );
+		report( message );
 		unlink(file);
 	}
-#endif /* !WIN32 */
+	else
+	{
+		sprintf( message, "uucp unlinking failed %s\n", file );
+		report( message );
+	}
 }
 
 /*----------------------------------------------------------
@@ -2089,7 +2162,6 @@ void uucp_unlock( const char *filename )
 ----------------------------------------------------------*/
 int check_lock_pid( const char *file )
 {
-#ifndef WIN32
 	int fd;
 	char pid_buffer[12];
 
@@ -2108,7 +2180,6 @@ int check_lock_pid( const char *file )
 	{
 		return( 1 );
 	}
-#endif /* !WIN32 */
 	return( 0 );
 }
 /*----------------------------------------------------------
@@ -2125,7 +2196,6 @@ int check_lock_pid( const char *file )
 ----------------------------------------------------------*/
 int check_group_uucp()
 {
-#ifndef WIN32
 	struct group *g = getgrnam( "uucp" );
 	struct passwd *user = getpwuid( geteuid() );
 
@@ -2145,7 +2215,6 @@ int check_group_uucp()
 			return 1;
 		}
 	}
-#endif /* !WIN32 */
 	return 0;
 }
 
@@ -2162,7 +2231,6 @@ int check_group_uucp()
 ----------------------------------------------------------*/
 int is_device_locked( const char *filename )
 {
-#ifndef WIN32
 	const char *lockdirs[] = { "/etc/locks", "/usr/spool/kermit",
 		"/usr/spool/locks", "/usr/spool/uucp", "/usr/spool/uucp/",
 		"/usr/spool/uucp/LCK", "/var/lock", "/var/lock/modem",
@@ -2292,8 +2360,36 @@ int is_device_locked( const char *filename )
 			}
 		}
 	}
-#endif /* WIN32 */
 	return 0;
+}
+#endif /* WIN32 */
+
+/*----------------------------------------------------------
+ system_does_not_lock
+
+   accept:      the filename the system thinks should be locked.
+   perform:     avoid trying to create lock files on systems that dont use them
+   return:      0 for success ;)
+   exceptions:  none
+   comments:    OS's like Win32 may not have lock files.
+----------------------------------------------------------*/
+int system_does_not_lock( const char * filename )
+{
+	return 0;
+}
+
+/*----------------------------------------------------------
+ system_does_not_unlock
+
+   accept:      the filename the system thinks should be locked.
+   perform:     avoid trying to create lock files on systems that dont use them
+   return:      none
+   exceptions:  none
+   comments:    OS's like Win32 may not have lock files.
+----------------------------------------------------------*/
+void system_does_not_unlock( const char * filename )
+{
+	return;
 }
 
 /*----------------------------------------------------------
