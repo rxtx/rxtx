@@ -19,7 +19,6 @@
 #if defined(__MWERKS__)//dima
 #include "I2C.h"//dima
 #else//dima
-#include "I2C.h"
 #include "config.h"
 #include "gnu_io_I2C.h"
 #endif//dima
