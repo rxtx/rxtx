@@ -1,5 +1,46 @@
 This is TODO  Thu Jun 21 13:42:32 MDT 2001
 
+HIGH PRIORITY TODO's 
+
+The following TODO's will be implemented in the near future.
+
+1) Verify that the contrib/LeakTest1 does not illustrate a memory leak when
+   run on win32.  A noticable leak on linux happens after 8000 times through
+   the loop with jdk 1.2.  With jdk 1.4 the leak is not noticable.
+
+2) Win32 ports are always seen as COM1 through COM4.  (?)
+
+3) Verify that applications can see available ports even when the application
+   contains an underscore.  Probably a remnant of javax.comm.properties.
+
+4) Verify that ports are visable when the application is running from a
+   network drive.
+
+5)  Win32 is not abble to set BaudRate to 14499, 128000 or 256000.  See if
+    the API can support it.
+
+	* 14999 must be a typo?
+	* 128000 should work
+	* 256000 should work
+
+6)  Allow configurable DTR/RTS initial states.
+
+7) Verify that there are no threading issues on Solaris when trying to
+   open a port many times... (No big deal)
+
+8) Fix solaris locking (no big deal).
+ 
+
+Sat Jul 28 09:55:37 MDT 2001
+
+
+
+
+REMAINING TODOS
+
+The following TODO's are known to need work but will not be implmented in the
+near future.
+
 The system crashes with a NullPointException if you enable notifications
 before your register a listener.
  

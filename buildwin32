@@ -1,6 +1,6 @@
 rm -f config.cache config.h config.status
 export WIN32INCLUDE=/home/jarvi/RXTX/tools/win32-include
-export PATH=/usr/local/cross-tools/i386-mingw32/bin/:/bin:/usr/bin:/usr/java/jdk1.3/bin/:
+export PATH=/usr/local/cross-tools/i386-mingw32/bin/:/bin:/usr/bin:/usr/local/jdk1.2/bin/:
 ../configure --target=i386-mingw32 --host=i386-redhat-linux
 make
 #export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/java/jdk1.3/bin:/usr/local/cross-tools/i386-mingw32/bin/:/usr/local/cross-tools/i386-mingw32/bin
