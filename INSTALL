@@ -16,7 +16,7 @@
 |   License along with this library; if not, write to the Free
 |   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --------------------------------------------------------------------------*/
-This is the INSTALL file for RXTX.  Tue Sep 18 11:01:54 MDT 2001
+This is the INSTALL file for RXTX.  Tue Nov 13 14:28:41 MST 2001
 
 If, while following the instructions, you find this file unclear or incorrect 
 please make a note and email the details to trentjarvi@yahoo.com.  
@@ -28,13 +28,13 @@ CommAPI but out of respect for our friends at Sun the package name of 1.5 has
 been moved to gnu.io.  A script is offered in contrib/ChangePackage.sh that
 will switch source tree's between javax.comm and gnu.io.
 
-A not on Mac OS X:
-
-go to the MacOSX file for install instructions. 
-
 See Sun's CommAPI license for more details on why this decision was made.
 
 If you would like to use javax.comm, use rxtx 1.4 with Sun's CommAPI.
+
+A note on Mac OS X:
+
+	Go to the MacOSX file for install instructions. 
 
 1.  INSTALL INSTRUCTIONS IN OTHER LANGUAGES
 
@@ -105,10 +105,10 @@ A.  Japanese
 	The following packages are used to build rxtx:
 
 		autoconf-2.13
-		automake-1.4a
-		libtool-1.2f
-		gnu make-3.77
-		jdk 1.2+ or 1.1 	Preferably the native threads version of
+		automake-1.4
+		libtool-1.3.5
+		gnu make-3.79.1
+		jdk 1.1 or newer	Preferably the native threads version of
 		                        jdk. 
 
 	With the packages installed, proceed to build and install rxtx.
@@ -552,6 +552,13 @@ example
 will look kind of like Solaris, if you have created the appropriate
 device nodes.
 
+A note on Linux port enumeration.  We have set most ports aside.  Once the
+number of possible devices started getting into the thousands, checking them
+all made little sense.  Look in RXTXCommDriver.java and search for Linux.
+
+You will see that only /dev/ttyS* is searched but the possible addition ports
+that can be used are listed under it.  Just copy the few you need.
+
 R.  How can I use Lock Files with rxtx?
 
 RXTX uses lock files by default.  configure --disable-lockfiles to generate
@@ -584,6 +591,17 @@ User jarvi in this case can now use rxtx with lock files.
 The lock file code does not support kermit style lock files or lock files in
 /var/spool.  Its sure to fail if you're using subdirectories in /dev or do not
 have /dev.
+
+	Still cant get things to run under a root account?
+
+	Vadim Tkachenko writes:
+	
+	"Maybe you remember - couple of months back I've run into inability to
+	run the JDK 1.3+ from under root account.
+
+	Today, absolutely suddenly, something clicked in my head and the cause
+	was found: libsafe. To make JDK work, it is enough to disable libsafe
+	(unset LD_PRELOAD)."
 
 S.  How can I tell which version of rxtx is installed?
 
