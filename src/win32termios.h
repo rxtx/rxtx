@@ -25,16 +25,36 @@
 #include <windows.h>
 #include <sys/types.h>
 #include <io.h>
-#include <fcntl.h>
+#ifdef TRACE
+#	define ENTER(x) printf("entering "x" \n");
+#	define LEAVE(x) printf("leavine "x" \n");
+#else
+#	define ENTER(x)
+#	define LEAVE(x)
+#endif /* TRACE */
+#define YACK() \
+{ \
+	char *allocTextBuf; \
+	unsigned long nChars; \
+	unsigned int errorCode = GetLastError(); \
+	nChars = FormatMessage ( \
+		FORMAT_MESSAGE_ALLOCATE_BUFFER | \
+		FORMAT_MESSAGE_FROM_SYSTEM, \
+		NULL, \
+		errorCode, \
+		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), \
+		(LPSTR)&allocTextBuf, \
+		16, \
+		NULL ); \
+	fprintf( stderr, "Error 0x%x at %s(%d): %s", errorCode, __FILE__, __LINE__, allocTextBuf); \
+	LocalFree(allocTextBuf); \
+}
 
 typedef unsigned char   cc_t;
 typedef unsigned int    speed_t;
 typedef unsigned int    tcflag_t;
 
-/* garbage to get compiling */
-//#define SSIZE_MAX 0
-/*#define SIG_IGN 0*/
-#define SIGIO 0
+
 
 #define NCCS 32
 struct termios
@@ -53,17 +73,18 @@ struct termios
  *  custom_divisor
  */
 struct serial_struct {
+/*
+	Mainly we are after baud_base/custom_diviser to match
+	the ioctl() in SerialImp.c
+*/
 	int custom_divisor;   /* use to set unsupported speeds */
 	int baud_base;        /* use to set unsupported speeds */
 
-/*
- * 	not used:
 	unsigned short	close_delay, closing_wait, iomem_reg_shift;
 	int type, line, irq, flags, xmit_fifo_size, hub6;
 	unsigned int	port, port_high;
 	char		io_type;
 	unsigned char	*iomem_base;
-*/
 };
 struct serial_icounter_struct {
 	int cts;		/* clear to send count */
@@ -253,7 +274,7 @@ void cfmakeraw(struct termios *s_termios);
 #define  B9600	0000015
 #define  B19200	0000016
 #define  B38400	0000017
-#define  B57600   0010001
+#define  B57600	  0010001
 #define  B115200  0010002
 #define  B230400  0010003
 #define  B460800  0010004
@@ -268,6 +289,14 @@ void cfmakeraw(struct termios *s_termios);
 #define  B3000000 0010015
 #define  B3500000 0010016
 #define  B4000000 0010017
+
+/* glue for unsupported linux speeds see also SerialImp.h.h */
+
+#define B14400		1010001
+#define B28800		1010002
+#define B128000		1010003
+#define B256000		1010004
+
 #define EXTA B19200
 #define EXTB B38400
 #define CSIZE	0000060
@@ -303,7 +332,9 @@ void cfmakeraw(struct termios *s_termios);
 #define IEXTEN  0100000
 
 /* glue for unsupported windows speeds */
+
 #define CBR_230400	230400
+#define CBR_28800	28800
 #define CBR_460800	460800
 #define CBR_500000	500000
 #define CBR_576000	576000
@@ -316,12 +347,6 @@ void cfmakeraw(struct termios *s_termios);
 #define CBR_3000000	3000000
 #define CBR_3500000	3500000
 #define CBR_4000000	4000000
-
-/* glue for unsupported linux speeds */
-
-#define B14400		0010100
-#define B128000		0010101
-#define B256000		0010102
 
 
 /* Values for the ACTION argument to `tcflow'.  */
@@ -350,6 +375,7 @@ void cfmakeraw(struct termios *s_termios);
 #define TIOCMSET	0x5418
 #define TIOCGSOFTCAR	0x5419
 #define TIOCSSOFTCAR	0x541a
+#define TIOCSER_TEMP	0x01
 // #define FIONREAD	0x541b
 #define TIOCGSERIAL	0x541e
 #define TIOCSSERIAL	0x541f
@@ -362,10 +388,12 @@ void cfmakeraw(struct termios *s_termios);
 #define TIOCSERGETMULTI	0x545a
 #define TIOCSERSETMULTI	0x545b
 #define TIOCMIWAIT	0x545c
-#define TIOCGICOUNT	0x545d
+/* this would require being able to get the number of overruns ... */
+/* #define TIOCGICOUNT	0x545d */
 
 /* ioctl errors */
 #define ENOIOCTLCMD	515
+#define EBADFD		 77
 /* modem lines */
 #define TIOCM_LE    0x001
 #define TIOCM_DTR   0x002
