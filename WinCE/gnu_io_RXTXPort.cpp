@@ -409,7 +409,7 @@ JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_NativeEnableReceiveTimeoutThreshold(
     return;
   }
 
-  /* ------ from javax.CommPort javadoc ------------------------------------------------------------------
+  /* ------ from javax.comm.CommPort javadoc -------------------------------------------------------------
   |    Threshold   |    Timeout   |Read Buffer Size | Read Behaviour
   |State   |Value  |State   |Value|                 |
   |disabled|  -    |disabled| -   |    n bytes      | block until any data is available 
@@ -417,39 +417,32 @@ JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_NativeEnableReceiveTimeoutThreshold(
   |disabled|  -    |enabled |x ms |    n bytes      | block for x ms or until any data is available 
   |enabled |m bytes|enabled |x ms |    n bytes      | block for x ms or until min(m,n) bytes are available 
   --------------------------------------------------------------------------------------------------------
+  
+  Enabling the Timeout OR Threshold with a value a zero is a special case. 
+  This causes the underlying driver to poll for incoming data instead being event driven. 
+  Otherwise, the behaviour is identical to having both the Timeout and Threshold disabled.
   */
 
   // Following is based on my understanding of timeout parameters meaning.
-  // Not completely correct (threshold?!)
+  // Not completely precise (threshold?!)
+
   if(time == 0)
-  {
-    if(threshold == 0)
-    {
-      CommTimeouts.ReadIntervalTimeout = 0;  
-      CommTimeouts.ReadTotalTimeoutMultiplier = 0;  
-      CommTimeouts.ReadTotalTimeoutConstant = MAXDWORD;    
-    }
-    else
-    {
-      CommTimeouts.ReadIntervalTimeout = 0;  
-      CommTimeouts.ReadTotalTimeoutMultiplier = 0;  
-      CommTimeouts.ReadTotalTimeoutConstant = MAXDWORD;    
-    }
+  { // polling mode - return if no data
+    CommTimeouts.ReadIntervalTimeout = MAXDWORD;  
+    CommTimeouts.ReadTotalTimeoutMultiplier = MAXDWORD;  
+    CommTimeouts.ReadTotalTimeoutConstant = 1;    
+  } 
+  else if(time == -1)
+  { // disable timeout
+    CommTimeouts.ReadIntervalTimeout = 0;  
+    CommTimeouts.ReadTotalTimeoutMultiplier = 0;  
+    CommTimeouts.ReadTotalTimeoutConstant = 0;    
   }
   else
-  {
-    if(threshold == 0)
-    {
-      CommTimeouts.ReadIntervalTimeout = MAXDWORD;  
-      CommTimeouts.ReadTotalTimeoutMultiplier = MAXDWORD;  
-      CommTimeouts.ReadTotalTimeoutConstant = time;    
-    }
-    else
-    {
-      CommTimeouts.ReadIntervalTimeout = MAXDWORD;  
-      CommTimeouts.ReadTotalTimeoutMultiplier = MAXDWORD;  
-      CommTimeouts.ReadTotalTimeoutConstant = time;    
-    }
+  { // set timeout
+    CommTimeouts.ReadIntervalTimeout = 0;  
+    CommTimeouts.ReadTotalTimeoutMultiplier = 0;  
+    CommTimeouts.ReadTotalTimeoutConstant = time;    
   }
 
   // Set the time-out parameters for all read and write operations
@@ -1101,7 +1094,7 @@ JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_eventLoop(JNIEnv *env, jobject jobj)
       EventInfo->eventThreadReady = false;
     }
 
-    if((dwWaitResult = WaitForSingleObject(EventInfo->eventHandle, 500)) == WAIT_FAILED)
+    if((dwWaitResult = WaitForSingleObject(EventInfo->eventHandle, 250)) == WAIT_FAILED)
     {
       IF_DEBUG
       (
