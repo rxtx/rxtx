@@ -24,7 +24,17 @@
 #include <stdio.h>
 #include <errno.h>
 #include "win32termios.h"
-#include "malloc.h"
+/*
+ * odd malloc.h error with lcc compiler
+ * winsock has FIONREAD with lcc
+ */
+
+#ifdef __LCC__
+#   include <winsock.h>
+#else
+#   include <malloc.h>
+#endif
+
 
 #define SIZE 64	/* number of serial ports */
 int my_errno;
@@ -728,8 +738,15 @@ int fcntl(int fd, int command, int arg) {
 	fprintf(stderr, "FIXME: fcntl(%d, %#o, %#o)\n", fd, command, arg);
 	return 0;
 }
+
+/*
+ * lcc has a select in winsock.h
+ * trying to use the select() in wsock32.lib
+ */
+#ifndef __LCC__
+
 int  serial_select(int  n,  fd_set  *readfds,  fd_set  *writefds, fd_set *exceptfds, struct timeval *timeout) {
 	return 1;
 	/* FIXME */
 }
-
+#endif
