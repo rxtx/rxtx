@@ -372,9 +372,16 @@ Flow Control defines inspired by reading how mgetty by Gert Doering does it
 #ifdef DEBUG_MW
 extern void mexWarnMsgTxt( const char * );
 extern void mexErrMsgTxt( const char * );
+#ifndef __APPLE__
 extern int mexPrintf( const char *, ... );
 #	define printf mexPrintf
+#endif
 #endif /* DEBUG_MW */
+
+#ifdef __APPLE__
+#   define mexPrintf printf
+#endif
+
 #ifdef __BEOS__
 struct tpid_info_struct *add_tpid( struct tpid_info_struct * );
 data_rate translate_speed( JNIEnv*, jint  );
