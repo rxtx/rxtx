@@ -156,7 +156,7 @@ $(SRC)/Parallel.def:	$(PARALLELOBJECTS)
 
 rxtxZystem.dll:	RXTXcomm.jar $(DLLOBJECTS) #ZystemImp.o $(SRC)/Zystem.def
 	gcc  -c -DBUILDING_DLL=1 -D_DLL=1  -I. -Ic:/jdk13/include -Ic:/jdk13/include/win32  -Wall -O2 -D __int64="long long" -o ZystemImp.o $(SRC)/ZystemImp.c
-	dllwrap --verbose --no-default-excludes --export-all-symbols --output-exp Zystem.exp --output-def Zystem.def --add-stdcall-alias --driver-name gcc  -o rxtxZystem.dll ZystemImp.o libmex.dll -Wl,-e,__cygwin_noncygwin_dll_entry@12 -s
+	dllwrap --verbose --no-default-excludes --export-all-symbols --output-exp Zystem.exp --output-def Zystem.def --add-stdcall-alias --driver-name gcc  -o rxtxZystem.dll ZystemImp.o -Wl,-e,__cygwin_noncygwin_dll_entry@12 -s
 
 #rxtxZystem.dll:	RXTXcomm.jar $(DLLOBJECTS) ZystemImp.o $(SRC)/Zystem.def
 	#$(LD) --base-file Zystem.base --dll -o rxtxZystem.dll $(DLLOBJECTS) \
