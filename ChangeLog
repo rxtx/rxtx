@@ -1,18 +1,54 @@
-This is ChangeLog Wed Jun 20 10:47:21 MDT 2001
+This is ChangeLog Sun Oct 14 14:13:12 MDT 2001
 
 rxtx-1.5 and rxtx-1.4 changes are kept in the same file.  skip to the version
 you downloaded.
 
-1.5-5  Sep 28, 2001   Merged with rxtx-1.4
+1.5-6  Oct 14, 2001   Mac OS X port to Code Warrier
+		      Documentation of the above
+		      possible double deletion fix
+		      all by Dmitry Markman <dmarkman@mac.com>
+		      Specified port fixes
+		      Santiago Nicolau <nicolaus@ing.unlpam.edu.ar>
+		      Merged with rxtx-1.4
+		      comm.jar renamed to RXTXcomm.jar to avoid confusion.
+		      port enumeration fixes
+		      multiple win32 fixes
+		      lockfile fixes for native threads
+		      thread fixes, thread test added.
+		      user defined lock directory support.
+		      Many more forgotten.
+1.5-5 Oct  4, 2001    Lock file fixes and other <wroberts1@home.com>
+                      null termination of strings in lock_file
+		      <rob@pitman.co.za>
+		      If you had problems with green threads jdk the above will
+		      probably help.
+                      Documentation of libsecure issues while running as root
+		      Vadim Tkachenko <vt@freehold.crocodile.org>
+		      Code Warrior build files for Mac OS X 
+		      Dmitry Markman <dimitry.markman@verizon.net>
+		      win32 fixes and enhancments.
 		      win32 fixes <wroberts1@home.com>
-		      more Mac OS X port fixes (still not finding system libs)
+		      Initial Solaris port
+		      initial Mac OS X port
+		      Joseph Goldstone <joseph@lp.com>
                       Paul Tokarchuk <ptokarchuk@sympatico.ca>
+		      package renamed to gnu.io
 		      Memory leak Cleanups
 		      cross-compile fixes
+		      more windows fixes.
+		      more ioctl support for windows
+		      more fcntl suppport for windows
+		      misc changes to windows
 		      Makefile for building on mingw32 systems in DOS
-		      More work on Mac OS X port
+		      uucp_lock file support
+		      Many thanks to Mathworks for Making it happen.
+		      symbolic link lock files now work (Mandrake)
+		      peter.beelen@philips.com
+		      Configure.in fixes for permission issues
+		      Vadim Tkachenko <vt@freehold.crocodile.org>
+		      Closed memleaks on open()/close()
+                      registered port support.
 		      Joseph Goldstone <joseph@lp.com>
-		      minor cleanups
 1.5-4  Jan 26, 2001   Irix build fixes (still needs CFLAGS fixed?)
 		      Michael Delgadillo <delgadil@ymi.com>
 		      Windows build support with lcc
@@ -37,9 +73,13 @@ you downloaded.
 		      Added RawIO classes and read/write/open/close functions.
 		      Jim Garvin <jgarvin@gardelsoftware.com>
 1.5-1  Mar  7, 2000   RS485 write support.  comm.jar implemented.
-		      Stallion Card support 
+		      Stallion Card support
 		      Greg Luck <gluck@tempo-services.com.au>
 		      CommPort enumeration with rxtx's comm.jar
+1.4-13 Oct 14, 2001   see rxtx-1.5-6
+1.4-12 Oct 10, 2001   see rxtx-1.5-6
+1.4-11 Oct  4, 2001   see rxtx-1.5-6
+1.4-10 Aug 31, 2001   see rxtx-1.5-5
 1.4-9  Jun 21, 2001   Steve Drach <drach@eng.sun.com>
                       Minor fix of error reporting in lockfiles
 		      Mac OS X port Joseph Goldstone <joseph@lp.com>
