@@ -18,8 +18,12 @@
 --------------------------------------------------------------------------*/
 #include "config.h"
 #include "javax_comm_RXTXPort.h"
+#ifndef __LCC__ 
+#   include <unistd.h>
+#else /* windows lcc compiler for fd_set. probably wrong */
+#   include<winsock.h>
+#endif
 #include <time.h>
-#include <unistd.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -29,6 +33,9 @@
 #include <sys/ioctl.h>
 #include <sys/param.h>
 #include <sys/utsname.h>
+#else
+#	include <win32termios.h>
+#endif /* WIN32 */
 #ifdef HAVE_TERMIOS_H
 #	include <termios.h>
 #endif
@@ -38,12 +45,12 @@
 #ifdef HAVE_SYS_SIGNAL_H
 #   include <sys/signal.h>
 #endif
-#else
-#	include <win32termios.h>
-#endif /* WIN32 */
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/time.h>
+#ifdef HAVE_SYS_TIME_H
+#   include <sys/time.h>
+#endif
+#   include <fcntl.h>
 #ifdef HAVE_SYS_FCNTL_H
 #   include <sys/fcntl.h>
 #endif
@@ -757,7 +764,7 @@ read_byte_array
 int read_byte_array( int fd, unsigned char *buffer, int length, int timeout )
 {
 	int ret, left, bytes = 0;
-	fd_set rfds;
+        struct fd_set rfds;
 	struct timeval sleep;
 	struct timeval *psleep=&sleep;
 
@@ -1120,10 +1127,7 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(isDeviceGood)(JNIEnv *env,
 		sprintf(teststring,"%s%s%i",DEVICEDIR,name, i);
 #endif /* _GNU_SOURCE */
 		stat(teststring,&mystat);
-#ifndef WIN32
-		if(S_ISCHR(mystat.st_mode))
-#endif /* WIN32 */
-		{
+		if(S_ISCHR(mystat.st_mode)){
 			fd=open(teststring,O_RDONLY|O_NONBLOCK);
 			if (fd>0){
 				close(fd);
