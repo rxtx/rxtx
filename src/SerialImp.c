@@ -2910,6 +2910,131 @@ RXTXPort.readByte
 	        is thrown, or end of stream.
    return:      The byte read
    exceptions:  IOException
+   comments:
+
+On Fri, 30 Aug 2002, Bill Smith wrote:
+
+I agree, the documentation isn't the best. No surprises there. 
+
+I did do a test using the sun/win32 comm driver with read() and retrieve 
+timeout enabled. It blocked until the timeout expired, then returned a -1. 
+This seems to jive with the way I'm reading it which is the javax.comm 
+comments regarding read (in the CommPort.getInputStream stuff)
+extends/overrides 
+the documentation for java.io.InputStream.
+
+This is the same behavior that the Windriver driver for vxworks exhibits.
+
+On Fri, 30 Aug 2002, Bill Smith wrote:
+
+> Hi Trent,
+> 
+> I have a couple of questions/comments.
+> 
+> 1) I noticed in the thread last night and in the code changes this morning that you
+>    now have readByte() (which is called from the input stream read(), to block
+>    forever. I pulled the following info from the javax.comm doc for the CommPort class in
+>    getInputStream().
+> 
+>    The way I interpret that is that read() just like read(byte[]), and read(byte[], int, int),
+>    show only block indefinitely if timeout is disabled. The sun implementation for win32 (as 
+>    well as the one we have for vxworks) returns a -1 when it times out.
+> 
+
+Doing what Sun does is going to the least hassle.  The documentation was a 
+little unclear to me.  I assume this is the CommPort.getInputStream 
+comment that you mention 
+
+        The read behaviour of the input stream returned by getInputStream
+        depends on combination of the threshold and timeout values. The
+        possible behaviours are described in the table below: ... 
+
+But InputStream is where read(byte) is documented
+http://java.sun.com/j2se/1.3/docs/api/java/io/InputStream.html#read()
+
+        Reads the next byte of data from the input stream. The value byte
+        is returned as an int in the range 0 to 255. If no byte is
+        available because the end of the stream has been reached, the value 
+        -1 is returned. This method blocks until input data is
+        available, the end of the stream is detected, or an exception is 
+        thrown
+
+If you are sure commapi is doing a timeout and returning -1, I can change 
+it back and document the issue.
+
+Because I often grep my own mailbox for details, I'm going to add
+these two comments also:
+
+        public int read(byte[] b)
+)
+http://java.sun.com/j2se/1.3/docs/api/java/io/InputStream.html#read(byte[])
+
+        Reads some number of bytes from the input stream and stores them 
+        into the buffer array b. The number of bytes actually read is 
+        returned as an integer. This method blocks until input data is
+        available, end of file is detected, or an exception is thrown. 
+
+        If b is null, a NullPointerException is thrown. If the length of b 
+        is zero, then no bytes are read and 0 is returned; otherwise, 
+        there is an attempt to read at least one byte. If no byte is 
+        available because the stream is at end of file, the value -1 is 
+        returned; otherwise, at least one byte is read and stored into b. 
+
+So read(byte[] b) is documented as blocking for the first byte.
+
+public int read(byte[] b,int off,int len)
+http://java.sun.com/j2se/1.3/docs/api/java/io/InputStream.html#read(byte[],
+int, int)
+
+        Reads up to len bytes of data from the input stream into an array of 
+        bytes. An attempt is made to read as many as len bytes, but a 
+        smaller number may be read, possibly zero. The number of bytes 
+        actually read is returned as an integer. 
+
+Which makes sense with the timeout documentation.
+
+<snip>threshold comment  I'll look at that next.  I thought those changes 
+where in the ifdefed code.  I'll take a second look and reply.
+
+> 
+> Thoughts? Comments?
+> 
+> Bill
+> 
+> ----------------------
+> 
+> public abstract InputStream getInputStream() throws IOException
+> 
+> 
+> Returns an input stream. This is the only way to receive data from the
+communications
+> port. If the port is unidirectional and doesn't support receiving data, then 
+> getInputStream returns null.
+> 
+> The read behaviour of the input stream returned by getInputStream depends on 
+> combination of the threshold and timeout values. The possible behaviours are 
+> described in the table below: 
+> 
+> 
+>    Threshold             Timeout        Read Buffer    Read Behaviour
+> State     Value       State     Value       Size   
+>
+-----------------------------------------------------------------------------------
+> disabled    -         disabled    -       n bytes      block until any data is available
+> 
+> enabled   m bytes     disabled    -       n bytes      block until min(m,n) bytes are available
+> 
+> disabled    -         enabled   x ms      n bytes      block for x ms or
+until any data is available
+> 
+> enabled   m bytes     enabled   x ms      n bytes      block for x ms or
+until min(m,n) bytes are available
+> 
+> Returns: InputStream object that can be used to read from the port 
+> 
+> Throws: IOException if an I/O error occurred
+
+
 ----------------------------------------------------------*/
 JNIEXPORT jint JNICALL RXTXPort(readByte)( JNIEnv *env,
 	jobject jobj )
@@ -2917,11 +3042,12 @@ JNIEXPORT jint JNICALL RXTXPort(readByte)( JNIEnv *env,
 	int bytes;
 	unsigned char buffer[ 1 ];
 	int fd = get_java_var( env, jobj,"fd","I" );
+	int timeout = get_java_var( env, jobj, "timeout", "I" );
 	char msg[80];
 
 	ENTER( "RXTXPort:readByte" );
 	report_time_start( );
-	bytes = read_byte_array( env, &jobj, fd, buffer, 1, -1 );
+	bytes = read_byte_array( env, &jobj, fd, buffer, 1, timeout );
 	if( bytes < 0 ) {
 		LEAVE( "RXTXPort:readByte" );
 		throw_java_exception( env, IO_EXCEPTION, "readByte",
