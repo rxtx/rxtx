@@ -17,42 +17,26 @@
 |   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --------------------------------------------------------------------------*/
 
-/* javax.comm.SerialPort constants */
-
-#ifdef WIN32
-/* from winbase.h */
-#undef DATABITS_5
-#undef DATABITS_6
-#undef DATABITS_7
-#undef PARITY_NONE
-#undef PARITY_ODD
-#undef PARITY_EVEN
-#undef PARITY_MARK
-#undef PARITY_SPACE
-#endif
-
-#define DATABITS_5		5
-#define DATABITS_6		6
-#define DATABITS_7		7
-#define DATABITS_8		8
-
-#define PARITY_NONE		0
-#define PARITY_ODD		1
-#define PARITY_EVEN		2
-#define PARITY_MARK		3
-#define PARITY_SPACE		4
-
+/* gnu.io.SerialPort constants */
+#define JDATABITS_5		5
+#define JDATABITS_6		6
+#define JDATABITS_7		7
+#define JDATABITS_8		8
+#define JPARITY_NONE		0
+#define JPARITY_ODD		1
+#define JPARITY_EVEN		2
+#define JPARITY_MARK		3
+#define JPARITY_SPACE		4
 #define STOPBITS_1		1
 #define STOPBITS_2		2
 #define STOPBITS_1_5		3
-
 #define FLOWCONTROL_NONE	0
 #define FLOWCONTROL_RTSCTS_IN	1
 #define FLOWCONTROL_RTSCTS_OUT	2
 #define FLOWCONTROL_XONXOFF_IN	4
 #define FLOWCONTROL_XONXOFF_OUT	8
 
-/* javax.comm.SerialPortEvent constants */
+/* gnu.io.SerialPortEvent constants */
 #define SPE_DATA_AVAILABLE       1
 #define SPE_OUTPUT_BUFFER_EMPTY  2
 #define SPE_CTS                  3
@@ -70,45 +54,59 @@
 #define PORT_RS485		 4
 #define PORT_RAW		 5
 
+/* glue for unsupported linux speeds see also win32termios.h */
+
+#define B14400		1010001
+#define B28800		1010002
+#define B128000		1010003
+#define B256000		1010004
+
+
 /*  Ports known on the OS */
 #if defined(__linux__)
 #	define DEVICEDIR "/dev/"
 #	define LOCKDIR "/var/lock"
+#	define FHS
 #endif /* __linux__ */
 #if defined(__sgi__) || defined(sgi)
 #	define DEVICEDIR "/dev/"
 #	define LOCKDIR "/usr/spool/uucp"
+#	define UUCP
 #endif /* __sgi__ || sgi */
 #if defined(__FreeBSD__)
 #	define DEVICEDIR "/dev/"
-/* see SerialImp.c fhs_lock() & fhs_unlock() */
 #	define LOCKDIR "/var/spool/uucp/"
+#	define UUCP
 #endif
 #if defined(__APPLE__)
 #	define DEVICEDIR "/dev/"
-/* see SerialImp.c fhs_lock() & fhs_unlock() */
 #	define LOCKDIR "/var/spool/uucp/"
 #endif /* __FreeBSD__ */
 #if defined(__NetBSD__)
 #	define DEVICEDIR "/dev/"
 #	define LOCKDIR "/usr/spool/uucp"
+#	define UUCP
 #endif /* __NetBSD__ */
 #if defined(__hpux__)
 /* modif cath */
 #	define DEVICEDIR "/dev/"
 #	define LOCKDIR "/usr/spool/uucp"
+#	define UUCP
 #endif /* __hpux__ */
 #if defined(__osf__)  /* Digital Unix */
 #	define DEVICEDIR "/dev/"
 #	define LOCKDIR ""
+#	define UUCP
 #endif /* __osf__ */
 #if defined(__sun__) /* Solaris */
 #	define DEVICEDIR "/dev/"
-#	define LOCKDIR "/var/spool/lock"
+#	define LOCKDIR "/var/spool/locks"
+#	define UUCP
 #endif /* solaris */
 #if defined(__BEOS__)
 #	define DEVICEDIR "/dev/ports/"
 #	define LOCKDIR ""
+#	define UUCP
 #endif /* __BEOS__ */
 #if defined(WIN32)
 #	define DEVICEDIR ""
@@ -116,13 +114,23 @@
 #endif /* WIN32 */
 
 /*  That should be all you need to look at in this file for porting */
+#ifdef UUCP
+#	define LOCK uucp_lock
+#	define UNLOCK uucp_unlock
+#elif defined(FHS)
+#	define LOCK fhs_lock
+#	define UNLOCK fhs_unlock
+#else /* FSH */
+#	define LOCK system_does_not_lock
+#	define UNLOCK system_does_not_unlock
+#endif /* UUCP */
 
 /* java exception class names */
-#define UNSUPPORTED_COMM_OPERATION "javax/comm/UnsupportedCommOperationException"
+#define UNSUPPORTED_COMM_OPERATION "gnu.io/UnsupportedCommOperationException"
 #define ARRAY_INDEX_OUT_OF_BOUNDS "java/lang/ArrayIndexOutOfBoundsException"
 #define OUT_OF_MEMORY "java/lang/OutOfMemoryError"
 #define IO_EXCEPTION "java/io/IOException"
-#define PORT_IN_USE_EXCEPTION "javax/comm/PortInUseException"
+#define PORT_IN_USE_EXCEPTION "gnu.io/PortInUseException"
 
 /* some popular releases of Slackware do not have SSIZE_MAX */
 
@@ -162,7 +170,6 @@ Flow Control defines inspired by reading how mgetty by Gert Doering does it
 #	endif
 #endif
 
-
 /* PROTOTYPES */
 #ifdef __BEOS__
 data_rate translate_speed( JNIEnv*, jint  );
@@ -182,8 +189,19 @@ int send_event(JNIEnv *, jobject, jint, int );
 void dump_termios(char *,struct termios *);
 void report(char *);
 void throw_java_exception( JNIEnv *, char *, char *, char * );
-void fhs_unlock(const char *);
-int fhs_lock(const char *);
+int lock_device( const char * );
+void unlock_device( const char * );
+int is_device_locked( const char * );
+int check_lock_status( const char * );
+void fhs_unlock(const char * );
+int fhs_lock( const char *);
+void uucp_unlock( const char * );
+int uucp_lock( const char * );
+int system_does_not_lock( const char * );
+void system_does_not_unlock( const char * );
+int check_group_uucp();
+int check_lock_pid( const char * );
 
+#define UNEXPECTED_LOCK_FILE "RXTX Error:  Unexpected lock file: %s\n Please report to the RXTX developers\n"
 #define LINUX_KERNEL_VERSION_ERROR "\n\n\nRXTX WARNING:  This library was compiled to run with OS release %s and you are currently running OS release %s.  In some cases this can be a problem.  Try recompiling RXTX if you notice strange behavior.  If you just compiled RXTX make sure /usr/include/linux is a symbolic link to the include files that came with the kernel source and not an older copy.\n\n\npress enter to continue\n"
 #define UUCP_ERROR "\n\n\nRXTX WARNING:  This library requires the user running applications to be in\ngroup uucp.  Please consult the INSTALL documentation.  More information is\navaiable under the topic 'How can I use Lock Files with rxtx?'\n" 
