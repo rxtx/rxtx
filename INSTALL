@@ -53,7 +53,7 @@ If you would like to use javax.comm, use rxtx 1.4 with Sun's CommAPI.
 	B.  Exception in thread "main" java.lang.UnsatisfiedLinkError: 
 	    no Serial in java.library.path
 	C.  I Can Not Open the Port.
-	D.  java.lang.NoClassDefFoundError: javax/comm/CommPort
+	D.  java.lang.NoClassDefFoundError: gnu/io/CommPort
 	E.  The Compiler Cannot Find Java Include Files
 	F.  Configure says 'unterminated sed command' and stops 
 	G.  Java Can Not Find libstdc++-libc6.0-1.so.2 
@@ -325,7 +325,7 @@ B.  Exception in thread "main" java.lang.UnsatisfiedLinkError: no Serial in
 		at gnu.io.NativePort.<clinit>(NativePort.java:32)
 		at gnu.io.RXTXPort.<init>(Compiled Code)
 		at gnu.io.RXTXCommDriver.getCommPort(Compiled Code)
-		at javax.comm.CommPortIdentifier.open(Compiled Code)
+		at gnu.io.CommPortIdentifier.open(Compiled Code)
 		at SerialPortDisplay.openBBPort(Compiled Code)
 		at SerialPortDisplay.<init>(Compiled Code)
 		at BlackBox.addPort(Compiled Code)
@@ -350,7 +350,7 @@ C.  I Can Not Open the Port.
 	should fix the problem.  Be sure to check the file CommAPI for common 
 	mistakes.
 
-D.  java.lang.NoClassDefFoundError: javax/comm/CommPort
+D.  java.lang.NoClassDefFoundError: gnu/io/CommPort
 
 	comm.jar is probably not in your classpath or not located in
 	the proper directory.
@@ -359,7 +359,7 @@ D.  java.lang.NoClassDefFoundError: javax/comm/CommPort
 
 	export CLASSPATH=../java/lib/classes.zip
 	$ java BlackBoxException in thread "main"
-	java.lang.NoClassDefFoundError: javax/comm/CommPort
+	java.lang.NoClassDefFoundError: gnu/io/CommPort
 
 E.  The Compiler Cannot Find Java Include Files
 
@@ -406,7 +406,7 @@ I.  Illegal use of nonvirtal function call!
 	gnu/io/RXTXPort$SerialOutputStream, method: flush signature: ()V) 
 	Illegal use of nonvirtual function call
 		at gnu.io.RXTXCommDriver.getCommPort(Compiled Code)
-		at javax.comm.CommPortIdentifier.open(Compiled Code)
+		at gnu.io.CommPortIdentifier.open(Compiled Code)
 		at SerialPortDisplay.openBBPort(Compiled Code)
 		at SerialPortDisplay.<init>(Compiled Code)
 		at BlackBox.addPort(Compiled Code)
