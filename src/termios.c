@@ -1372,7 +1372,8 @@ serial_read()
    exceptions:  
    win32api:      ReadFile(), GetLastError(), WaitForSingleObject()
                   GetOverLappedResult()
-   comments:    
+   comments:    If setting errno make sure not to use EWOULDBLOCK
+                In that case use EAGAIN.  See SerialImp.c:testRead() 
 ----------------------------------------------------------*/
 
 int serial_read( int fd, void *vb, int size )

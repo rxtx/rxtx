@@ -2688,7 +2688,7 @@ int read_byte_array( JNIEnv *env,
                      int timeout )
 {
 	int ret, left, bytes = 0;
-	long timeLeft, now, start = 0;
+	long timeLeft, now = 0, start = 0;
 	char msg[80];
 	struct timeval tv, *tvP;
 	fd_set rset;
@@ -2735,9 +2735,22 @@ int read_byte_array( JNIEnv *env,
 					return -1;
 				}
 			}
-			else{
+			else if ( ret ) {
 				bytes += ret;
 				left -= ret;
+			}
+		/*
+		The only thing that is bugging me with the new 
+		version is the CPU usage when reading on the serial port.  I
+		looked at it today and find a quick fix.  It doesn't seems to
+		affect the performance for our apps (I mean in a negative way,
+		cause the CPU is back to normal, near 0-5%).  All I did is add
+		a usleep in the reading function.
+
+		Nicolas <ripley@8d.com>
+		*/
+			else {
+				usleep(10);
 			}
 		}
 	}
@@ -3811,20 +3824,17 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(testRead)(
 		return JNI_FALSE;
 	}
 
-	/* CLOCAL eliminates open blocking on modem status lines */
-	if ((fd = OPEN(name, O_RDONLY | CLOCAL)) <= 0)
-	{
-		report_verbose( "testRead() open failed\n" );
-		ret = JNI_FALSE;
-		goto END;
-	}
-/*
+	/*
+           CLOCAL eliminates open blocking on modem status lines
+           -- changed to O_NONBLOCK
+	*/
 	do {
 		fd=OPEN ( name, O_RDWR | O_NOCTTY | O_NONBLOCK );
 	}  while ( fd < 0 && errno==EINTR );
-*/
+
 	if( fd < 0 )
 	{
+		report_verbose( "testRead() open failed\n" );
 		ret = JNI_FALSE;
 		goto END;
 	}
@@ -3866,8 +3876,81 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(testRead)(
 			tcsetattr( fd, TCSANOW, &saved_termios );
 			goto END;
 		}
+
+/*
+
+              The following may mess up if both EAGAIN and EWOULDBLOCK
+              are defined but only EWOULDBLOCK is used
+
+              Linux:
+
+              man 2 open
+              O_NONBLOCK or O_NDELAY
+              When  possible,  the file is opened in non-blocking
+              mode. Neither the open nor  any  subsequent  opera­
+              tions on the file descriptor which is returned will
+              cause the calling process to wait.   For  the  han­
+              dling  of  FIFOs  (named  pipes), see also fifo(4).
+              This mode need not have any effect on  files  other
+              than FIFOs.
+
+	      man 2 read
+              EAGAIN
+              Non-blocking I/O has been selected using O_NONBLOCK
+              and no data was immediately available for  reading.
+
+
+              /usr/include/asm/error.h:
+              #define EAGAIN          11      / Try again /
+              #define EWOULDBLOCK     EAGAIN  / Operation would block /
+
+              looks like the kernel is using EAGAIN
+
+              -- should be OK
+
+              Solaris:
+
+              man 2 open
+              EAGAIN    The path  argument  names  the  slave  side  of  a
+              pseudo-terminal device that is locked.
+
+              man 2 read
+              If O_NONBLOCK is set, read() returns -1 and sets errno
+              to EAGAIN.
+
+              -- should be OK.
+
+              HP-UX
+
+              both are defined but EAGAIN is used.
+
+              -- should be OK.
+
+              Win32
+
+              neither errno is currently set.  Comment added to termios.c
+              serial_open().
+
+              -- should be OK
+
+Steven's book.  Advanced programming in the Unix Environment pg 364
+
+"A common use for nonblocking I/O is for dealing with a terminal device 
+for a network connection and these devices are normally used by one process
+at a time.  This means that the change in the BSD semantics normally does 't 
+effect us.  The different error return, EWOULDBLOCK, instead of POSIX.1 
+EAGAIN, continues to be a portability difference that we must deal with."
+
+*/
+
 		if ( READ( fd, &c, 1 ) < 0 )
 		{
+#ifdef EAGAIN
+			if ( errno != EAGAIN ) {
+				report( "testRead() read failed\n" );
+				ret = JNI_FALSE;
+			}
+#else                      
 #ifdef EWOULDBLOCK
 			if ( errno != EWOULDBLOCK )
 			{
@@ -3877,6 +3960,7 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(testRead)(
 #else
 			ret = JNI_FALSE;
 #endif /* EWOULDBLOCK */
+#endif /* EAGAIN */
 		}
 
 		/* dont walk over unlocked open devices */
