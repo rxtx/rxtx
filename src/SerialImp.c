@@ -104,7 +104,10 @@
 #include <math.h>
 
 extern int errno;
+
 #include "SerialImp.h"
+
+JavaVM *javaVM = NULL;
 
 
 struct preopened *preopened_port = NULL;
@@ -5301,10 +5304,9 @@ int check_group_uucp()
 	testLockFile = fopen (testLockAbsFileName, "w+");
 	if (NULL == testLockFile)
 	{
-		report_error("check_group_uucp(): error testing lock file \
-			creation Error details: ");
+		report_error("check_group_uucp(): error testing lock file "
+			"creation Error details:");
 		report_error(strerror(errno));
-
 		free(testLockAbsFileName);
 		return 1;
 	}
@@ -5617,6 +5619,76 @@ void dump_termios(char *foo,struct termios *ttyset)
 	fprintf(stderr,"\n" );
 #endif /* DEBUG */
 }
+
+/*----------------------------------------------------------
+get_java_environment
+
+   accept:      pointer to the virtual machine
+		flag to know if we are attached
+   return:      pointer to the Java Environment
+   exceptions:  none
+   comments:    see JNI_OnLoad.  For getting the JNIEnv in the thread
+		used to monitor for output buffer empty.
+----------------------------------------------------------*/
+JNIEnv *get_java_environment(JavaVM *java_vm,  jboolean *was_attached){
+	JNIEnv *env = NULL;
+	if(java_vm == NULL) return env;
+	*was_attached = JNI_FALSE;
+
+	jint err_get_env = (*java_vm)->GetEnv(
+		java_vm,
+		(void **) &env,
+		JNI_VERSION_1_4
+	);
+	if(err_get_env == JNI_ERR) return NULL;
+	if(err_get_env == JNI_EDETACHED){
+		(*java_vm)->AttachCurrentThread(
+			java_vm,
+			(void **) &env,
+			(void **) NULL
+		);
+		if(env != NULL) *was_attached = JNI_TRUE;
+	}else if(err_get_env != JNI_OK) return NULL;
+	return env;
+}
+
+/*----------------------------------------------------------
+JNI_OnLoad
+
+   accept:      JavaVM pointer to the Vertial Machine
+		void * reserved ???
+   return:      jint JNI version used.
+   exceptions:  none
+   comments:    http://java.sun.com/j2se/1.4.2/docs/guide/jni/jni-14.html
+		http://java.sun.com/j2se/1.4.2/docs/guide/jni/jni-12.html
+		grab the Java VM pointer when the library loads for later use
+		in the drain thread.  Also lets Java know we are using the
+		1.4 API so we can get pointers later.
+----------------------------------------------------------*/
+JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *java_vm, void *reserved)
+{
+     javaVM = java_vm;
+     printf("Experimental:  JNI_OnLoad called.\n");
+     return JNI_VERSION_1_4;  /* JNI API used */
+}
+
+/*----------------------------------------------------------
+JNI_OnUnload
+
+   accept:      JavaVM pointer to the Vertial Machine
+		void * reserved ???
+   return:      none
+   exceptions:  none
+   comments:    http://java.sun.com/j2se/1.4.2/docs/guide/jni/jni-14.html
+		http://java.sun.com/j2se/1.4.2/docs/guide/jni/jni-12.html
+		final library cleanup here.  
+----------------------------------------------------------*/
+JNIEXPORT void JNICALL JNI_OnUnload(JavaVM *vm, void *reserved)
+{
+     /* never called it appears */
+     printf("Experimental:  JNI_OnUnload called.\n");
+}
+
 #ifdef asdf
 /*----------------------------------------------------------
 printj
