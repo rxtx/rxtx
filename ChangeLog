@@ -3,9 +3,11 @@ This is ChangeLog Tue Oct 12 10:01:16 BST 2004
 rxtx-2.1 and rxtx-2.0 changes are kept in the same file.  skip to the version
 you downloaded.
 
-2.1-7pre22 Mar 9 2005
+2.1-7pre22 Mar 25 2005
 		CNI debug message cleanups and fd fix
 		Mark Anderson <mark@panonet.net>
+		Dont override system properties 
+		Klaus Kierer <klaus.kierer@tiscover.com>
 2.1-7pre21 Oct 16 2004
 		dereferencing type-punned pointer will break strict-aliasing
 		rules.  Fixed.
