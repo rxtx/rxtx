@@ -1,7 +1,9 @@
-This is AUTHORS Tue Dec  4 15:25:27 MST 2001
+This is AUTHORS Fri Feb 22 05:35:52 MST 2002
 
 This package is not the result of one persons time.  Recognition is given
 to the following people for their assistance.
+
+Michal Hobot MichalHobot@netscape.net http://www.mhobot.w.pl  WinCE port.
 
 Scott Burleigh <Scott.Burleigh@jpl.nasa.gov> Documentation of ThinkPad Serial Behavior and clairification of "No serial ports found!"
 
