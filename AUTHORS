@@ -1,7 +1,13 @@
-This is AUTHORS Thu Oct  4 19:34:31 MDT 2001
+This is AUTHORS Wed Nov 14 16:54:25 MST 2001
 
 This package is not the result of one persons time.  Recognition is given
 to the following people for their assistance.
+
+O'Kane <finbarr@e-merge.ie> True64 Port Finbarr
+
+Peter C. Verhage <peter@no-nonsense.org> FreeBSD fixes
+
+Jonathan Schilling <jls@caldera.com> UnixWare and OpenUNIX ports
 
 Dmitry Markman <dimitry.markman@verizon.net> Mac OS X builds with CW lots of
 fixes
