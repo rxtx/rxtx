@@ -29,9 +29,6 @@
 #include <sys/ioctl.h>
 #include <sys/param.h>
 #include <sys/utsname.h>
-#else
-#	include <win32termios.h>
-#endif
 #ifdef HAVE_TERMIOS_H
 #	include <termios.h>
 #endif
@@ -40,6 +37,9 @@
 #endif
 #ifdef HAVE_SYS_SIGNAL_H
 #   include <sys/signal.h>
+#endif
+#else
+#	include <win32termios.h>
 #endif
 #include <sys/types.h>
 #include <sys/stat.h>
