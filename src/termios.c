@@ -1,4 +1,4 @@
-//#define TRACE
+#define TRACE
 /*-------------------------------------------------------------------------
 |   rxtx is a native interface to serial ports in java.
 |   Copyright 1997-2001 by Trent Jarvi trentjarvi@yahoo.com.
@@ -646,8 +646,8 @@ BOOL init_termios(struct termios *ttyset )
 	if ( !ttyset )
 		return FALSE;
 	memset( ttyset, 0, sizeof( struct termios ) );
-	//cfsetospeed( ttyset, B9600 );
-	cfsetospeed( ttyset, 14400 );
+	cfsetospeed( ttyset, B9600 );
+	//cfsetospeed( ttyset, 14400 );
 	cfmakeraw( ttyset );
 	ttyset->c_cc[VINTR] = 0x03;	/* 0: C-c */
 	ttyset->c_cc[VQUIT] = 0x1c;	/* 1: C-\ */
