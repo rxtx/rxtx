@@ -36,7 +36,7 @@ public class RXTXCommDriver implements CommDriver
 {
 
 	private final static boolean debug = false;
-	private final static boolean devel = false;
+	private final static boolean devel = true;
 
 	static
 	{
@@ -404,38 +404,16 @@ public class RXTXCommDriver implements CommDriver
 		}
 		else if(osName.toLowerCase().indexOf("windows") != -1 )
 		{
-			/*
-			{ "COM1:", "COM2:","COM3:","COM4:",
-			"COM5:", "COM6:", "COM7:", "COM8:" };
-			*/
-			/* //./name is supposed to work for port numbers > 8 */
-			/*
-					{ "//./COM1", "//./COM2", "//./COM3",
-					"//./COM4", "//./COM5", "//./COM6",
-					"//./COM7", "//./COM8" };
-			*/
-			String[] temp =
+			String[] temp = new String[259];
+			for( int i = 1; i <= 256; i++ )
 			{
-					"COM1", "COM2", "COM3",
-					"COM4", "COM5", "COM6",
-					"COM7", "COM8",
-				/*
-				   OK,  you asked for it The thread gods will
-				   not like this.
-				*/
-					"COM9", "COM10", "COM11",
-					"COM12", "COM13", "COM14",
-					"COM15", "COM16",
-				/*
-				   Lets toss in LPT too!
-				*/
-					"LPT1", "LPT2", "LPT3" 
-				};
-	/*
-				{ "COM1", "COM2","COM3","COM4",
-				"COM5", "COM6", "COM7", "COM8" };
-	*/
-				CandidateDeviceNames=temp;
+				temp[i - 1] = new String( "COM" + i );
+			}
+			for( int i = 1; i <= 3; i++ )
+			{
+				temp[i + 255] = new String( "LPT" + i );
+			}
+			CandidateDeviceNames=temp;
 			}
 			else if ( osName.equals("Solaris") || osName.equals("SunOS"))
 			{
