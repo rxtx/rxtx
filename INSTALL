@@ -184,7 +184,10 @@ A.  Japanese
 		(Wayne is largely responsible for bringing rxtx back to win32.)
 		http://www.linuxgrrls.org/~taj/crossmingw32-2.95-1.i386.rpm
 		A more current version can be obtained:
+		http://www.devolution.com/~slouken/SDL/Xmingw32/crossgcc/index.html
+		prebuilt Binaries:
 		http://www.devolution.com/~slouken/SDL/Xmingw32/mingw32-linux-x86-glibc-2.1.tar.gz
+
 
 		I built the dll with jdk-1.2.2 for linux using jdk-1.2.2 
 		include files from the win32 JDK.
