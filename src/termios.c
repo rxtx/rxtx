@@ -815,7 +815,7 @@ BOOL init_termios(struct termios *ttyset )
 	ttyset->c_cc[VEOL] = '\r';	/* 11: */
 	ttyset->c_cc[VREPRINT] = 0x12;	/* 12: C-r */
 /*
-	ttyset->c_cc[VDISCARD] = 0x;	/* 13: IEXTEN only */
+	ttyset->c_cc[VDISCARD] = 0x;	   13: IEXTEN only 
 */
 	ttyset->c_cc[VWERASE] = 0x17;	/* 14: C-w */
 	ttyset->c_cc[VLNEXT] = 0x16;	/* 15: C-w */
@@ -3514,8 +3514,8 @@ int main( int argc, char *argv[] )
 			if(!send_event( env, jobj, SPE_DATA_AVAILABLE, 1 ))
 			{
 /*
-				usleep(100000); /* select wont block */
-				usleep(100); /* select wont block */
+				usleep(100000);  select wont block 
+				usleep(100);
 */
 			}
 		}
