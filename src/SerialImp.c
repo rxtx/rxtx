@@ -100,6 +100,7 @@
 
 extern int errno;
 #ifdef TRENT_IS_HERE
+/*
 #undef TIOCSERGETLSR
 #define DEBUG
 #define TRACE
@@ -177,6 +178,8 @@ JNIEXPORT void JNICALL RXTXPort(Initialize)(
 	struct sigaction old_action;
 	sigaction(SIGIO, NULL, &old_action);
 	/* green threads already has handler, no touch */
+	/* FIXME remove for release */
+	printf("Hello Jauhar!\n");
 	if (old_action.sa_handler == NULL) {
 		/* no handler when using native threads, set to ignore */
 		struct sigaction new_action;
