@@ -15,7 +15,7 @@ DIE=0
     DIE=1
 }
 
-/* avoid libtool on Mac OS X codename Darwin Dmitry */
+# avoid libtool on Mac OS X codename Darwin Dmitry
 
 
 if test `uname` != "Darwin"; then
