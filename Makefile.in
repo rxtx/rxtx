@@ -341,7 +341,7 @@ mostlyclean distclean maintainer-clean
 export NSJAVA=1
 export THREADS_FLAG=@THREAD_FLAG@
 
-install: all comm.jar  install-lib
+install: all comm.jar  install-lib 
 
 clean-generic:
 	rm -rf $(TOP)/$(target_alias) $(TOP)/javax 

@@ -41,7 +41,7 @@ CLEANFILES = $(TOP)/*.class $(TOP)/javax/comm/*.class $(TOP)/jcl.jar
 SUFFIXES = .java .class
 SUFFIXES = .class .h
 
-install: all comm.jar  install-lib
+install: all comm.jar  install-lib 
 
 clean-generic:
 	rm -rf $(TOP)/$(target_alias) $(TOP)/javax 
