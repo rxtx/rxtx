@@ -27,7 +27,7 @@
 #  to full event support and the win32 code has not been updated to reflect
 #  the changes.  There is no windows parallel port code at this time.
 #
-#  Thur Jan 24 2001  put Comments in the Makefile. trentjarvi@yahoo.com.
+#  Thur Jan 24 2001  put Comments in the Makefile. taj@parcelfarce.linux.theplanet.co.uk.
 #                    added javac/javah/jar build rule.
 
 CFLAGS=-I\JDK\INCLUDE -I\jdk\include\win32 -I.

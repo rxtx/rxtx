@@ -1,6 +1,6 @@
 /*-------------------------------------------------------------------------
 |   rxtx is a native interface to serial ports in Java.
-|   Copyright 1997-2001 by Trent Jarvi trentjarvi@yahoo.com.
+|   Copyright 1997-2002 by Trent Jarvi taj@parcelfarce.linux.theplanet.co.uk.
 |
 |   This library is free software; you can redistribute it and/or
 |   modify it under the terms of the GNU Library General Public
@@ -19,7 +19,7 @@
 This is the INSTALL file for RXTX.  Mon Mar 11 09:47:34 MST 2002
 
 If, while following the instructions, you find this file unclear or incorrect 
-please make a note and email the details to trentjarvi@yahoo.com.  
+please make a note and email the details to taj@parcelfarce.linux.theplanet.co.uk.  
 
 A note about rxtx 1.5:
 
@@ -499,7 +499,7 @@ make --version
    		make 3.77
 
 
-	mail any bugs to trentjarvi@yahoo.com.  
+	mail any bugs to taj@parcelfarce.linux.theplanet.co.uk.  
 
 P.  Which jdk should be used? 
 

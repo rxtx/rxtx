@@ -112,7 +112,7 @@ One such Makefile is provided to help build rxtx.  The file will probably
 need to be edited to match your system configuration.  If you would like to
 add more information for other Mac OS X users please email
 
-	trentjarvi@yahoo.com
+	taj@parcelfarce.linux.theplanet.co.uk
 
 We are sorry the build process is not easier.  A great deal of effort was
 put into trying to automate the builds without luck.

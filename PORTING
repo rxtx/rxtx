@@ -35,11 +35,11 @@ Common problems include the following varibles in the Makefile
 Which are defined in configure.in
 
 We will gladly help with any UNIX platform.  Send questions to
-trentjarvi@yahoo.com.  New OS's usually require tweaks.
+taj@parcelfarce.linux.theplanet.co.uk.  New OS's usually require tweaks.
 
 If its not compiling try backing out functionality until it compiles.
 
-win32 support has not been tested.  Contact trentjarvi@yahoo.com if your 
+win32 support has not been tested.  Contact taj@parcelfarce.linux.theplanet.co.uk if your 
 interested in developing win32 support.   
 
 For all Unix flavors... If the package did not work out of the box please

@@ -120,7 +120,7 @@ final class I2C  extends  I2CPort {
 
 	/*
 	linux/drivers/char/n_hdlc.c? FIXME
-		trentjarvi@yahoo.com
+		taj@parcelfarce.linux.theplanet.co.uk
 	*/
 	/** Receive framing control 
 	*/
@@ -187,7 +187,7 @@ final class I2C  extends  I2CPort {
 	/** Input/output buffers */
 	/** FIXME I think this refers to 
 		FOPEN(3)/SETBUF(3)/FREAD(3)/FCLOSE(3) 
-		trentjarvi@yahoo.com
+		taj@parcelfarce.linux.theplanet.co.uk
 
 		These are native stubs...
 	*/
