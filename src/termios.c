@@ -2639,11 +2639,15 @@ int ioctl( int fd, int request, ... )
 				return -1;
 			}
 			if( ErrCode & CE_FRAME ) sistruct->frame++;
+			else sistruct->frame = 0;
 			if( ErrCode & CE_OVERRUN ) sistruct->overrun++;
 			/* should this be here? */
-			if( ErrCode & CE_RXOVER ) sistruct->overrun++;
+			else if( ErrCode & CE_RXOVER ) sistruct->overrun++;
+			else sistruct->overrun = 0;
 			if( ErrCode & CE_RXPARITY ) sistruct->parity++;
+			else sistruct->parity = 0;
 			if( ErrCode & CE_BREAK ) sistruct->brk++;
+			else sistruct->brk = 0;
 			return 0;
 		/* abolete ioctls */
 #endif /* TIOCGICOUNT */

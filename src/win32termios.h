@@ -409,7 +409,7 @@ void termiosSetParityError( int, char );
 #define TIOCSERSETMULTI	0x545b
 #define TIOCMIWAIT	0x545c
 /* this would require being able to get the number of overruns ... */
-/* #define TIOCGICOUNT	0x545d */
+#define TIOCGICOUNT	0x545d
 
 /* ioctl errors */
 #define ENOIOCTLCMD	515
