@@ -570,6 +570,7 @@ JNIEXPORT jint JNICALL RXTXPort(open)(
 	return (jint)fd;
 
 fail:
+	UNLOCK( filename, pid );
 	(*env)->ReleaseStringUTFChars( env, jstr, filename );
 	LEAVE( "RXTXPort:open" );
 	throw_java_exception( env, PORT_IN_USE_EXCEPTION, "open",
