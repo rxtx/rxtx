@@ -287,13 +287,18 @@ int find_preopened_ports( const char *filename )
 				p->next->prev = p->prev;
 			}
 			else if ( p->prev )
+			{
 				p->prev->next = NULL;
+			}
 			else if ( p->next )
+			{
 				p->next->prev = NULL;
+			}
 			else
 			{
 				free( p );
 				preopened_port = NULL;
+				return( fd );
 			}
 			free( p );
 			return( fd );
@@ -303,7 +308,9 @@ int find_preopened_ports( const char *filename )
 			p = p->next;
 		}
 		else
+		{
 			return(0);
+		}
 	}
 }
 
@@ -1437,7 +1444,7 @@ RXTXPort.static_add_filename
 		This is used so people can setDTR low before calling the
 -----------------------------------------------------------*/
 
-void static_add_filename( char *filename, int fd)
+void static_add_filename( const char *filename, int fd)
 {
 	struct preopened *newp, *p = preopened_port;
 
@@ -1449,7 +1456,7 @@ void static_add_filename( char *filename, int fd)
 	{
 		newp->next = NULL;
 		newp->prev = NULL;
-		p = newp;
+		preopened_port = newp;
 		return;
 	}
 	for(;;)
@@ -1469,6 +1476,7 @@ void static_add_filename( char *filename, int fd)
 			newp->next = NULL;
 			newp->prev = p;
 			p->next = newp;
+			preopened_port = p;
 			return;
 		}
 	}
@@ -1523,7 +1531,7 @@ JNIEXPORT jboolean JNICALL RXTXPort(nativeStaticSetRTS) (JNIEnv *env,
 
 	UNLOCK( filename,  pid );
 
-	static_add_port( fd, filename );
+	static_add_filename( filename, fd );
 	
 	/* dont close the port.  Its not clear if the RTS would remain high */
 	(*env)->ReleaseStringUTFChars( env, jstr, filename );
@@ -1584,6 +1592,7 @@ JNIEXPORT jboolean JNICALL RXTXPort(nativeStaticSetDTR) (JNIEnv *env,
 
 	UNLOCK( filename,  pid );
 
+	static_add_filename( filename, fd );
 	/* dont close the port.  Its not clear if the DTR would remain high */
 
 	(*env)->ReleaseStringUTFChars( env, jstr, filename );
