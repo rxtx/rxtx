@@ -1240,6 +1240,9 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 
 /*------------------------  END OF CommAPI -----------------------------*/
 
+	private native static void nativeStaticSetSerialPortParams( String f,
+		int b, int d, int s, int p )
+		throws UnsupportedCommOperationException;
 	private native static boolean nativeStaticSetDTR( String port,
 							boolean flag )
 		throws UnsupportedCommOperationException;
@@ -1274,6 +1277,34 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 		throws UnsupportedCommOperationException;
 	private native boolean nativeGetCallOutHangup()
 		throws UnsupportedCommOperationException;
+
+	/** 
+	*  Extension to CommAPI
+	*  This is an extension to CommAPI.  It may not be supported on
+	*  all operating systems.
+	*
+	*  Set the SerialPort parameters
+	*  1.5 stop bits requires 5 databits
+	*  @param  f filename
+	*  @param  b baudrate
+	*  @param  d databits
+	*  @param  s stopbits
+	*  @param  p parity
+	*
+	*  @throws UnsupportedCommOperationException
+	*  @see gnu.io.UnsupportedCommOperationException
+	*/
+
+	public static void staticSetSerialPortParams( String f, int b, int d,
+		int s, int p )
+		throws UnsupportedCommOperationException
+	{
+		if ( debug )
+			System.out.println(
+				"RXTXPort:staticSetSerialPortParams( " +
+				f + " " + b + " " + d + " " + s + " " + p );
+		nativeStaticSetSerialPortParams( f, b, d, s, p );
+	}
 
 	/**
 	*  Extension to CommAPI

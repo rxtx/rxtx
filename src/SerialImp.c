@@ -267,6 +267,7 @@ RXTXPort.find_preopened_ports
    comments:    see
 			RXTXPort.nativeStaticSetDTR
 			RXTXPort.nativeStaticSetRTS
+			RXTXPort.nativeStaticSetSerialPortParms
 		This is used so people can setDTR low before calling the
 		Java open().
 ----------------------------------------------------------*/
@@ -486,57 +487,49 @@ JNIEXPORT void JNICALL RXTXPort(nativeClose)( JNIEnv *env,
 }
 
 /*----------------------------------------------------------
- RXTXPort.nativeSetSerialPortParams
+ RXTXPort.set_port_params
 
-   accept:     speed, data bits, stop bits, parity
+   accept:     env, fd, speed, data bits, stop bits, parity
    perform:    set the serial port parameters
-   return:     void
+   return:     1 on error
    exceptions: UnsupportedCommOperationException
+   comments:   There is a static method and an instance method that use this
+		function.  The static method gets a fd first.  The instance
+		method can get the fd from the object.
+
+		see:  nativeSetSerialPortParms & nativeStaticSerialPortParams
 ----------------------------------------------------------*/
-JNIEXPORT void JNICALL RXTXPort(nativeSetSerialPortParams)(
-	JNIEnv *env, jobject jobj, jint speed, jint dataBits, jint stopBits,
-	jint parity )
+int set_port_params( JNIEnv *env, int fd, int cspeed, int dataBits,
+			int stopBits, int parity )
 {
 	struct termios ttyset;
-	int fd = get_java_var( env, jobj,"fd","I" );
-	int cspeed = translate_speed( env, speed );
 	int result = 0;
 #if defined(TIOCGSERIAL) && !defined( WIN32 )
 	struct serial_struct sstruct;
 #endif /* TIOCGSERIAL && !WIN32 */
-	report_time_start( );
-	if (cspeed == -1)
-	{
-		throw_java_exception( env, UNSUPPORTED_COMM_OPERATION,
-			"", "BaudRate could not be set to the specified value" );
-		return;
-	}
-
-
-	ENTER( "RXTXPort:nativeSetSerialPortParams" );
 
 	if( tcgetattr( fd, &ttyset ) < 0 )
 	{
-		report( "nativeSetSerialPortParams: Cannot Get Serial Port Settings\n" );
-		goto fail;
+		report( "SetSerialPortParams: Cannot Get Serial Port Settings\n" );
+		return(1);
 	}
 
 	if( !translate_data_bits( env, &(ttyset.c_cflag), dataBits ) )
 	{
-		report( "nativeSetSerialPortParams: Invalid Data Bits Selected\n" );
-		goto fail;
+		report( "SetSerialPortParams: Invalid Data Bits Selected\n" );
+		return(1);
 	}
 
 	if( !translate_stop_bits( env, &(ttyset.c_cflag), stopBits ) )
 	{
-		report( "nativeSetSerialPortParams: Invalid Stop Bits Selected\n" );
-		goto fail;
+		report( "SetSerialPortParams: Invalid Stop Bits Selected\n" );
+		return(1);
 	}
 
 	if( !translate_parity( env, &(ttyset.c_cflag), parity ) )
 	{
-		report( "nativeSetSerialPortParams: Invalid Parity Selected\n" );
-		goto fail;
+		report( "SetSerialPortParams: Invalid Parity Selected\n" );
+		return(1);
 	}
 
 #if defined(TIOCGSERIAL) && !defined(WIN32)
@@ -557,7 +550,7 @@ JNIEXPORT void JNICALL RXTXPort(nativeSetSerialPortParams)(
 
 		if ( ioctl( fd, TIOCGSERIAL, &sstruct ) < 0 )
 		{
-			goto fail;
+			return( 1 );
 		}
 
 		switch( cspeed )
@@ -575,12 +568,12 @@ JNIEXPORT void JNICALL RXTXPort(nativeSetSerialPortParams)(
 				cspeed = 256000;
 				break;
 			default:
-				goto fail;
+				return( 1 );
 		}
 	
 		if ( cspeed < 1  || sstruct.baud_base < 1 )
 		{
-			goto fail;
+			return( 1 );
 		}
 
 		sstruct.custom_divisor = ( sstruct.baud_base/cspeed );
@@ -588,7 +581,7 @@ JNIEXPORT void JNICALL RXTXPort(nativeSetSerialPortParams)(
 		if (	sstruct.baud_base < 1 ||
 			ioctl( fd, TIOCSSERIAL, &sstruct ) < 0 )
 		{
-			goto fail;
+			return( 1 );
 		}
 
 		cspeed = 38400;
@@ -598,8 +591,8 @@ JNIEXPORT void JNICALL RXTXPort(nativeSetSerialPortParams)(
 #ifdef __FreeBSD__
 	if( cfsetspeed( &ttyset, cspeed ) < 0 )
 	{
-		report( "nativeSetSerialPortParams: Cannot Set Speed\n" );
-		goto fail;
+		report( "SetSerialPortParams: Cannot Set Speed\n" );
+		return( 1 );
 	}
 #endif  /* __FreeBSD__ */
 	if( !cspeed )
@@ -609,6 +602,7 @@ JNIEXPORT void JNICALL RXTXPort(nativeSetSerialPortParams)(
 		/*
 		mexPrintf("dropping DTR\n");
 		*/
+		printf("dropping DTR\n");
 		ioctl( fd, TIOCMGET, &result );
 		result &= ~TIOCM_DTR;
 		ioctl( fd, TIOCMSET, &result );
@@ -619,23 +613,53 @@ JNIEXPORT void JNICALL RXTXPort(nativeSetSerialPortParams)(
 		cfsetospeed( &ttyset, cspeed ) < 0 )
 	{
 		report( "nativeSetSerialPortParams: Cannot Set Speed\n" );
-		goto fail;
+		return( 1 );
 	}
 	}
 
 	if( tcsetattr( fd, TCSANOW, &ttyset ) < 0 )
 	{
-		goto fail;
+		return( 1 );
+	}
+	return(0);
+}
+
+/*----------------------------------------------------------
+ RXTXPort.nativeSetSerialPortParms
+
+   accept:     speed, data bits, stop bits, parity
+   perform:    set the serial port parameters
+   return:     void
+   exceptions: UnsupportedCommOperationException
+----------------------------------------------------------*/
+JNIEXPORT void JNICALL RXTXPort(nativeSetSerialPortParms)(
+	JNIEnv *env, jobject jobj, jint speed, jint dataBits, jint stopBits,
+	jint parity )
+{
+	int fd = get_java_var( env, jobj,"fd","I" );
+	int cspeed = translate_speed( env, speed );
+
+	ENTER( "RXTXPort:nativeSetSerialPortParms" );
+	report_time_start( );
+
+	if (cspeed == -1)
+	{
+		throw_java_exception( env, UNSUPPORTED_COMM_OPERATION,
+			"", "BaudRate could not be set to the specified value" );
+		return;
 	}
 
-	LEAVE( "RXTXPort:nativeSetSerialPortParams" );
+
+	if( set_port_params( env, fd, cspeed, dataBits, stopBits, parity ) )
+	{
+		LEAVE( "RXTXPort:nativeSetSerialPortParms" );
+		throw_java_exception( env, UNSUPPORTED_COMM_OPERATION,
+			"nativeSetSerialPortParms", strerror( errno ) );
+	}
+
+	LEAVE( "RXTXPort:nativeSetSerialPortParms" );
 	report_time_end( );
 	return;
-
-fail:
-	LEAVE( "RXTXPort:nativeSetSerialPortParams" );
-	throw_java_exception( env, UNSUPPORTED_COMM_OPERATION,
-		"nativeSetSerialPortParams", strerror( errno ) );
 }
 
 /*----------------------------------------------------------
@@ -1447,6 +1471,7 @@ RXTXPort.static_add_filename
    comments:    see
 			RXTXPort.nativeStaticSetDTR
 			RXTXPort.nativeStaticSetRTS
+			RXTXPort.nativeStaticSetSerialPortParms
 		This is used so people can setDTR low before calling the
 -----------------------------------------------------------*/
 
@@ -1521,9 +1546,13 @@ JNIEXPORT jboolean JNICALL RXTXPort(nativeStaticSetRTS) (JNIEnv *env,
 
 	if ( LOCK( filename, pid ) ) goto fail;;
 	
-	do {
-		fd = OPEN (filename, O_RDWR | O_NOCTTY | O_NONBLOCK );
-	}  while (fd < 0 && errno==EINTR);
+	fd = find_preopened_ports( filename );
+	if( !fd )
+	{
+		do {
+			fd = OPEN (filename, O_RDWR | O_NOCTTY | O_NONBLOCK );
+		}  while (fd < 0 && errno==EINTR);
+	}
 	if ( fd < 0 ) goto fail;
 
 	/* raise the RTS */
@@ -1547,6 +1576,88 @@ fail:
 	(*env)->ReleaseStringUTFChars( env, jstr, filename );
 	LEAVE( "RXTXPort:nativeStaticSetRTS" );
 	return( JNI_FALSE );
+}
+
+/*----------------------------------------------------------
+RXTXPort.nativeStaticSetSerialPortParams
+
+   accept:      string for the filename, int baudrate, int databits,
+		int stopbits, int parity
+   perform:     set the serial port, set the params, save the fd in a linked
+		list.
+   return:      none
+   exceptions:  none
+   comments:    Not set the speed on the next 'open'
+
+		This is static so we can not call the open() setDTR()
+		we dont have the jobject.
+
+		First introduced in rxtx-1.5-9
+----------------------------------------------------------*/
+JNIEXPORT void JNICALL RXTXPort(nativeStaticSetSerialPortParams) (JNIEnv *env,
+	jclass jclazz, jstring jstr, jint baudrate, jint dataBits, jint stopBits, jint parity )
+{
+	int fd;
+	int  pid = -1;
+	const char *filename = (*env)->GetStringUTFChars( env, jstr, 0 );
+	int cspeed = translate_speed( env, baudrate );
+
+	ENTER( "RXTXPort:nativeStaticSetSerialPortParams" );
+#ifndef WIN32
+	pid = getpid();
+#endif /* WIN32 */
+	/* Open and lock the port so nothing else changes the setting */
+
+	if ( LOCK( filename, pid ) ) goto fail;
+	
+	fd = find_preopened_ports( filename );
+	if( !fd )
+	{
+		do {
+			fd = OPEN (filename, O_RDWR | O_NOCTTY | O_NONBLOCK );
+		}  while (fd < 0 && errno==EINTR);
+	}
+
+	if ( fd < 0 )
+	{
+		(*env)->ReleaseStringUTFChars( env, jstr, filename );
+		LEAVE( "RXTXPort:nativeStaticSetSerialPortParams" );
+		throw_java_exception( env, UNSUPPORTED_COMM_OPERATION,
+			"nativeStaticSetSerialPortParams", strerror( errno ) );
+		return;
+	}
+
+	if (cspeed == -1)
+	{
+		(*env)->ReleaseStringUTFChars( env, jstr, filename );
+		throw_java_exception( env, UNSUPPORTED_COMM_OPERATION,
+			"", "BaudRate could not be set to the specified value" );
+		return;
+	}
+
+	if( set_port_params( env, fd, cspeed, dataBits, stopBits, parity ) )
+	{
+		(*env)->ReleaseStringUTFChars( env, jstr, filename );
+		LEAVE( "RXTXPort:nativeStatic SetSerialPortParams" );
+		throw_java_exception( env, UNSUPPORTED_COMM_OPERATION,
+			"nativeStaticSetSerialPortParams", strerror( errno ) );
+		return;
+	}
+
+	/* Unlock the port.  Good luck! :) */
+
+	UNLOCK( filename,  pid );
+
+	static_add_filename( filename, fd );
+	/* dont close the port. */
+
+	(*env)->ReleaseStringUTFChars( env, jstr, filename );
+	LEAVE( "RXTXPort:nativeStaticSetSerialPortParams" );
+	return;
+fail:
+	(*env)->ReleaseStringUTFChars( env, jstr, filename );
+	LEAVE( "RXTXPort:nativeStaticSetSerialPortParams" );
+	return;
 }
 
 /*----------------------------------------------------------
@@ -1582,9 +1693,13 @@ JNIEXPORT jboolean JNICALL RXTXPort(nativeStaticSetDTR) (JNIEnv *env,
 
 	if ( LOCK( filename, pid ) ) goto fail;;
 	
-	do {
-		fd = OPEN (filename, O_RDWR | O_NOCTTY | O_NONBLOCK );
-	}  while (fd < 0 && errno==EINTR);
+	fd = find_preopened_ports( filename );
+	if( !fd )
+	{
+		do {
+			fd = OPEN (filename, O_RDWR | O_NOCTTY | O_NONBLOCK );
+		}  while (fd < 0 && errno==EINTR);
+	}
 	if ( fd < 0 ) goto fail;
 
 	/* raise the DTR */
