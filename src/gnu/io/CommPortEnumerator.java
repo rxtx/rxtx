@@ -30,7 +30,7 @@ import java.util.Enumeration;
 class CommPortEnumerator implements Enumeration
 {
 	private CommPortIdentifier index;
-	private static boolean debug = false;
+	private final static boolean debug = false;
 	static
 	{
 		if (debug)

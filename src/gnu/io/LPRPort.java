@@ -38,7 +38,7 @@ final class LPRPort extends ParallelPort
 
 	/** Initialize the native library */
 	private native static void Initialize();
-	private static boolean debug = false;
+	private final static boolean debug = false;
 
 	/** Open the named port */
 	public LPRPort( String name ) throws PortInUseException

@@ -35,7 +35,7 @@ import java.util.StringTokenizer;
 public class RXTXCommDriver implements CommDriver
 {
 
-	private static boolean debug = false;
+	private final static boolean debug = false;
 
 	static
 	{
