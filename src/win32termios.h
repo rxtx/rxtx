@@ -24,15 +24,15 @@
 #define _WIN32S_H_
 #include <windows.h>
 #include <sys/types.h>
-//#include "jni.h"
 #include <io.h>
+#define S_ISCHR(m)	(((m)&S_IFMT) == S__IFCHR)
 typedef unsigned char   cc_t;
 typedef unsigned int    speed_t;
 typedef unsigned int    tcflag_t;
 
 /* garbage to get compiling */
 #define SSIZE_MAX 0
-#define SIG_IGN 0
+/*#define SIG_IGN 0*/
 #define SIGIO 0
 
 #define NCCS 32
@@ -51,12 +51,17 @@ struct termios
 int serial_open(const char *File, int flags);
 int serial_read(int fd, void *b, int size);
 int serial_write(int fd, char *Str, int length);
-int serial_select(int, fd_set *, fd_set *, fd_set *, struct timeval *);
+/*
+ * lcc winsock.h conflicts
+ */
+#ifndef __LCC__
+int serial_select(int, struct fd_set *, struct fd_set *, struct fd_set *, struct timeval *);
+#define select serial_select
+#endif
 
 #define open serial_open
 #define read serial_read
 #define write serial_write
-#define select serial_select
 
 void usleep(unsigned long usec);
 int fcntl(int fd, int command, int arg);
