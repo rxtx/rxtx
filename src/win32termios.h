@@ -47,6 +47,21 @@ struct termios
     speed_t c_ospeed;           /* output speed */
   };
 
+struct serial_icounter_struct {
+	int cts;		/* clear to send count */
+	int dsr;		/* data set ready count */
+	int rng;		/* ring count */
+	int dcd;		/* carrier detect count */
+	int rx;			/* recieved byte count */
+	int tx;			/* transmitted byte count */
+	int frame;		/* frame error count */
+	int overrun;		/* hardware overrun error count */
+	int parity;		/* parity error count */
+	int brk;		/* break count */
+	int buf_overrun;	/* buffer overrun count */
+	int reserved[9]; 	/* unused */
+};
+
 int serial_open(const char *File, int flags);
 int serial_read(int fd, void *b, int size);
 int serial_write(int fd, char *Str, int length);
@@ -85,7 +100,7 @@ int tcsetpgrp ( int , int );
 int tcdrain ( int );
 int tcflow ( int , int );
 int tcsendbreak ( int , int );
-int ioctl(int fd, int request, unsigned int *arg);
+int ioctl(int fd, int request, ... );
 void cfmakeraw(struct termios *s_termios);
 
 #define O_NOCTTY	0400	/* not for fcntl */
@@ -219,20 +234,6 @@ void cfmakeraw(struct termios *s_termios);
 #define  B9600	0000015
 #define  B19200	0000016
 #define  B38400	0000017
-#define EXTA B19200
-#define EXTB B38400
-#define CSIZE	0000060
-#define   CS5	0000000
-#define   CS6	0000020
-#define   CS7	0000040
-#define   CS8	0000060
-#define CSTOPB	0000100
-#define CREAD	0000200
-#define PARENB	0000400
-#define PARODD	0001000
-#define HUPCL	0002000
-#define CLOCAL	0004000
-# define CBAUDEX 0010000
 #define  B57600   0010001
 #define  B115200  0010002
 #define  B230400  0010003
@@ -248,25 +249,61 @@ void cfmakeraw(struct termios *s_termios);
 #define  B3000000 0010015
 #define  B3500000 0010016
 #define  B4000000 0010017
+#define EXTA B19200
+#define EXTB B38400
+#define CSIZE	0000060
+#define   CS5	0000000
+#define   CS6	0000020
+#define   CS7	0000040
+#define   CS8	0000060
+#define CSTOPB	0000100
+#define CREAD	0000200
+#define PARENB	0000400
+#define PARODD	0001000
+#define HUPCL	0002000
+#define CLOCAL	0004000
+# define CBAUDEX 0010000
 # define CIBAUD	  002003600000		/* input baud rate (not used) */
 # define CRTSCTS  020000000000		/* flow control */
 
-/* c_lflag bits */
-#define ISIG	0x00000080
-#define ICANON	0x00000100
-#define XCASE	0x00004000
-#define ECHO	0x00000008
-#define ECHOE	0x00000002
-#define ECHOK	0x00000004
-#define ECHONL	0x00000010
-#define NOFLSH	0x80000000
-#define TOSTOP	0x00400000
-#define ECHOCTL	0x00000040
-#define ECHOPRT	0x00000020
-#define ECHOKE	0x00000001
-#define FLUSHO	0x00800000
-#define PENDIN	0x20000000
-#define IEXTEN	0x00000400
+/* c_l flag */
+#define ISIG    0000001
+#define ICANON  0000002
+#define XCASE   0000004
+#define ECHO    0000010
+#define ECHOE   0000020
+#define ECHOK   0000040
+#define ECHONL  0000100
+#define NOFLSH  0000200
+#define TOSTOP  0000400
+#define ECHOCTL 0001000
+#define ECHOPRT 0002000
+#define ECHOKE  0004000
+#define FLUSHO  0010000
+#define PENDIN  0040000
+#define IEXTEN  0100000
+
+/* glue for unsupported windows speeds */
+#define CBR_230400	230400
+#define CBR_460800	460800
+#define CBR_500000	500000
+#define CBR_576000	576000
+#define CBR_921600	921600
+#define CBR_1000000	1000000
+#define CBR_1152000	1152000
+#define CBR_1500000	1500000
+#define CBR_2000000	2000000
+#define CBR_2500000	2500000
+#define CBR_3000000	3000000
+#define CBR_3500000	3500000
+#define CBR_4000000	4000000
+
+/* glue for unsupported linux speeds */
+
+#define B14400		0010100
+#define B128000		0010101
+#define B256000		0010102
+
 
 /* Values for the ACTION argument to `tcflow'.  */
 #define	TCOOFF		0
@@ -286,13 +323,30 @@ void cfmakeraw(struct termios *s_termios);
 #endif /*_WIN32S_H_*/
 
 /* ioctls */
+#define TCSBRK		0x5409
+#define TIOCOUTQ	0x5411
 #define TIOCMGET	0x5415
+#define TIOCMBIS	0x5416
+#define TIOCMBIC	0x5417
 #define TIOCMSET	0x5418
-#define TIOCMWAIT	0x545C
-/* #define TIOCGICOUNT	0x545D */
+#define TIOCGSOFTCAR	0x5419
+#define TIOCSSOFTCAR	0x541a
+// #define FIONREAD	0x541b
+#define TIOCGSERIAL	0x541e
+#define TIOCSSERIAL	0x541f
+#define TCSBRKP		0x5425
+#define TIOCSERCONFIG	0x5453
+#define TIOCSERGWILD	0x5454
+#define TIOCSERSWILD	0x5455
+#define TIOCSERGSTRUCT	0x5458
 #define TIOCSERGETLSR	0x5459
-/*define FIONREAD	0x */
+#define TIOCSERGETMULTI	0x545a
+#define TIOCSERSETMULTI	0x545b
+#define TIOCMIWAIT	0x545c
+#define TIOCGICOUNT	0x545d
 
+/* ioctl errors */
+#define ENOIOCTLCMD	515
 /* modem lines */
 #define TIOCM_LE    0x001
 #define TIOCM_DTR   0x002

@@ -818,4 +818,152 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	*  @deprecated deprecated but used in Kaffe 
 	*/
 	public void setRcvFifoTrigger(int trigger){};  
+
+/*------------------------  END OF CommAPI -----------------------------*/
+
+	private native boolean nativeSetUartType(String type, boolean test)
+		throws UnsupportedCommOperationException;
+	native String nativeGetUartType()
+		throws UnsupportedCommOperationException;
+	private native boolean nativeSetBaudBase(int BaudBase) 
+		throws UnsupportedCommOperationException;
+	private native int nativeGetBaudBase() 
+		throws UnsupportedCommOperationException;
+	private native boolean nativeSetDivisor(int Divisor)
+		throws UnsupportedCommOperationException;
+	private native int nativeGetDivisor()
+		throws UnsupportedCommOperationException;
+	private native boolean nativeSetLowLatency()
+		throws UnsupportedCommOperationException;
+	private native boolean nativeGetLowLatency()
+		throws UnsupportedCommOperationException;
+	private native boolean nativeSetCallOutHangup(boolean NoHup)
+		throws UnsupportedCommOperationException;
+	private native boolean nativeGetCallOutHangup()
+		throws UnsupportedCommOperationException;
+	/**
+	*  Extension to CommAPI
+	*  This is an extension to CommAPI.  It may not be supported on
+	*  all operating systems.
+	*  @param type String representation of the UART type which mayb
+	*  be "none", "8250", "16450", "16550", "16550A", "16650", "16550V2"
+	*  or "16750".
+	*  @param test boolean flag to determin if the UART should be tested.
+	*  @return boolean true on success
+	*  @throws UnsupportedCommOperationException;
+	*/
+	public boolean setUARTType(String type, boolean test)
+		throws UnsupportedCommOperationException
+	{
+		return nativeSetUartType(type, test);
+	}
+	/**
+	*  Extension to CommAPI
+	*  This is an extension to CommAPI.  It may not be supported on
+	*  all operating systems.
+	*  @return type String representation of the UART type which mayb
+	*  be "none", "8250", "16450", "16550", "16550A", "16650", "16550V2"
+	*  or "16750".
+	*  @throws UnsupportedCommOperationException;
+	*/
+	public String getUARTType() throws UnsupportedCommOperationException
+	{
+		return nativeGetUartType();
+	}
+
+	/**
+	*  Extension to CommAPI
+	*  @param int BaudBase The clock frequency divided by 16.  Default
+	*  BaudBase is 115200.
+	*  @return boolean true on success
+	*  @throws UnsupportedCommOperationException
+	*/
+
+	public boolean setBaudBase(int BaudBase)
+		throws UnsupportedCommOperationException
+	{
+		return nativeSetBaudBase(BaudBase);
+	}
+
+	/**
+	*  Extension to CommAPI
+	*  @return int BaudBase
+	*  @throws UnsupportedCommOperationException
+	*/
+
+	public int getBaudBase() throws UnsupportedCommOperationException
+	{
+		return nativeGetBaudBase();
+	}
+
+	/**
+	*  Extension to CommAPI
+	*  @param int Divisor;
+	*  @throws UnsupportedCommOperationException
+	*/
+
+	public boolean setDivisor(int Divisor)
+		throws UnsupportedCommOperationException
+	{
+		return nativeSetDivisor(Divisor);
+	}
+
+	/**
+	*  Extension to CommAPI
+	*  @returns int Divisor;
+	*  @throws UnsupportedCommOperationException
+	*/
+
+	public int getDivisor() throws UnsupportedCommOperationException
+	{
+		return nativeGetDivisor();
+	}
+	
+	/**
+	*  Extension to CommAPI
+	*  returns boolean true on success
+	*  @throws UnsupportedCommOperationException
+	*/
+
+	public boolean setLowLatency() throws UnsupportedCommOperationException
+	{
+		return nativeSetLowLatency();
+	}
+
+	/**
+	*  Extension to CommAPI
+	*  returns boolean true on success
+	*  @throws UnsupportedCommOperationException
+	*/
+
+	public boolean getLowLatency() throws UnsupportedCommOperationException
+	{
+		return nativeGetLowLatency();
+	}
+
+	/**
+	*  Extension to CommAPI
+	*  returns boolean true on success
+	*  @throws UnsupportedCommOperationException
+	*/
+
+	public boolean setCallOutHangup(boolean NoHup)
+		throws UnsupportedCommOperationException
+	{
+		return nativeSetCallOutHangup(NoHup);
+	}
+
+	/**
+	*  Extension to CommAPI
+	*  returns boolean true on success
+	*  @throws UnsupportedCommOperationException
+	*/
+
+	public boolean getCallOutHangup()
+		throws UnsupportedCommOperationException
+	{
+		return nativeGetCallOutHangup();
+	}
+
+/*------------------------  END OF CommAPI Extensions -----------------------*/
 }

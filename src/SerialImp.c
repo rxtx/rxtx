@@ -39,7 +39,9 @@
 /*  FIXME  returns 0 in all cases on win32
 #define S_ISCHR(m)	(((m)&S_IFMT) == S_IFCHR)
 */
-#define S_ISCHR(m) (1)
+#	if !defined(S_ISCHR)
+#		define S_ISCHR(m) (1)
+#	endif /* S_ISCHR(m) */
 #endif /* WIN32 */
 #ifdef HAVE_TERMIOS_H
 #	include <termios.h>
@@ -1315,7 +1317,7 @@ JNIEXPORT jboolean JNICALL RXTXCommDriver(registerKnownPorts)(JNIEnv *env,
 		case PORT_TYPE_I2C:      break;
 		case PORT_TYPE_RS485:    break;
 		case PORT_TYPE_RAW:      break;
-		default: printf("unknown portType %d handed to native RXTXCommDriver.registerKnownPorts() method.\n");
+		default: printf("unknown portType %d handed to native RXTXCommDriver.registerKnownPorts() method.\n", (int) portType );
 	}
 	return result;
 }

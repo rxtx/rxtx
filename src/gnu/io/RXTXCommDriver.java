@@ -47,7 +47,7 @@ public class RXTXCommDriver implements CommDriver
 	/** Get the Serial port prefixes for the running OS */
 	private String deviceDirectory;
 	private String osName;
-`	private native boolean registerKnownPorts(int PortType);
+	private native boolean registerKnownPorts(int PortType);
 	private native boolean isPortPrefixValid(String dev);
 	private native boolean testRead(String dev, int type);
 	private native String getDeviceDirectory();
