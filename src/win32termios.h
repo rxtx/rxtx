@@ -47,7 +47,7 @@
 		16, \
 		NULL ); \
 	sprintf( message, "Error 0x%x at %s(%d): %s\n", errorCode, __FILE__, __LINE__, allocTextBuf); \
-	report_warning( message ); \
+	report_error( message ); \
 	LocalFree(allocTextBuf); \
 }
 
