@@ -6,6 +6,8 @@ you downloaded.
 2.1-7pre19 Oct 12 2004
 		Thread safer nativeDrain()/flush() method.
 		Philip Gladstone <philip@gladstonefamily.net>
+		Don't look for unexpected lockfiles in expected places
+		Philip Gladstone <philip@gladstonefamily.net>
 		adding the new properties gnu.io.rxtx.SerialPorts and
 		gnu.io.rxtx.ParallelPorts insead of overriding the system
 		properties and uses them only as default values
@@ -22,7 +24,6 @@ you downloaded.
 		work exactly as expected with some kernels)
 		Christopher R. Wren <wren@merl.com>
 		configure fix for jdk 1.5
-		
 2.1-7pre17 Oct 17, 2003
 		merged with 2.0 and took small changes from cvs.
 2.1-7pre16 Mar 27, 2003
