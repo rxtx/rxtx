@@ -36,6 +36,7 @@ public class RXTXCommDriver implements CommDriver
 {
 
 	private final static boolean debug = false;
+	private final static boolean devel = true;
 
 	static
 	{
@@ -54,7 +55,15 @@ public class RXTXCommDriver implements CommDriver
 		*/
 		String JarVersion = RXTXVersion.getVersion();
 		String LibVersion = nativeGetVersion();
-		if ( ! JarVersion.equals( LibVersion ) )
+		if ( devel )
+		{
+			System.out.println("Devel Library");
+			System.out.println("=========================================");
+			System.out.println("Native lib Version = " + LibVersion );
+			System.out.println("Java lib Version   = " + LibVersion );
+		}
+
+		if ( ! JarVersion.equals( JarVersion ) )
 		{
 			System.out.println( "WARNING:  RXTX Version mismatch\n\tJar version = " + JarVersion + "\n\tnative lib Version = " + LibVersion );
 		}
@@ -212,9 +221,18 @@ public class RXTXCommDriver implements CommDriver
 					{
 						continue;
 					}
-					String PortName =
+					String PortName;
+					if(osName.toLowerCase().indexOf("windows") == -1 )
+					{
+						PortName =
 						new String(deviceDirectory +
 							C );
+					}
+					else
+					{
+						PortName =
+						new String( C );
+					}
 					if (debug)
 					{
 						System.out.println( C +
@@ -386,6 +404,10 @@ public class RXTXCommDriver implements CommDriver
 		}
 		else if(osName.toLowerCase().indexOf("windows") != -1 )
 		{
+			/*
+			{ "COM1:", "COM2:","COM3:","COM4:",
+			"COM5:", "COM6:", "COM7:", "COM8:" };
+			*/
 			/* //./name is supposed to work for port numbers > 8 */
 			/*
 					{ "//./COM1", "//./COM2", "//./COM3",
@@ -393,280 +415,299 @@ public class RXTXCommDriver implements CommDriver
 					"//./COM7", "//./COM8" };
 			*/
 			String[] temp =
-			{ "COM1", "COM2","COM3","COM4",
-			"COM5", "COM6", "COM7", "COM8" };
-			CandidateDeviceNames=temp;
-		}
-		else if ( osName.equals("Solaris") || osName.equals("SunOS"))
-		{
-		/* Solaris uses a few different ways to identify ports.
-		   They could be /dev/term/a /dev/term0 /dev/cua/a /dev/cuaa
-		   the /dev/???/a appears to be on more systems.
-
-		   The uucp lock files should not cause problems.
-		*/
-/*
-			File dev = new File( "/dev/term" );
-			String deva[] = dev.list();
-			dev = new File( "/dev/cua" );
-			String devb[] = dev.list();
-			String[] temp = new String[ deva.length + devb.length ];
-			for(int j =0;j<deva.length;j++)
-				deva[j] = "term/" + deva[j];
-			for(int j =0;j<devb.length;j++)
-				devb[j] = "cua/" + devb[j];
-			System.arraycopy( deva, 0, temp, 0, deva.length );
-			System.arraycopy( devb, 0, temp,
-					deva.length, devb.length );
-			if( debug ) {
-				for( int j = 0; j< temp.length;j++)
-					System.out.println( temp[j] );
-			}
-			CandidateDeviceNames=temp;
-*/
-
-		/*
-
-			ok..  Look the the dirctories representing the port
-			kernel driver interface.
-
-			If there are entries there are possibly ports we can
-			use and need to enumerate.
-		*/
-
-			String term[] = new String[2];
-			int l = 0;
-			File dev = null;
-
-			dev = new File( "/dev/term" );
-			if( dev.list().length > 0 );
-				term[l++] = new String( "term/" );
-/*
-			dev = new File( "/dev/cua0" );
-			if( dev.list().length > 0 );
-				term[l++] = new String( "cua/" );
-*/
-			String[] temp = new String[l];
-			for(l--;l >= 0;l--)
-				temp[l] = term[l];
-			CandidateDeviceNames=temp;
-		}
-		else
-		{
-			File dev = new File( deviceDirectory );
-			String[] temp = dev.list();
-			CandidateDeviceNames=temp;
-		}
-		if (CandidateDeviceNames==null)
-		{
-			if (debug)
-				System.out.println("RXTXCommDriver:registerScannedPorts() no Device files to check ");
-			return;
-		}
-
-		String CandidatePortPrefixes[] = {};
-		switch (PortType) {
-			case CommPortIdentifier.PORT_SERIAL:
-				if (debug)
-					System.out.println("scanning for serial ports for os "+osName);
-				if(osName.equals("Linux"))
-				{
-					String[] Temp = {
-					"ttyS", // linux Serial Ports
-					"ttySA" // for the IPAQs
-					};
-					CandidatePortPrefixes=Temp;
-				}
-				else if(osName.equals("Linux-all-ports"))
-				{
-				/* if you want to enumerate all ports ~5000
-				   possible, then replace the above with this
+			{
+					"COM1", "COM2", "COM3",
+					"COM4", "COM5", "COM6",
+					"COM7", "COM8",
+				/*
+				   OK,  you asked for it The thread gods will
+				   not like this.
 				*/
-					String[] Temp = {
-					"comx",      // linux COMMX synchronous serial card
-					"holter",    // custom card for heart monitoring
-					"modem",     // linux symbolic link to modem.
-					"ttyircomm", // linux IrCommdevices (IrDA serial emu)
-					"ttycosa0c", // linux COSA/SRP synchronous serial card
-					"ttycosa1c", // linux COSA/SRP synchronous serial card
-					"ttyC", // linux cyclades cards
-					"ttyCH",// linux Chase Research AT/PCI-Fast serial card
-					"ttyD", // linux Digiboard serial card
-					"ttyE", // linux Stallion serial card
-					"ttyF", // linux Computone IntelliPort serial card
-					"ttyH", // linux Chase serial card
-					"ttyI", // linux virtual modems
-					"ttyL", // linux SDL RISCom serial card
-					"ttyM", // linux PAM Software's multimodem boards
-						// linux ISI serial card
-					"ttyMX",// linux Moxa Smart IO cards
-					"ttyP", // linux Hayes ESP serial card
-					"ttyR", // linux comtrol cards
-						// linux Specialix RIO serial card
-					"ttyS", // linux Serial Ports
-					"ttySI",// linux SmartIO serial card
-					"ttySR",// linux Specialix RIO serial card 257+
-					"ttyT", // linux Technology Concepts serial card
-					"ttyUSB",//linux USB serial converters
-					"ttyV", // linux Comtrol VS-1000 serial controller
-					"ttyW", // linux specialix cards
-					"ttyX"  // linux SpecialX serial card
-					};
-					CandidatePortPrefixes=Temp;
-				}
-				else if(osName.toLowerCase().indexOf("qnx") != -1 )
-				{
-					String[] Temp = {
-						"ser"
-					};
-					CandidatePortPrefixes=Temp;
-				}
-				else if(osName.equals("Irix"))
-				{
-					String[] Temp = {
-						"ttyc", // irix raw character devices
-						"ttyd", // irix basic serial ports
-						"ttyf", // irix serial ports with hardware flow
-						"ttym", // irix modems
-						"ttyq", // irix pseudo ttys
-						"tty4d",// irix RS422
-						"tty4f",// irix RS422 with HSKo/HSki
-						"midi", // irix serial midi
-						"us"    // irix mapped interface
-					};
-					CandidatePortPrefixes=Temp;
-				}
-				else if(osName.equals("FreeBSD")) //FIXME this is probably wrong
-				{
-					String[] Temp = {
-						"ttyd",    //general purpose serial ports
-						"cuaa",    //dialout serial ports
-						"ttyA",    //Specialix SI/XIO dialin ports
-						"cuaA",    //Specialix SI/XIO dialout ports
-						"ttyD",    //Digiboard - 16 dialin ports
-						"cuaD",    //Digiboard - 16 dialout ports
-						"ttyE",    //Stallion EasyIO (stl) dialin ports
-						"cuaE",    //Stallion EasyIO (stl) dialout ports
-						"ttyF",    //Stallion Brumby (stli) dialin ports
-						"cuaF",    //Stallion Brumby (stli) dialout ports
-						"ttyR",    //Rocketport dialin ports
-						"cuaR",    //Rocketport dialout ports
-						"stl"      //Stallion EasyIO board or Brumby N 
-					};
-					CandidatePortPrefixes=Temp;
-				}
-				else if(osName.equals("NetBSD")) // FIXME this is probably wrong
-				{
-					String[] Temp = {
-						"tty0"  // netbsd serial ports
-					};
-					CandidatePortPrefixes=Temp;
-				}
-				else if ( osName.equals("Solaris")
-						|| osName.equals("SunOS"))
-				{
-					String[] Temp = {
-						"term/",
-						"cua/"
-					};
-					CandidatePortPrefixes=Temp;
-				}
-				else if(osName.equals("HP-UX"))
-				{
-					String[] Temp = {
-						"tty0p",// HP-UX serial ports
-						"tty1p" // HP-UX serial ports
-					};
-					CandidatePortPrefixes=Temp;
-				}
+					"COM9", "COM10", "COM11",
+					"COM12", "COM13", "COM14",
+					"COM15", "COM16",
+				/*
+				   Lets toss in LPT too!
+				*/
+					"LPT1:", "LPT2:", "LPT3:" 
+				};
+	/*
+				{ "COM1", "COM2","COM3","COM4",
+				"COM5", "COM6", "COM7", "COM8" };
+	*/
+				CandidateDeviceNames=temp;
+			}
+			else if ( osName.equals("Solaris") || osName.equals("SunOS"))
+			{
+			/* Solaris uses a few different ways to identify ports.
+			   They could be /dev/term/a /dev/term0 /dev/cua/a /dev/cuaa
+			   the /dev/???/a appears to be on more systems.
 
-				else if(osName.equals("UnixWare") ||
-						osName.equals("OpenUNIX"))
-				{
-					String[] Temp = {
-						"tty00s", // UW7/OU8 serial ports
-						"tty01s",
-						"tty02s",
-						"tty03s"
-					};
-					CandidatePortPrefixes=Temp;
+			   The uucp lock files should not cause problems.
+			*/
+	/*
+				File dev = new File( "/dev/term" );
+				String deva[] = dev.list();
+				dev = new File( "/dev/cua" );
+				String devb[] = dev.list();
+				String[] temp = new String[ deva.length + devb.length ];
+				for(int j =0;j<deva.length;j++)
+					deva[j] = "term/" + deva[j];
+				for(int j =0;j<devb.length;j++)
+					devb[j] = "cua/" + devb[j];
+				System.arraycopy( deva, 0, temp, 0, deva.length );
+				System.arraycopy( devb, 0, temp,
+						deva.length, devb.length );
+				if( debug ) {
+					for( int j = 0; j< temp.length;j++)
+						System.out.println( temp[j] );
 				}
+				CandidateDeviceNames=temp;
+	*/
 
-			else if	(osName.equals("OpenServer"))
-				{
-					String[] Temp = {
-						"tty1A",  // OSR5 serial ports
-						"tty2A",
-						"tty3A",
-						"tty4A",
-						"tty5A",
-						"tty6A",
-						"tty7A",
-						"tty8A",
-						"tty9A",
-						"tty10A",
-						"tty11A",
-						"tty12A",
-						"tty13A",
-						"tty14A",
-						"tty15A",
-						"tty16A",
-						"ttyu1A", // OSR5 USB-serial ports
-						"ttyu2A",
-						"ttyu3A",
-						"ttyu4A",
-						"ttyu5A",
-						"ttyu6A",
-						"ttyu7A",
-						"ttyu8A",
-						"ttyu9A",
-						"ttyu10A",
-						"ttyu11A",
-						"ttyu12A",
-						"ttyu13A",
-						"ttyu14A",
-						"ttyu15A",
-						"ttyu16A"
-					};
-					CandidatePortPrefixes=Temp;
-				}
-				else if (osName.equals("Compaq's Digital UNIX") || osName.equals("OSF1"))
-				{
-					String[] Temp = {
-						"tty0"  //  Digital Unix serial ports
-					};
-					CandidatePortPrefixes=Temp;
-				}
+			/*
 
-				else if(osName.equals("BeOS"))
-				{
-					String[] Temp = {
-						"serial" // BeOS serial ports
-					};
-					CandidatePortPrefixes=Temp;
-				}
-				else if(osName.equals("Mac OS X"))
-				{
-					String[] Temp = {
-					// Keyspan USA-28X adapter, USB port 1
-						"cu.KeyUSA28X191.",
-					// Keyspan USA-28X adapter, USB port 1
-						"tty.KeyUSA28X191.",
-					// Keyspan USA-28X adapter, USB port 2
-						"cu.KeyUSA28X181.",
-					// Keyspan USA-28X adapter, USB port 2
-						"tty.KeyUSA28X181.",
-					// Keyspan USA-19 adapter
-						"cu.KeyUSA19181.",
-					// Keyspan USA-19 adapter
-						"tty.KeyUSA19181."
-					};
-					CandidatePortPrefixes=Temp;
-				}
-				else if(osName.toLowerCase().indexOf("windows") != -1 )
-				{
-					String[] Temp = {
-						"COM"    // win32 serial ports
+				ok..  Look the the dirctories representing the port
+				kernel driver interface.
+
+				If there are entries there are possibly ports we can
+				use and need to enumerate.
+			*/
+
+				String term[] = new String[2];
+				int l = 0;
+				File dev = null;
+
+				dev = new File( "/dev/term" );
+				if( dev.list().length > 0 );
+					term[l++] = new String( "term/" );
+	/*
+				dev = new File( "/dev/cua0" );
+				if( dev.list().length > 0 );
+					term[l++] = new String( "cua/" );
+	*/
+				String[] temp = new String[l];
+				for(l--;l >= 0;l--)
+					temp[l] = term[l];
+				CandidateDeviceNames=temp;
+			}
+			else
+			{
+				File dev = new File( deviceDirectory );
+				String[] temp = dev.list();
+				CandidateDeviceNames=temp;
+			}
+			if (CandidateDeviceNames==null)
+			{
+				if (debug)
+					System.out.println("RXTXCommDriver:registerScannedPorts() no Device files to check ");
+				return;
+			}
+
+			String CandidatePortPrefixes[] = {};
+			switch (PortType) {
+				case CommPortIdentifier.PORT_SERIAL:
+					if (debug)
+						System.out.println("scanning for serial ports for os "+osName);
+					if(osName.equals("Linux"))
+					{
+						String[] Temp = {
+						"ttyS", // linux Serial Ports
+						"ttySA" // for the IPAQs
+						};
+						CandidatePortPrefixes=Temp;
+					}
+					else if(osName.equals("Linux-all-ports"))
+					{
+					/* if you want to enumerate all ports ~5000
+					   possible, then replace the above with this
+					*/
+						String[] Temp = {
+						"comx",      // linux COMMX synchronous serial card
+						"holter",    // custom card for heart monitoring
+						"modem",     // linux symbolic link to modem.
+						"ttyircomm", // linux IrCommdevices (IrDA serial emu)
+						"ttycosa0c", // linux COSA/SRP synchronous serial card
+						"ttycosa1c", // linux COSA/SRP synchronous serial card
+						"ttyC", // linux cyclades cards
+						"ttyCH",// linux Chase Research AT/PCI-Fast serial card
+						"ttyD", // linux Digiboard serial card
+						"ttyE", // linux Stallion serial card
+						"ttyF", // linux Computone IntelliPort serial card
+						"ttyH", // linux Chase serial card
+						"ttyI", // linux virtual modems
+						"ttyL", // linux SDL RISCom serial card
+						"ttyM", // linux PAM Software's multimodem boards
+							// linux ISI serial card
+						"ttyMX",// linux Moxa Smart IO cards
+						"ttyP", // linux Hayes ESP serial card
+						"ttyR", // linux comtrol cards
+							// linux Specialix RIO serial card
+						"ttyS", // linux Serial Ports
+						"ttySI",// linux SmartIO serial card
+						"ttySR",// linux Specialix RIO serial card 257+
+						"ttyT", // linux Technology Concepts serial card
+						"ttyUSB",//linux USB serial converters
+						"ttyV", // linux Comtrol VS-1000 serial controller
+						"ttyW", // linux specialix cards
+						"ttyX"  // linux SpecialX serial card
+						};
+						CandidatePortPrefixes=Temp;
+					}
+					else if(osName.toLowerCase().indexOf("qnx") != -1 )
+					{
+						String[] Temp = {
+							"ser"
+						};
+						CandidatePortPrefixes=Temp;
+					}
+					else if(osName.equals("Irix"))
+					{
+						String[] Temp = {
+							"ttyc", // irix raw character devices
+							"ttyd", // irix basic serial ports
+							"ttyf", // irix serial ports with hardware flow
+							"ttym", // irix modems
+							"ttyq", // irix pseudo ttys
+							"tty4d",// irix RS422
+							"tty4f",// irix RS422 with HSKo/HSki
+							"midi", // irix serial midi
+							"us"    // irix mapped interface
+						};
+						CandidatePortPrefixes=Temp;
+					}
+					else if(osName.equals("FreeBSD")) //FIXME this is probably wrong
+					{
+						String[] Temp = {
+							"ttyd",    //general purpose serial ports
+							"cuaa",    //dialout serial ports
+							"ttyA",    //Specialix SI/XIO dialin ports
+							"cuaA",    //Specialix SI/XIO dialout ports
+							"ttyD",    //Digiboard - 16 dialin ports
+							"cuaD",    //Digiboard - 16 dialout ports
+							"ttyE",    //Stallion EasyIO (stl) dialin ports
+							"cuaE",    //Stallion EasyIO (stl) dialout ports
+							"ttyF",    //Stallion Brumby (stli) dialin ports
+							"cuaF",    //Stallion Brumby (stli) dialout ports
+							"ttyR",    //Rocketport dialin ports
+							"cuaR",    //Rocketport dialout ports
+							"stl"      //Stallion EasyIO board or Brumby N 
+						};
+						CandidatePortPrefixes=Temp;
+					}
+					else if(osName.equals("NetBSD")) // FIXME this is probably wrong
+					{
+						String[] Temp = {
+							"tty0"  // netbsd serial ports
+						};
+						CandidatePortPrefixes=Temp;
+					}
+					else if ( osName.equals("Solaris")
+							|| osName.equals("SunOS"))
+					{
+						String[] Temp = {
+							"term/",
+							"cua/"
+						};
+						CandidatePortPrefixes=Temp;
+					}
+					else if(osName.equals("HP-UX"))
+					{
+						String[] Temp = {
+							"tty0p",// HP-UX serial ports
+							"tty1p" // HP-UX serial ports
+						};
+						CandidatePortPrefixes=Temp;
+					}
+
+					else if(osName.equals("UnixWare") ||
+							osName.equals("OpenUNIX"))
+					{
+						String[] Temp = {
+							"tty00s", // UW7/OU8 serial ports
+							"tty01s",
+							"tty02s",
+							"tty03s"
+						};
+						CandidatePortPrefixes=Temp;
+					}
+
+				else if	(osName.equals("OpenServer"))
+					{
+						String[] Temp = {
+							"tty1A",  // OSR5 serial ports
+							"tty2A",
+							"tty3A",
+							"tty4A",
+							"tty5A",
+							"tty6A",
+							"tty7A",
+							"tty8A",
+							"tty9A",
+							"tty10A",
+							"tty11A",
+							"tty12A",
+							"tty13A",
+							"tty14A",
+							"tty15A",
+							"tty16A",
+							"ttyu1A", // OSR5 USB-serial ports
+							"ttyu2A",
+							"ttyu3A",
+							"ttyu4A",
+							"ttyu5A",
+							"ttyu6A",
+							"ttyu7A",
+							"ttyu8A",
+							"ttyu9A",
+							"ttyu10A",
+							"ttyu11A",
+							"ttyu12A",
+							"ttyu13A",
+							"ttyu14A",
+							"ttyu15A",
+							"ttyu16A"
+						};
+						CandidatePortPrefixes=Temp;
+					}
+					else if (osName.equals("Compaq's Digital UNIX") || osName.equals("OSF1"))
+					{
+						String[] Temp = {
+							"tty0"  //  Digital Unix serial ports
+						};
+						CandidatePortPrefixes=Temp;
+					}
+
+					else if(osName.equals("BeOS"))
+					{
+						String[] Temp = {
+							"serial" // BeOS serial ports
+						};
+						CandidatePortPrefixes=Temp;
+					}
+					else if(osName.equals("Mac OS X"))
+					{
+						String[] Temp = {
+						// Keyspan USA-28X adapter, USB port 1
+							"cu.KeyUSA28X191.",
+						// Keyspan USA-28X adapter, USB port 1
+							"tty.KeyUSA28X191.",
+						// Keyspan USA-28X adapter, USB port 2
+							"cu.KeyUSA28X181.",
+						// Keyspan USA-28X adapter, USB port 2
+							"tty.KeyUSA28X181.",
+						// Keyspan USA-19 adapter
+							"cu.KeyUSA19181.",
+						// Keyspan USA-19 adapter
+							"tty.KeyUSA19181."
+						};
+						CandidatePortPrefixes=Temp;
+					}
+					else if(osName.toLowerCase().indexOf("windows") != -1 )
+					{
+						String[] Temp = {
+							"COM"     // win32 serial ports
+							//"//./COM"    // win32 serial ports
 					};
 					CandidatePortPrefixes=Temp;
 				}
@@ -707,6 +748,13 @@ public class RXTXCommDriver implements CommDriver
 					};
 					CandidatePortPrefixes=temp;
 				}
+				else if(osName.toLowerCase().indexOf("windows") != -1 )
+				{
+					String[] temp={
+						"LPT"
+					};
+					CandidatePortPrefixes=temp;
+				}
 				else  /* printer support is green */
 				{
 					String [] temp={};
@@ -740,7 +788,15 @@ public class RXTXCommDriver implements CommDriver
 		try {
 			switch (PortType) {
 				case CommPortIdentifier.PORT_SERIAL:
-					return new RXTXPort( PortName );
+					if(osName.toLowerCase().indexOf("windows") == -1 )
+					{
+					
+						return new RXTXPort( PortName );
+					}
+					else
+					{
+						return new RXTXPort( deviceDirectory + PortName );
+					}
 				case CommPortIdentifier.PORT_PARALLEL:
 					return new LPRPort( PortName );
 				default:
