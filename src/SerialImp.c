@@ -382,7 +382,7 @@ JNIEXPORT void JNICALL RXTXPort(nativeSetSerialPortParams)(
 	if (cspeed == -1)
 	{
 		throw_java_exception( env, UNSUPPORTED_COMM_OPERATION,
-			"nativeSetSerialPortParams", "Unsupported BaudRate" );
+			"", "BaudRate could not be set to the specified value" );
 		return;
 	}
 #ifdef TIOCGSERIAL
