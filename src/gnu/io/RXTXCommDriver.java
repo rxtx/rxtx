@@ -434,9 +434,11 @@ public class RXTXCommDriver implements CommDriver
 			dev = new File( "/dev/term" );
 			if( dev.list().length > 0 );
 				term[l++] = new String( "term/" );
+/*
 			dev = new File( "/dev/cua0" );
 			if( dev.list().length > 0 );
 				term[l++] = new String( "cua/" );
+*/
 			String[] temp = new String[l];
 			for(l--;l >= 0;l--)
 				temp[l] = term[l];
