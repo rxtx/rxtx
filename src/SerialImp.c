@@ -5671,26 +5671,26 @@ get_java_environment
 		used to monitor for output buffer empty.
 ----------------------------------------------------------*/
 JNIEnv *get_java_environment(JavaVM *java_vm,  jboolean *was_attached){
-	JNIEnv *env = NULL;
+	void **env = NULL;
 	jint err_get_env;
-	if(java_vm == NULL) return env;
+	if(java_vm == NULL) return (JNIEnv *) *env;
 	*was_attached = JNI_FALSE;
 
 	err_get_env = (*java_vm)->GetEnv(
 		java_vm,
-		(void **) &env,
+		env,
 		JNI_VERSION_1_2
 	);
 	if(err_get_env == JNI_ERR) return NULL;
 	if(err_get_env == JNI_EDETACHED){
 		(*java_vm)->AttachCurrentThread(
 			java_vm,
-			(void **) &env,
+			env,
 			(void **) NULL
 		);
-		if(env != NULL) *was_attached = JNI_TRUE;
-	}else if(err_get_env != JNI_OK) return NULL;
-	return env;
+		if(*env != NULL) *was_attached = JNI_TRUE;
+	}else if(err_get_env != JNI_OK) return (JNIEnv *) NULL;
+	return (JNIEnv *) *env;
 }
 
 /*----------------------------------------------------------

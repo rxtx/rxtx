@@ -3,6 +3,9 @@ This is ChangeLog Tue Oct 12 10:01:16 BST 2004
 rxtx-2.1 and rxtx-2.0 changes are kept in the same file.  skip to the version
 you downloaded.
 
+2.1-7pre21 Oct 16 2004
+		dereferencing type-punned pointer will break strict-aliasing
+		rules.  Fixed.
 2.1-7pre20 Oct 16 2004
 		x86_64 Linux Fixes fixes BlackBox Serial now runs
 		switch to JNI_VERSION_1_2 -- many people are still using
