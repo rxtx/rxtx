@@ -106,11 +106,11 @@
 
 extern int errno;
 #ifdef TRENT_IS_HERE
-#undef TIOCSERGETLSR
 #define TRACE
-#define DEBUG_VERBOSE
 #define DEBUG
 #define DEBUG_MW
+#define DEBUG_VERBOSE
+#undef TIOCSERGETLSR
 #endif /* TRENT_IS_HERE */
 #include "SerialImp.h"
 
@@ -170,7 +170,7 @@ struct timeval snow, enow, seloop, eeloop;
 #define report_time_end( ) \
 { \
 	gettimeofday(&enow, NULL); \
-	mexPrintf("%8i sec : %8i usec\n", enow.tv_sec - snow.tv_sec, enow.tv_usec - snow.tv_usec); \
+	mexPrintf("%8i sec : %8i usec\n", enow.tv_sec - snow.tv_sec, enow.tv_sec - snow.tv_sec?snow.tv_usec-enow.tv_usec:enow.tv_usec - snow.tv_usec); \
 }
 #else
 #define report_time( ) {}
@@ -758,6 +758,7 @@ void *drain_loop( void *arg )
 	{
 		report("drain_loop:  looping\n");
 		usleep(10000);
+		// system_wait();
 		if( eis->eventloop_interrupted )
 		{
 			goto end;
@@ -2212,7 +2213,6 @@ system_wait
 void system_wait()
 {
 #if defined (__sun__ )
-/*
 	struct timespec retspec, tspec;
 	retspec.tv_sec = 0;
 	retspec.tv_nsec = 100000000;
@@ -2220,6 +2220,7 @@ void system_wait()
 		tspec = retspec;
 		nanosleep( &tspec, &retspec );
 	} while( tspec.tv_nsec != 0 );
+/* Trent
 */
 #else
 #ifdef TRENT_IS_HERE_DEBUGGING_THREADS
@@ -2441,6 +2442,7 @@ JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 				return;
 			}
 			usleep(10000);
+			// Trent system_wait();
 		}  while ( eis.ret < 0 && errno == EINTR );
 		if( eis.ret >= 0 )
 		{
