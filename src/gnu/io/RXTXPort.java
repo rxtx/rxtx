@@ -629,6 +629,7 @@ final class RXTXPort extends SerialPort
 	*/
 
 	boolean MonitorThreadLock = true;
+	boolean MonitorThreadCloseLock = true;
 
 	public void addEventListener(
 		SerialPortEventListener lsnr ) throws TooManyListenersException
@@ -647,12 +648,7 @@ final class RXTXPort extends SerialPort
 			System.out.println("RXTXPort:Interrupt=false");
 		monThread = new MonitorThread();
 		monThread.start();
-		while( MonitorThreadLock ) 
-		{
-			try {
-				Thread.sleep( 2 );
-			} catch( Exception e ){} 
-		}
+		waitForTheNativeCodeSilly();
 	}
 	/**
 	*  Remove the serial port event listener
@@ -662,7 +658,6 @@ final class RXTXPort extends SerialPort
 		if (debug)
 			System.out.println("RXTXPort:removeEventListener()");
 		waitForTheNativeCodeSilly();
-		MonitorThreadLock = true;
 		//if( monThread != null && monThread.isAlive() )
 		if( monThreadisInterrupted == true )
 		{
@@ -670,7 +665,6 @@ final class RXTXPort extends SerialPort
 			monThread = null;
 			SPEventListener = null;
 			Runtime.getRuntime().gc();
-			MonitorThreadLock = false;
 			return;
 		}
 		else if( monThread != null && monThread.isAlive() )
@@ -683,7 +677,14 @@ final class RXTXPort extends SerialPort
 			   They will call back to see if its their thread
 			   using isInterrupted().
 			*/
+			MonitorThreadCloseLock = true;
 			interruptEventLoop( );
+			while( MonitorThreadCloseLock )
+			{
+				try {
+					Thread.sleep(100);
+				} catch( Exception e ) {}
+			}
 			try {
 				monThread.join(1000);
 			} catch (Exception ex) {
@@ -721,7 +722,7 @@ final class RXTXPort extends SerialPort
 		while( MonitorThreadLock )
 		{
 			try {
-				Thread.sleep(2);
+				Thread.sleep(100);
 			} catch( Exception e ) {}
 		}
 	}
@@ -874,15 +875,17 @@ final class RXTXPort extends SerialPort
 		MonitorThreadLock = false;
 	}
 
-
 	/** Close the port */
 	private native void nativeClose( String name );
 	/**
 	*/
+	boolean closeLock = false;
 	public synchronized void close()
 	{
 		if (debug)
 			System.out.println("RXTXPort:close( " + this.name + " )"); 
+		if( closeLock ) return;
+		closeLock = true;
 		if ( fd <= 0 )
 		{
 			System.out.println( "RXTXPort:close detected bad File Descriptor" );
@@ -890,16 +893,16 @@ final class RXTXPort extends SerialPort
 		}
 		setDTR(false);
 		setDSR(false);
-		nativeClose( this.name );
-		super.close();
-
 		if ( ! monThreadisInterrupted )
 		{
 			removeEventListener();
 		}
+		nativeClose( this.name );
+		super.close();
 
 		fd = 0;
 		Runtime.getRuntime().gc();
+		closeLock = false;
 	}
 
 
@@ -922,8 +925,9 @@ final class RXTXPort extends SerialPort
 		{
 			if (debug_verbose)
 				System.out.println("RXTXPort:SerialOutputStream:write(int)");
+			waitForTheNativeCodeSilly();
 			if ( fd == 0 ) throw new IOException();
-				writeByte( b );
+			writeByte( b );
 		}
 	/**
 	*  @param b[]
@@ -936,7 +940,8 @@ final class RXTXPort extends SerialPort
 				System.out.println("Entering RXTXPort:SerialOutputStream:write(" + b.length + ") "/* + new String(b)*/ );
 			}
 			if ( fd == 0 ) throw new IOException();
-				writeArray( b, 0, b.length );
+			waitForTheNativeCodeSilly();
+			writeArray( b, 0, b.length );
 			if (debug)
 				System.out.println("Leaving RXTXPort:SerialOutputStream:write(" +b.length  +")");
 		}
@@ -963,7 +968,8 @@ final class RXTXPort extends SerialPort
 				System.out.println("Entering RXTXPort:SerialOutputStream:write(" + send.length + " " + off + " " + len + " " +") " /*+  new String(send) */ );
 			}
 			if ( fd == 0 ) throw new IOException();
-				writeArray( send, 0, len );
+			waitForTheNativeCodeSilly();
+			writeArray( send, 0, len );
 			if( debug )
 				System.out.println("Leaving RXTXPort:SerialOutputStream:write(" + send.length + " " + off + " " + len + " " +") "  /*+ new String(send)*/ );
 		}
@@ -974,6 +980,7 @@ final class RXTXPort extends SerialPort
 			if (debug)
 				System.out.println("RXTXPort:SerialOutputStream:flush() enter");
 			if ( fd == 0 ) throw new IOException();
+			waitForTheNativeCodeSilly();
 			nativeDrain();
 			if (debug)
 				System.out.println("RXTXPort:SerialOutputStream:flush() leave");
@@ -993,6 +1000,7 @@ final class RXTXPort extends SerialPort
 			if (debug_verbose)
 				System.out.println("RXTXPort:SerialInputStream:read()");
 			if ( fd == 0 ) throw new IOException();
+			waitForTheNativeCodeSilly();
 			int result = readByte();
 			if (debug)
 				System.out.println( "readByte= " + result );
@@ -1008,6 +1016,7 @@ final class RXTXPort extends SerialPort
 			int result;
 			if (debug_verbose)
 				System.out.println("RXTXPort:SerialInputStream:read(" + b.length + ")");
+			waitForTheNativeCodeSilly();
 			result = read( b, 0, b.length);
 			if (debug)
 				System.out.println( "read = " + result );
@@ -1074,6 +1083,7 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 			 */
 				Minimum = Math.min(Minimum, threshold);
 			}
+			waitForTheNativeCodeSilly();
 			result = readArray( b, off, Minimum);
 			if (debug)
 				System.out.println("RXTXPort:SerialInputStream:read(" + b.length + " " + off + " " + len + ") = " + result + " bytes containing "  /*+ new String(b) */);
