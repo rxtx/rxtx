@@ -69,6 +69,11 @@ final class RXTXPort extends SerialPort
 	//	try {
 			fd = open( name );
 			this.name = name;
+
+			MonitorThreadLock = true;
+			monThread = new MonitorThread();
+			monThread.start();
+			waitForTheNativeCodeSilly();
 	//	} catch ( PortInUseException e ){}
 		if (debug)
 			System.out.println("RXTXPort:RXTXPort("+name+") fd = " +
@@ -637,7 +642,6 @@ final class RXTXPort extends SerialPort
 		/*  Don't let and notification requests happen until the
 		    Eventloop is ready
 		*/
-		MonitorThreadLock = true;
 
 		if (debug)
 			System.out.println("RXTXPort:addEventListener()");
@@ -646,9 +650,6 @@ final class RXTXPort extends SerialPort
 		SPEventListener = lsnr;
 		if (debug)
 			System.out.println("RXTXPort:Interrupt=false");
-		monThread = new MonitorThread();
-		monThread.start();
-		waitForTheNativeCodeSilly();
 	}
 	/**
 	*  Remove the serial port event listener
