@@ -106,19 +106,11 @@
 
 extern int errno;
 #ifdef TRENT_IS_HERE
-#define DEBUG
-#define DEBUG_VERBOSE
-#define TRACE
 #undef TIOCSERGETLSR
-#define DEBUG
-#define DEBUG_VERBOSE
 #define TRACE
+#define DEBUG_VERBOSE
+#define DEBUG
 #define DEBUG_MW
-/*
-#define DONT_USE_OUTPUT_BUFFER_EMPTY_CODE
-notes:
-	TIOCGSERIAL
-*/
 #endif /* TRENT_IS_HERE */
 #include "SerialImp.h"
 
@@ -269,6 +261,7 @@ JNIEXPORT jint JNICALL RXTXPort(open)(
 	*/
 			
 	ENTER( "RXTXPort:open" );
+	printf( "XXXXXXXXXXXXXXXXXXXXX RXTXPort:open XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" );
 	if ( LOCK( filename, pid ) )
 	{
 		sprintf( message, "open: locking has failed for %s\n",
@@ -341,6 +334,7 @@ JNIEXPORT void JNICALL RXTXPort(nativeClose)( JNIEnv *env,
 	pid = get_java_var( env, jobj,"pid","I" );
 
 	report(">nativeClose pid\n");
+	printf( "XXXXXXXXXXXXXXXXXXXXX RXTXPort:close XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" );
 	//usleep(10000);
 	if( !pid ) {
 		(*env)->ExceptionDescribe( env );
@@ -697,24 +691,37 @@ void *drain_loop( void *arg )
 {
 	struct event_info_struct *eis = ( struct event_info_struct * ) arg;
 	char msg[80];
+	int i;
 	pthread_detach( pthread_self() );
 
-	for(;;)
+#include <time.h>
+	for(i=0;;i++)
 	{
+		if( ! i%10 )
+			printf("s");
+		report("drain_loop:  looping\n");
 		if( eis->eventloop_interrupted )
 		{
 			goto end;
 		}
 		if( tcdrain( eis->fd ) == 0 )
 		{
-			if( eis->writing )
+			if( eis && eis->writing )
 			{
-				sprintf(msg, "drain_loop: setting OUTPUT_BUFFER_EMPTY\n" );
-				report( msg );
+				//sprintf(msg, "drain_loop: setting OUTPUT_BUFFER_EMPTY\n" );
+				//report( msg );
 				eis->output_buffer_empty_flag = 1;
 				eis->writing=JNI_FALSE;
 			}
-			usleep(2000);
+			else
+			{
+				if( !eis )
+				{
+					printf("drain_loop:  --------------------- !eis --------------------\n");
+					goto end;
+				}
+				report("drain_loop:  writing not set\n");
+			}
 		}
 		else
 		{
@@ -724,6 +731,7 @@ void *drain_loop( void *arg )
 	}
 end:
 	//usleep(10000);
+	printf("\n------------------ drain_loop exiting ---------------------\n");
 	report("------------------ drain_loop exiting ---------------------\n");
 	eis->closing = 1;
 	pthread_exit( NULL );
@@ -822,7 +830,11 @@ int init_threads( struct event_info_struct *eis )
 	report("init_threads: set eis\n");
 	(*eis->env)->SetIntField(eis->env, *eis->jobj, jeis, ( jint ) eis );
 	report("init_threads: creating drain_loop\n");
+	printf("\ninit_threads: -------------------- start --------------------\n");
 	pthread_create( &tid, NULL, drain_loop, (void *) eis );
+	printf("\ninit_threads: -------------------- detatch --------------------\n");
+	pthread_detach( tid );
+	printf("\ninit_threads: -------------------- stop --------------------\n");
 #endif /* TIOCSERGETLSR */
 	report("init_threads:  stop\n");
 	return( 1 );
@@ -858,7 +870,8 @@ JNIEXPORT void JNICALL RXTXPort(writeByte)( JNIEnv *env,
 		while( index->fd != fd &&
 			index->next ) index = index->next;
 	}
-	index->writing = JNI_TRUE;
+	index->writing = 1;
+	report( "writeByte:  index->writing = 1" );
 #endif
 	sprintf( msg, "RXTXPort:writeByte %i\n", result );
 	report( msg );
@@ -884,6 +897,7 @@ RXTXPort.writeArray
 JNIEXPORT void JNICALL RXTXPort(writeArray)( JNIEnv *env,
 	jobject jobj, jbyteArray jbarray, jint offset, jint count )
 {
+	struct event_info_struct *index = master_index;
 	int fd = get_java_var( env, jobj,"fd","I" );
 	int result=0,total=0;
 	jbyte *body = (*env)->GetByteArrayElements( env, jbarray, 0 );
@@ -897,8 +911,8 @@ JNIEXPORT void JNICALL RXTXPort(writeArray)( JNIEnv *env,
 
 	ENTER( "writeArray" );
 	/* warning Will Rogers */
-	sprintf( message, "::::RXTXPort:writeArray(%s);\n", (char *) body );
-	report_verbose( message );
+	//sprintf( message, "::::RXTXPort:writeArray(%s);\n", (char *) body );
+	//report_verbose( message );
 
 	do {
 		result=WRITE (fd, body + total + offset, count - total); /* dima */
@@ -908,6 +922,15 @@ JNIEXPORT void JNICALL RXTXPort(writeArray)( JNIEnv *env,
 		report("writeArray()\n");
 	}  while ( ( total < count ) || (result < 0 && errno==EINTR ) );
 	(*env)->ReleaseByteArrayElements( env, jbarray, body, 0 );
+#ifndef TIOCSERGETLSR
+	if( index )
+	{
+		while( index->fd != fd &&
+			index->next ) index = index->next;
+	}
+	index->writing = 1;
+	report( "writeArray:  index->writing = 1" );
+#endif
 	/*
 		50 ms sleep to make sure read can get in
 
@@ -1538,6 +1561,7 @@ GetTickCount()
 	struct timeval now;
 
 	gettimeofday(&now, NULL);
+	report_verbose("gettimeofday\n");
 
 	return (now.tv_sec * 1000) + ceil(now.tv_usec / 1000);
 }
@@ -2246,6 +2270,7 @@ JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 	if ( !initialise_event_info_struct( &eis ) ) goto end;
 	if ( !init_threads( &eis ) ) goto end;
 	unlock_monitor_thread( &eis );
+	printf("\n------------------ drain_loop starting ---------------------\n");
 	do{
 		do {
 			/* report( "." ); */
