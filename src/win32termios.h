@@ -421,8 +421,8 @@ find a way to get/set buad_base and divisor directly.
 /*
 	FIXME
 	frame and parity errors caused crashes in testing BlackBox
-	#define TIOCGICOUNT	0x545d
 */
+#define TIOCGICOUNT	0x545d
 
 /* ioctl errors */
 #define ENOIOCTLCMD	515

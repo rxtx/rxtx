@@ -60,7 +60,7 @@ public class RXTXCommDriver implements CommDriver
 			System.out.println("Devel Library");
 			System.out.println("=========================================");
 			System.out.println("Native lib Version = " + LibVersion );
-			System.out.println("Java lib Version   = " + LibVersion );
+			System.out.println("Java lib Version   = " + JarVersion );
 		}
 
 		if ( ! JarVersion.equals( LibVersion ) )

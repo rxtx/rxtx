@@ -52,6 +52,7 @@ extern void report_error( char * );
 #define SIGIO 0
 
 int my_errno;
+extern int errno;
 struct termios_list
 {
 	char filename[80];
@@ -508,6 +509,8 @@ int ClearErrors( struct termios_list *index, COMSTAT *Stat )
 		index->sis->frame++;
 		ErrCode &= ~CE_FRAME;
 	}
+#ifdef LIFE_IS_GOOD
+  FIXME OVERRUN is spewing
 	if( ErrCode & CE_OVERRUN )
 	{
 		index->sis->overrun++;
@@ -519,6 +522,7 @@ int ClearErrors( struct termios_list *index, COMSTAT *Stat )
 		index->sis->overrun++;
 		ErrCode &= ~CE_OVERRUN;
 	}
+#endif /* LIFE_IS_GOOD */
 	if( ErrCode & CE_RXPARITY )
 	{
 		index->sis->parity++;
@@ -1234,7 +1238,7 @@ int serial_write( int fd, char *Str, int length )
 {
 	unsigned long nBytes;
 	struct termios_list *index;
-	COMSTAT Stat;
+	//COMSTAT Stat;
 	int old_flag;
 
 	ENTER( "serial_write" );
@@ -1262,10 +1266,12 @@ int serial_write( int fd, char *Str, int length )
 		WaitForSingleObject( index->wol.hEvent,100 );
 		if ( GetLastError() != ERROR_IO_PENDING )
 		{
-			ClearErrors( index, &Stat );
-			set_errno(EIO);
+			//ClearErrors( index, &Stat );
 			report( "serial_write error\n" );
-			length=-1;
+			//report("Condition 1 Detected in write()\n");
+			YACK();
+			errno = EIO;
+			nBytes=-1;
 			goto end;
 		}
 		/* This is breaking on Win2K, WinXP for some reason */
@@ -1274,21 +1280,30 @@ int serial_write( int fd, char *Str, int length )
 		{
 			if ( GetLastError() != ERROR_IO_INCOMPLETE )
 			{
-				ClearErrors( index, &Stat );
+				//report("Condition 2 Detected in write()\n");
+				YACK();
+				errno = EIO;
+				nBytes = -1;
+				goto end;
+				//ClearErrors( index, &Stat );
 			}
 		}
 	}
 	else
 	{
-		ClearErrors( index, &Stat );
-		set_errno(EIO);
-		report( "serial_write bailing!\n" );
+		//ClearErrors( index, &Stat );
+		//report("Condition 3 Detected in write()\n");
+		YACK();
+		errno = EIO;
+		//report( "serial_write bailing!\n" );
 		return(-1);
 	}
 end:
 	/* FlushFileBuffers( index->hComm ); */
 	index->event_flag |= EV_TXEMPTY;
+	//ClearErrors( index, &Stat );
 	SetCommMask( index->hComm, index->event_flag );
+	//ClearErrors( index, &Stat );
 	index->event_flag = old_flag;
 	index->tx_happened = 1; 
 	LEAVE( "serial_write" );
@@ -1474,6 +1489,187 @@ int serial_read( int fd, void *vb, int size )
 	LEAVE( "serial_read" );
 	return total;
 }
+
+#ifdef asdf
+int serial_read( int fd, void *vb, int size )
+{
+	long start, now;
+	unsigned long nBytes = 0, total = 0, error;
+	/* unsigned long waiting = 0; */
+	int err, vmin; 
+	struct termios_list *index;
+	char message[80];
+	COMSTAT Stat;
+	clock_t c;
+	unsigned char *dest = vb;
+	
+	start = GetTickCount();
+	ENTER( "serial_read" );
+
+	if ( fd <= 0 )
+	{
+		printf("1\n");
+		return 0;
+	}
+	index = find_port( fd );
+	if ( !index )
+	{
+		LEAVE( "serial_read 7" );
+		errno = EIO;
+		printf("2\n");
+		return -1;
+	}
+
+	/* FIXME: CREAD: without this, data cannot be read
+	   FIXME: PARMRK: mark framing & parity errors
+	   FIXME: IGNCR: ignore \r
+	   FIXME: ICRNL: convert \r to \n
+	   FIXME: INLCR: convert \n to \r
+	*/
+
+	ClearErrors( index, &Stat );
+	if ( index->open_flags & O_NONBLOCK  )
+	{
+		int ret;
+		vmin = 0;
+		/* pull mucho-cpu here? */
+		do {
+#ifdef DEBUG_VERBOSE
+			report( "vmin=0\n" );
+#endif /* DEBUG_VERBOSE */
+			ret = ClearErrors( index, &Stat);
+/*
+			usleep(1000);
+			usleep(50);
+*/
+			/* we should use -1 instead of 0 for disabled timeout */
+			now = GetTickCount();
+			if ( index->ttyset->c_cc[VTIME] &&
+				now-start >= (index->ttyset->c_cc[VTIME]*100)) {
+/*
+				sprintf( message, "now = %i start = %i time = %i total =%i\n", now, start, index->ttyset->c_cc[VTIME]*100, total);
+				report( message );
+*/
+				errno = EAGAIN;
+				printf("3\n");
+				return -1;	/* read timeout */
+			}
+		} while( Stat.cbInQue < size && size > 1 );
+	}
+	else
+	{
+		/* VTIME is in units of 0.1 seconds */
+
+#ifdef DEBUG_VERBOSE
+		report( "vmin!=0\n" );
+#endif /* DEBUG_VERBOSE */
+		vmin = index->ttyset->c_cc[VMIN];
+
+		c = clock() + index->ttyset->c_cc[VTIME] * CLOCKS_PER_SEC / 10;
+		do {
+			error = ClearErrors( index, &Stat);
+			usleep(1000);
+		} while ( c > clock() );
+
+	}
+
+	total = 0;
+	while ( size > 0 )
+	{
+		nBytes = 0;
+		//ret = ClearErrors( index, &Stat);
+
+		index->rol.Offset = index->rol.OffsetHigh = 0;
+		ResetEvent( index->rol.hEvent );
+
+		err = ReadFile( index->hComm, dest + total, size, &nBytes, &index->rol ); 
+#ifdef DEBUG_VERBOSE
+	/* warning Roy Rogers! */
+		sprintf(message, " ========== ReadFile = %i %s\n",
+			( int ) nBytes, (char *) dest + total );
+		report( message );
+#endif /* DEBUG_VERBOSE */
+		size -= nBytes;
+		total += nBytes;
+		
+		if ( !err )
+		{
+			switch ( GetLastError() )
+			{
+				case ERROR_BROKEN_PIPE:
+					report( "ERROR_BROKEN_PIPE\n ");
+					nBytes = 0;
+					break;
+				case ERROR_MORE_DATA:
+/*
+					usleep(1000);
+*/
+					report( "ERROR_MORE_DATA\n" );
+					break;
+				case ERROR_IO_PENDING:
+					while( ! GetOverlappedResult(
+							index->hComm,
+							&index->rol,
+							&nBytes,
+							TRUE ) )
+					{
+						if( GetLastError() !=
+							ERROR_IO_INCOMPLETE )
+						{
+							ClearErrors(
+								index,
+								&Stat);
+							printf("4\n");
+							return( total );
+						}
+					}
+					size -= nBytes;
+					total += nBytes;
+					if (size > 0) {
+						now = GetTickCount();
+						sprintf(message, "size > 0: spent=%ld have=%d\n", now-start, index->ttyset->c_cc[VTIME]*100);
+						report( message );
+						/* we should use -1 for disabled
+						   timouts */
+						if ( index->ttyset->c_cc[VTIME] && now-start >= (index->ttyset->c_cc[VTIME]*100)) {
+							report( "TO " );
+							/* read timeout */
+							printf("5\n");
+							return total;
+						}
+					}
+					sprintf(message, "end nBytes=%ld] ", nBytes);
+					report( message );
+/*
+					usleep(1000);
+*/
+					report( "ERROR_IO_PENDING\n" );
+					break;
+				default:
+/*
+					usleep(1000);
+*/
+					YACK();
+					errno = EIO;
+					printf("6\n");
+					return -1;
+			}
+		}
+		else
+		{
+/*
+			usleep(1000);
+*/
+			ClearErrors( index, &Stat);
+			printf("7\n");
+			return( total );
+		}
+	}
+	LEAVE( "serial_read" );
+	ClearErrors( index, &Stat);
+	return total;
+}
+#endif /* asdf */
 
 /*----------------------------------------------------------
 cfsetospeed()
@@ -2225,12 +2421,33 @@ tcsendbreak()
    exceptions:  
    win32api:     None
    comments:    
+		break for duration*0.25 seconds or
+		0.25 seconds if duration = 0.
 ----------------------------------------------------------*/
 
 int tcsendbreak( int fd, int duration )
 {
+	struct termios_list *index;
+	COMSTAT Stat;
+
 	ENTER( "tcsendbreak" );
-	/* FIXME send a stream of zero bits for duration */
+
+	index = find_port( fd );
+
+	if ( !index )
+	{
+		LEAVE( "tcdrain" );
+		return -1;
+	}
+
+	if ( duration <= 0 ) duration = 1;
+
+	if( !SetCommBreak( index->hComm ) )
+		ClearErrors( index, &Stat );
+	/* 0.25 seconds == 250000 usec */
+	usleep( duration * 250000 );
+	if( !ClearCommBreak( index->hComm ) )
+		ClearErrors( index, &Stat );
 	LEAVE( "tcsendbreak" );
 	return 1;
 }
@@ -2498,6 +2715,7 @@ int ioctl( int fd, int request, ... )
 
 	va_start( ap, request );
 	
+	ClearErrors( index, &Stat );
 	switch( request )
 	{
 		case TCSBRK:
@@ -2747,7 +2965,7 @@ int ioctl( int fd, int request, ... )
 				printf( "---------------overrun\n" );
 */
 				sistruct->overrun = index->sis->overrun;
-				ErrCode &= ~CE_OVERRUN;
+				//ErrCode &= ~CE_OVERRUN;
 			}
 			if( sistruct->parity != index->sis->parity )
 			{
@@ -2912,7 +3130,93 @@ Serial_select()
    comments:    
 ----------------------------------------------------------*/
 #ifndef __LCC__
+int  serial_select( int  n,  fd_set  *readfds,  fd_set  *writefds,
+			fd_set *exceptfds, struct timeval *timeout )
+{
 
+	unsigned long dwCommEvent, wait = WAIT_TIMEOUT;
+	int fd = n-1;
+	struct termios_list *index;
+	char message[80];
+	COMSTAT Stat;
+
+	ENTER( "serial_select" );
+	if ( fd <= 0 )
+	{
+		/*  Baby did a bad baad thing */
+		goto fail;
+	}
+
+	index = find_port( fd );
+	if ( !index || !index->event_flag )
+	{
+		/* still setting up the port? hold off for a Sec so
+		   things can fire up
+
+		   this does happen.  loops ~twice on a 350 Mzh with 
+		   usleep(1000000)
+		*/
+		usleep(10000);
+		return(0);
+	}
+
+	ResetEvent( index->wol.hEvent );
+	ResetEvent( index->sol.hEvent );
+	ResetEvent( index->rol.hEvent );
+	ClearErrors( index, &Stat );
+	while ( wait == WAIT_TIMEOUT && index->sol.hEvent )
+	{
+		if( index->interrupt == 1 )
+		{
+			goto fail;
+		}
+		SetCommMask( index->hComm, index->event_flag );
+		ClearErrors( index, &Stat );
+		if ( !WaitCommEvent( index->hComm, &dwCommEvent,
+			&index->sol ) )
+		{
+			/* WaitCommEvent failed probably overlapped though */
+			if ( GetLastError() != ERROR_IO_PENDING )
+			{
+				ClearErrors( index, &Stat );
+				goto fail;
+			}
+			/* thought so... */
+		}
+		/*  could use the select timeout here but it should not
+		    be needed
+		*/
+		ClearErrors( index, &Stat );
+		wait = WaitForSingleObject( index->sol.hEvent, 100 );
+		switch ( wait )
+		{
+			case WAIT_OBJECT_0:
+				goto end;
+			case WAIT_TIMEOUT:
+				goto timeout;
+			case WAIT_ABANDONED:
+			default:
+				goto fail;
+			
+		}
+	}
+end:
+	/*  You may want to chop this out for lower latency */
+	usleep(1000)
+	LEAVE( "serial_select" );
+	return( 1 );
+timeout:
+	LEAVE( "serial_select" );
+	return( 0 );
+fail:
+	YACK();
+	sprintf( message, "< select called error %i\n", n );
+	report( message );
+	errno = EBADFD;
+	LEAVE( "serial_select" );
+	return( 1 );
+}
+#ifdef asdf
 int  serial_select( int  n,  fd_set  *readfds,  fd_set  *writefds,
 			fd_set *exceptfds, struct timeval *timeout )
 {
@@ -3022,7 +3326,7 @@ fail:
 #endif /* asdf */
 	
 }
-
+#endif /* asdf */
 #endif /* __LCC__ */
 
 /*----------------------------------------------------------
