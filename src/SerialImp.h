@@ -65,6 +65,14 @@
 #define B256000		1010004
 #endif /* dima */
 
+struct preopened
+{
+	char filename[40];
+	int fd;
+	struct preopened *next;
+	struct preopened *prev;
+};
+
 struct event_info_struct
 {
 	int fd;
