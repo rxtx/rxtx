@@ -4949,7 +4949,64 @@ int check_lock_pid( const char *file, int openpid )
 		In a recent change RedHat 7.2 decided to use group lock.
 		In order to get around this we just check the group id
 		of the lock directory.
+
+		* Modified to support Debian *
+
+		The problem was that checking the ownership of the lock file
+		dir is not enough, in the sense that even if the current user
+		is not in the group of the lock directory if the lock
+		directory has 777 permissions the lock file can be anyway
+		created.  My solution is simply to try to create a tmp file
+		there and if it works then we can go on.  Here is my code that
+		I tried and seems to work.
+
+		Villa Valerio <valerio.villa@siemens.com>
 ----------------------------------------------------------*/
+int check_group_uucp()
+{
+#ifndef USER_LOCK_DIRECTORY
+	FILE *testLockFile ;
+	char testLockFileDirName[] = LOCKDIR;
+	char testLockFileName[] = "tmpXXXXXX";
+	char *testLockAbsFileName;
+
+	testLockAbsFileName = calloc(strlen(testLockFileDirName)
+			+ strlen(testLockFileName) + 2, sizeof(char));
+	if ( NULL == testLockAbsFileName )
+	{
+		report_error("check_group_uucp(): Insufficient memory");
+		return 1;  
+	}
+	strcat(testLockAbsFileName, testLockFileDirName);
+	strcat(testLockAbsFileName, "/");
+	strcat(testLockAbsFileName, testLockFileName);
+	if ( NULL == mktemp(testLockAbsFileName) )
+	{
+		free(testLockAbsFileName);
+		report_error("check_group_uucp(): mktemp malformed string - \
+			should not happen");
+
+		return 1;
+	}
+	testLockFile = fopen (testLockAbsFileName, "w+");
+	if (NULL == testLockFile)
+	{
+		report_error("check_group_uucp(): error testing lock file
+creation Error details: ");
+		report_error(strerror(errno));
+
+		free(testLockAbsFileName);
+		return 1;
+	}
+
+	fclose (testLockFile);
+	unlink (testLockAbsFileName);           
+	free(testLockAbsFileName);
+
+#endif /* USER_LOCK_DIRECTORY */
+	return 0;
+
+#ifdef USE_OLD_CHECK_GROUP_UUCP
 int check_group_uucp()
 {
 #ifndef USER_LOCK_DIRECTORY
@@ -5011,6 +5068,7 @@ int check_group_uucp()
 */
 #endif /* USER_LOCK_DIRECTORY */
 	return 0;
+#endif /* USE_OLD_CHECK_GROUP_UUCP */
 }
 
 /*----------------------------------------------------------
