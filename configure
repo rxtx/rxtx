@@ -2036,10 +2036,12 @@ fi
 
 
 
-JHOME=
+
 RXTX_PATH=
 EXTENSION="c"
+OBJECT_EXTENSION="lo"
 TOP="`pwd`"
+LINK="\$(TOP)/libtool --mode=link \$(CC) \$(CFLAGS) \$(LDFLAGS) -release \$(VERSION) -o lib\$*.la -rpath \$(RXTX_PATH)"
 
 
 case "$host_os" in
@@ -2418,13 +2420,11 @@ Linux)
 
 		if test x"$RXTX_PATH" = x;then
 			#  We are not using Kaffe
-			fix_comm_jar $JPATH/lib/comm.jar
 			#fix_parameters $JPATH/lib/javax.comm.properties
 			check_prefix
 			RXTX_PATH="\$(prefix)/lib/"
 		else
 			# Kaffe
-			fix_comm_jar $JPATH/share/kaffe/comm.jar
 			CLASSPATH=$CLASSPATH:`find $JHOME -name RXTXcomm.jar`	
 			echo "Warning!  Kaffe's comm.jar does not support rxtx"
 			echo "See INSTALL for details"
@@ -2470,7 +2470,6 @@ Linux)
 	case $JAVA_VERSION in
 	1.2*|1.3*|1.4*) 
 		#fix_parameters $JPATH/jre/lib/javax.comm.properties
-		fix_comm_jar $JPATH/jre/lib/ext/RXTXcomm.jar
 		CLASSPATH=".:\$(TOP):\$(TOP)/src:"`find $JPATH/ -name RXTXcomm.jar |head -n1`
 		RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
 		JHOME=$JPATH/"jre/lib/ext"
@@ -2478,7 +2477,6 @@ Linux)
 	1.1*) 
 		check_prefix
 		#fix_parameters $JPATH/lib/javax.comm.properties
-		fix_comm_jar $JPATH/lib/comm.jar
 		CLASSPATH=".:\$(TOP):\$(TOP)/src:"` \
 			if [ -d $JPATH/share/kaffe/ ]; then
 				find $JPATH/share/kaffe/ -name [cK]lasses.[jz][ai][rp]
@@ -2493,13 +2491,11 @@ Linux)
 
 		if test x"$RXTX_PATH" = x;then
 			#  We are not using Kaffe
-			fix_comm_jar $JPATH/lib/comm.jar
 			#fix_parameters $JPATH/lib/javax.comm.properties
 			check_prefix
 			RXTX_PATH="\$(prefix)/lib/"
 		else
 			# Kaffe
-			fix_comm_jar $JPATH/share/kaffe/comm.jar
 			CLASSPATH=$CLASSPATH:`find $JHOME -name RXTXcomm.jar`	
 			echo "Warning!  Kaffe's comm.jar does not support rxtx"
 			echo "See INSTALL for details"
@@ -2527,7 +2523,6 @@ HP-UX)
 	case $JAVA_VERSION in
 		HP-UX\ Java\ C.01.2*|HP-UX\ Java\ C.01.3*) 
 			#fix_parameters $JPATH/jre/lib/javax.comm.properties
-			fix_comm_jar $JPATH/jre/lib/ext/comm.jar
 			JHOME=$JPATH"/jre/lib/ext"
 			CLASSPATH=".:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/jre/lib/ext/RXTXcomm.jar:$CLASSPATH"
 			RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
@@ -2535,14 +2530,12 @@ HP-UX)
 		;;
 		HP-UX\ Java\ C.01.1*) 
 			#fix_parameters $JPATH/lib/javax.comm.properties
-			fix_comm_jar $JPATH/lib/comm.jar
 			JHOME=$JPATH/"lib"
 			CLASSPATH=".:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/RXTXcomm.jar:$CLASSPATH"
 			RXTX_PATH="\$(prefix)/lib/"
 		;;
 		*)
 			#fix_parameters $JPATH/lib/javax.comm.properties
-			fix_comm_jar $JPATH/lib/comm.jar
 			JHOME=$JPATH"/lib"
 			CLASSPATH=".:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/RXTXcomm.jar:$CLASSPATH"
 			RXTX_PATH="\$(prefix)/lib/"
@@ -2618,7 +2611,8 @@ WIN32)
 
 Mac\ OS\ X)
 	#fix_parameters $JPATH/lib/javax.comm.properties
-	fix_comm_jar $JPATH/lib/ext/comm.jar
+	LINK="cc -bundle -framework CoreFoundation -framework IOKit -o lib\$*.jnilib"
+	OBJECT_EXTENSION="o"
 	TARGETLIB="\$(target_alias)/libSerial.la"
 	RXTX_PATH="/usr/lib/java"
 	JHOME=$JPATH"/lib/ext"
@@ -2893,6 +2887,8 @@ s%@JAR@%$JAR%g
 s%@JAVADOC@%$JAVADOC%g
 s%@EXTENSION@%$EXTENSION%g
 s%@LIBTOOL_FIX@%$LIBTOOL_FIX%g
+s%@LINK@%$LINK%g
+s%@OBJECT_EXTENSION@%$OBJECT_EXTENSION%g
 
 CEOF
 EOF

@@ -29,7 +29,6 @@ CLASSDEST=gnu/io
 ####################### tools
 LIBTOOLC=$(TOP)/libtool --mode=compile $(CC) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) $(VERBOSE_IOEXCEPTIONS) -c
 LIBTOOL_INST=$(TOP)/libtool --mode=install $(INSTALL_PROGRAM)
-LINK =$(TOP)/libtool --mode=link $(CC) $(CFLAGS) $(LDFLAGS) -release $(VERSION) 
 ####################### dirs
 SPATH = $(srcdir)/src
 DEST=$(target_alias)
@@ -45,18 +44,18 @@ CLEANFILES = $(TOP)/*.class $(TOP)/$(CLASSDEST)/*.class $(TOP)/$(JARTARGET)
 #  If a LIBTOOL_FIX is added be sure to provide a trailing ';' in configure.in
 
 $(target_alias)/lib%.la: $(SPATH)/%Imp.@EXTENSION@ $(CLASSES) $(SPATH)/%Imp.h
-	@(							\
+	(							\
 	$(LIBTOOL_FIX)						\
 	cd $(DEST); 						\
-	$(LIBTOOLC) ../$(SPATH)/$*Imp.c -o $(TOP)/$(DEST)/$*Imp.lo; \
+	$(LIBTOOLC) ../$(SPATH)/$*Imp.c -o			\
+		$(TOP)/$(DEST)/$*Imp.@OBJECT_EXTENSION@;	\
 	if [ "$*" = "Serial" ]; then 				\
 		$(LIBTOOLC) ../$(SPATH)/fuserImp.c		\
-			-o $(TOP)/$(DEST)/fuserImp.lo;		\
-		$(LINK) -o lib$*.la -rpath $(RXTX_PATH)		\
-			$(TOP)/$(DEST)/$*Imp.lo $(TOP)/$(DEST)/fuserImp.lo; \
+			-o $(TOP)/$(DEST)/fuserImp.@OBJECT_EXTENSION@;\
+		@LINK@ $(TOP)/$(DEST)/$*Imp.@OBJECT_EXTENSION@	\
+			$(TOP)/$(DEST)/fuserImp.@OBJECT_EXTENSION@;\
 	else							\
-		$(LINK) -o lib$*.la -rpath $(RXTX_PATH)		\
-			$(TOP)/$(DEST)/$*Imp.lo $(FUSER);	\
+		@LINK@ $(TOP)/$(DEST)/$*Imp.@OBJECT_EXTENSION@ $(FUSER);\
 	fi;							\
 	)
 
