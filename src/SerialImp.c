@@ -171,7 +171,7 @@ JNIEXPORT jint JNICALL RXTXPort(open)(
 	int fd;
 	const char *filename = (*env)->GetStringUTFChars( env, jstr, 0 );
 
-	if (!LOCK(filename))
+	if ( LOCK( filename) )
 	{
 		(*env)->ReleaseStringUTFChars( env, jstr, filename );
 		printf("locking has failed\n");
