@@ -4224,7 +4224,7 @@ int check_lock_status( const char *filename )
 	if ( check_group_uucp() )
 	{
 		report_error( "check_lock_status: No permission to create lock file.\nplease see: How can I use Lock Files with rxtx? in INSTALL\n" );
-		exit(0);
+		return(1);
 	}
 
 	/* is the device alread locked */
