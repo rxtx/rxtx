@@ -768,7 +768,7 @@ read_byte_array
 int read_byte_array( int fd, unsigned char *buffer, int length, int timeout )
 {
 	int ret, left, bytes = 0;
-        struct fd_set rfds;
+        fd_set rfds;
 	struct timeval sleep;
 	struct timeval *psleep=&sleep;
 
@@ -982,7 +982,7 @@ RXTXPort.eventLoop
 JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 {
 	int fd, ret, change;
-	struct fd_set rfds;
+	fd_set rfds;
 	struct timeval tv_sleep;
 	unsigned int mflags, omflags;
 	jboolean interrupted = 0;
