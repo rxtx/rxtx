@@ -161,28 +161,48 @@ final public class RXTXPort extends SerialPort
 	*  @return  int representing the baudrate
 	*  This will not behave as expected with custom speeds
 	*/
-	public int getBaudRate() { return speed; }
+	public int getBaudRate()
+	{
+		if (debug)
+			System.out.println(System.currentTimeMillis() + ": " + "RXTXPort:getBaudRate()");
+		return speed;
+	}
 
 	/** Data bits port parameter */
 	private int dataBits=DATABITS_8;
 	/** 
 	*  @return int representing the databits
 	*/
-	public int getDataBits() { return dataBits; }
+	public int getDataBits()
+	{
+		if (debug)
+			System.out.println(System.currentTimeMillis() + ": " + "RXTXPort:getDataBits()");
+		return dataBits;
+	}
 
 	/** Stop bits port parameter */
 	private int stopBits=SerialPort.STOPBITS_1;
 	/** 
 	*  @return int representing the stopbits
 	*/
-	public int getStopBits() { return stopBits; }
+	public int getStopBits()
+	{
+		if (debug)
+			System.out.println(System.currentTimeMillis() + ": " + "RXTXPort:getStopBits()");
+		return stopBits;
+	}
 
 	/** Parity port parameter */
 	private int parity= SerialPort.PARITY_NONE;
 	/** 
 	*  @return int representing the parity
 	*/
-	public int getParity() { return parity; }
+	public int getParity()
+	{
+		if (debug)
+			System.out.println(System.currentTimeMillis() + ": " + "RXTXPort:getParity()");
+		return parity;
+	}
 
 
 	/** Flow control */
