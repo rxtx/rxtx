@@ -5672,10 +5672,11 @@ get_java_environment
 ----------------------------------------------------------*/
 JNIEnv *get_java_environment(JavaVM *java_vm,  jboolean *was_attached){
 	JNIEnv *env = NULL;
+	jint err_get_env;
 	if(java_vm == NULL) return env;
 	*was_attached = JNI_FALSE;
 
-	jint err_get_env = (*java_vm)->GetEnv(
+	err_get_env = (*java_vm)->GetEnv(
 		java_vm,
 		(void **) &env,
 		JNI_VERSION_1_4
