@@ -239,6 +239,7 @@ void termiosSetParityError( int, char );
 #define CCTS_OFLOW	0100000
 #define CIGNORE		0400000
 #define CRTSCTS	  020000000000		/* flow control */
+#define HARDWARE_FLOW_CONTROL CRTSCTS
 #define CRTSXOFF        010000000000
 /* c_oflag bits */
 #define OPOST	0000001
@@ -440,3 +441,4 @@ find a way to get/set buad_base and divisor directly.
 #define TIOCM_RI    TIOCM_RNG
 
 
+#define CMSPAR      010000000000  /* mark or space parity */
