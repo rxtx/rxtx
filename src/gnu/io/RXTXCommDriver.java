@@ -472,7 +472,8 @@ public class RXTXCommDriver implements CommDriver
 				if(osName.equals("Linux"))
 				{
 					String[] Temp = {
-					"ttyS" // linux Serial Ports
+					"ttyS", // linux Serial Ports
+					"ttySA" // for the IPAQs
 					};
 					CandidatePortPrefixes=Temp;
 				}
