@@ -169,7 +169,7 @@ JNIEXPORT jint JNICALL RXTXPort(open)(
 
 	if (!fhs_lock(filename))
 	{
-		(*env)->ReleaseStringUTFChars( env, jstr, NULL );
+		(*env)->ReleaseStringUTFChars( env, jstr, filename );
 		printf("locking has failed\n");
 		goto fail;
 	}
@@ -177,7 +177,7 @@ JNIEXPORT jint JNICALL RXTXPort(open)(
 	do {
 		fd=open (filename, O_RDWR | O_NOCTTY | O_NONBLOCK );
 	}  while (fd < 0 && errno==EINTR);
-	(*env)->ReleaseStringUTFChars( env, jstr, NULL );
+	(*env)->ReleaseStringUTFChars( env, jstr, filename );
 	if( fd < 0 ) goto fail;
 
 	if( tcgetattr( fd, &ttyset ) < 0 ) goto fail;
@@ -205,6 +205,7 @@ JNIEXPORT jint JNICALL RXTXPort(open)(
 	return (jint)fd;
 
 fail:
+	(*env)->ReleaseStringUTFChars( env, jstr, filename );
 	throw_java_exception( env, PORT_IN_USE_EXCEPTION, "open",
 		strerror( errno ) );
 	return -1;
@@ -232,7 +233,7 @@ JNIEXPORT void JNICALL RXTXPort(nativeClose)( JNIEnv *env,
 		}  while (result < 0 && errno==EINTR);
 		fhs_unlock(filename);
 	}
-	(*env)->ReleaseStringUTFChars( env, jstr, NULL );
+	(*env)->ReleaseStringUTFChars( env, jstr, filename );
 	return;
 }
 
@@ -1146,7 +1147,10 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(testRead)(JNIEnv *env,
 	int ret = JNI_TRUE;
 
 	if (!fhs_lock(name))
+	{
+		(*env)->ReleaseStringUTFChars(env, tty_name, name);
 		return JNI_FALSE;
+	}
 
 	if ((fd = open(name, O_RDONLY | O_NONBLOCK)) < 0) {
 		ret = JNI_FALSE;
@@ -1178,6 +1182,7 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(testRead)(JNIEnv *env,
 	}
 END:
 	fhs_unlock(name);
+	(*env)->ReleaseStringUTFChars(env, tty_name, name);
 	close(fd);
 	return ret;
 }
@@ -1284,6 +1289,7 @@ registerKnownSerialPorts(JNIEnv *env, jobject jobj)
             }
         }
     }
+    (*env)->DeleteLocalRef( env, cls );
     return numPorts;
 }
 #endif /* __APPLE__ */
@@ -1547,6 +1553,7 @@ int get_java_var( JNIEnv *env, jobject jobj, char *id, char *type )
 	if( !jfd ) {
 		(*env)->ExceptionDescribe( env );
 		(*env)->ExceptionClear( env );
+		(*env)->DeleteLocalRef( env, jclazz );
 		return result;
 	}
 	result = (int)( (*env)->GetIntField( env, jobj, jfd ) );
