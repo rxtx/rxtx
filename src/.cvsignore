@@ -1,0 +1,7 @@
+win32s.h
+fixup.cc
+new.c
+init.cc
+typedefs_md.h.diff
+Serial.def
+termios.c
