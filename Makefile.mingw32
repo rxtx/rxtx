@@ -38,7 +38,7 @@ DOSSRC=..\\\src
 # path to the jdk directory that has include, bin, lib, ... Unix style path
 JDKHOME=/jdk118
 
-# path to install comm.jar DOS style path
+# path to install RXTXcomm.jar DOS style path
 COMMINSTALL="\jdk118\lib"
 
 # path to install the shared libraries DOS style path
@@ -47,7 +47,7 @@ LIBINSTALL="\jdk118\bin"
 # path to the mingw32 libraries (directory with libmingw32.a) DOS style path
 LIBDIR="\mingw\lib"
 
-CLASSPATH="\jdk118\lib\classes.zip;\BlackBox.jar;\jdk118\lib\comm.jar;\jdk118\lib\jcl.jar;."
+CLASSPATH="\jdk118\lib\classes.zip;\BlackBox.jar;\jdk118\lib\RXTXcomm.jar;\jdk118\lib\jcl.jar;."
 ######################
 #  End of user defined variables
 ######################
@@ -124,7 +124,7 @@ $(SRC)/Serial.def:	$(DLLOBJECTS)
 	xcopy  $(DOSSRC)\\\Serial.def gnu\\\io\\\ #  need a space here
 
 
-$(TARGETLIBS):	comm.jar $(DLLOBJECTS)  $(SRC)/Serial.def
+$(TARGETLIBS):	RXTXcomm.jar $(DLLOBJECTS)  $(SRC)/Serial.def
 	$(LD) --base-file Serial.base --dll -o Serial.dll $(DLLOBJECTS) \
 		$(LIBS) -e _dll_entry@12
 	$(DLLTOOL) --as=$(AS) --dllname Serial.dll --def $(SRC)/Serial.def \
@@ -143,9 +143,9 @@ $(TARGETLIBS):	comm.jar $(DLLOBJECTS)  $(SRC)/Serial.def
 #		--target=i386-mingw32 -o $*.dll $(DLLOBJECTS) $(LIBS) -s
 #		-mno-cygwin
 
-comm.jar:	gnutimestamp
+RXTXcomm.jar:	gnutimestamp
 	$(JAVAC) gnu\\\io\\\\*.java
-	$(JAR) -cf comm.jar gnu\\\io\\\\*.class
+	$(JAR) -cf RXTXcomm.jar gnu\\\io\\\\*.class
 	$(JAVAH) $(JAVAHFLAGS) $(patsubst gnu/io/%.java,gnu.io.%,$(wildcard gnu/io/*.java))
 
 include/config.h:  gnutimestamp
@@ -157,14 +157,14 @@ include/config.h:  gnutimestamp
 	echo "#undef HAVE_TERMIOS_H" >> include\\\config.h
 
 install: all
-	xcopy comm.jar $(COMMINSTALL)
+	xcopy RXTXcomm.jar $(COMMINSTALL)
 	xcopy $(TARGETLIBS) $(LIBINSTALL)
 
 uninstall:
-	del $(COMMINSTALL)\\\comm.jar
+	del $(COMMINSTALL)\\\RXTXcomm.jar
 	del $(LIBINSTALL)\\\$(TARGETLIBS)
 
 clean:
 	deltree gnu\\\io\\\*.*
 	deltree include
-	del Serial.* gnutimestamp *.o comm.jar
+	del Serial.* gnutimestamp *.o RXTXcomm.jar

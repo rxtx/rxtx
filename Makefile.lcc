@@ -41,20 +41,20 @@ JAVA_HOME=D:\jdk
 lib: $(OBJS)
 	lcclnk -dll $(OBJS) wsock32.lib -o Serial.dll
 
-init.obj:  comm.jar
+init.obj:  RXTXcomm.jar
 	$(CC) $(CFLAGS) init.c
 
-SerialImp.obj: comm.jar config.h
+SerialImp.obj: RXTXcomm.jar config.h
 	$(CC) $(CFLAGS) SerialImp.c
 
-fuserImp.obj: comm.jar config.h
+fuserImp.obj: RXTXcomm.jar config.h
          
-termios.obj: comm.jar
+termios.obj: RXTXcomm.jar
 	$(CC) $(CFLAGS) termios.c
 
-comm.jar:
+RXTXcomm.jar:
 	javac -d . -O *.java
-	jar -cf comm.jar gnu
+	jar -cf RXTXcomm.jar gnu
 	javah -jni gnu.io.RXTXPort gnu.io.RXTXCommDriver
 
 config.h:
@@ -62,4 +62,4 @@ config.h:
 
 install:
 	copy Serial.dll $(JAVA_HOME)\jre\bin
-	copy comm.jar   $(JAVA_HOME)\jre\lib\ext
+	copy RXTXcomm.jar   $(JAVA_HOME)\jre\lib\ext
