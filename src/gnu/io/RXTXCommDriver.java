@@ -114,7 +114,7 @@ public class RXTXCommDriver implements CommDriver
 	private void checkSolaris(String PortName, int PortType)
 	{
 		char p[] =  { 91 };
-		for( p[0] =91 ;p[0] < 123; p[0]++ )
+		for( p[0] =97 ;p[0] < 123; p[0]++ )
 		{
 			if (testRead(PortName.concat(new String(p)),PortType))
 			{
