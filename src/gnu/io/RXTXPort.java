@@ -134,13 +134,18 @@ final public class RXTXPort extends SerialPort
 	*  If speed is not a predifined speed it is assumed to be
 	*  the actual speed desired.
 	*/
-	public synchronized void setSerialPortParams( int b, int d, int s, int p )
+	private native int nativeGetParity( int fd );
+	private native int nativeGetFlowControlMode( int fd );
+	public synchronized void setSerialPortParams( int b, int d, int s,
+		int p )
 		throws UnsupportedCommOperationException
 	{
 		if (debug)
 			System.out.println(System.currentTimeMillis() + ": " + "RXTXPort:setSerialPortParams(" +
 					b + " " + d + " " + s + " " + p + ")");
-		nativeSetSerialPortParams( b, d, s, p );
+		if ( nativeSetSerialPortParams( b, d, s, p ) )
+		 	throw new UnsupportedCommOperationException(
+				"Invalid Parameter" );
 		speed = b;
 		if( s== STOPBITS_1_5 ) dataBits = DATABITS_5;
 		else dataBits = d;
@@ -153,8 +158,8 @@ final public class RXTXPort extends SerialPort
 	*  If speed is not a predifined speed it is assumed to be
 	*  the actual speed desired.
 	*/
-	private native void nativeSetSerialPortParams( int speed, int dataBits,
-		int stopBits, int parity )
+	private native boolean nativeSetSerialPortParams( int speed,
+		int dataBits, int stopBits, int parity )
 		throws UnsupportedCommOperationException;
 
 	/** Line speed in bits-per-second */
