@@ -47,13 +47,9 @@
 #		define S_ISCHR(m) (1)
 #	endif /* S_ISCHR(m) */
 #endif /* WIN32 */
-#ifdef HAVE_ASM_TERMBITS_H
-#	include <asm/termbits.h>
-#else
 #ifdef HAVE_TERMIOS_H
 #	include <termios.h>
 #endif /* HAVE_TERMIOS_H */
-#endif /* HAVE_ASM_TERMBITS_H */
 #   include <signal.h>
 #ifdef HAVE_SIGNAL_H
 #   include <signal.h>
