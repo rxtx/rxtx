@@ -1,11 +1,11 @@
 This is MacOSX.  Last modified: Thu Oct  4 19:34:31 MDT 2001
 
---------------------- Code Warrior Builds -------------------
+--------------------- Code Warrior and ProjectBuilder Builds -------------------
 
 contributed by Dmitry Markman <dimitry.markman@verizon.net>
 
 
-1.4.12 release of RXTX - GNU implementation of communication API for JAVA
+1.5 release of RXTX - GNU implementation of communication API for JAVA
 was released today:
 http://www.rxtx.org
 
@@ -22,55 +22,39 @@ ProjectBuilder 1.1 (from 10.1 tools)
 or
 CodeWarrior 7
 
-you should download SUN's comm api before start
-http://java.sun.com/products/javacomm/index.html
-choose solaris version
-follow download instructions
-
-1. Download 1.4.12 package:
-http://www.frii.com/~jarvi/rxtx/download/rxtx-1.4-12.tar.gz
-2.expand it (you can use Stuffit expander or any appropriate unix tool)
-3.go to MACOSX_IDE folder
+1. go to MACOSX_IDE folder
 
 
-  4.ProjectBuilder development
+  2.ProjectBuilder development
     goto folder PB
 	expand file LibSerial.pbproj.sit.hqx
 	open LibSerial.pbproj project
 	choose libSerial.jnilib target
         build
-	after build you will find comm.jar and libSerial.jnilib files in 
+	after build you will find RXTXcomm.jar and libSerial.jnilib files in 
 build directory
-	(if you can't find comm.jar (unlikely) build comm.jar target manually)
+	(if you can't find RXTXcomm.jar (unlikely) build RXTXcomm target manually)
 
-5. CodeWarrior
+3. CodeWarrior
 	open libSerial.mcp project
 	goto jnilib target
 	build
-	after build you will find comm.jar and libSerial.jnilib files in 
+	after build you will find RXTXcomm.jar and libSerial.jnilib files in 
 project's directory
-	(if you can't found comm.jar (unlikely) build java target manually)
+	(if you can't found RXTXcomm.jar (unlikely) build java target manually)
 	
 
 INSTALLATION:
 	MANUALLY:
-		copy comm.jar -> 
+		copy RXTXcomm.jar -> 
 /System/Library/Frameworks/JavaVM.framework/Home/lib/ext folder
 		copy libSerial.jnilib -> /usr/lib/java
-		create text file javax.comm.properties
-		this file should contain only one line:
-		Driver=gnu.io.RXTXCommDriver
-  		(you can found this file in folder:
-	
-	MACOSX_IDE/ForPackageMaker/Install/System/Library/Frameworks/JavaVM.framework/
-Home/lib)
-		copy javax.comm.properties -> 
-/System/Library/Frameworks/JavaVM.framework/Home/lib folder
 		use sudo command if it's necessary
+	
 	PackageMaker package:
 		CodeWarrior developers: before starting creating installation 
 package do following step:
-			copy comm.jar into 
+			copy RXTXcomm.jar into 
 MACOSX_IDE/ForPackageMaker/Install/System/Library/Frameworks/JavaVM.framework/
 Home/lib/ext
 			copy libSerial.jnilib into 
