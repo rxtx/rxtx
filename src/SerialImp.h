@@ -75,12 +75,12 @@
 #endif /* __sgi__ || sgi */
 #if defined(__FreeBSD__)
 #	define DEVICEDIR "/dev/"
-#	define LOCKDIR "/var/spool/uucp/"
+#	define LOCKDIR "/var/spool/uucp"
 #	define UUCP
 #endif
 #if defined(__APPLE__)
 #	define DEVICEDIR "/dev/"
-#	define LOCKDIR "/var/spool/uucp/"
+#	define LOCKDIR "/var/spool/uucp"
 #endif /* __FreeBSD__ */
 #if defined(__NetBSD__)
 #	define DEVICEDIR "/dev/"
