@@ -30,7 +30,7 @@
 #include "config.h"
 /* work around for libc5 */
 /*#include <typedefs_md.h>*/
-#include "javax_comm_LPRPort.h"
+#include "gnu_io_LPRPort.h"
 #include <time.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -66,7 +66,7 @@ extern int errno;
 
 #include "ParallelImp.h"
 
-#define LPRPort(foo) Java_javax_comm_LPRPort_ ## foo
+#define LPRPort(foo) Java_gnu_io_LPRPort_ ## foo
 /* #define DEBUG */
 
 /*----------------------------------------------------------
