@@ -109,22 +109,6 @@ final class LPRPort extends ParallelPort
 	public native boolean isPrinterSelected();
 	public native boolean isPrinterTimedOut();
 	
-	/** Line speed in bits-per-second */
-	private int speed;
-	public int getBaudRate() { return speed; }
-
-	/** Data bits port parameter */
-	private int dataBits;
-	public int getDataBits() { return dataBits; }
-
-	/** Stop bits port parameter */
-	private int stopBits;
-	public int getStopBits() { return stopBits; }
-
-	/** Parity port parameter */
-	private int parity;
-	public int getParity() { return parity; }
-
 	/** Close the port */
 	private native void nativeClose();
 	public synchronized void close()
