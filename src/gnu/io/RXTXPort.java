@@ -50,9 +50,10 @@ final class RXTXPort extends SerialPort
 	*  @throws  PortInUseException
 	*  @see gnu.io.SerialPort
 	*/
-	public RXTXPort( String name ) throws PortInUseException
+	public RXTXPort( String name ) throws gnu.io.PortInUseException
 	{
-		if (debug) System.out.println("RXTXPort:RXTXPort("+name+")");
+		if (debug)
+			System.out.println("RXTXPort:RXTXPort("+name+")");
 	/* 
 	   commapi/javadocs/API_users_guide.html specifies that whenever
 	   an application tries to open a port in use by another application
@@ -73,7 +74,7 @@ final class RXTXPort extends SerialPort
 				fd);
 	}
 	private native synchronized int open( String name )
-		throws PortInUseException;
+		throws gnu.io.PortInUseException;
 
 	/** File descriptor */
 	private int fd = 0;
@@ -465,17 +466,18 @@ final class RXTXPort extends SerialPort
 	/** 
 	*  @return boolean  true if monitor thread is interrupted
 	*/
+	boolean monThreadisInterrupted=true;
 	public boolean checkMonitorThread()
 	{
 		if (debug)
 			System.out.println("RXTXPort:checkMonitorThread()");
 		if(monThread != null)
 		{
-			if (debug)
+			if ( monThreadisInterrupted )
 				System.out.println(
-					"monThread.isInterrupted = " +
-					monThread.isInterrupted() );
-			return monThread.isInterrupted();
+					"monThreadisInterrupted = " +
+					monThreadisInterrupted );
+			return monThreadisInterrupted;
 		}
 		if ( debug )
 			System.out.println( "monThread is null " );
@@ -644,19 +646,20 @@ final class RXTXPort extends SerialPort
 		SPEventListener = lsnr;
 		monThread = new MonitorThread();
 		monThread.setDaemon(true);
+		monThreadisInterrupted=false;
 		monThread.start();
 	}
 	/**
 	*  Remove the serial port event listener
 	*/
+	
 	public void removeEventListener()
 	{
 		if (debug)
 			System.out.println("RXTXPort:removeEventListener()");
-		SPEventListener = null;
 		if( monThread != null && monThread.isAlive() )
 		{
-			monThread.interrupt();
+			monThreadisInterrupted=true;
 			try {
 				monThread.join(1000);
 			} catch (Exception ex) {
@@ -665,6 +668,8 @@ final class RXTXPort extends SerialPort
 			}
 		}
 		monThread = null;
+		// SPEventListener = null;
+		Runtime.getRuntime().gc();
 	}
 
 	/**
@@ -768,7 +773,7 @@ final class RXTXPort extends SerialPort
 	public synchronized void close()
 	{
 		if (debug)
-			System.out.println("close(" + this.name + " )"); 
+			System.out.println("RXTXPort:close(" + this.name + " )"); 
 		if ( fd <= 0 ) return;
 		setDTR(false);
 		setDSR(false);
@@ -976,8 +981,8 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	   SerialPortEvent constants are NOT bit-flags, they are just
 	   defined as integers from 1 to 10  -DPL */
 		private volatile boolean CTS=false;
-		private volatile boolean DSR=false;
-		private volatile boolean RI=false;
+		private volatile boolean DSR = false;
+		private volatile boolean RI = false;
 		private volatile boolean CD=false;
 		private volatile boolean OE=false;
 		private volatile boolean PE=false;
@@ -998,24 +1003,13 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 		{
 			if (debug)
 				System.out.println("RXTXPort:MontitorThread:run()"); 
-/*
-			while( monThread.isInterrupted() )
+			while( monThreadisInterrupted )
 			{
-				//try {
-					System.out.println("eventLoop is interupted");
-				//} catch(java.lang.InterruptedException e) {}
+				System.out.println("eventLoop is interupted?");
 			}
-*/
-			/* another eventLoop is exiting? */
-			try {
-				Thread.sleep(500);
-			} catch(java.lang.InterruptedException e) {}
-			Thread.yield();
 			eventLoop();
-			yield();
 			if (debug)
 				System.out.println("eventLoop() returned"); 
-
 		}
 		protected void finalize() throws Throwable 
 		{ 
