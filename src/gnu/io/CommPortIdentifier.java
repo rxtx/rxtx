@@ -211,7 +211,12 @@ public class CommPortIdentifier extends Object /* extends Vector? */
 			}
 		}
 		if (index != null) return index;
-		else throw new NoSuchPortException();
+		else
+		{
+			if ( debug )
+				System.out.println("not found!" + s);
+			throw new NoSuchPortException();
+		}
 	}
 /*------------------------------------------------------------------------------
 	getPortIdentifier()
@@ -234,6 +239,8 @@ public class CommPortIdentifier extends Object /* extends Vector? */
 		if ( c != null )
 			return (c);
 
+		if ( debug )
+			System.out.println("not found!" + p.getName());
 		throw new NoSuchPortException();
 	}
 /*------------------------------------------------------------------------------
