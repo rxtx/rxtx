@@ -39,7 +39,7 @@ LIBS=
 JAVA_HOME=D:\jdk
 
 lib: $(OBJS)
-	lcclnk -dll $(OBJS) wsock32.lib -o Serial.dll
+	lcclnk -dll $(OBJS) wsock32.lib -o rxtxSerial.dll
 
 init.obj:  RXTXcomm.jar
 	$(CC) $(CFLAGS) init.c
@@ -61,5 +61,5 @@ config.h:
 	echo please read how to create config.h in the Makefile
 
 install:
-	copy Serial.dll $(JAVA_HOME)\jre\bin
+	copy rxtxSerial.dll $(JAVA_HOME)\jre\bin
 	copy RXTXcomm.jar   $(JAVA_HOME)\jre\lib\ext

@@ -85,13 +85,13 @@ JDKINCLUDE=$(JDKHOME)/include
 MINGINCLUDE=$(MINGHOME)/include
 JAVAFILES = $(wildcard $(SRC)/*.java)
 CFILES=$(wildcard $(SRC)/*.c) $(wildcard $(SRC)/*.cc)
-TARGETLIBS= Serial.dll 
+TARGETLIBS= rxtxSerial.dll 
 DLLOBJECTS= fixup.o SerialImp.o termios.o init.o fuserImp.o
 
 all:  $(TARGETLIBS) # rebuild  rebuild will force everything to be built.
 
 rebuild:
-	rm -rf gnu include RXTXcomm.jar Serial.* * *.O.o *.O gnutimestamp 
+	rm -rf gnu include RXTXcomm.jar Serial.* rxtxSerial.* * *.O.o *.O gnutimestamp 
 
 include:
 	mkdir include
@@ -126,22 +126,22 @@ termios.o:
 #  need to install cygwin.
 
 $(SRC)/Serial.def:	$(DLLOBJECTS)
-	$(LD) --base-file Serial.base --dll -o Serial.dll $(DLLOBJECTS) $(LIBS) -e _dll_entry@12
+	$(LD) --base-file Serial.base --dll -o rxtxSerial.dll $(DLLOBJECTS) $(LIBS) -e _dll_entry@12
 	xcopy  $(DOSSRC)\\Serial.def gnu\\io\\
 
-#	echo EXPORTS >$(SRC)/Serial.def;for i in `nm Serial.dll | grep "T _Java"|cut -b 13-`;do echo -n $$i|sed s#@.*##;echo "="$$i;done >> $(SRC)/Serial.def
+#	echo EXPORTS >$(SRC)/Serial.def;for i in `nm rxtxSerial.dll | grep "T _Java"|cut -b 13-`;do echo -n $$i|sed s#@.*##;echo "="$$i;done >> $(SRC)/Serial.def
 
 
 $(TARGETLIBS):	RXTXcomm.jar $(DLLOBJECTS)  $(SRC)/Serial.def
-	$(LD) --base-file Serial.base --dll -o Serial.dll $(DLLOBJECTS) \
+	$(LD) --base-file Serial.base --dll -o rxtxSerial.dll $(DLLOBJECTS) \
 		$(LIBS) -e _dll_entry@12
-	$(DLLTOOL) --as=$(AS) --dllname Serial.dll --def $(SRC)/Serial.def \
+	$(DLLTOOL) --as=$(AS) --dllname rxtxSerial.dll --def $(SRC)/Serial.def \
 		--base-file Serial.base --output-exp Serial.exp
-	$(LD) --base-file Serial.base Serial.exp -dll -o Serial.dll \
+	$(LD) --base-file Serial.base Serial.exp -dll -o rxtxSerial.dll \
 		$(DLLOBJECTS) $(LIBS) -e _dll_entry@12
-	$(DLLTOOL) --as=$(AS) --dllname Serial.dll --def $(SRC)/Serial.def \
+	$(DLLTOOL) --as=$(AS) --dllname rxtxSerial.dll --def $(SRC)/Serial.def \
 		--base-file Serial.base --output-exp Serial.exp
-	$(LD) --base-file Serial.base Serial.exp -dll -o Serial.dll \
+	$(LD) --base-file Serial.base Serial.exp -dll -o rxtxSerial.dll \
 		$(DLLOBJECTS) $(LIBS) -e _dll_entry@12
 #
 # This should replace the mess above if it worked.
@@ -177,4 +177,4 @@ uninstall:
 clean:
 	deltree gnu\\\io\\\*.*
 	deltree include
-	del Serial.* gnutimestamp *.o *.O RXTXcomm.jar
+	del Serial.* gnutimestamp *.o *.O RXTXcomm.jar rxtxSerial.*
