@@ -109,7 +109,7 @@ class Configure extends Frame
 			public void actionPerformed( ActionEvent e )
 			{
 				addCheckBoxes(e.getActionCommand());
-				f.show();
+				f.setVisible(true);
 			}
 		});
 		p2.add(tf);
@@ -128,7 +128,7 @@ class Configure extends Frame
 					{
 						cb[x].setState(
 							!cb[x].getState());
-						f.show();
+						f.setVisible(true);
 					}
 				}
 			});
@@ -151,7 +151,7 @@ class Configure extends Frame
 				}
 			}
 		);
-		f.show();
+		f.setVisible(true);
 	}
 	public static void main (String[] args)
 	{
