@@ -25,6 +25,8 @@
 #include <windows.h>
 #include <sys/types.h>
 #include <io.h>
+#include <fcntl.h>
+
 typedef unsigned char   cc_t;
 typedef unsigned int    speed_t;
 typedef unsigned int    tcflag_t;
@@ -93,6 +95,7 @@ int serial_select(int, struct fd_set *, struct fd_set *, struct fd_set *, struct
 #define read serial_read
 #define write serial_write
 
+struct termios_list *find_port( int );
 void usleep(unsigned long usec);
 int fcntl(int fd, int command, ...);
 const char *get_dos_port(const char *);
