@@ -59,6 +59,7 @@ please make a note and email the details to trentjarvi@yahoo.com.
 	R.  How can I use Lock Files with rxtx?
 	S.  How can I tell which version of rxtx is installed?
 	T.  What Type of Latency can I expect with RXTX
+	U.  I got rxtx working on a new OS but I can't read from the port
 
 -------------------------------------------------------------------------------
 1.  INSTALL INSTRUCTIONS IN OTHER LANGUAGES
@@ -537,7 +538,84 @@ T.  What Type of Latency can I expect with RXTX
 
 	He is going to look at this further.  He needs 20 ms or less latency.
 	
+U.  I got rxtx working on a new OS but I can't read from the port
 
+> Now my java program starts up nicely without complaining. However, it does
+> never read any data from the serial port. It looks like it can write data,
+> because if I start a terminal program after I tried to run my program, I get
+> all the return stuff from the modem that my program wrote.
+> 
+> I hacked around abit and found out that it hangs in the select() call which
+> simply never returns.
+> 
+On Sun, 28 Jan 2001, Baldur Norddahl wrote:
+> HPUX 11:
+> 
+> As I wrote to the mailinglist I had some wierd problems where it apparently
+> could write data to the modem, but not read anything back. My terminal
+> programs had no problem using the port. A few days after I reported the
+> problem to the mailinglist, I had given up for now, but then I noticed that
+> it suddenly worked! So it remains a mystery what was wrong as I did not
+> change anything at all, neither in my program nor on the host.
+> 
+> Baldur
+> 
+
+I suspect two java applications had the port open.  Its easy to do while 
+developing.  Perhaps <ctl> z instead of <ctl> c was entered.
+
+This is the reason for adding lockfile support to rxtx.  If another application
+has opened the port, a second application will appear to not be able to 
+read or get only part of the data.  ..because the first one is reading.  Only
+one of the select()s are waken.
+
+Its possible to put lockfile support in for HPUX if it is known where other
+applications place their lockfiles.   The easiest way to find out where is
+to fire up minicom, kermit, ... and see where its lockfile is placed.
+
+Here are the known suspects:
+
+const char *lockdirs[]={ "/etc/locks", "/usr/spool/kermit",
+                "/usr/spool/locks", "/usr/spool/uucp", "/usr/spool/uucp/",
+                "/usr/spool/uucp/LCK", "/var/lock", "/var/lock/modem",
+                "/var/spool/lock", "/var/spool/locks", "/var/spool/uucp",NULL
+        };
+
+freebsd uses /var/spool/uucp/, linux uses /var/lock those are the only two
+I've done so far.  Adding the support is trivial once a directory is
+decided upon.
+
+Lockfiles are rather simple.  when an application opens a port it first checks
+if there is a file with the ports name.  If there is it grabs the PID from the
+file.  If that PID is still active the application does not open the port.
+
+If the PID is not active or there is no lockfile, the application creates one
+with its own PID in it.
+
+The confusion starts when you have to decide where (see above) to put the
+lockfile, what the name format is for the file and how to store the PID.
+
+rxtx follows The File System Hierarchy Standard http://www.pathname.com/fhs/
+on linux.  I'm not positive what is normal on other OS's.
+
+                more reading:
+
+                The File System Hierarchy Standard
+                http://www.pathname.com/fhs/
+
+                FSSTND
+                ftp://tsx-11.mit.edu/pub/linux/docs/linux-standards/fsstnd/
+
+                Proposed Changes to the File System Hierarchy Standard
+                ftp://scicom.alphacdc.com/pub/linux/devlock-0.X.tgz
+
+                "UNIX Network Programming", W. Richard Stevens,
+                Prentice-Hall, 1990, pages 96-101.
+                more reading:
+
+-- 
+Trent Jarvi
+TrentJarvi@yahoo.com
 -------------------------------------------------------------------------------
 You made it this far.. what is one more line.
 
