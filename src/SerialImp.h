@@ -126,16 +126,16 @@ struct event_info_struct
 #endif /* __sgi__ || sgi */
 #if defined(__FreeBSD__)
 #	define DEVICEDIR "/dev/"
-#	define LOCKDIR "/var/spool/uucp"
-#	define LOCKFILEPREFIX "LK."
+#	define LOCKDIR "/var/spool/lock"
+#	define LOCKFILEPREFIX "LK.."
 #	define UUCP
-#endif
+#endif /* __FreeBSD__ */
 #if defined(__APPLE__)
 #	define DEVICEDIR "/dev/"
 #	define LOCKDIR "/var/spool/uucp"
 #	define LOCKFILEPREFIX "LK."
 #	define UUCP
-#endif /* __FreeBSD__ */
+#endif /* __APPLE__ */
 #if defined(__NetBSD__)
 #	define DEVICEDIR "/dev/"
 #	define LOCKDIR "/usr/spool/uucp"
