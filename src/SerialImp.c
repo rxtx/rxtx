@@ -972,7 +972,6 @@ JNIEXPORT jint JNICALL RXTXPort(nativeGetParity)(JNIEnv *env, jobject jobj, jint
 		return( -1 );
 	}
 #ifdef  CMSPAR 
-#endif /* CMSPAR */
 	if ( ( ttyset.c_cflag & PARENB ) &&
 		( ttyset.c_cflag & PARODD ) &&
 		( ttyset.c_cflag & CMSPAR ) )
@@ -984,7 +983,8 @@ JNIEXPORT jint JNICALL RXTXPort(nativeGetParity)(JNIEnv *env, jobject jobj, jint
 	{
 		return( JPARITY_SPACE );
 	}
-	else if ( ttyset.c_cflag & PARENB &&
+#endif /* CMSPAR */
+	if ( ttyset.c_cflag & PARENB &&
 		ttyset.c_cflag & PARODD )
 	{
 		return( JPARITY_ODD );
