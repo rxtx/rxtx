@@ -568,6 +568,8 @@ Redhat users.  Note that Redhat changed group uucp to group lock with Redhat
 
 Mandrake users.  Note that /var/lock needs to be group uucp for this to work.
 
+Mac OS X users.  Note that you may need to create the lock directory with group uucp ownership.
+
 RXTX uses lock files by default.  configure --disable-lockfiles to generate
 rxtx libraries without lock files.  Its strongly recommended that you do
 use lock files to prevent rxtx from stomping on other programs using serial
