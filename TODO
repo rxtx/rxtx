@@ -37,7 +37,14 @@ whats going wrong.
 
 Irix SerialPort support
 	I've heard it works.  I didnt get an exact diff back but it should work.
-	rxtx-1.5 has not been tested
+	rxtx-1.5 has not been tested.  Last report was that the library built
+	but there was unsatified link errors when an application was run.
+
+	The following showed up in the build:
+
+	/usr/include/standards.h:128: warning:  `_NO_POSIX' redifined
+	/usr/include/standars.h:156: warning: `_NO_XOPEN4' redefined
+	ld32: WARING 84: /usr/lib32/libc.so is not used for resolving any symbol
 
 HP-UX   I've heard it works.  The fix was distructive to other ports by hard
         coding the device files.  An attempt was made to add what was required.
@@ -46,7 +53,7 @@ HP-UX   I've heard it works.  The fix was distructive to other ports by hard
 *BSD SerialPort support
 	freebsd serial works.
 	kernel specific implementations
-	buggy event loop.
+	possibly a buggy event loop.
 
 Win95/98 with mingw32
 	The maintainer has integrated Wayne Roberts improvements.  The code
@@ -54,6 +61,32 @@ Win95/98 with mingw32
 	for starters look at select()
 	http://msdn.microsoft.com/library/techart/msdn_serial.htm
 	for documentation.   WaitForSingleObject() may be of use.
+	eventLoop() uses ioctls() that have not been implemented in termios.c
+	FIONREAD support is also missing
+
+	The library was tested  (rxtx-1.5-4).  The library built and installed
+	using lcc and mingw32(on windows and from linux) BlackBox runs but 
+	does not work.  Significant work is required.
+
+	Older versions (rxtx 1.3?) provided simple read/write/set/get
+	functionality.  The code is being included as a starting point for
+	possible future win32 support
+
+	files:
+		SerialImp.c   termios based JNI code
+		SerialImp.h            ""
+		termios.c      termios implementation for win32
+		win32termios.h         ""
+		init.c  lcc dll support
+		init.cc mingw32 dll support
+		fixup.c mingw32 dll support
+		Makefile.lcc  static Makefile for building with lcc
+		Makefile.cc   static Makefile for building with mingw32
+
+	The following other options are possible but not started
+
+		use cygwin.dll and release rxtx under the GPL
+		replace SerialImp.c/h with something that does not use termios.
 
 BeOS
 	BeOS support is in the early stages.  It should read and write bytes

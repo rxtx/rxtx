@@ -25,7 +25,6 @@
 #include <windows.h>
 #include <sys/types.h>
 #include <io.h>
-#define S_ISCHR(m)	(((m)&S_IFMT) == S__IFCHR)
 typedef unsigned char   cc_t;
 typedef unsigned int    speed_t;
 typedef unsigned int    tcflag_t;
