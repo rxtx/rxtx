@@ -110,6 +110,12 @@ AC_ARG_ENABLE(lockfiles,
 	fi
 )
 
+AC_ARG_ENABLE(lockfile_server,
+	[  --enable-lockfile_server          Enable interaction with a lock file server [default=no]],
+	if test x$enable_lockfile_server = xyes; then 
+		CFLAGS=$CFLAGS" -DLFS"
+	fi
+)
 AC_ARG_ENABLE(DEBUG,
 	[  --enable-DEBUG          Print debugging info from SerialImp.c [default=no]],
 	if test x$enable_DEBUG = xyes; then 

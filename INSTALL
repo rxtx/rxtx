@@ -16,7 +16,7 @@
 |   License along with this library; if not, write to the Free
 |   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --------------------------------------------------------------------------*/
-This is the INSTALL file for RXTX.  Tue Dec  4 17:16:47 MST 2001
+This is the INSTALL file for RXTX.  Mon Jan  7 15:45:01 MST 2002
 
 If, while following the instructions, you find this file unclear or incorrect 
 please make a note and email the details to trentjarvi@yahoo.com.  
@@ -607,6 +607,15 @@ have /dev.
 	Today, absolutely suddenly, something clicked in my head and the cause
 	was found: libsafe. To make JDK work, it is enough to disable libsafe
 	(unset LD_PRELOAD)."
+
+As another option it is possible to use a Lock File Server.  In this case,
+a server runs in group uucp or lock and rxtx then connects to localhost
+to lock and unlock the port.  The server and install instructions can be
+found in src/lfd.  RXTX will need to be configured to use the server:
+
+	configure --enable-lockfile_server
+
+Any user can then lock the ports if they are not already locked.
 
 S.  How can I tell which version of rxtx is installed?
 
