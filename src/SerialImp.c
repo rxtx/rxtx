@@ -854,7 +854,6 @@ int spawn_write_thread( int fd, char *buff, int length,
 	pthread_mutex_unlock( t->mutex_closing );
 	report("<spawn_write_thread: cond_wait\n");
 	sprintf(msg, "spawn_write_thread: returning return = %i\n", t->length );
-	printf(msg, "spawn_write_thread: returning return = %i\n", t->length );
 	report( msg );
 	return(t->length);
 #endif /* DONT_USE_OUTPUT_BUFFER_EMPTY_CODE */
