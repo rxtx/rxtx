@@ -97,7 +97,9 @@ AC_ARG_ENABLE(PRINTER,
 )
 	if test x$enable_PRINTER = xyes; then  
 		TARGETLIB="\$(TOP)/\$(target_alias)/libSerial.la \
-			\$(TOP)/\$(target_alias)/libParallel.la"
+			\$(TOP)/\$(target_alias)/libParallel.la \
+			\$(TOP)/\$(target_alias)/libI2C.la \
+			\$(TOP)/\$(target_alias)/libRS485.la"
 	else
 		TARGETLIB="\$(TOP)/\$(target_alias)/libSerial.la"
 	fi

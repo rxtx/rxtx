@@ -33,6 +33,8 @@ LIBTOOL = $(SHELL) $(TOP)/libtool
 LINK = $(LIBTOOL) --mode=link $(CC) $(CFLAGS) $(LDFLAGS) -version-info 1:0:1
 SERIAL_HEADER = $(TOP)/$(target_alias)/javax_comm_RXTXPort.h $(TOP)/$(target_alias)/javax_comm_RXTXCommDriver.h
 PARALLEL_HEADER = $(TOP)/$(target_alias)/javax_comm_LPRPort.h
+I2C_HEADER = $(TOP)/$(target_alias)/javax_comm_I2CPort.h 
+RS485_HEADER = $(TOP)/$(target_alias)/javax_comm_RS485Port.h
 CLEANFILES = $(TOP)/*.class $(TOP)/javax/comm/*.class $(TOP)/jcl.jar
 #LTLIBRARIES =     $(lib_LTLIBRARIES)
 #BUILT_SOURCES = $(TOP)/$(target_alias)/libSerial.la
@@ -52,6 +54,12 @@ install-lib:
 	fi; \
 	if [ -f libParallel.la ];then \
 	$(LIBTOOL) --mode=install $(INSTALL_PROGRAM) libParallel.la $(RXTX_PATH);\
+	fi; \
+	if [ -f libI2C.la ];then \
+	$(LIBTOOL) --mode=install $(INSTALL_PROGRAM) libI2C.la $(RXTX_PATH);\
+	fi; \
+	if [ -f libRS485.la ];then \
+	$(LIBTOOL) --mode=install $(INSTALL_PROGRAM) libRS485.la $(RXTX_PATH);\
 	fi; \
 	)
 	$(INSTALL_PROGRAM) jcl.jar $(JPATH)/$(JCL_PATH)/
@@ -107,6 +115,28 @@ $(TOP)/$(target_alias)/SerialImp.lo: $(srcdir)/src/SerialImp.c \
 	(cd $(TOP)/$(target_alias); \
 	$(LIBTOOL) --mode=compile $(CC) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) @VERBOSE_IOEXCEPTIONS@ -c ../$< )
 
+$(TOP)/$(target_alias)/libI2C.la: $(TOP)/$(target_alias)/I2CImp.lo
+	( cd $(TOP)/$(target_alias); \
+	$(LINK) -o libI2C.la -rpath $(RXTX_PATH) $(<F); \
+	for I in .libs/*.so*;do cp $$I . ;done;)
+
+$(TOP)/$(target_alias)/I2CImp.lo: $(srcdir)/src/I2CImp.c \
+                                  $(I2C_HEADER) \
+				  $(TOP)/Makefile
+	(cd $(TOP)/$(target_alias); \
+	$(LIBTOOL) --mode=compile $(CC) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) @VERBOSE_IOEXCEPTIONS@ -c ../$< )
+
+$(TOP)/$(target_alias)/libRS485.la: $(TOP)/$(target_alias)/RS485Imp.lo
+	( cd $(TOP)/$(target_alias); \
+	$(LINK) -o libRS485.la -rpath $(RXTX_PATH) $(<F); \
+	for I in .libs/*.so*;do cp $$I . ;done;)
+
+$(TOP)/$(target_alias)/RS485Imp.lo: $(srcdir)/src/RS485Imp.c \
+                                  $(RS485_HEADER) \
+				  $(TOP)/Makefile
+	(cd $(TOP)/$(target_alias); \
+	$(LIBTOOL) --mode=compile $(CC) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) @VERBOSE_IOEXCEPTIONS@ -c ../$< )
+
 $(TOP)/javax/comm/ParallelPort.class $(TOP)/javax/comm/ParallelPortEvent.class $(TOP)/javax/comm/ParallelPortEventListener.class: $(srcdir)/src/ParallelPort.java $(srcdir)/src/ParallelPortEvent.java $(srcdir)/src/ParallelPortEventListener.java
 	$(JAVAC) $(srcdir)/src/ParallelPort.java $(srcdir)/src/ParallelPortEvent.java $(srcdir)/src/ParallelPortEventListener.java
 
@@ -130,7 +160,7 @@ I2C: $(TOP)/javax/comm/I2CPort.class $(TOP)/javax/comm/I2CPortEvent.class $(TOP)
 $(TOP)/%.class $(TOP)/javax/comm/%.class: $(srcdir)/src/%.java 
 	$(JAVAC) $< 
 
-$(SERIAL_HEADER) $(PARALLEL_HEADER): $(TOP)/javax/comm/RXTXPort.class
+$(I2C_HEADER) $(RS485_HEADER) $(SERIAL_HEADER) $(PARALLEL_HEADER): $(TOP)/javax/comm/RXTXPort.class
 	$(JAVAH) javax.comm.`echo $(@F) | sed s#\.h##|sed s#javax_comm_##`
 	touch $(TOP)/$(target_alias)/$(@F)
 
