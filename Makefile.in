@@ -12,7 +12,7 @@
 
 #-------------------------------------------------------------------------
 #   rxtx is a native interface to serial ports in java.
-#   Copyright 1997-2000 by Trent Jarvi trentjarvi@yahoo.com.
+#   Copyright 1997-2001 by Trent Jarvi trentjarvi@yahoo.com.
 #
 #   This library is free software; you can redistribute it and/or
 #   modify it under the terms of the GNU Library General Public
@@ -349,6 +349,8 @@ mostlyclean distclean maintainer-clean
 
 
 #  compile src/SerialImp.c and simular files into libraries.
+#  LIBTOOL_FIX handles problems encountered on some OS's.  See configure.in
+#  If a LIBTOOL_FIX is added be sure to provide a trailing ';' in configure.in
 $(target_alias)/lib%.la: $(SPATH)/%Imp.@EXTENSION@ $(CLASSES)
 	@( \
 	$(LIBTOOL_FIX) \

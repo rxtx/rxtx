@@ -41,9 +41,11 @@ javahfiles = $(patsubst $(SPATH)/%.java,%,$(wildcard $(SPATH)/*.java))
 CLEANFILES = $(TOP)/*.class $(TOP)/$(CLASSDEST)/*.class $(TOP)/$(JARTARGET)
 
 #  compile src/SerialImp.c and simular files into libraries.
+#  LIBTOOL_FIX handles problems encountered on some OS's.  See configure.in
+#  If a LIBTOOL_FIX is added be sure to provide a trailing ';' in configure.in
 $(target_alias)/lib%.la: $(SPATH)/%Imp.@EXTENSION@ $(CLASSES)
 	@( \
-	$(LIBTOOL_FIX); \
+	$(LIBTOOL_FIX) \
 	cd $(DEST); \
 	$(LIBTOOLC) ../$(SPATH)/$*Imp.@EXTENSION@ -o $(TOP)/$(DEST)/$*Imp.lo; \
 	$(LINK) -o lib$*.la -rpath $(RXTX_PATH) $(TOP)/$(DEST)/$*Imp.lo)
