@@ -77,6 +77,10 @@ A note on Mac OS X:
 	U.  I got rxtx working on a new OS but I can't read from the port
 	V.  My ThinkPad is Not Working!
 
+4)  APPLETS
+
+	A.  Using Applets
+
 -------------------------------------------------------------------------------
 1.  INSTALL INSTRUCTIONS IN OTHER LANGUAGES
 A.  Japanese
@@ -765,6 +769,45 @@ V.  My ThinkPad is Not Working!
 
 		Until you do, "setserial -ga /dev/ttyS0" will always tell you
 		the UART is unknown.  
+
+
+
+4.  APPLETS
+
+More info is needed on signing applets.  This is an exchange from the rxtx mail-
+list.
+
+A.  Using Applets
+
+prashantg10@yahoo.com asked:
+
+	Hi All !
+
+	I am trying to use applet on thin terminal which has
+	Linux base Kernel.For testing I am using Linux
+	machine.I have install all the required components.
+	e.g. JDK, RXTX. Everthing is fine. BlackBox runs ,even
+	my application runs. When It comes to applet,
+	everything is halts. It does not even show the listing
+	of ports. Is it because applet can't run under root
+	account or what might be the reasons. Can anybody tell
+	me solution.
+
+Son To <son@openbx.net> replied:
+
+	Java applets run withing the sandbox of the security manager.
+	Applets must be signed to access the com port, but for development 
+	purposes you can put
+
+	user_pref("signed.applets.codebase_principal_support", true);
+
+	in your prefs.js located in ~/.mozilla/default/XYYrandomDirName
+	
+	I didn't use Java applet for my application. I used XUL and CSS for
+	the GUI development and used mozilla Javascript SOAP library to
+	communicate with apache Axis webservice backend which uses RXTX to
+	access the com port.
+
 -- 
 Trent Jarvi
 taj@www.linux.org.uk
