@@ -99,11 +99,11 @@
 #endif /* HAVE_GRP_H */
 
 extern int errno;
-#ifdef TRENT_IS_HERE
-#undef TIOCSERGETLSR
-//#define DEBUG
-/*
 #define DEBUG_MW
+#ifdef TRENT_IS_HERE
+/*
+#define DEBUG
+#undef TIOCSERGETLSR
 #define DONT_USE_OUTPUT_BUFFER_EMPTY_CODE
 notes:
 	TIOCGSERIAL
@@ -3177,7 +3177,7 @@ int fhs_lock( const char *filename )
 		report( "fhs_lock() lockstatus fail\n" );
 		return 1;
 	}
-	fd = open( file, O_CREAT | O_WRONLY | O_EXCL, 0666 );
+	fd = open( file, O_CREAT | O_WRONLY | O_EXCL, 0444 );
 	if( fd < 0 )
 	{
 		sprintf( message,
@@ -3278,7 +3278,7 @@ int uucp_lock( const char *filename )
 		report_error( message );
 		return 1;
 	}
-	fd = open( lockfilename, O_CREAT | O_WRONLY | O_EXCL, 0666 );
+	fd = open( lockfilename, O_CREAT | O_WRONLY | O_EXCL, 0444 );
 	if( fd < 0 )
 	{
 		sprintf( message,
