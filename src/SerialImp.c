@@ -234,7 +234,7 @@ JNIEXPORT void JNICALL RXTXPort(Initialize)(
 #ifdef DEBUG_MW
 	mexPrintf("RXTX Prerelease for testing  Tue Feb 19 18:00:27 EST 2002\n");
 #else
-	printf("RXTX Prerelease for testing  Tue Feb 19 18:00:27 EST 2002\n");
+	printf("RXTX Prerelease for testing  Thu Feb 21 19:31:38\n");
 #endif /* DEBUG_MW */
 #endif /* PRERELEASE */
 #if DEBUG_TIMING
