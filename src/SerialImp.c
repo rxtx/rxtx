@@ -2657,7 +2657,6 @@ GetTickCount()
 #else
 	return (now.tv_sec * 1000) + ceil(now.tv_usec / 1000);
 #endif /* __QNX__ */
-
 }
 
 #endif /* !WIN32 */
@@ -2680,6 +2679,7 @@ read_byte_array
 		The nuts and bolts are documented in
 		NativeEnableReceiveTimeoutThreshold()
 ----------------------------------------------------------*/
+
 int read_byte_array( JNIEnv *env,
                      jobject *jobj,
                      int fd,
@@ -2704,8 +2704,8 @@ int read_byte_array( JNIEnv *env,
 	{
 		if (timeout >= 0) {
 			now = GetTickCount();
-			if ( now-start >= timeout +1 )
-			return bytes;
+			if ( now-start >= timeout )
+				return bytes;
 		}
 
 		FD_ZERO(&rset);
@@ -2906,7 +2906,8 @@ fail:
 RXTXPort.readByte
 
    accept:      none
-   perform:     Read a single byte from the port
+   perform:     Read a single byte from the port.  Block unless an exeption
+	        is thrown, or end of stream.
    return:      The byte read
    exceptions:  IOException
 ----------------------------------------------------------*/
@@ -2916,12 +2917,11 @@ JNIEXPORT jint JNICALL RXTXPort(readByte)( JNIEnv *env,
 	int bytes;
 	unsigned char buffer[ 1 ];
 	int fd = get_java_var( env, jobj,"fd","I" );
-	int timeout = get_java_var( env, jobj, "timeout", "I" );
 	char msg[80];
 
 	ENTER( "RXTXPort:readByte" );
 	report_time_start( );
-	bytes = read_byte_array( env, &jobj, fd, buffer, 1, timeout );
+	bytes = read_byte_array( env, &jobj, fd, buffer, 1, 0 );
 	if( bytes < 0 ) {
 		LEAVE( "RXTXPort:readByte" );
 		throw_java_exception( env, IO_EXCEPTION, "readByte",
@@ -2979,7 +2979,7 @@ JNIEXPORT jint JNICALL RXTXPort(readArray)( JNIEnv *env,
 	report( msg );
 	report_time_end( );
 	LEAVE( "RXTXPort:readArray" );
-	return (bytes ? bytes : -1);
+	return (bytes);
 }
 
 /*----------------------------------------------------------
