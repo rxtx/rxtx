@@ -3,6 +3,8 @@ This is AUTHORS Tue Oct 15 20:32:04 MDT 2002
 This package is not the result of one persons time.  Recognition is given
 to the following people for their assistance.
 
+Stephane Cachat <stephane@cachat.org> J2SE java.util.loggin and property file to match
+
 Sheikh, Awais <awais.sheikh@hp.com> HP-UX port enumeration fixes.
 
 Bill Smith <bsmith@tridium.com> QNX Port
