@@ -72,17 +72,17 @@ JAVAC=javac
 #  Tool Flags
 ######################
 
-CFLAGS= $(INCLUDE) -mno-cygwin -DWIN32 -D __int64="long long" -mno-fp-ret-in-387 -Wall 
+CFLAGS= $(INCLUDE) -mno-cygwin -DWIN32 -D __int64="long long" -mno-fp-ret-in-387 -Wall  -D TRENT_IS_HERE -D TRENT_IS_HERE_DEBUGGING_ENUMERATION
 INCLUDE= -I . -I $(JDKINCLUDE) -I $(JDKINCLUDE)/win32 -I $(SRC) -I include
 JAVAHFLAGS= -classpath $(CLASSPATH) -jni -d include
-LIBS=-L $(LIBDIR) -luser32 -lgdi32 -lcomdlg32 -lkernel32 -ladvapi32 -lmingw32 -lmoldname -lcrtdll
+LIBS=-L . -L $(LIBDIR) -luser32 -lgdi32 -lcomdlg32 -lkernel32 -ladvapi32 -lmingw32 -lmoldname -lcrtdll 
 
 # path to the java native interface headers (directory with jni.h)
 JDKINCLUDE=$(JDKHOME)/include
 JAVAFILES = $(wildcard $(SRC)/*.java)
 CFILES=$(wildcard $(SRC)/*.c) $(wildcard $(SRC)/*.cc)
 TARGETLIBS= Serial.dll 
-DLLOBJECTS= fixup.o fuserImp.o SerialImp.o termios.o init.o
+DLLOBJECTS= fixup.o fuserImp.o SerialImp.o termios.o init.o # libmex.dll
 
 all:  $(TARGETLIBS)
 

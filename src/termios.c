@@ -1,5 +1,5 @@
 #ifdef TRENT_IS_HERE
-//#define TRACE
+#define TRACE
 #define DEBUG
 #define DEBUG_MW
 #endif /* TRENT_IS_HERE */
