@@ -26,15 +26,15 @@
 #include <sys/types.h>
 #include <io.h>
 #ifdef TRACE
-#	define ENTER(x) printf("entering "x" \n");
-#	define LEAVE(x) printf("leavine "x" \n");
+#define ENTER(x) report("entering "x" \n");
+#define LEAVE(x) report("leaving "x" \n");
 #else
-#	define ENTER(x)
-#	define LEAVE(x)
+#define ENTER(x)
+#define LEAVE(x)
 #endif /* TRACE */
 #define YACK() \
 { \
-	char *allocTextBuf; \
+	char *allocTextBuf, message[80]; \
 	unsigned long nChars; \
 	unsigned int errorCode = GetLastError(); \
 	nChars = FormatMessage ( \
@@ -46,7 +46,8 @@
 		(LPSTR)&allocTextBuf, \
 		16, \
 		NULL ); \
-	fprintf( stderr, "Error 0x%x at %s(%d): %s", errorCode, __FILE__, __LINE__, allocTextBuf); \
+	sprintf( message, "Error 0x%x at %s(%d): %s\n", errorCode, __FILE__, __LINE__, allocTextBuf); \
+	report( message ); \
 	LocalFree(allocTextBuf); \
 }
 
@@ -54,12 +55,15 @@ typedef unsigned char   cc_t;
 typedef unsigned int    speed_t;
 typedef unsigned int    tcflag_t;
 
+/* structs are from linux includes or linux man pages to match
+   interfaces.
+*/
+
 struct timespec
 {
 	time_t	tv_sec;
 	long	tv_nsec;
 };
-
 
 #define NCCS 32
 struct termios
@@ -106,7 +110,8 @@ struct serial_icounter_struct {
 	int reserved[9]; 	/* unused */
 };
 
-int serial_open(const char *File, int flags, ...);
+int serial_open(const char *File, int flags, ... );
+int serial_close(int fd);
 int serial_read(int fd, void *b, int size);
 int serial_write(int fd, char *Str, int length);
 /*
@@ -117,13 +122,13 @@ int serial_select(int, struct fd_set *, struct fd_set *, struct fd_set *, struct
 #define select serial_select
 #endif
 
-#define open serial_open
-#define read serial_read
-#define write serial_write
+#define OPEN serial_open
+#define CLOSE serial_close
+#define READ serial_read
+#define WRITE serial_write
 
 struct termios_list *find_port( int );
-//void usleep(unsigned long usec);
-int nanosleep( const struct timespec *, struct timespec * );
+void usleep(unsigned long usec);
 int fcntl(int fd, int command, ...);
 const char *get_dos_port(const char *);
 void set_errno(int);
@@ -134,7 +139,7 @@ int termios_to_bytesize(int);
 int bytesize_to_termios(int);
 int tcgetattr(int Fd, struct termios *s_termios);
 int tcsetattr(int Fd, int when, struct termios *);
-int close(int );
+int serial_close(int );
 speed_t cfgetospeed(struct termios *s_termios);
 speed_t cfgetispeed(struct termios *s_termios);
 int cfsetspeed(struct termios *, speed_t speed);
@@ -147,6 +152,7 @@ int tcdrain ( int );
 int tcflow ( int , int );
 int tcsendbreak ( int , int );
 int ioctl(int fd, int request, ... );
+//int fstat(int fd, ... );
 void cfmakeraw(struct termios *s_termios);
 
 #define O_NOCTTY	0400	/* not for fcntl */
@@ -370,9 +376,13 @@ void cfmakeraw(struct termios *s_termios);
 #define	TCSANOW		0
 #define	TCSADRAIN	1
 #define	TCSAFLUSH	2
-#endif /*_WIN32S_H_*/
 
 /* ioctls */
+#define TIOCSERGETLSR	0x5459
+
+#endif /*_WIN32S_H_*/
+
+/* unused ioctls */
 #define TCSBRK		0x5409
 #define TIOCOUTQ	0x5411
 #define TIOCMGET	0x5415
@@ -390,12 +400,11 @@ void cfmakeraw(struct termios *s_termios);
 #define TIOCSERGWILD	0x5454
 #define TIOCSERSWILD	0x5455
 #define TIOCSERGSTRUCT	0x5458
-#define TIOCSERGETLSR	0x5459
 #define TIOCSERGETMULTI	0x545a
 #define TIOCSERSETMULTI	0x545b
 #define TIOCMIWAIT	0x545c
 /* this would require being able to get the number of overruns ... */
-/* #define TIOCGICOUNT	0x545d */
+#define TIOCGICOUNT	0x545d
 
 /* ioctl errors */
 #define ENOIOCTLCMD	515

@@ -16,10 +16,10 @@
 |   License along with this library; if not, write to the Free
 |   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --------------------------------------------------------------------------*/
-//#ifdef TRENT_IS_HERE
+#ifdef TRENT_IS_HERE
 #define DEBUG
-//#define DEBUG_MW
-//#endif /* TRENT_IS_HERE */
+#define DEBUG_MW
+#endif /* TRENT_IS_HERE */
 #if defined(__MWERKS__)//dima
 #include "RXTXPort.h"//dima
 #else //dima
