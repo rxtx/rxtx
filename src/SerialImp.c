@@ -1182,7 +1182,8 @@ JNIEXPORT jboolean  JNICALL Java_javax_comm_RXTXCommDriver_IsDeviceGood(JNIEnv *
 		!strcmp(name,"ttyq")|| !strcmp(name,"ttym")||
 		!strcmp(name,"ttyf")|| !strcmp(name,"ttyS")||
 		!strcmp(name,"ttyI")|| !strcmp(name,"ttyW")||
-		!strcmp(name,"ttyC")|| !strcmp(name,"ttyR")
+		!strcmp(name,"ttyC")|| !strcmp(name,"ttyR")||
+		!strcmp(name,"ttyE")
 		)
 	{
 #ifdef DEBUG
@@ -1199,7 +1200,7 @@ JNIEXPORT jboolean  JNICALL Java_javax_comm_RXTXCommDriver_IsDeviceGood(JNIEnv *
 		!strcmp(name,"ttyq")|| !strcmp(name,"ttym")||
 		!strcmp(name,"ttyf")|| !strcmp(name,"cuaa")||
 		!strcmp(name,"ttyC")|| !strcmp(name,"ttyR")||
-		!strcmp(name,"ttyM")
+		!strcmp(name,"ttyM")|| !strcmp(name,"ttyE")
 		)
 	{
 #ifdef DEBUG

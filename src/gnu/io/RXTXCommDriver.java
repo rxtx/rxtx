@@ -121,7 +121,9 @@ public class RXTXCommDriver implements CommDriver {
 			"ttyq", // irix pseudo ttys
 			"ttyd", // irix serial ports
 			"tty0", // netbsd serial ports 
-			"ttyM"  // Moxa Smart IO cards
+			"ttyM", // Moxa Smart IO cards
+			"ttuE"  // Stallion serial card
+
 		};
 	/** Get the Parallel port prefixes for the running os
 	* Holger Lehmann
