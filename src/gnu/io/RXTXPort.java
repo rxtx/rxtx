@@ -1055,10 +1055,7 @@ final public class RXTXPort extends SerialPort
 			if ( monThreadisInterrupted == true )
 			{
 				return;
-				/* FIXME Trent this breaks
-					InstrumentControlSerialPort = hGetPort
-					in Matlab.
-				*/
+				// FIXME Trent this breaks
 				//throw new IOException( "flush() Port has been Closed" );
 			}
 	*/
