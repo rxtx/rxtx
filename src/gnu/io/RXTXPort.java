@@ -473,7 +473,7 @@ final class RXTXPort extends SerialPort
 			System.out.println("RXTXPort:checkMonitorThread()");
 		if(monThread != null)
 		{
-			if ( monThreadisInterrupted )
+			if ( debug )
 				System.out.println(
 					"monThreadisInterrupted = " +
 					monThreadisInterrupted );
@@ -624,9 +624,6 @@ final class RXTXPort extends SerialPort
 		}
 		else 
 		{
-			try{
-				Thread.sleep(50);
-			} catch(Exception exc){}
 			return(false);  
 		}
 	}
@@ -645,7 +642,7 @@ final class RXTXPort extends SerialPort
 			throw new TooManyListenersException();
 		SPEventListener = lsnr;
 		if (debug)
-			System.out.println("RXTXPort:Interrupt=true");
+			System.out.println("RXTXPort:Interrupt=false");
 		monThreadisInterrupted=false;
 		monThread = new MonitorThread();
 		monThread.setDaemon(true);
@@ -655,10 +652,17 @@ final class RXTXPort extends SerialPort
 	*  Remove the serial port event listener
 	*/
 	
-	public void removeEventListener()
+	public synchronized void removeEventListener()
 	{
 		if (debug)
 			System.out.println("RXTXPort:removeEventListener()");
+		if( monThreadisInterrupted == true )
+		{
+			monThread = null;
+			SPEventListener = null;
+			Runtime.getRuntime().gc();
+			return;
+		}
 		if( monThread != null && monThread.isAlive() )
 		{
 			if (debug)
@@ -866,7 +870,6 @@ final class RXTXPort extends SerialPort
 				System.out.println("RXTXPort:SerialOutputStream:flush() enter");
 			if ( fd == 0 ) throw new IOException();
                         nativeDrain();
-			Thread.yield();
 			if (debug)
 				System.out.println("RXTXPort:SerialOutputStream:flush() leave");
 		}
