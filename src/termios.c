@@ -42,6 +42,7 @@ struct termios_list {
 	char *filename;
 	int my_errno;
 	HANDLE hComm;
+	OVERLAPPED lpOverlap;
 	struct termios *ttyset;
 	int flags;
  	int fd;
@@ -49,6 +50,39 @@ struct termios_list {
  	struct termios_list *prev;
 };
 struct termios_list *first_tl = NULL;
+
+int get_fd(char *filename)
+{
+	struct termios_list *index = first_tl;
+
+	if( !index )
+	{
+		return -1;
+	}
+
+	while( strcmp( index->filename, filename ) )
+	{
+		index = index->next;
+		if( !index->next )
+			return( -1 );
+	}
+	return( index->fd );
+}
+
+char *get_filename(int fd)
+{
+	struct termios_list *index = first_tl;
+
+	if( !index )
+		return( "bad" );
+	while( index->fd != fd )
+	{
+		if( index->next == NULL )
+			return( "bad" );
+		index = index->next;
+	}
+	return( index->filename );
+}
 
 void dump_termios_list( char *foo )
 {
@@ -85,6 +119,7 @@ usleep()
 
 void usleep(unsigned long usec)
 {
+
 	Sleep(usec/1000);
 }
 
@@ -354,18 +389,28 @@ int close(int fd)
 	*/
 	struct termios_list *index;
 
-	printf("entering close %i\n", fd);
+	if( !first_tl || !first_tl->hComm )
+	{
+		printf( "gotit!" );
+		return( 0 );
+	}
 	if ( fd <= 0 )
+	{
+		printf("close -fd");
 		return 0;
+	}
 	index = find_port( fd );
 	if ( !index )
 	{
-		fprintf(stderr, "No info known about the port being closed %i\n", fd);
+		printf("close !index");
+		//fprintf(stderr, "No info known about the port being closed %i\n", fd);
 		return -1;
 	}
 
 	if (index->hComm != INVALID_HANDLE_VALUE)
 		CloseHandle( index->hComm );
+	else
+		printf("close bad hcomm");
 	if ( index->next  && index->prev )
 	{
 		index->next->prev = index->prev;
@@ -382,11 +427,15 @@ int close(int fd)
 	}
 	else
 		first_tl = NULL;
-	if ( index->ttyset )  free( index->ttyset );
-	if ( index->filename ) free( index->filename );
-	if ( index ) free( index );
-	dump_termios_list( "close" );
-	printf("leaveing close\n");
+	if ( index )
+	{
+		if ( index->lpOverlap.hEvent ) CloseHandle( index->lpOverlap.hEvent );
+		if ( index->ttyset )  free( index->ttyset );
+		if ( index->filename ) free( index->filename );
+		free( index );
+	}
+	//dump_termios_list( "close" );
+	//printf("leaving close\n");
 	return 0;
 }
 
@@ -479,22 +528,43 @@ open_port()
    return:      
    exceptions:  
    comments:    
+	FILE_FLAG_OVERLAPPED allows one to break out the select()
+	so RXTXPort.close() does not hang.
+
+	The setDTR() and setDSR() are the functions that noticed
+	to be blocked in the java close.  Basically ioctl(TIOCM[GS]ET)
+	are where it hangs.
+
+	FILE_FLAG_OVERLAPPED also means we need to create valid OVERLAPPED
+	structure in serial_select.
 ----------------------------------------------------------*/
 
 int open_port( struct termios_list *port )
 {
-	port->hComm = CreateFile(port->filename,
+	//printf("open entering %s\n", port->filename);
+	port->hComm = CreateFile( port->filename,
 		GENERIC_READ | GENERIC_WRITE,
 		0,
 		0,
 		OPEN_EXISTING,
-		0,	//		FILE_FLAG_OVERLAPPED,
-		0);
+		FILE_FLAG_OVERLAPPED,
+		0
+	);
 	if (port->hComm == INVALID_HANDLE_VALUE) {
 		errno = EINVAL;
+		//printf("open failed %s\n", port->filename);
 		return -1;
 	}
 	SetupComm(port->hComm, 2048, 1024);
+
+	ZeroMemory( &port->lpOverlap, sizeof( port->lpOverlap ) );
+	//port->lpOverlap.hEvent = CreateEvent( NULL, TRUE, FALSE, NULL );
+	port->lpOverlap.hEvent = CreateEvent( NULL, FALSE, FALSE, NULL );
+	if ( port->lpOverlap.hEvent == NULL )
+	{
+		printf("CreatEvent failed for %s\n", port->filename );
+		return -1;
+	}
 	return( 0 );
 }
 
@@ -544,7 +614,6 @@ int get_free_fd()
 
 	if ( !index )
 	{
-		printf("!index\n");
 		return(1);
 	}
 	if ( !index->fd )
@@ -554,6 +623,7 @@ int get_free_fd()
 	}
 	if (index->fd > 1)
 	{
+		first_tl = index;
 		return ( 1 );
 	}
 	
@@ -563,7 +633,10 @@ int get_free_fd()
 	{
 		next = index->next->fd;
 		if ( next !=  last + 1 )
+		{
 			return( last + 1 );
+			
+		}
 		index = index->next;
 		last = next;
 	}
@@ -597,7 +670,6 @@ struct termios_list *add_port( const char *filename )
 	if( ! port->filename )
 		goto fail;
 
-	port->fd = get_free_fd();
 	
 	if ( !first_tl )
 	{
@@ -608,7 +680,7 @@ struct termios_list *add_port( const char *filename )
 	{
 		while ( index->next )
 			index = index->next;
-		if ( port->fd == 1 )
+		if ( port == first_tl )
 		{
 			port->prev = NULL;
 			port->next = first_tl;
@@ -621,6 +693,7 @@ struct termios_list *add_port( const char *filename )
 			index->next = port;
 		}
 	}
+	port->fd = get_free_fd();
 	port->next = NULL;
 	return port;
 
@@ -682,26 +755,26 @@ int serial_open(const char *filename, int flags)
 
 	if ( port_opened( filename ) )
 	{
-		fprintf(stderr, "Port is already opened\n");
+		printf("Port is already opened");
 		return( -1 );
 	}
 	port = add_port( filename );
 	if(!port)
 	{
-		fprintf(stderr, "Could not get port data structure\n");
+		printf("open !port\n");
 		return( -1 );
 	}
 	
 	if ( open_port( port ) )
 	{
-		fprintf(stderr, "open hComm invalid! %s\n", port->filename );
+		printf("open !hComm");
 		close( port->fd );
 		return -1;
 	}
 
 	if( check_port_capabilities( port ) )
 	{
-		fprintf( stderr, "check_port_capabilites failed!" );
+		printf("check_port_capabilites!" );
 		close( port->fd );
 		return -1;
 	}
@@ -712,6 +785,9 @@ int serial_open(const char *filename, int flags)
 	tcsetattr( port->fd, 0, port->ttyset );
 
 	dump_termios_list( "open filename" );
+	//printf(" returning fd %i for filename %s\n", port->fd, port->filename);
+	if( !first_tl->hComm )
+		printf( "open !hcomm2" );
 	return( port->fd );
 }
 
@@ -734,7 +810,7 @@ int serial_write(int fd, char *Str, int length) {
 	index = find_port( fd );
 	if ( !index )
 	{
-		fprintf(stderr, "No info known about the port. fcntl %i\n", fd);
+		fprintf(stderr, "No info known about the port. write %i\n", fd);
 		return -1;
 	}
 	/***** output mode flags (c_oflag) *****/
@@ -771,7 +847,7 @@ int serial_read(int fd, void *vb, int size) {
 	index = find_port( fd );
 	if ( !index )
 	{
-		fprintf(stderr, "No info known about the port. fcntl %i\n", fd);
+		fprintf(stderr, "No info known about the port. read %i\n", fd);
 		return -1;
 	}
 	/* FIXME: CREAD: without this, data cannot be read */
@@ -788,7 +864,7 @@ int serial_read(int fd, void *vb, int size) {
 	
 //	printf("serial_read(ing) %d\n", size);
 	while (nBytes <= vmin || size > 0) {
-		if (!ReadFile(index->hComm, b, size, &nBytes, NULL)) {
+		if (!ReadFile(index->hComm, b, size, &nBytes, &index->lpOverlap)) {
 			err = GetLastError();
 			switch (err) {
 				case ERROR_BROKEN_PIPE:
@@ -941,7 +1017,7 @@ int tcgetattr(int fd, struct termios *s_termios) {
 	index = find_port( fd );
 	if ( !index )
 	{
-		fprintf(stderr, "No info known about the port. fcntl %i\n", fd);
+		fprintf(stderr, "No info known about the port. tcgetattr %i\n", fd);
 		return -1;
 	}
 #ifdef DEBUG
@@ -1178,7 +1254,7 @@ int tcsetattr(int fd, int when, struct termios *s_termios) {
 	index = find_port( fd );
 	if ( !index )
 	{
-		fprintf(stderr, "No info known about the port. ioctl %i\n", fd);
+		fprintf(stderr, "No info known about the port. tcsetattr %i\n", fd);
 		return -1;
 	}
 #ifdef DEBUG
@@ -1428,11 +1504,9 @@ int ioctl(int fd, int request, ...) {
 			arg = va_arg( ap, int * );
 #ifdef DEBUG
 			printf("fixme TIOCMGET %i\n",fd);
-			printf(">BANG!! calling TIOCMGET %i\n", fd);
 #endif
 			GetCommModemStatus(index->hComm, &dwStatus);
 #ifdef DEBUG
-			printf("<BANG!! calling TIOCMGET %i\n", fd);
 #endif
 			if (dwStatus & MS_RLSD_ON) *arg |= TIOCM_CAR;
 			else *arg &= ~TIOCM_CAR;
@@ -1463,7 +1537,6 @@ int ioctl(int fd, int request, ...) {
 		case TIOCMSET:
 			arg = va_arg(ap, int *);
 #ifdef DEBUG
-			printf(">BANG!! calling TIOCMSET %i\n", fd);
 #endif
 			EscapeCommFunction(index->hComm,
 				(*arg & TIOCM_DTR) ? SETDTR : CLRDTR);
@@ -1581,6 +1654,12 @@ serial_select()
    exceptions:  
    comments:    lcc has a select in winsock.h
 		trying to use the select() in wsock32.lib
+
+	Because we are opening the port with the FILE_FLAG_OVERLAPPED
+	structure we need to create valid OVERLAPPED structure.
+	
+	Not using FILE_FLAG_OVERLAPPED in open and OVERLAPPED here results
+	in ioctl() being blocked.
 ----------------------------------------------------------*/
 
 #ifndef __LCC__
@@ -1588,7 +1667,6 @@ serial_select()
 int  serial_select(int  fd,  fd_set  *readfds,  fd_set  *writefds,
 			fd_set *exceptfds, struct timeval *timeout) {
 	DWORD CommEvent;
-	OVERLAPPED Status = { 0 };
 	struct termios_list *index;
 
 #ifdef DEBUG
@@ -1626,13 +1704,7 @@ int  serial_select(int  fd,  fd_set  *readfds,  fd_set  *writefds,
 		return 0;
 	}
 
-	Status.hEvent = CreateEvent( NULL, TRUE, FALSE, NULL );
-	if ( Status.hEvent == NULL )
-	{
-		printf("CreatEvent failed for %s\n", index->filename );
-		return 0;
-	}
-	if ( !WaitCommEvent( index->hComm, &CommEvent, &Status ) )
+	if ( !WaitCommEvent( index->hComm, &CommEvent, &( index->lpOverlap ) ) )
 	{
 		if ( GetLastError() == ERROR_IO_PENDING )
 		{
@@ -1651,5 +1723,110 @@ int  serial_select(int  fd,  fd_set  *readfds,  fd_set  *writefds,
 	}
 	/* FIXME */
 	return 0;
+}
+int main( int argc, char *argv[] )
+{
+	int fd[4] = { 0,0,0,0 };
+	int res, seed, foo;
+	char file[8], vb[80];
+	int printflag = 0;
+
+#ifdef asdf
+	for(;;)
+	{
+		res = open( "COM1", 1 );
+		if ( res <= 0 )
+		{
+			printf("Open Failed\n");
+		}
+		else
+		{
+			serial_read(res, vb,  1);
+			res = close(res);
+			if ( res != 0 )
+				printf("close Failed\n");
+		}
+		res = open( "COM2", 1 );
+		if ( res <= 0 )
+		{
+			printf("Open Failed\n");
+		}
+		else
+		{
+			serial_read(res, vb,  1);
+			res = close(res);
+			if ( res != 0 )
+				printf("close Failed\n");
+		}
+		res = open( "COM3", 1 );
+		if ( res <= 0 )
+		{
+			printf("Open Failed\n");
+		}
+		else
+		{
+			serial_read(res, vb,  1);
+			res = close(res);
+			if ( res != 0 )
+				printf("close Failed\n");
+		}
+		res = open( "COM4", 1 );
+		if ( res <= 0 )
+		{
+			printf("Open Failed\n");
+		}
+		else
+		{
+			serial_read(res, vb,  1);
+			res = close(res);
+			if ( res != 0 )
+				printf("close Failed\n");
+		}
+		printf(".");
+	}
+//#ifdef asdf
+#endif 
+	for(;;)
+	{
+
+		seed = (int) (4.0*rand()/RAND_MAX + 1.0);
+		foo  = (int) (2*rand()/RAND_MAX + 1.0);
+		res = -1;
+
+		if( foo == 1 )
+		{
+			if ( fd[ seed - 1] == 0 )
+			{
+				sprintf(file, "COM%i",
+					seed );
+				res = open( file, 1 ); 
+				if(res > 0 )
+				{
+					fd[ seed - 1] = res;
+				}
+				res = -1;
+				//serial_read(res, vb,  1);
+				printflag = 1;
+			}
+		}
+		else
+		{
+			if ( fd[ seed - 1] != 0 )
+			{
+				res = close ( fd[ seed - 1 ] );
+				if (res != -1)
+					fd[ seed - 1 ] = 0;
+				res = -1;
+				printflag = 1;
+			}
+		}
+		if ( printflag )
+		{
+			printf("\n%5i %5i %5i %5i",fd[0],fd[1],fd[2],fd[3]);
+			printflag = 0;
+		}
+		//usleep( 10000);
+	}
+//#endif 
 }
 #endif
