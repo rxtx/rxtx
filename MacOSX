@@ -46,9 +46,8 @@ project's directory
 
 INSTALLATION:
 	MANUALLY:
-		copy RXTXcomm.jar -> 
-/System/Library/Frameworks/JavaVM.framework/Home/lib/ext folder
-		copy libSerial.jnilib -> /usr/lib/java
+		copy RXTXcomm.jar -> /Library/Java/Extensions
+		copy libSerial.jnilib -> /Library/Java/Extensions
 		use sudo command if it's necessary
 	
 	PackageMaker package:
