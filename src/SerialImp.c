@@ -1142,6 +1142,7 @@ JNIEXPORT void JNICALL RXTXPort(nativeDrain)( JNIEnv *env,
 	if( eis && eis->writing )
 	{
 		eis->writing=JNI_FALSE;
+		eis->output_buffer_empty_flag = 0;
 	}
 #endif /* !TIOCSERGETLSR !WIN32 */
 	if( eis->eventflags[SPE_OUTPUT_BUFFER_EMPTY] )
