@@ -153,7 +153,7 @@ CLASSDEST = gnu/io
 ####################### tools
 LIBTOOLC = $(TOP)/libtool --mode=compile $(CC) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) $(VERBOSE_IOEXCEPTIONS) -c
 LIBTOOL_INST = $(TOP)/libtool --mode=install $(INSTALL_PROGRAM)
-LINK = $(TOP)/libtool --mode=link $(CC) $(CFLAGS) $(LDFLAGS) -version-info 1:0:1
+LINK = $(TOP)/libtool --mode=link $(CC) $(CFLAGS) $(LDFLAGS) -release $(VERSION) 
 ####################### dirs
 SPATH = $(srcdir)/src
 DEST = $(target_alias)
