@@ -8,6 +8,9 @@ you downloaded.
 		Tico Ballagas <ballagas@cs.rwth-aachen.de>
 		J2SE java.util.loggin and property file to match
 		Stephane Cachat <stephane@cachat.org>
+		termios stack overflow fix for Linux caused by including
+		termbits.h
+		Bill Holmes <weh@super.org>
 2.1-7pre17 Oct 17, 2003
 		merged with 2.0 and took small changes from cvs.
 2.1-7pre16 Mar 27, 2003
