@@ -74,6 +74,7 @@ struct tpid_info_struct
 
 	int length;
 	int done;
+	int inuse;
 	char *buff;
 };
 
