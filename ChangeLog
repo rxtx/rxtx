@@ -1,4 +1,4 @@
-This is ChangeLog Wed Sep 25 10:39:10 MDT 2002
+This is ChangeLog Tue Oct 15 20:33:12 MDT 2002
 
 rxtx-2.1 and rxtx-2.0 changes are kept in the same file.  skip to the version
 you downloaded.
@@ -13,6 +13,8 @@ you downloaded.
 		      All QA tests passed.
 		      Debian lock file fix
 		      "Villa Valerio" <valerio.villa@siemens.com>
+		      HP-UX port enumeration fixes.
+		      Sheikh, Awaus <awais.sheikh@hp.com>
 2.1-5 Aug 15, 2002    AM_MAINTAINER_MODE for auto* fixes
 2.1-[2-4] Aug 13, 2002 A series of minor bug fixes compile fixes
 		      Custom speed fixes
