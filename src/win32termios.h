@@ -30,7 +30,7 @@ typedef unsigned int    speed_t;
 typedef unsigned int    tcflag_t;
 
 /* garbage to get compiling */
-#define SSIZE_MAX 0
+//#define SSIZE_MAX 0
 /*#define SIG_IGN 0*/
 #define SIGIO 0
 
@@ -94,7 +94,7 @@ int serial_select(int, struct fd_set *, struct fd_set *, struct fd_set *, struct
 #define write serial_write
 
 void usleep(unsigned long usec);
-int fcntl(int fd, int command, int arg);
+int fcntl(int fd, int command, ...);
 const char *get_dos_port(const char *);
 void set_errno(int);
 char *sterror(int);
