@@ -1384,7 +1384,7 @@ JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 	while( !interrupted ) {
 		FD_SET( fd, &rfds );
 		tv_sleep.tv_sec = 0;
-		tv_sleep.tv_usec = 100000;
+		tv_sleep.tv_usec = 10000;
 		do {
 			ret=select( fd + 1, &rfds, NULL, NULL, &tv_sleep );
 		}  while (ret < 0 && errno==EINTR);
