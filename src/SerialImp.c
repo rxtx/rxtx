@@ -2402,7 +2402,9 @@ finalize_event_info_struct
 void finalize_event_info_struct( struct event_info_struct *eis )
 {
 	report("finalize_thread_write: mutex_lock closing\n");
+#if !defined(TIOCSERGETLSR) && !defined(WIN32)
 	pthread_mutex_lock( eis->tpid->mutex_closing );
+#endif /* !TIOCSERGETLSR && !WIN32 */
 	if( eis->jclazz)
 	{
 		(*eis->env)->DeleteLocalRef( eis->env, eis->jclazz );
@@ -2420,7 +2422,9 @@ void finalize_event_info_struct( struct event_info_struct *eis )
 	else if( eis->prev )
 		eis->prev->next = NULL;
 	else master_index = NULL;
+#if !defined(TIOCSERGETLSR) && !defined(WIN32)
 	pthread_mutex_unlock( eis->tpid->mutex_closing );
+#endif /* !TIOCSERGETLSR && !WIN32 */
 }
 
 /*----------------------------------------------------------
