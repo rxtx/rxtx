@@ -644,9 +644,11 @@ final class RXTXPort extends SerialPort
 		if( SPEventListener != null )
 			throw new TooManyListenersException();
 		SPEventListener = lsnr;
+		if (debug)
+			System.out.println("RXTXPort:Interrupt=true");
+		monThreadisInterrupted=false;
 		monThread = new MonitorThread();
 		monThread.setDaemon(true);
-		monThreadisInterrupted=false;
 		monThread.start();
 	}
 	/**
@@ -659,6 +661,8 @@ final class RXTXPort extends SerialPort
 			System.out.println("RXTXPort:removeEventListener()");
 		if( monThread != null && monThread.isAlive() )
 		{
+			if (debug)
+				System.out.println("RXTXPort:Interrupt=true");
 			monThreadisInterrupted=true;
 			try {
 				monThread.join(1000);
@@ -668,7 +672,7 @@ final class RXTXPort extends SerialPort
 			}
 		}
 		monThread = null;
-		// SPEventListener = null;
+		SPEventListener = null;
 		Runtime.getRuntime().gc();
 	}
 
@@ -1003,9 +1007,9 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 		{
 			if (debug)
 				System.out.println("RXTXPort:MontitorThread:run()"); 
-			while( monThreadisInterrupted )
+			if( monThreadisInterrupted )
 			{
-				System.out.println("eventLoop is interupted?");
+				System.out.println("eventLoop is interrupted?");
 			}
 			eventLoop();
 			if (debug)
