@@ -3150,8 +3150,10 @@ void report_serial_events( struct event_info_struct *eis )
 		if( check_line_status_register( eis ) )
 			return;
 
+#ifndef WIN32 /* something is wrong here */
 	if ( eis && eis->has_tiocgicount )
 		check_cgi_count( eis );
+#endif /* WIN32 */
 
 	check_tiocmget_changes( eis );
 
