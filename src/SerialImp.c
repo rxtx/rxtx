@@ -1881,7 +1881,7 @@ int uucp_lock( const char *filename )
 		report("could not find lock directory.\n");
 		return 1;
 	}
-        sprintf( lockfilename, "%/LK.%03d.%03d.%03d",
+        sprintf( lockfilename, "%s/LK.%03d.%03d.%03d",
 		LOCKDIR,
 		(int) major( buf.st_dev ),
 	 	(int) major( buf.st_rdev ),
