@@ -1181,8 +1181,8 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(testRead)(JNIEnv *env,
 		}
 	}
 END:
-	fhs_unlock(name);
 	(*env)->ReleaseStringUTFChars(env, tty_name, name);
+	fhs_unlock(name);
 	close(fd);
 	return ret;
 }
