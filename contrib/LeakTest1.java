@@ -7,7 +7,7 @@
 		  when called multiple times.
 */
 
-import javax.comm.*;
+import gnu.io.*;
 
 public class LeakTest1
 {
