@@ -99,11 +99,11 @@
 #endif /* HAVE_GRP_H */
 
 extern int errno;
-#ifdef TRENT_IS_HERE
 #undef TIOCSERGETLSR
 #define SIGNALS
-#define DEBUG
+#ifdef TRENT_IS_HERE
 /*
+#define DEBUG
 #define DEBUG_MW
 #define DONT_USE_OUTPUT_BUFFER_EMPTY_CODE
 notes:
@@ -1835,10 +1835,6 @@ JNIEXPORT jint JNICALL RXTXPort(nativeavailable)( JNIEnv *env,
 
 	printf("=====================native available==============\n");
 	ENTER( "RXTXPort:nativeavailable" );
-	result = ioctl(fd, FIORDCHK, 0);
-	sprintf(message, "    nativeavailable: FIORDCHK result %d, errno %d\n", result , result == -1 ? errno : 0);
-	report( message );
-	return( (jint)result );
 	if( ioctl( fd, FIONREAD, &result ) )
 	{
 #if defined(__unixware__)
