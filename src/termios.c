@@ -90,10 +90,10 @@ void MexPrintf( char *string )
 void termios_setflags( int fd, int termios_flags[] )
 {
 	struct termios_list *index = find_port( fd );
-	int i;
+	int i result;
 	int windows_flags[11] = { 0, EV_RXCHAR, EV_TXEMPTY, EV_CTS, EV_DSR,
-					EV_RING, EV_RLSD, EV_ERR,
-					//EV_RING|0x2000, EV_RLSD, EV_ERR,
+					//EV_RING, EV_RLSD, EV_ERR,
+					EV_RING|0x2000, EV_RLSD, EV_ERR,
 					EV_ERR, EV_ERR, EV_BREAK
 				};
 					//EV_RING|0x2000, EV_RLSD, EV_ERR,
@@ -103,7 +103,25 @@ void termios_setflags( int fd, int termios_flags[] )
 	for(i=0;i<11;i++)
 		if( termios_flags[i] )
 			index->event_flag |= windows_flags[i];
-	SetCommMask( index->hComm, index->event_flag );
+	result = SetCommMask( index->hComm, index->event_flag );
+	/*
+	   This is rank.  0x2000 was used to detect the trailing edge of ring.
+	   The leading edge is detedted by EV_RING.
+
+	   The trailing edge is reliable.  The leading edge is not.
+	   Softie no longer allows the trailing edge to be detected in NTsp2
+	   and beyond.
+
+	   So... Try the reliable option above and if it fails, use the less
+	   reliable means.
+
+	   The screams for a giveio solution that bypasses the kernel.
+	*/
+	if( event_flag & 0x2000 && result == 0 )
+	{
+		event_flag &= ~0x2000
+		SetCommMask( index->hComm, index->event_flag );
+	}
 }
 
 /*----------------------------------------------------------
