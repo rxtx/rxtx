@@ -27,7 +27,6 @@ package gnu.io;
 
 import java.util.*;
 import java.io.*;
-import gnu.io.*;
 import java.util.StringTokenizer;
 
 /**
