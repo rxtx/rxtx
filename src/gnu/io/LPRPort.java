@@ -60,7 +60,7 @@ final class LPRPort extends ParallelPort
 	    or LPT_MODE_ECP */
 	private int lprmode=LPT_MODE_ANY;
 	public int getMode() { return lprmode; }
-	public int setMode(int mode) 
+	public int setMode(int mode) throws UnsupportedCommOperationException
 	{
 		try {
 			setLPRMode(mode);

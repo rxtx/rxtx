@@ -35,7 +35,8 @@ public  abstract class ParallelPort extends CommPort
 	public static final int  LPT_MODE_NIBBLE=5;
 
 	public abstract int getMode();
-	public abstract int setMode(int mode);
+	public abstract int setMode(int mode)
+		throws UnsupportedCommOperationException;
 	public abstract void restart();
 	public abstract void suspend();
 	public abstract boolean isPaperOut();
