@@ -13,46 +13,29 @@ author may not be used to endorse or promote products derived from
 this software without specific prior written permission. This work
 is provided "as is" and without any express or implied warranties.
 */
-
-
-#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <ctype.h>
-#include <unistd.h>
 #include <dirent.h>
 #include <pwd.h>
 #include <signal.h>
-#include <limits.h>
-#include <sys/types.h>
 #include <sys/stat.h>
-#include <linux/kdev_t.h>
 #include <linux/major.h>
+#include <unistd.h>
+#include <sys/types.h>
+
 #define COMM_LEN 16
 #define PROC_BASE  "/proc"
 #define UID_UNKNOWN -1
 #define NAME_FIELD 20 /* space reserved for file name */
-
-#define MAX_LINE 256 /* longest line we may ever find in /proc */
-
-
-#ifndef LOOP_MAJOR /* don't count on the headers too much ... */
-#define LOOP_MAJOR 7
-#endif
-
-
 #define REF_FILE   1	/* an open file */
 #define REF_ROOT   2	/* current root */
 #define REF_CWD    4	/* current directory */
 #define REF_EXE    8	/* executable */
 #define REF_MMAP  16	/* mmap'ed file or library */
-
-#define FLAG_KILL  1	/* kill process */
 #define FLAG_UID   2	/* show uid */
 #define FLAG_VERB  4	/* show verbose output */
 #define FLAG_DEV   8	/* show all processes using this device */
-#define FLAG_ASK  16	/* ask before killing a process */
-
+void parse_args(char *);
 
 typedef struct _unix_cache {
     dev_t fs_dev;
@@ -63,7 +46,6 @@ typedef struct _unix_cache {
 
 typedef struct {
     const char *name;
-    int once;
 } SPACE_DSC;
 
 typedef enum { it_proc,it_mount,it_loop,it_swap } ITEM_TYPE;
@@ -93,17 +75,10 @@ typedef struct file_dsc {
     struct file_dsc *named,*next;
 } FILE_DSC;
 
-static SPACE_DSC name_spaces[] = {
-    { "file",  0 }, /* must be first */
-    { "tcp",  0 },
-    { "udp",  0 },
-    { NULL,   0 }
-};
-
-
+static SPACE_DSC name_spaces[] = { };
 static FILE_DSC *files = NULL;
 static FILE_DSC *last_named = NULL;
-static UNIX_CACHE *unix_cache = NULL;
+//static UNIX_CACHE *unix_cache = NULL;
 static int all = 0,found_item = 0;
 
 static void add_file(const char *path,unsigned long device,unsigned long inode, pid_t pid,int ref)
@@ -142,25 +117,20 @@ static void add_file(const char *path,unsigned long device,unsigned long inode, 
 	}
     }
 }
-static void check_link(const char *path,pid_t pid,int type)
-{
-    struct stat st;
-
-    if (stat(path,&st) >= 0)
-	add_file(path,st.st_dev,st.st_ino,pid,type);
-}
 
 static void check_dir(const char *rel,pid_t pid,int type)
 {
     DIR *dir;
     struct dirent *de;
     char path[PATH_MAX+1];
+    struct stat st;
 
     if (!(dir = opendir(rel))) return;
     while (de = readdir(dir))
 	if (strcmp(de->d_name,".") && strcmp(de->d_name,"..")) {
 	    sprintf(path,"%s/%s",rel,de->d_name);
-	    check_link(path,pid,type);
+            if (stat(path,&st) >= 0)
+               add_file(path,st.st_dev,st.st_ino,pid,type);
 	}
     (void) closedir(dir);
 }
@@ -184,11 +154,6 @@ extern void scan_fd(void)
 	    empty = 0;
 	    sprintf(path,"%s/%d",PROC_BASE,pid);
 	    if (chdir(path) >= 0) {
-		check_link("root",pid,REF_ROOT);
-		check_link("cwd",pid,REF_CWD);
-		check_link("exe",pid,REF_EXE);
-		check_dir("lib",pid,REF_MMAP);
-		check_dir("mmap",pid,REF_MMAP);
 		check_dir("fd",pid,REF_FILE);
 	    }
 	}
@@ -215,7 +180,7 @@ extern void show_user(char tstring[])
     scan_fd();
     if (seteuid(getuid()) < 0) {
             perror("seteuid");
-            return 1;
+            return;
     }
     self = getpid();
 	if (files->name && (files->items || all)) {
@@ -296,14 +261,14 @@ static void enter_item(const char *name,int flags,int sig_number,dev_t dev, ino_
     new->named = last_named;
     if (new->name) last_named = new;
 }
-extern void parse_args(char *argv)
+ void parse_args(char *argv)
 {
     SPACE_DSC *name_space;
-    char path[PATH_MAX+1];
+    //char path[PATH_MAX+1];
     int flags,silent,sig_number,no_files;
     SPACE_DSC *this_name_space;
     struct stat st;
-    char *here;
+    //char *here;
 
     flags = silent = 0;
     sig_number = SIGKILL;
@@ -313,35 +278,14 @@ extern void parse_args(char *argv)
     no_files = 0;
     last_named = NULL;
     this_name_space = name_space;
-    if (name_space != name_spaces || stat(argv,&st) < 0) {
-		here = strchr(argv,'/');
-		if (here && here != argv) {
-		    for (this_name_space = name_spaces; this_name_space->name;
-		      this_name_space++)
-			if (!strcmp(here+1,this_name_space->name)) {
-			    *here = 0;
-			    break;
-			}
-		    if (!this_name_space->name) this_name_space = name_spaces;
-		}
-	    }
     if (this_name_space == name_spaces) {
-		if (stat(argv,&st) < 0) {
-		    perror(argv);
-		    exit(0);
-		}
-		if (flags & FLAG_DEV)
-		    if (S_ISBLK(st.st_mode)) st.st_dev = st.st_rdev;
-		    else if (S_ISDIR(st.st_mode)) {
-			    sprintf(path,"%s/.",argv);
-			    if (stat(argv,&st) < 0) {
-				perror(argv);
-				exit(0);
-			    }
-			}
-		if (!S_ISSOCK(st.st_mode) || (flags & FLAG_DEV))
-		    enter_item(argv,flags,sig_number,st.st_dev,st.st_ino,NULL);
-	    }
+       if (stat(argv,&st) < 0) {
+          perror(argv);
+          exit(0);
+       }
+       if (!S_ISSOCK(st.st_mode) || (flags & FLAG_DEV))
+          enter_item(argv,flags,sig_number,st.st_dev,st.st_ino,NULL);
+    }
 }
 
 
