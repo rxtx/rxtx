@@ -704,7 +704,7 @@ JNIEXPORT void JNICALL LPRPort(eventLoop)( JNIEnv *env,
 	jobject jobj )
 {
 	int fd, ret;
-	unsigned int pflags;
+	unsigned int pflags = 0;
 	fd_set rfds;
 	struct timeval sleep;
 	jboolean interrupted = 0;
