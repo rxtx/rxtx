@@ -499,7 +499,7 @@ Linux)
 ;;
 
 *BSD)
-	LDFLAGS=-lpthread
+	LDFLAGS=-lc_r
 	RXTX_PATH="\$(prefix)/lib"
 	JHOME=$JPATH/"lib"
 	CFLAGS=$CFLAGS" -D_NO_POSIX=1 -D_NO_XOPEN4=1"
