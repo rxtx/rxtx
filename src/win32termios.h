@@ -47,6 +47,22 @@ struct termios
     speed_t c_ospeed;           /* output speed */
   };
 
+/*  for TIOCGSERIAL and TIOCSSERIAL of interest are baud_base and
+ *  custom_divisor
+ */
+struct serial_struct {
+	int custom_divisor;   /* use to set unsupported speeds */
+	int baud_base;        /* use to set unsupported speeds */
+
+/*
+ * 	not used:
+	unsigned short	close_delay, closing_wait, iomem_reg_shift;
+	int type, line, irq, flags, xmit_fifo_size, hub6;
+	unsigned int	port, port_high;
+	char		io_type;
+	unsigned char	*iomem_base;
+*/
+};
 struct serial_icounter_struct {
 	int cts;		/* clear to send count */
 	int dsr;		/* data set ready count */
