@@ -3636,11 +3636,7 @@ int check_lock_status( const char *filename )
 
 	if ( check_group_uucp() )
 	{
-<<<<<<< SerialImp.c
-		report_error( "check_lock_status: No permission to create lock file.  please see: How can I use Lock Files with rxtx? in INSTALL\n" );
-=======
 		report_error( "check_lock_status: No permission to create lock file.\nplease see: How can I use Lock Files with rxtx? in INSTALL\n" );
->>>>>>> 1.46.2.112
 		exit(0);
 	}
 
