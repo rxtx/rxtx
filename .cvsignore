@@ -11,6 +11,7 @@ tx.class
 rx.class
 i486-pc-linux-gnu
 i686-pc-linux-gnu
+i386-mingw32
 gnu
 WIN32
 CROSSCOMPILE
