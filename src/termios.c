@@ -76,20 +76,6 @@ struct termios_list
 };
 struct termios_list *first_tl = NULL;
 
-/*
-#define DEBUG_SELECT
-*/
-#ifdef DEBUG_SELECT
-void MexPrintf( char *string )
-{
-	mexPrintf(string);
-}
-#else
-void MexPrintf( char *string )
-{
-}
-#endif /* DEBUG_SELECT */
-
 /*----------------------------------------------------------
 serial_test
 
@@ -118,17 +104,14 @@ void termios_setflags( int fd, int termios_flags[] )
 	struct termios_list *index = find_port( fd );
 	int i, result;
 	int windows_flags[11] = { 0, EV_RXCHAR, EV_TXEMPTY, EV_CTS, EV_DSR,
-/*
-					EV_RING, EV_RLSD, EV_ERR,
-*/
 					EV_RING|0x2000, EV_RLSD, EV_ERR,
 					EV_ERR, EV_ERR, EV_BREAK
 				};
-/*
-					EV_RING|0x2000, EV_RLSD, EV_ERR,
-					 NT service pack 4+ breaks 0x2000
-*/
-	if( index == NULL ) report_error("index=null termois_setflags\n");
+	if( !index )
+	{
+		LEAVE( "termios_setflags" );
+		return;
+	}
 	index->event_flag = 0;
 	for(i=0;i<11;i++)
 		if( termios_flags[i] )
@@ -157,12 +140,12 @@ void termios_setflags( int fd, int termios_flags[] )
 /*----------------------------------------------------------
 get_fd()
 
-   accept:      
-   perform:     
-   return:      
+   accept:      filename
+   perform:     find the file descriptor associated with the filename
+   return:      fd
    exceptions:  
    win32api:    None
-   comments:    
+   comments:    This is not currently called by anything
 ----------------------------------------------------------*/
 
 int get_fd( char *filename )
@@ -188,12 +171,12 @@ int get_fd( char *filename )
 /*----------------------------------------------------------
 get_filename()
 
-   accept:      
-   perform:     
-   return:      
-   exceptions:  
+   accept:      file descriptor
+   perform:     find the filename associated with the file descriptor
+   return:      the filename associated with the fd
+   exceptions:  None
    win32api:    None
-   comments:    
+   comments:    This is not currently called by anything
 ----------------------------------------------------------*/
 
 char *get_filename( int fd )
@@ -216,12 +199,12 @@ char *get_filename( int fd )
 /*----------------------------------------------------------
 dump_termios_list()
 
-   accept:      
+   accept:      string to print out.
    perform:     
    return:      
    exceptions:  
    win32api:    None
-   comments:    
+   comments:    used only for debugging eg serial_close()
 ----------------------------------------------------------*/
 
 void dump_termios_list( char *foo )
@@ -621,7 +604,6 @@ int serial_close( int fd )
 {
 	struct termios_list *index;
 	/* char message[80]; */
-	MexPrintf("C");
 
 	ENTER( "close" );
 	if( !first_tl || !first_tl->hComm )
@@ -629,18 +611,10 @@ int serial_close( int fd )
 		report( "gotit!" );
 		return( 0 );
 	}
-	if ( fd <= 0 )
-	{
-		report( "close -fd" );
-		return 0;
-	}
 	index = find_port( fd );
 	if ( !index )
 	{
-		report( "close !index" );
-/*
-		fprintf( stderr, "No info known about the port being closed %i\n", fd );
-*/
+		LEAVE( "close" );
 		return -1;
 	}
 
@@ -693,9 +667,6 @@ int serial_close( int fd )
 		*/
 		free( index );
 	}
-/*
-	dump_termios_list( "close" );
-*/
 	LEAVE( "close" );
 	return 0;
 }
@@ -930,7 +901,7 @@ int open_port( struct termios_list *port )
 		report( "Could not create write overlapped\n" );
 		goto fail;
 	}
-	LEAVE("open_port" );
+	LEAVE( "open_port" );
 	return( 0 );
 fail:
 	return( -1 );
@@ -939,10 +910,13 @@ fail:
 /*----------------------------------------------------------
 termios_list()
 
-   accept:      
-   perform:     
-   return:      
-   exceptions:  
+   accept:       fd which is a fake # for the port assigned when the port
+		 is opened
+   perform:      walk through a double linked list to see if the given
+		 fd is in any of the termios_list members.
+   return:       the termios_list if it is found.
+		 NULL if no matches are found.
+   exceptions:   None
    win32api:     None
    comments:    
 ----------------------------------------------------------*/
@@ -950,14 +924,11 @@ termios_list()
 struct termios_list *find_port( int fd )
 {
 
+	char message[80];
 	struct termios_list *index = first_tl;
 
 	ENTER( "find_port" );
-	if( !first_tl )
-	{
-		LEAVE( "find_port" );
-		return NULL;
-	}
+	if ( fd <= 0 || !first_tl ) goto fail;
 
 	while( index->fd )
 	{
@@ -970,6 +941,10 @@ struct termios_list *find_port( int fd )
 			break;
 		index = index->next;
 	}
+fail:
+	sprintf( message, "No info known about the port. %i\n", fd );
+	report( message );
+	set_errno( EBADF );
 	LEAVE( "find_port" );
 	return NULL;
 }
@@ -1229,9 +1204,6 @@ int serial_open( const char *filename, int flags, ... )
 		index->open_flags = 0;
 
 
-/*
-	dump_termios_list( "open filename" );
-*/
 	if( !first_tl->hComm )
 	{
 		sprintf( message, "open():  Invalid Port Reference for %s\n",
@@ -1262,7 +1234,6 @@ int serial_write( int fd, char *Str, int length )
 {
 	unsigned long nBytes;
 	struct termios_list *index;
-	char message[80];
 	COMSTAT Stat;
 	int old_flag;
 
@@ -1273,9 +1244,7 @@ int serial_write( int fd, char *Str, int length )
 	index = find_port( fd );
 	if ( !index )
 	{
-		sprintf( message,
-			"No info known about the port. serial_write %i\n", fd );
-		report( message );
+		LEAVE( "serial_write");
 		return -1;
 	}
 	old_flag = index->event_flag;
@@ -1286,9 +1255,7 @@ int serial_write( int fd, char *Str, int length )
 */
 	if ( !WriteFile( index->hComm, Str, length, &nBytes, &index->wol ) )
 	{
-		/* this causes problems just do it async
 		WaitForSingleObject( index->wol.hEvent,100 );
-		*/
 		if ( GetLastError() != ERROR_IO_PENDING )
 		{
 			ClearErrors( index, &Stat );
@@ -1297,7 +1264,6 @@ int serial_write( int fd, char *Str, int length )
 			length=-1;
 			goto end;
 		}
-#ifdef DEFINE_THIS_FOR_NON_WIN2K_OR_WINXP_MACHINES_ONLY
 		/* This is breaking on Win2K, WinXP for some reason */
 		else while( !GetOverlappedResult( index->hComm, &index->wol,
 					&nBytes, TRUE ) )
@@ -1307,7 +1273,6 @@ int serial_write( int fd, char *Str, int length )
 				ClearErrors( index, &Stat );
 			}
 		}
-#endif /* DEFINE_THIS_FOR_NON_WIN2K_OR_WINXP_MACHINES_ONLY */
 	}
 	else
 	{
@@ -1318,14 +1283,12 @@ int serial_write( int fd, char *Str, int length )
 	}
 end:
 	/* FlushFileBuffers( index->hComm ); */
-	MexPrintf("W");
 	index->event_flag |= EV_TXEMPTY;
 	SetCommMask( index->hComm, index->event_flag );
 	index->event_flag = old_flag;
 	index->tx_happened = 1; 
 	LEAVE( "serial_write" );
-	/* return nBytes;  See GetOverLappedResult above */
-	return(length);
+	return nBytes;
 }
 
 /*----------------------------------------------------------
@@ -1351,6 +1314,7 @@ int serial_read( int fd, void *vb, int size )
 	char message[80];
 	COMSTAT stat;
 	clock_t c;
+	unsigned char *dest = vb;
 	
 
 	start = GetTickCount();
@@ -1361,9 +1325,7 @@ int serial_read( int fd, void *vb, int size )
 	index = find_port( fd );
 	if ( !index )
 	{
-		sprintf( message, "No info known about the port. read %i\n",
-			fd );
-		report( message );
+		LEAVE( "serial_read" );
 		return -1;
 	}
 
@@ -1381,7 +1343,7 @@ int serial_read( int fd, void *vb, int size )
 		/* pull mucho-cpu here? */
 		do {
 #ifdef DEBUG_VERBOSE
-			report("vmin=0\n");
+			report( "vmin=0\n" );
 #endif /* DEBUG_VERBOSE */
 			ret = ClearErrors( index, &stat);
 /*
@@ -1405,7 +1367,7 @@ int serial_read( int fd, void *vb, int size )
 		/* VTIME is in units of 0.1 seconds */
 
 #ifdef DEBUG_VERBOSE
-		report("vmin!=0\n");
+		report( "vmin!=0\n" );
 #endif /* DEBUG_VERBOSE */
 		vmin = index->ttyset->c_cc[VMIN];
 
@@ -1413,25 +1375,21 @@ int serial_read( int fd, void *vb, int size )
 		do {
 			error = ClearErrors( index, &stat);
 			usleep(1000);
-/*
-			mexPrintf("%i/n", CLOCKS_PER_SEC/40);
-*/
 		} while ( c > clock() );
 
 	}
 	
 
 	total = 0;
-	MexPrintf("R");
 	while ( size > 0 )
 	{
 		nBytes = 0;
-		err = ReadFile( index->hComm, vb + total, size, &nBytes, &index->rol ); 
+		err = ReadFile( index->hComm, dest + total, size, &nBytes, &index->rol ); 
 		WaitForSingleObject( index->wol.hEvent, INFINITE );
 #ifdef DEBUG_VERBOSE
 	/* warning Roy Rogers! */
 		sprintf(message, " ========== ReadFile = %i %s\n",
-			( int ) nBytes, (char *) vb + total );
+			( int ) nBytes, (char *) dest + total );
 		report( message );
 #endif /* DEBUG_VERBOSE */
 		size -= nBytes;
@@ -1442,14 +1400,14 @@ int serial_read( int fd, void *vb, int size )
 			switch ( GetLastError() )
 			{
 				case ERROR_BROKEN_PIPE:
-					report("ERROR_BROKEN_PIPE\n");
+					report( "ERROR_BROKEN_PIPE\n ");
 					nBytes = 0;
 					break;
 				case ERROR_MORE_DATA:
 /*
 					usleep(1000);
 */
-					report("ERROR_MORE_DATA\n");
+					report( "ERROR_MORE_DATA\n" );
 					break;
 				case ERROR_IO_PENDING:
 					while( ! GetOverlappedResult(
@@ -1476,7 +1434,7 @@ int serial_read( int fd, void *vb, int size )
 						/* we should use -1 for disabled
 						   timouts */
 						if ( index->ttyset->c_cc[VTIME] && now-start >= (index->ttyset->c_cc[VTIME]*100)) {
-							report("TO ");
+							report( "TO " );
 							/* read timeout */
 							return total;
 						}
@@ -1486,7 +1444,7 @@ int serial_read( int fd, void *vb, int size )
 /*
 					usleep(1000);
 */
-					report("ERROR_IO_PENDING\n");
+					report( "ERROR_IO_PENDING\n" );
 					break;
 				default:
 /*
@@ -1613,7 +1571,7 @@ speed_t cfgetispeed( struct termios *s_termios )
 }
 
 /*----------------------------------------------------------
-TermiosToDCB()
+serial_struct_to_DCB()
 
    accept:      
    perform:     
@@ -1622,19 +1580,77 @@ TermiosToDCB()
    win32api:     None
    comments:    
 ----------------------------------------------------------*/
-
-int TermiosToDCB( struct termios *s_termios, DCB *dcb )
+int serial_struct_to_DCB( struct serial_struct *sstruct, DCB *dcb )
 {
-	ENTER( "TermiosToDCB" );
-	s_termios->c_ispeed = s_termios->c_cflag & CBAUD;
-	s_termios->c_ospeed = s_termios->c_ispeed;
+	/* 5 Baud rate fix
+	sstruct.baud_base
+	sstruct.custom_divisor = ( sstruct.baud_base/cspeed );
+	*/
+	return(0);
+}
+
+/*----------------------------------------------------------
+termios_to_DCB()
+
+   accept:      
+   perform:     
+   return:      
+   exceptions:  
+   win32api:     None
+   comments:    
+----------------------------------------------------------*/
+int termios_to_DCB( struct termios *s_termios, DCB *dcb )
+{
+	ENTER( "termios_to_DCB" );
+	s_termios->c_ispeed = s_termios->c_ospeed = s_termios->c_cflag & CBAUD;
 	dcb->BaudRate        = B_to_CBR( s_termios->c_ispeed );
-	LEAVE( "TermiosToDCB" );
+	dcb->ByteSize = termios_to_bytesize( s_termios->c_cflag );
+
+	if ( s_termios->c_cflag & PARENB )
+	{
+		if ( s_termios->c_cflag & PARODD 
+			&& s_termios->c_cflag & CMSPAR )
+		{
+			dcb->Parity = MARKPARITY;
+		}
+		else if ( s_termios->c_cflag & PARODD )
+		{
+			dcb->Parity = ODDPARITY;
+		}
+		else if ( s_termios->c_cflag & CMSPAR )
+		{
+			dcb->Parity = SPACEPARITY;
+		}
+		else
+		{
+			dcb->Parity = EVENPARITY;
+		}
+	}
+	else
+	{
+		dcb->Parity = NOPARITY;
+	}	
+
+	if ( s_termios->c_cflag & CSTOPB ) dcb->StopBits = TWOSTOPBITS;
+		else dcb->StopBits = ONESTOPBIT;
+
+	if ( s_termios->c_cflag & HARDWARE_FLOW_CONTROL )
+	{
+		dcb->fRtsControl = RTS_CONTROL_HANDSHAKE;
+		dcb->fOutxCtsFlow = TRUE;
+	}
+	else
+	{
+		dcb->fRtsControl = RTS_CONTROL_DISABLE;
+		dcb->fOutxCtsFlow = FALSE;
+	}
+
+	LEAVE( "termios_to_DCB" );
 	return 0;
 }
 
 /*----------------------------------------------------------
-DCBToTermios()
+DCB_to_serial_struct()
 
    accept:      
    perform:     
@@ -1643,14 +1659,27 @@ DCBToTermios()
    win32api:     None
    comments:    
 ----------------------------------------------------------*/
-
-void DCBToTermios( DCB *dcb, struct termios *s_termios )
+int DCB_to_serial_struct( DCB *dcb, struct serial_struct *sstruct  )
 {
-	ENTER( "DCBToTermios" );
+	return( 0 );
+}
+/*----------------------------------------------------------
+DCB_to_termios()
+
+   accept:      
+   perform:     
+   return:      
+   exceptions:  
+   win32api:     None
+   comments:    
+----------------------------------------------------------*/
+void DCB_to_termios( DCB *dcb, struct termios *s_termios )
+{
+	ENTER( "DCB_to_termios" );
 	s_termios->c_ispeed = CBR_to_B( dcb->BaudRate );
 	s_termios->c_ospeed = s_termios->c_ispeed;
 	s_termios->c_cflag |= s_termios->c_ispeed & CBAUD;
-	LEAVE( "DCBToTermios" );
+	LEAVE( "DCB_to_termios" );
 }
 
 /*----------------------------------------------------------
@@ -1799,10 +1828,7 @@ int tcgetattr( int fd, struct termios *s_termios )
 	index = find_port( fd );
 	if ( !index )
 	{
-		sprintf( message,
-			"No info known about the port. tcgetattr %i\n",
-			fd );
-		report( message );
+		LEAVE( "tcgetattr" );
 		return -1;
 	}
 	if ( !GetCommState( index->hComm, &myDCB ) )
@@ -1968,7 +1994,7 @@ int tcgetattr( int fd, struct termios *s_termios )
 
 	/***** line discipline ( c_line ) ( == c_cc[33] ) *****/
 
-	DCBToTermios( &myDCB, s_termios ); /* baudrate */
+	DCB_to_termios( &myDCB, s_termios ); /* baudrate */
 	LEAVE( "tcgetattr" );
 	return 0;
 }
@@ -2013,7 +2039,6 @@ int tcsetattr( int fd, int when, struct termios *s_termios )
 	DCB dcb;
 	COMMTIMEOUTS timeouts;
 	struct termios_list *index;
-	char message[80];
 
 	ENTER( "tcsetattr" );
 	if ( fd <= 0 )
@@ -2021,8 +2046,7 @@ int tcsetattr( int fd, int when, struct termios *s_termios )
 	index = find_port( fd );
 	if ( !index )
 	{
-		sprintf( message, "No info known about the port. tcsetattr %i\n", fd );
-		report( message );
+		LEAVE( "tcsetattr" );
 		return -1;
 	}
 	fflush( stdout );
@@ -2045,58 +2069,13 @@ int tcsetattr( int fd, int when, struct termios *s_termios )
 		return -1;
 	}
 
-	/* FIXME: CLOCAL: DONT send SIGHUP on modem disconnect */
-	/* FIXME: HUPCL: generate modem disconnect when all has closed or
-			exited */
-	/* FIXME: CREAD: without this, data cannot be read */
-	/* FIXME: MDMBUF: carrier based flow control of output */
-
 	/*** control flags, c_cflag **/
 	if ( !( s_termios->c_cflag & CIGNORE ) )
 	{
 		dcb.fParity=1;
 		/* CIGNORE: ignore control modes and baudrate */
 		/* baudrate */
-		if ( TermiosToDCB( s_termios, &dcb ) < 0 )
-			return -1;
-		dcb.ByteSize = termios_to_bytesize( s_termios->c_cflag );
-
-		if ( s_termios->c_cflag & PARENB )
-		{
-			if ( s_termios->c_cflag & PARODD 
-				&& s_termios->c_cflag & CMSPAR )
-			{
-				dcb.Parity = MARKPARITY;
-			}
-			else if ( s_termios->c_cflag & PARODD )
-			{
-				dcb.Parity = ODDPARITY;
-			}
-			else if ( s_termios->c_cflag & CMSPAR )
-			{
-				dcb.Parity = SPACEPARITY;
-			}
-			else
-			{
-				dcb.Parity = EVENPARITY;
-			}
-		} else
-		{
-			dcb.Parity = NOPARITY;
-		}	
-
-
-		if ( s_termios->c_cflag & CSTOPB ) dcb.StopBits = TWOSTOPBITS;
-			else dcb.StopBits = ONESTOPBIT;
-
-
-		if ( s_termios->c_cflag & HARDWARE_FLOW_CONTROL ) {
-			dcb.fRtsControl = RTS_CONTROL_HANDSHAKE;
-			dcb.fOutxCtsFlow = TRUE;
-		} else {
-			dcb.fRtsControl = RTS_CONTROL_DISABLE;
-			dcb.fOutxCtsFlow = FALSE;
-                }
+		if ( termios_to_DCB( s_termios, &dcb ) < 0 ) return -1;
 	}
 	else
 	{
@@ -2109,7 +2088,6 @@ int tcsetattr( int fd, int when, struct termios *s_termios )
 		dcb.fParity = TRUE;
 	} else
 	{
-		mexPrintf("Trashing fParity!!\n");
 		dcb.fParity = FALSE;
 	}
 */
@@ -2270,11 +2248,6 @@ int tcdrain ( int fd )
 
 	if ( !index )
 	{
-		sprintf( message, "No info known about the port. ioctl %i\n",
-			fd );
-		report( message );
-		set_errno( EBADF );
-		
 		LEAVE( "tcdrain" );
 		return -1;
 	}
@@ -2339,10 +2312,14 @@ tcflush()
 int tcflush( int fd, int queue_selector )
 {
 	struct termios_list *index;
-	char message[80];
 	int old_flag;
 
 	index = find_port( fd );
+	if( !index)
+	{
+		LEAVE( "tclflush" );
+		return(-1);
+	}
 
 	old_flag = index->event_flag;
 /*
@@ -2350,14 +2327,10 @@ int tcflush( int fd, int queue_selector )
 	SetCommMask( index->hComm, index->event_flag );
 	index->tx_happened = 1; 
 */
-	ENTER("tcflush");
+	ENTER( "tcflush" );
 	if ( !index )
 	{
-		set_errno( EBADF );
-		sprintf( message, "No info known about the port. ioctl %i\n",
-			fd );
-		report( message );
-		LEAVE("tcflush");
+		LEAVE( "tcflush" );
 		return -1;
 	}
 
@@ -2391,14 +2364,14 @@ int tcflush( int fd, int queue_selector )
 			set_errno( ENOTSUP );
 */
 			report( "tcflush: Unknown queue_selector\n" );
-			LEAVE("tcflush");
+			LEAVE( "tcflush" );
 			return -1;
 	}
 	index->event_flag |= EV_TXEMPTY;
 	SetCommMask( index->hComm, index->event_flag );
 	index->event_flag = old_flag;
 	index->tx_happened = 1; 
-	LEAVE("tcflush");
+	LEAVE( "tcflush" );
 	return( 0 );
 
 /* FIXME  Need to figure out what the various errors are in
@@ -2407,7 +2380,7 @@ int tcflush( int fd, int queue_selector )
 */
 
 fail:
-	LEAVE("tcflush");
+	LEAVE( "tcflush" );
 	set_errno( EAGAIN );
 	YACK();
 	return -1;
@@ -2488,20 +2461,21 @@ int ioctl( int fd, int request, ... )
 {
 	unsigned long dwStatus = 0;
 	va_list ap;
-	int *arg, ret, result;
+	int *arg, ret, result, old_flag;
+	char message[80];
+
 #ifdef TIOCGSERIAL
-	unsigned long ErrCode;
+	DCB	*dcb;
 	struct serial_struct *sstruct;
 #endif /* TIOCGSERIAL */
+	COMSTAT Stat;
+
+	struct termios_list *index;
 	struct async_struct *astruct;
 	struct serial_multiport_struct *mstruct;
-	COMSTAT Stat;
 #ifdef TIOCGICOUNT
 	struct serial_icounter_struct *sistruct;
 #endif  /* TIOCGICOUNT */
-	struct termios_list *index;
-	char message[80];
-	int old_flag;
 
 	ENTER( "ioctl" );
 	if ( fd <= 0 )
@@ -2509,9 +2483,7 @@ int ioctl( int fd, int request, ... )
 	index = find_port( fd );
 	if ( !index )
 	{
-		sprintf( message,
-			"No info known about the port. ioctl %i\n", fd );
-		report( message );
+		LEAVE( "ioctl" );
 		return -1;
 	}
 
@@ -2540,7 +2512,7 @@ int ioctl( int fd, int request, ... )
 			arg = va_arg( ap, int * );
 		/* DORITOS */
 			if ( !GetCommModemStatus( index->hComm, &dwStatus ) )
-				report_error("GetCommMOdemStatus failed!\n");
+				report_error( "GetCommMOdemStatus failed!\n" );
 			if ( dwStatus & MS_RLSD_ON ) *arg |= TIOCM_CAR;
 			else *arg &= ~TIOCM_CAR;
 			if ( dwStatus & MS_RING_ON ) *arg |= TIOCM_RNG;
@@ -2580,18 +2552,9 @@ int ioctl( int fd, int request, ... )
 			return -ENOIOCTLCMD;
 		case TIOCMSET:
 			arg = va_arg( ap, int * );
-/*
-			sprintf( message, "DTR = %i, RTS=%i was DTR = %i RTS = %i\n",
-				*arg & TIOCM_DTR,
-				*arg & TIOCM_RTS,
-				index->MSR &TIOCM_DTR,
-				index->MSR &TIOCM_RTS
-			);
-			mexPrintf( message );
-*/
 			if (( *arg & TIOCM_DTR) == (index->MSR & TIOCM_DTR) )
 			{
-				report("DTR is unchanged\n");
+				report( "DTR is unchanged\n" );
 			}
 			sprintf(message, "DTR %i %i\n", *arg&TIOCM_DTR, index->MSR & TIOCM_DTR );
 			report( message );
@@ -2606,12 +2569,12 @@ int ioctl( int fd, int request, ... )
 			if ( EscapeCommFunction( index->hComm, 
 				( *arg & TIOCM_DTR ) ? SETDTR :
 				CLRDTR ) )
-				report("EscapeCommFunction: True\n");
+				report( "EscapeCommFunction: True\n" );
 			else
-				report("EscapeCommFunction: False\n");
+				report( "EscapeCommFunction: False\n" );
 			if ( (*arg & TIOCM_RTS) == ( index->MSR & TIOCM_RTS) )
 			{
-				report("RTS is unchanged\n");
+				report( "RTS is unchanged\n" );
 			}
 			sprintf( message, "RTS %i %i\n", *arg&TIOCM_RTS, index->MSR & TIOCM_RTS );
 			report( message );
@@ -2627,101 +2590,56 @@ int ioctl( int fd, int request, ... )
 			}
 			if( EscapeCommFunction( index->hComm,
 				( *arg & TIOCM_RTS ) ? SETRTS : CLRRTS ) )
-				report("EscapeCommFunction: True\n");
+				report( "EscapeCommFunction: True\n" );
 			else
-				report("EscapeCommFunction: False\n");
-/*
-			if ( *arg & TIOCM_DTR )
-			{
-				index->MSR |= TIOCM_DTR;
-			}
-			else
-			{
-				index->MSR &= ~TIOCM_DTR;
-			}
-			if ( *arg & TIOCM_RTS )
-			{
-				index->MSR |= TIOCM_RTS;
-				result &= SETRTS;
-			}
-			else
-			{
-				index->MSR &= ~TIOCM_RTS;
-				result &= CLRRTS;
-			}
-			if( EscapeCommFunction( index->hComm,
-				( *arg & TIOCM_RTS ) ? SETRTS : CLRRTS ) )
-				report("EscapeCommFunction: True\n");
-			else
-				report("EscapeCommFunction: False\n");
-			if ( EscapeCommFunction( index->hComm, 
-				( *arg & TIOCM_DTR ) ? SETDTR : CLRDTR ) )
-				report("EscapeCommFunction: True\n");
-			else
-				report("EscapeCommFunction: False\n");
-*/
-/*
-			if ( ! (*arg & TIOCM_DTR) != (index->MSR & TIOCM_DTR))
-			{
-				report("Changing DTR\n");
-				EscapeCommFunction( index->hComm,
-				( *arg & TIOCM_DTR ) ? SETDTR : CLRDTR );
-				if ( *arg & TIOCM_DTR )
-				{
-					index->MSR |= TIOCM_DTR;
-				}
-				else
-				{
-					index->MSR &= ~TIOCM_DTR;
-				}
-			}
-			else
-				report("not changing DTR\n");
-			if ( ! (*arg & TIOCM_RTS) != (index->MSR & TIOCM_RTS))
-			{
-				report("Changing RTS\n");
-				EscapeCommFunction( index->hComm,
-				( *arg & TIOCM_RTS ) ? SETRTS : CLRRTS );
-				if ( *arg & TIOCM_RTS )
-				{
-					index->MSR |= TIOCM_RTS;
-				}
-				else
-				{
-					index->MSR &= ~TIOCM_RTS;
-				}
-			}
-			else
-				report("not changing RTS\n");
-*/
+				report( "EscapeCommFunction: False\n" );
 			break;
-		/* get the serial struct info from the underlying API
-		 * TIOCGSERIAL is not used on win32.  Its commented out
-		 * in win32termios.h
-		 */
+
 #ifdef TIOCGSERIAL
 		case TIOCGSERIAL:
-			sstruct = va_arg( ap, struct serial_struct * );
-			sstruct = index->sstruct;
 			report( "TIOCGSERIAL\n" );
-			va_end( ap );
-			return 0;
+
+			dcb = malloc( sizeof( DCB ) );
+			if( !dcb ) return -1;
+			memset( dcb, 0, sizeof( DCB ) );
+			GetCommState( index->hComm, dcb );
+
+			sstruct = va_arg( ap, struct serial_struct * );
+			if ( DCB_to_serial_struct( dcb, sstruct ) < 0 )
+			{
+				va_end( ap );
+				return -1;
+			}
+			index->sstruct = sstruct;
+
+			report( "TIOCGSERIAL\n" );
+			free(dcb);
+			break;
+
 #endif /* TIOCGSERIAL */
-		/* set the serial struct info from the underlying API
-		 * this is not implemented.  TIOCSSERIAL is commented out
-		 * in win32termios.h
-	         */
 #ifdef TIOCSSERIAL
 		case TIOCSSERIAL:
 			report( "TIOCSSERIAL\n" );
-			index->sstruct = sstruct;
-			arg = va_arg( ap, int * );
-			va_end( ap );
-			return 0;
+
+			dcb = malloc( sizeof( DCB ) );
+			if( !dcb ) return -1;
+			memset( dcb, 0, sizeof( DCB ) );
+			GetCommState( index->hComm, dcb );
+
+			index->sstruct = va_arg( ap, struct serial_struct * );
+			if ( serial_struct_to_DCB( index->sstruct, dcb ) < 0 )
+			{
+				va_end( ap );
+				return -1;
+			}
+
+			report( "TIOCSSERIAL\n" );
+			free(dcb);
+			break;
+
 #endif /* TIOCSSERIAL */
 		case TIOCSERCONFIG:
 		case TIOCSERGETLSR:
-			MexPrintf("t");
 			arg = va_arg( ap, int * );
 			/*
 			do {
@@ -2732,7 +2650,6 @@ int ioctl( int fd, int request, ... )
 			if ( ret == 0 )
 			{
 				/* FIXME ? */
-				MexPrintf("X");
 				set_errno( EBADFD );
 				YACK();
 				report( "TIOCSERGETLSR EBADFD" );
@@ -2742,9 +2659,6 @@ int ioctl( int fd, int request, ... )
 			if ( (int ) Stat.cbOutQue == 0 )
 			{
 				/* output is empty */
-/*
-					&& !index->interrupt ) 
-*/
 				if( index->tx_happened == 1 )
 				{
 					old_flag = index->event_flag;
@@ -2752,18 +2666,12 @@ int ioctl( int fd, int request, ... )
 					SetCommMask( index->hComm,
 						index->event_flag );
 					index->event_flag = old_flag;
-					MexPrintf("+");
 					*arg = 1;
 					index->tx_happened = 0;
 					report( "ioctl: ouput empty\n" );
 				}
 				else
 				{
-					if( index->interrupt )
-						MexPrintf("}");
-					if( index->tx_happened )
-						MexPrintf("]");
-					MexPrintf("-");
 					*arg = 0;
 				}
 				ret = 0;
@@ -2771,14 +2679,9 @@ int ioctl( int fd, int request, ... )
 			else
 			{
 				/* still data out there */
-				MexPrintf("U");
 				*arg = 0;
 				ret = 0;
-/*
-				*arg = TIOCSER_TEMP;
-*/
 			}
-			MexPrintf("T");
 			va_end( ap );
 			return(0);
 			break;
@@ -2809,7 +2712,7 @@ int ioctl( int fd, int request, ... )
 			if ( ret == 0 )
 			{
 				/* FIXME ? */
-				report("TIOCGICOUNT failed\n");
+				report( "TIOCGICOUNT failed\n" );
 				set_errno( EBADFD );
 				va_end( ap );
 				return -1;
@@ -2818,13 +2721,13 @@ int ioctl( int fd, int request, ... )
 			{
 				sistruct->frame = index->sis->frame;
 /*
-				printf("---------------frame = %i\n", sistruct->frame++);
+				printf( "---------------frame = %i\n", sistruct->frame++ );
 */
 			}
 			if( sistruct->overrun != index->sis->overrun )
 			{
 /*
-				printf("---------------overrun\n");
+				printf( "---------------overrun\n" );
 */
 				sistruct->overrun = index->sis->overrun;
 				ErrCode &= ~CE_OVERRUN;
@@ -2832,14 +2735,14 @@ int ioctl( int fd, int request, ... )
 			if( sistruct->parity != index->sis->parity )
 			{
 /*
-				printf("---------------parity\n");
+				printf( "---------------parity\n" );
 */
 				sistruct->parity = index->sis->parity;
 			}
 			if( sistruct->brk != index->sis->brk )
 			{
 /*
-				printf("---------------brk\n");
+				printf( "---------------brk\n" );
 */
 				sistruct->brk = index->sis->brk;
 			}
@@ -2859,7 +2762,7 @@ int ioctl( int fd, int request, ... )
 			if ( ret == 0 )
 			{
 				/* FIXME ? */
-				report("FIONREAD failed\n");
+				report( "FIONREAD failed\n" );
 				set_errno( EBADFD );
 				va_end( ap );
 				return -1;
@@ -2920,8 +2823,7 @@ int fcntl( int fd, int command, ... )
 	index = find_port( fd );
 	if ( !index )
 	{
-		sprintf( message, "No info known about the port. fcntl %i\n", fd );
-		report( message );
+		LEAVE( "fcntl" );
 		return -1;
 	}
 
@@ -2966,10 +2868,11 @@ termios_interrupt_event_loop()
 void termios_interrupt_event_loop( int fd, int flag )
 {
 	struct termios_list * index = find_port( fd );
-/*
-	mexPrintf(":>");
-*/
-	if ( !index ) return;
+	if ( !index )
+	{
+		LEAVE( "termios_interrupt_event_loop" );
+		return;
+	}
 /*
 	index->event_flag = 0;
 	 TRENT SetCommMask( index->hComm, index->event_flag );
@@ -2978,9 +2881,6 @@ void termios_interrupt_event_loop( int fd, int flag )
 	SetEvent( index->sol.hEvent ); 
 */
 	index->interrupt = flag;
-/*
-	mexPrintf(":<");
-*/
 	return;
 }
 
@@ -3004,44 +2904,33 @@ int  serial_select( int  n,  fd_set  *readfds,  fd_set  *writefds,
 	int fd = n-1;
 	struct termios_list *index;
 	char message[80];
-	int loopcount = 0;
 
 	ENTER( "serial_select" );
-	MexPrintf(">");
 	if ( fd <= 0 )
 	{
-		MexPrintf("<!fd\n");
 		usleep(1000);
 		return 1;
 	}
 	index = find_port( fd );
 	if ( !index )
 	{
-		sprintf( message, "No info known about the port. select %i\n",
-			fd );
-		report( message );
-		MexPrintf("<!I\n");
+		LEAVE( "serial_select" );
 		return -1;
 	}
 	if( index->interrupt == 1 )
 	{
-		MexPrintf("I");
 		goto end;
 	}
 	while(!index->event_flag )
 	{
 		usleep(1000);
-		MexPrintf("!F<\n");
 		return -1;
 	}
 	
 	while ( wait == WAIT_TIMEOUT && index->sol.hEvent )
 	{
-		sprintf(message, "%i", loopcount++ );
-		MexPrintf( message );
 		if( index->interrupt == 1 )
 		{
-			MexPrintf("i");
 			goto end;
 		}
 		if( !index->sol.hEvent ) return 1;
@@ -3051,14 +2940,12 @@ int  serial_select( int  n,  fd_set  *readfds,  fd_set  *writefds,
 			/* WaitCommEvent failed */
 			if( index->interrupt == 1 )
 			{
-				MexPrintf("i");
 				goto end;
 			}
 			if ( GetLastError() != ERROR_IO_PENDING )
 			{
 				sprintf( message, "WaitCommEvent filename = %s\n", index->filename);
 				report( message );
-				MexPrintf("-");
 				return(1);
 /*
 				goto fail;
@@ -3068,44 +2955,31 @@ int  serial_select( int  n,  fd_set  *readfds,  fd_set  *writefds,
 		}
 		if( index->interrupt == 1 )
 		{
-			MexPrintf("i");
 			goto end;
 		}
 		wait = WaitForSingleObject( index->sol.hEvent, 1000 );
 		switch ( wait )
 		{
 			case WAIT_OBJECT_0:
-				MexPrintf("o");
 				if( index->interrupt == 1 )
 				{
-					MexPrintf("i");
 					goto end;
 				}
 				if( !index->sol.hEvent ) return(1);
 				if (!GetOverlappedResult( index->hComm,
 					&index->sol, &nBytes, TRUE ))
 				{
-					MexPrintf("G");
 					goto end;
 				}
 				else if( index->tx_happened == 1 )
 				{
-				/*
-					ClearErrors( index, &Stat );
-					if ( (int ) Stat.cbOutQue == 0 )
-					{
-						MexPrintf(".");
-					}
-				*/
 					goto end;
 				}
 				else
 					goto end;
 				break;
 			case WAIT_TIMEOUT:
-				MexPrintf("T");
 			default:
-				MexPrintf("W");
 				return(1); /* WaitFor error */
 			
 		}
@@ -3114,13 +2988,11 @@ end:
 /*
 	usleep(1000);
 */
-	MexPrintf("<");
 	LEAVE( "serial_select" );
 	return( 1 );
 #ifdef asdf
 	/* FIXME this needs to be cleaned up... */
 fail:
-	MexPrintf("f<\n");
 	sprintf( message, "< select called error %i\n", n );
 	YACK();
 	report( message );
@@ -3151,6 +3023,11 @@ int termiosGetParityErrorChar( int fd )
 
 	ENTER( "termiosGetParityErrorChar" );
 	index = find_port( fd );
+	if( !index )
+	{
+		LEAVE( "termiosGetParityErrorChar" );
+		return(-1);
+	}
 	GetCommState( index->hComm, &dcb );
 	LEAVE( "termiosGetParityErrorChar" );
 	return( dcb.ErrorChar );
@@ -3172,21 +3049,26 @@ void termiosSetParityError( int fd, char value )
 	DCB	dcb;
 	struct termios_list *index;
 
-	index = find_port( fd );
 	ENTER( "termiosGetParityErrorChar" );
+	index = find_port( fd );
+	if ( !index )
+	{
+		LEAVE( "termiosSetParityError" );
+		return;
+	}
 	GetCommState( index->hComm, &dcb );
 	dcb.ErrorChar = value;
 	SetCommState( index->hComm, &dcb );
 	LEAVE( "termiosGetParityErrorChar" );
 }
 /*----------------------- END OF LIBRARY -----------------*/
-
+#ifdef PLAYING_AROUND
 static inline int inportb( int index )
 {
    unsigned char value;
-  __asm__ volatile ("inb %1,%0"
+  __asm__ volatile ( "inb %1,%0"
                     : "=a" (value)
-                    : "d" ((unsigned short)index));
+                    : "d" ((unsigned short)index) );
    return value;
 }
 
@@ -3198,3 +3080,4 @@ static inline void outportb(unsigned char val, unsigned short int index)
                     : "a" (val), "d" (index)
                     );
 }
+#endif /* PLAYING_AROUND */
