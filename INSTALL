@@ -33,7 +33,7 @@ please make a note and email the details to trentjarvi@yahoo.com.
 	D.  Add comm.jar to your CLASSPATH.
 	E.  Build and Install the jar.
 	F.  Where did everything end up?
-	G.  Cross Compiling for Win32 support
+	G.  Compiling for Win32 support
 
 3.  COMMON PROBLEMS
 
@@ -170,13 +170,61 @@ A.  Japanese
 			/usr/lib so people don't have to change with their 
 			LD_LIBRARY_PATH.
 
-	G.  Cross Compiling for Win32 support
+	G.  Compiling for Win32 support
 
 		Get the Sun CommAPI if you want a plug-in solution.  The code 
 		is provided for people that may have demanding needs and coding
 		ability. 
 
-		Instructions unique to win32 builds.
+		There is only serial port code at this time.
+
+		Three ways of compiling win32 libraries are offered:
+
+			mingw32 tools in DOS
+			lcc tools in DOS
+			cross-compiling from Linux
+
+		----------------- mingw32 tools in DOS -----------------------
+
+		Install mingw32  http://www.mingw.org
+		Install cygwin   http://sources.redhat.com/cygwin
+		Install a jdk    http://java.sun.com/j2se
+		in the rxtx top directory to the following:
+		mkdir build
+		cp Makefile.mingw32 build
+		edit the Makefile and make sure the directories are correct.
+		run make
+		run make install
+		
+		----------------- lcc tools in DOS ---------------------------
+
+		Install a jdk    http://java.sun.com/j2se
+		Install lcc http://www.cs.virginia.edu/~lcc-win32/
+
+		A make file (Makefile.lcc) for compiling rxtx with lcc
+		contributed by Valentin Pavlov
+
+		You will need a config.h file in the src directory.  Other
+		builds usually generate them automatically.  The following
+		should work.
+
+		#define HAVE_FCNTL_H
+		#define HAVE_SIGNAL_H
+		#undef HAVE_SYS_FCNTL_H
+		#undef HAVE_SYS_FILE_H
+		#undef HAVE_SYS_SIGNAL_H
+		#undef HAVE_TERMIOS_H
+		#undef HAVE_SYS_TIME_H
+
+		if you know how to create the above in a dos Makefile send in			the changes.
+
+		the following commands should then work fine on the command
+		line.
+
+		cd src
+		make -f ..\Makefile.lcc
+
+		----------------- cross-compiling from Linux -----------------
 
 		Grab ming32:
 
@@ -185,9 +233,6 @@ A.  Japanese
 		http://www.linuxgrrls.org/~taj/crossmingw32-2.95-1.i386.rpm
 		A more current version can be obtained:
 		http://www.devolution.com/~slouken/SDL/Xmingw32/crossgcc/index.html
-		prebuilt Binaries:
-		http://www.devolution.com/~slouken/SDL/Xmingw32/mingw32-linux-x86-glibc-2.1.tar.gz
-
 
 		I built the dll with jdk-1.2.2 for linux using jdk-1.2.2 
 		include files from the win32 JDK.
@@ -636,3 +681,9 @@ TrentJarvi@yahoo.com
 You made it this far.. what is one more line.
 
 Sun, Solaris and Java are registered trademarks of Sun Microsystems, Inc.
+
+
+reminder:
+
+redhat 7.1 needs:
+export LD_ASSUME_KERNEL=2.2.5

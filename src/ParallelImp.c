@@ -27,7 +27,6 @@
 
         - Trent Jarvi
 */
-
 #include "config.h"
 /* work around for libc5 */
 /*#include <typedefs_md.h>*/
