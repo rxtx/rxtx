@@ -101,8 +101,8 @@
 extern int errno;
 #ifdef TRENT_IS_HERE
 #undef TIOCSERGETLSR
-#define DEBUG
 /*
+#define DEBUG
 #define DEBUG_MW
 #define DONT_USE_OUTPUT_BUFFER_EMPTY_CODE
 #define SIGNALS
@@ -716,7 +716,7 @@ void *thread_write( void *arg )
 	report("thread_write: cond_signal\n");
 	pthread_cond_signal( t->cpt );
 #else
-		t->done = 1;
+	t->done = 1;
 #endif
 	if( t->closing)
 	{
@@ -752,7 +752,7 @@ void *thread_write( void *arg )
 		pthread_exit( NULL );
 	}
 	//if( !t->tcdrain ) t->inuse = 0;
-	report("thread_write: return(NULL)\n" );
+	report("thread_write: pthread_exit(NULL)\n" );
 	pthread_exit( NULL );
 	/* -Wall ?fix */
 	return( NULL );
@@ -964,7 +964,13 @@ int init_thread_write( struct event_info_struct *eis )
 	sigaddset(&newmask, SIGCHLD);
 	newaction.sa_handler = warn_sig_abort;
 	sigemptyset( &newaction.sa_mask );
+#ifdef SA_INTERRUPT
 	newaction.sa_flags = SA_INTERRUPT;
+#endif /* SA_INTERRUPT */
+#ifdef SA_RESTART
+	newaction.sa_flags = SA_RESTART;
+#endif /* SA_RESTART */
+
 	sigaction(SIGABRT, &newaction, &oldaction);
 	sigaction(SIGCHLD, &newaction, &oldaction);
 /*
@@ -1942,14 +1948,14 @@ int check_line_status_register( struct event_info_struct *eis )
 	}
 	else if( eis->change )
 	{
-		report_verbose( "scheck_line_status_register: ending OUTPUT_BUFFER_EMPTY\n" );
+		report_verbose( "check_line_status_register: sending OUTPUT_BUFFER_EMPTY\n" );
 		send_event( eis, SPE_OUTPUT_BUFFER_EMPTY, 1 );
 	}
 #else
 	if( eis->output_buffer_empty_flag == 1 && 
 		eis->eventflags[SPE_OUTPUT_BUFFER_EMPTY] )
 	{
-		report("scheck_line_status_register: ending SPE_OUTPUT_BUFFER_EMPTY\n");
+		report("check_line_status_register: sending SPE_OUTPUT_BUFFER_EMPTY\n");
 		send_event( eis, SPE_OUTPUT_BUFFER_EMPTY, 1 );
 		eis->output_buffer_empty_flag = 0;
 	}
