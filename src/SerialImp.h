@@ -113,6 +113,11 @@ struct event_info_struct
 #	define LOCKFILEPREFIX "LCK.."
 #	define FHS
 #endif /* __linux__ */
+#if defined(__QNX__)
+#	define DEVICEDIR "/dev/"
+#	define LOCKDIR ""
+#	define LOCKFILEPREFIX ""
+#endif /* qnx */
 #if defined(__sgi__) || defined(sgi)
 #	define DEVICEDIR "/dev/"
 #	define LOCKDIR "/usr/spool/uucp"

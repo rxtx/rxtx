@@ -514,6 +514,13 @@ public class RXTXCommDriver implements CommDriver
 					};
 					CandidatePortPrefixes=Temp;
 				}
+				else if(osName.toLowerCase().indexOf("qnx") != -1 )
+				{
+					String[] Temp = {
+						"ser"
+					};
+					CandidatePortPrefixes=Temp;
+				}
 				else if(osName.equals("Irix"))
 				{
 					String[] Temp = {
