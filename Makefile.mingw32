@@ -16,7 +16,6 @@
 #   License along with this library; if not, write to the Free
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #-------------------------------------------------------------------------
-#  Makefile.mingw32 last modified Fri Aug 17 14:23:35 MDT 2001
 #  This Makefile works on windows 98/NT with mingw32 in a DOS shell
 #  mingw build tools are used
 #  PATH=c:\mingw\bin;c:\jdk118\bin;%PATH%
@@ -111,7 +110,7 @@ Serial.dll:	$(CFILES) include/config.h $(DLLOBJECTS) fuserImp.o SerialImp.o term
 
 comm.jar: $(MINGJAVAFILES) 
 	javac javax\comm\\*.java
-	$(JAR) -cf comm.jar javax
+	$(JAR) -cf comm.jar javax\comm\\*.class
 	$(JAVAH) $(JAVAHFLAGS) $(patsubst javax/comm/%.java,javax.comm.%,$(wildcard javax/comm/*.java))
 
 include/config.h:
@@ -131,4 +130,9 @@ uninstall:
 	del $(LIBINSTALL)\Serial.dll
 
 clean:
-	rm -rf Serial.* javax* *.o *.bat comm.jar include 
+	del /Q javax\comm\\*.*
+	rmdir javax\comm
+	rmdir javax
+	del /Q include\\*
+	rmdir include
+	del /Q Serial.* javaxtimestamp *.o comm.jar
