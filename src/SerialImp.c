@@ -634,25 +634,25 @@ int set_port_params( JNIEnv *env, int fd, int cspeed, int dataBits,
 
 	if( tcgetattr( fd, &ttyset ) < 0 )
 	{
-		report( "SetSerialPortParams: Cannot Get Serial Port Settings\n" );
+		report( "set_port_params: Cannot Get Serial Port Settings\n" );
 		return(1);
 	}
 
 	if( !translate_data_bits( env, &(ttyset.c_cflag), dataBits ) )
 	{
-		report( "SetSerialPortParams: Invalid Data Bits Selected\n" );
+		report( "set_port_params: Invalid Data Bits Selected\n" );
 		return(1);
 	}
 
 	if( !translate_stop_bits( env, &(ttyset.c_cflag), stopBits ) )
 	{
-		report( "SetSerialPortParams: Invalid Stop Bits Selected\n" );
+		report( "set_port_params: Invalid Stop Bits Selected\n" );
 		return(1);
 	}
 
 	if( !translate_parity( env, &(ttyset.c_cflag), parity ) )
 	{
-		report( "SetSerialPortParams: Invalid Parity Selected\n" );
+		report( "set_port_params: Invalid Parity Selected\n" );
 		return(1);
 	}
 
@@ -715,7 +715,7 @@ int set_port_params( JNIEnv *env, int fd, int cspeed, int dataBits,
 #ifdef __FreeBSD__
 	if( cfsetspeed( &ttyset, cspeed ) < 0 )
 	{
-		report( "SetSerialPortParams: Cannot Set Speed\n" );
+		report( "set_port_params: Cannot Set Speed\n" );
 		return( 1 );
 	}
 #endif  /* __FreeBSD__ */
@@ -743,6 +743,7 @@ int set_port_params( JNIEnv *env, int fd, int cspeed, int dataBits,
 
 	if( tcsetattr( fd, TCSANOW, &ttyset ) < 0 )
 	{
+		report("tcsetattr returns nonzero value!\n");
 		return( 1 );
 	}
 	return(0);
@@ -766,8 +767,9 @@ JNIEXPORT void JNICALL RXTXPort(nativeSetSerialPortParams)(
 	ENTER( "RXTXPort:nativeSetSerialPortParams" );
 	report_time_start( );
 
-	if (cspeed == -1)
+	if (cspeed < 0 )
 	{
+		report(" invalid cspeed\n");
 		throw_java_exception( env, UNSUPPORTED_COMM_OPERATION,
 			"", "BaudRate could not be set to the specified value" );
 		return;
@@ -776,6 +778,7 @@ JNIEXPORT void JNICALL RXTXPort(nativeSetSerialPortParams)(
 
 	if( set_port_params( env, fd, cspeed, dataBits, stopBits, parity ) )
 	{
+		report("set_port_params failed\n");
 		LEAVE( "RXTXPort:nativeSetSerialPortParams" );
 		throw_java_exception( env, UNSUPPORTED_COMM_OPERATION,
 			"nativeSetSerialPortParams", strerror( errno ) );
@@ -949,6 +952,8 @@ int translate_parity( JNIEnv *env, tcflag_t *cflag, jint parity )
 			LEAVE( "translate_parity" );
 			return 1;
 #endif /* CMSPAR */
+		default:
+			printf("Parity missed %i\n", parity );
 	}
 
 	LEAVE( "translate_parity" );
@@ -1178,9 +1183,9 @@ JNIEXPORT void JNICALL RXTXPort(writeArray)( JNIEnv *env,
 #ifndef TIOCSERGETLSR
 	struct event_info_struct *index = master_index;
 #endif /* TIOCSERGETLSR */
-	int fd = get_java_var( env, jobj,"fd","I" );
+	int fd;
 	int result=0,total=0;
-	jbyte *body = (*env)->GetByteArrayElements( env, jbarray, 0 );
+	jbyte *body;
 	//char message[1000];
 #if defined ( __sun__ )
 	struct timespec retspec;
@@ -1188,6 +1193,8 @@ JNIEXPORT void JNICALL RXTXPort(writeArray)( JNIEnv *env,
 	retspec.tv_sec = 0;
 	retspec.tv_nsec = 50000;
 #endif /* __sun__ */
+	fd = get_java_var( env, jobj,"fd","I" );
+	body = (*env)->GetByteArrayElements( env, jbarray, 0 );
 
 	report_time_start();
 	ENTER( "writeArray" );
@@ -2118,7 +2125,7 @@ JNIEXPORT jboolean JNICALL RXTXPort(nativeStaticIsRI)( JNIEnv *env,
 	if( !fd )
 	{
 		/* Exception? FIXME */
-		return -1;
+		return JNI_FALSE;
 	}
 	ioctl( fd, TIOCMGET, &result );
 	sprintf( message, "nativeStaticRI( ) returns %i\n", result& TIOCM_RI );
@@ -2142,7 +2149,6 @@ JNIEXPORT jint JNICALL RXTXPort(nativeStaticGetBaudRate)( JNIEnv *env, jobject j
 	const char *filename = (*env)->GetStringUTFChars( env, jstr, 0 );
 	int fd = find_preopened_ports( filename );
 	struct termios ttyset;
-	printf("portname = %s\n", filename);
 	(*env)->ReleaseStringUTFChars( env, jstr, filename );
 
 	ENTER( "RXTXPort:nativeStaticGetBaudRate" );
@@ -2156,7 +2162,6 @@ JNIEXPORT jint JNICALL RXTXPort(nativeStaticGetBaudRate)( JNIEnv *env, jobject j
 		report( "nativeStaticGetBaudRate: Cannot Get Serial Port Settings\n" );
 		return(-1);
 	}
-	printf("speed = %i %i\n", ttyset.c_cflag, ttyset.c_cflag&CBAUD);
 	return( get_java_baudrate( ttyset.c_cflag&CBAUD ) );
 }
 /*----------------------------------------------------------
@@ -2820,14 +2825,14 @@ int check_line_status_register( struct event_info_struct *eis )
 		report( "check_line_status_register: TIOCSERGETLSR\n is nonnull\n" );
 		return( 1 );
 	}
-	else if( eis->change )
+	else if( eis && eis->change )
 	{
 		report_verbose( "check_line_status_register: sending OUTPUT_BUFFER_EMPTY\n" );
 		send_event( eis, SPE_OUTPUT_BUFFER_EMPTY, 1 );
 	}
 #else
 	//printf("test %i\n",  eis->output_buffer_empty_flag );
-	if( eis->output_buffer_empty_flag == 1 && 
+	if( eis && eis->output_buffer_empty_flag == 1 && 
 		eis->eventflags[SPE_OUTPUT_BUFFER_EMPTY] )
 	{
 		report_verbose("check_line_status_register: sending SPE_OUTPUT_BUFFER_EMPTY\n");
@@ -2885,29 +2890,31 @@ void check_cgi_count( struct event_info_struct *eis )
 	/* JK00: only use it if supported by this port */
 
 	struct serial_icounter_struct sis;
+	memcpy( &sis, &eis->osis, sizeof( struct serial_icounter_struct ) );
 
 	if( ioctl( eis->fd, TIOCGICOUNT, &sis ) )
 	{
 		report( "check_cgi_count: TIOCGICOUNT\n is not 0\n" );
 		return;
 	}
-	while( sis.frame != eis->osis.frame ) {
+	while( eis && sis.frame != eis->osis.frame ) {
 		send_event( eis, SPE_FE, 1);
 		eis->osis.frame++;
 	}
-	while( sis.overrun != eis->osis.overrun ) {
+	while( eis && sis.overrun != eis->osis.overrun ) {
 		send_event( eis, SPE_OE, 1);
 		eis->osis.overrun++;
 	}
-	while( sis.parity != eis->osis.parity ) {
+	while( eis && sis.parity != eis->osis.parity ) {
 		send_event( eis, SPE_PE, 1);
 		eis->osis.parity++;
 	}
-	while( sis.brk != eis->osis.brk ) {
+	while( eis && sis.brk != eis->osis.brk ) {
 		send_event( eis, SPE_BI, 1);
 		eis->osis.brk++;
 	}
-	eis->osis = sis;
+	if( eis )
+		memcpy( &eis->osis, &sis, sizeof( struct serial_icounter_struct ) );
 #endif /*  TIOCGICOUNT */
 }
 
@@ -2957,7 +2964,10 @@ check_tiocmget_changes
 void check_tiocmget_changes( struct event_info_struct * eis )
 {
 	unsigned int mflags;
-	int change = eis->change;
+	int change;
+
+	if( !eis ) return;
+	change  = eis->change;
 
 	report_verbose("entering check_tiocmget_changes\n");
 	if( ioctl( eis->fd, TIOCMGET, &mflags ) )
@@ -2968,22 +2978,23 @@ void check_tiocmget_changes( struct event_info_struct * eis )
 	}
 
 	change = (mflags&TIOCM_CTS) - (eis->omflags&TIOCM_CTS);
-	if( change ) send_event( eis, SPE_CTS, change );
+	if( eis && change ) send_event( eis, SPE_CTS, change );
 
 	change = (mflags&TIOCM_DSR) - (eis->omflags&TIOCM_DSR);
-	if( change )
+	if( eis && change )
 	{
 		report( "sending DSR ===========================\n");
 		send_event( eis, SPE_DSR, change );
 	}
 
 	change = (mflags&TIOCM_RNG) - (eis->omflags&TIOCM_RNG);
-	if( change ) send_event( eis, SPE_RI, change );
+	if( eis && change ) send_event( eis, SPE_RI, change );
 
 	change = (mflags&TIOCM_CD) - (eis->omflags&TIOCM_CD);
-	if( change ) send_event( eis, SPE_CD, change );
+	if( eis && change ) send_event( eis, SPE_CD, change );
 
-	eis->omflags = mflags;
+	if( eis )
+		eis->omflags = mflags;
 	report_verbose("leaving check_tiocmget_changes\n");
 }
 
@@ -3065,25 +3076,25 @@ void report_serial_events( struct event_info_struct *eis )
 		if( check_line_status_register( eis ) )
 			return;
 
-	if ( eis->has_tiocgicount )
+	if ( eis && eis->has_tiocgicount )
 		check_cgi_count( eis );
 
 	check_tiocmget_changes( eis );
 
-	if( port_has_changed_fionread( eis ) )
+	if( eis && port_has_changed_fionread( eis ) )
 	{
 		if(!eis->eventflags[SPE_DATA_AVAILABLE] )
 		{
 			report_verbose("report_serial_events: ignoring DATA_AVAILABLE\n");
 			//report(".");
-			usleep(1000);
+			usleep(20000);
 			return;
 		}
 		report("report_serial_events: sending DATA_AVAILABLE\n");
 		if(!send_event( eis, SPE_DATA_AVAILABLE, 1 ))
 		{
 			/* select wont block */
-			usleep(1000);
+			usleep(20000);
 			//system_wait();
 		}
 	}
@@ -3107,6 +3118,10 @@ int initialise_event_info_struct( struct event_info_struct *eis )
 
 	if ( eis->initialised == 1 )
 		goto end;
+
+#ifdef TIOCGICOUNT
+	memset(&eis->osis,0,sizeof(eis->osis));
+#endif /* TIOCGICOUNT */
 
 	if( index )
 	{
@@ -3227,7 +3242,7 @@ JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 				LEAVE("eventLoop");
 				return;
 			}
-			usleep(1000);
+			usleep(20000);
 			// Trent system_wait();
 		}  while ( eis.ret < 0 && errno == EINTR );
 		if( eis.ret >= 0 )
@@ -3856,10 +3871,12 @@ JNIEXPORT void JNICALL RXTXPort(nativeSetEventFlag)( JNIEnv *env,
 int send_event( struct event_info_struct *eis, jint type, int flag )
 {
 	int result;
-	JNIEnv *env = eis->env;
+	JNIEnv *env;
+	if( eis ) env = eis->env;
+	else return(-1);
 
 	ENTER( "send_event" );
-	if( eis->eventloop_interrupted > 1 )
+	if( !eis || eis->eventloop_interrupted > 1 )
 	{
 		report("event loop interrupted\n");
 		return JNI_TRUE;
@@ -3876,7 +3893,7 @@ int send_event( struct event_info_struct *eis, jint type, int flag )
 	report_verbose("send_event: called\n");
 
 #ifdef asdf
-	if((*eis->env)->ExceptionOccurred(eis->env)) {
+	if(!eis || (*eis->env)->ExceptionOccurred(eis->env)) {
 		report ( "send_event: an error occured calling sendEvent()\n" );
 		(*eis->env)->ExceptionDescribe(eis->env);
 		(*eis->env)->ExceptionClear(eis->env);
