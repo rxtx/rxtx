@@ -27,10 +27,14 @@
 
         - Trent Jarvi
 */
+#if defined(__MWERKS__)//dima
+#include "LPRPort.h"
+#else//dima
 #include "config.h"
 /* work around for libc5 */
 /*#include <typedefs_md.h>*/
 #include "gnu_io_LPRPort.h"
+#endif//dima
 #include <time.h>
 #include <unistd.h>
 #include <stdio.h>

@@ -16,8 +16,12 @@
 |   License along with this library; if not, write to the Free
 |   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --------------------------------------------------------------------------*/
+#if defined(__MWERKS__)//dima
+#include "RS485.h"
+#else//dima
 #include "config.h"
 #include "gnu_io_RS485.h"
+#endif//dima
 #include <time.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -192,9 +196,9 @@ JNIEXPORT void JNICALL Java_gnu_io_RS485Port_nativeSetRS485PortParams(
 	int cspeed = translate_speed( env, speed );
 	if( !cspeed ) return;
 	if( tcgetattr( fd, &ttyset ) < 0 ) goto fail;
-	if( !translate_data_bits( env, &(ttyset.c_cflag), dataBits ) ) return;
-	if( !translate_stop_bits( env, &(ttyset.c_cflag), stopBits ) ) return;
-	if( !translate_parity( env, &(ttyset.c_cflag), parity ) ) return;
+	if( !translate_data_bits( env, (int *)&(ttyset.c_cflag), dataBits ) ) return;//dima c_cflag in darwin is unsigned long
+	if( !translate_stop_bits( env, (int *)&(ttyset.c_cflag), stopBits ) ) return;//dima c_cflag in darwin is unsigned long
+	if( !translate_parity( env, (int *)&(ttyset.c_cflag), parity ) ) return;//dima c_cflag in darwin is unsigned long
 #ifdef __FreeBSD__
 	if( cfsetspeed( &ttyset, cspeed ) < 0 ) goto fail;
 #else
@@ -386,6 +390,7 @@ JNIEXPORT void JNICALL Java_gnu_io_RS485Port_writeByte( JNIEnv *env,
 	/* wait for the last bit to go 
 	 * see get_lsr_info in linux/driver/char/serial.c 
 	 * */
+#if defined(TIOCSERGETLSR) //dima ????????? I did it in exactly the same way as in SerialImp.c
 	do
 	{
 		result=ioctl(fd, TIOCSERGETLSR);
@@ -395,6 +400,7 @@ JNIEXPORT void JNICALL Java_gnu_io_RS485Port_writeByte( JNIEnv *env,
 			usleep(100);
 		}
 	} while(result != TIOCSER_TEMT);
+#endif /* TIOCSERGETLSR */
 	/* shut down the DTR */
 	ioctl(fd, TIOCMGET, &result);
 	result &= ~TIOCM_DTR;
@@ -452,6 +458,7 @@ JNIEXPORT void JNICALL Java_gnu_io_RS485Port_writeArray( JNIEnv *env,
 	/* wait for the last bit to go 
 	 * see get_lsr_info in linux/driver/char/serial.c 
 	 * */
+#if defined(TIOCSERGETLSR) //dima ????????? I did it in exactly the same way as in SerialImp.c
 	do
 	{
 		result=ioctl(fd, TIOCSERGETLSR);
@@ -461,6 +468,7 @@ JNIEXPORT void JNICALL Java_gnu_io_RS485Port_writeArray( JNIEnv *env,
 			usleep(100);
 		}
 	} while(result != TIOCSER_TEMT);
+#endif /* TIOCSERGETLSR */
 	/* shut down the DTR */
 	ioctl(fd, TIOCMGET, &result);
 	result &= ~TIOCM_DTR;

@@ -1,4 +1,8 @@
+#if defined(__MWERKS__)//dima
+#include "CommPortIdentifier.h"
+#else//dima
 #include "gnu_io_CommPortIdentifier.h"
+#endif//dima
 #ifndef __linux__
 JNIEXPORT jstring JNICALL Java_gnu_io_CommPortIdentifier_native_1psmisc_1report_1owner (JNIEnv *env, jobject obj, jstring arg)
 {
