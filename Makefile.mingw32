@@ -116,7 +116,7 @@ Serial.dll:  $(OBJECTS)
 
 comm.jar: $(javafiles) 
 	$(JAVAC) -d . $(javafiles) 
-	$(JAR) -cf comm.jar $(CLASSES)
+	$(JAR) -cf comm.jar javax
 	$(JAVAH) $(JAVAHFLAGS) `(for i in $(javahfiles);do \
 		if grep -q native.*\( $(SRC)/$$i.java; then \
 			echo javax.comm.$$i; \
