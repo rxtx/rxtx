@@ -33,6 +33,7 @@ final public class RXTXPort extends SerialPort
 
 	private final static boolean debug = false;
 	private final static boolean debug_verbose = false;
+	private final static boolean debug_events = false;
 	static
 	{
 		if(debug ) 
@@ -509,7 +510,7 @@ final public class RXTXPort extends SerialPort
 	*/
 	public boolean sendEvent( int event, boolean state )
 	{
-		if (debug_verbose)
+		if (debug_events)
 			System.out.print("RXTXPort:sendEvent(");
 		/* Let the native side know its time to die */
 
@@ -521,63 +522,63 @@ final public class RXTXPort extends SerialPort
 		switch( event )
 		{
 			case SerialPortEvent.DATA_AVAILABLE:
-				if( debug_verbose )
+				if( debug_events )
 					System.out.println( "DATA_AVAILABLE " +
 						monThread.Data + ")" );
 				break;
 			case SerialPortEvent.OUTPUT_BUFFER_EMPTY:
-				if( debug_verbose )
+				if( debug_events )
 					System.out.println(
 						"OUTPUT_BUFFER_EMPTY " +
 						monThread.Output + ")" );
 				break;
 			case SerialPortEvent.CTS:
-				if( debug_verbose )
+				if( debug_events )
 					System.out.println( "CTS " +
 						monThread.CTS + ")" );
 				break;
 			case SerialPortEvent.DSR:
-				if( debug_verbose )
+				if( debug_events )
 					System.out.println( "DSR " +
 						monThread.Output + ")" );
 				break;
 			case SerialPortEvent.RI:
-				if( debug_verbose )
+				if( debug_events )
 					System.out.println( "RI " +
 						monThread.RI + ")" );
 				break;
 			case SerialPortEvent.CD:
-				if( debug_verbose )
+				if( debug_events )
 					System.out.println( "CD " +
 						monThread.CD + ")" );
 				break;
 			case SerialPortEvent.OE:
-				if( debug_verbose )
+				if( debug_events )
 					System.out.println( "OE " +
 						monThread.OE + ")" );
 				break;
 			case SerialPortEvent.PE:
-				if( debug_verbose )
+				if( debug_events )
 					System.out.println( "PE " +
 						monThread.PE + ")" );
 				break;
 			case SerialPortEvent.FE:
-				if( debug_verbose )
+				if( debug_events )
 					System.out.println( "FE " +
 						monThread.FE + ")" );
 				break;
 			case SerialPortEvent.BI:
-				if( debug_verbose )
+				if( debug_events )
 					System.out.println( "BI " +
 						monThread.BI + ")" );
 				break;
 			default:
-				if( debug_verbose )
+				if( debug_events )
 					System.out.println( "XXXXXXXXXXXXXX " +
 						event + ")" );
 				break;
 		}
-		if( debug_verbose )
+		if( debug_events && debug_verbose )
 			System.out.println( "checking flags " );
 
 		switch( event )
@@ -616,15 +617,15 @@ final public class RXTXPort extends SerialPort
 				System.err.println("unknown event: " + event);
 				return(false);
 		}
-		if( debug_verbose )
+		if( debug_events && debug_verbose )
 			System.out.println( "getting event" );
 		SerialPortEvent e = new SerialPortEvent(this, event, !state,
 			state );
-		if( debug_verbose )
+		if( debug_events && debug_verbose )
 			System.out.println( "sending event" );
 		if(monThreadisInterrupted) 
 		{
-			if( debug_verbose )
+			if( debug_events )
 				System.out.println( "return" );
 			return(true);
 		}
@@ -633,8 +634,8 @@ final public class RXTXPort extends SerialPort
 			SPEventListener.serialEvent( e );
 		}
 
-		if( debug_verbose )
-			System.out.println( "return" );
+		if( debug_events && debug_verbose )
+			System.out.println( "sendEvent return" );
 
 		if (fd == 0 ||  SPEventListener == null || monThread == null) 
 		{
