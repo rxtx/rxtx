@@ -1,7 +1,7 @@
 #ifdef TRENT_IS_HERE
-#define TRACE
-#define DEBUG
-#define DEBUG_MW
+//#define TRACE
+//#define DEBUG
+//#define DEBUG_MW
 #ifdef DEBUG_MW
 	extern void mexWarMsgTxt( const char * );
 	extern void mexPrintf( const char *, ... );
@@ -1168,7 +1168,7 @@ int serial_open( const char *filename, int flags, ... )
 		index->open_flags = 0;
 
 
-	dump_termios_list( "open filename" );
+	//dump_termios_list( "open filename" );
 	if( !first_tl->hComm )
 	{
 		sprintf( message, "open():  Invalid Port Reference for %s\n",
@@ -1303,7 +1303,7 @@ int serial_read( int fd, void *vb, int size )
 	long start, now;
 	unsigned long nBytes = 0, total = 0, error;
 	/* unsigned long waiting = 0; */
-	int err, vmin, i;
+	int err, vmin; //, i;
 	struct termios_list *index;
 	char message[80];
 	COMSTAT stat;
@@ -1315,10 +1315,8 @@ int serial_read( int fd, void *vb, int size )
 	ENTER( "serial_read" );
 #endif /* DEBUG */
 
-	if ( fd <= 0 ) {
-		printf("serial_read fd=%d\n", fd);
+	if ( fd <= 0 )
 		return 0;
-	}
 	index = find_port( fd );
 	if ( !index )
 	{
@@ -1347,8 +1345,12 @@ int serial_read( int fd, void *vb, int size )
 			ret = ClearCommError( index->hComm, &error, &stat);
 			//usleep(1000);
 			//usleep(50);
+			/* we should use -1 instead of 0 for disabled timeout */
 			now = GetTickCount();
-			if (now-start >= (index->ttyset->c_cc[VTIME]*100)) {
+			if ( index->ttyset->c_cc[VTIME] &&
+				now-start >= (index->ttyset->c_cc[VTIME]*100)) {
+				//sprintf( message, "now = %i start = %i time = %i total =%i\n", now, start, index->ttyset->c_cc[VTIME]*100, total);
+				//report( message );
 				return total;	/* read timeout */
 			}
 		} while( stat.cbInQue < size && size > 1 );
@@ -1368,6 +1370,7 @@ int serial_read( int fd, void *vb, int size )
 			usleep(1000);
 			//mexPrintf("%i/n", CLOCKS_PER_SEC/40);
 		} while ( c > clock() );
+
 	}
 	
 
@@ -1375,10 +1378,11 @@ int serial_read( int fd, void *vb, int size )
 	MexPrintf("R");
 	while ( size > 0 )
 	{
+	//while ( ( ( nBytes <= vmin ) || ( size > 0 ) ) && !waiting )
+	//{
 		nBytes = 0;
 		err = ReadFile( index->hComm, vb + total, size, &nBytes, &index->rol ); 
 		WaitForSingleObject( index->wol.hEvent, INFINITE );
-
 #ifdef DEBUG_VERBOSE
 	/* warning Will Rogers! */
 		sprintf(message, " ========== ReadFile = %i %s\n",
@@ -1387,23 +1391,20 @@ int serial_read( int fd, void *vb, int size )
 #endif /* DEBUG_VERBOSE */
 		size -= nBytes;
 		total += nBytes;
-
-
+		
 		if ( !err )
 		{
-			i = GetLastError();
-			switch ( i )
+			switch ( GetLastError() )
 			{
 				case ERROR_BROKEN_PIPE:
-					report("ERROR_BROKEN_PIPE ");
+					report("ERROR_BROKEN_PIPE\n");
 					nBytes = 0;
 					break;
 				case ERROR_MORE_DATA:
 					//usleep(1000);
-					report("ERROR_MORE_DATA ");
+					report("ERROR_MORE_DATA\n");
 					break;
 				case ERROR_IO_PENDING:
-//					report("[ERROR_IO_PENDING ");
 					while( ! GetOverlappedResult(
 							index->hComm,
 							&index->rol,
@@ -1417,9 +1418,7 @@ int serial_read( int fd, void *vb, int size )
 								index->hComm,
 								&error,
 								&stat);
-							report("ERROR_IO_INCOMPLETE] ");
-//							return( total );
-							break;
+							return( total );
 						}
 					}
 					size -= nBytes;
@@ -1428,19 +1427,21 @@ int serial_read( int fd, void *vb, int size )
 						now = GetTickCount();
 						sprintf(message, "size > 0: spent=%ld have=%d\n", now-start, index->ttyset->c_cc[VTIME]*100);
 						report( message );
-						if (now-start >= (index->ttyset->c_cc[VTIME]*100)) {
+						/* we should use -1 for disabled
+						   timouts */
+						if ( index->ttyset->c_cc[VTIME] && now-start >= (index->ttyset->c_cc[VTIME]*100)) {
 							report("TO ");
-							return total;	/* read timeout */
+							/* read timeout */
+							return total;
 						}
 					}
-//					sprintf(message, "end nBytes=%ld] ", nBytes);
+					sprintf(message, "end nBytes=%ld] ", nBytes);
 					report( message );
 					//usleep(1000);
+					report("ERROR_IO_PENDING\n");
 					break;
 				default:
 					//usleep(1000);
-					sprintf(message, "[uknown error %d] ", i);
-					report( message );
 					YACK();
 					return -1;
 			}
@@ -1449,16 +1450,12 @@ int serial_read( int fd, void *vb, int size )
 		{
 			//usleep(1000);
 			ClearCommError( index->hComm, &error, &stat);
-//			sprintf(message, "cce=%ld ", total);
-			report( message );
 			return( total );
 		}
 	}
 #ifdef DEBUG
 	LEAVE( "serial_read" );
 #endif /* DEBUG */
-	now = GetTickCount();
-//	printf("srr=%ld in %ldms ", total, now-start);
 	return total;
 }
 

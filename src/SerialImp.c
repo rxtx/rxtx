@@ -261,7 +261,6 @@ JNIEXPORT jint JNICALL RXTXPort(open)(
 	*/
 			
 	ENTER( "RXTXPort:open" );
-	printf( "XXXXXXXXXXXXXXXXXXXXX RXTXPort:open XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" );
 	if ( LOCK( filename, pid ) )
 	{
 		sprintf( message, "open: locking has failed for %s\n",
@@ -334,7 +333,6 @@ JNIEXPORT void JNICALL RXTXPort(nativeClose)( JNIEnv *env,
 	pid = get_java_var( env, jobj,"pid","I" );
 
 	report(">nativeClose pid\n");
-	printf( "XXXXXXXXXXXXXXXXXXXXX RXTXPort:close XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" );
 	//usleep(10000);
 	if( !pid ) {
 		(*env)->ExceptionDescribe( env );
@@ -384,6 +382,7 @@ JNIEXPORT void JNICALL RXTXPort(nativeSetSerialPortParams)(
 	struct termios ttyset;
 	int fd = get_java_var( env, jobj,"fd","I" );
 	int cspeed = translate_speed( env, speed );
+	int result = 0;
 #if defined(TIOCGSERIAL) && !defined( WIN32 )
 	struct serial_struct sstruct;
 #endif /* TIOCGSERIAL && !WIN32 */
@@ -484,6 +483,17 @@ JNIEXPORT void JNICALL RXTXPort(nativeSetSerialPortParams)(
 		goto fail;
 	}
 #else
+#ifdef WIN32
+	if( !cspeed )
+	{
+		/* hang up the modem aka drop DTR  */
+		/* Unix should handle this */
+		ioctl( fd, TIOCMGET, &result );
+		result &= ~TIOCM_DTR;
+		ioctl( fd, TIOCMSET, &result );
+	}
+	else {
+#endif /* WIN32 */
 	if(
 		cfsetispeed( &ttyset, cspeed ) < 0 ||
 		cfsetospeed( &ttyset, cspeed ) < 0 )
@@ -491,6 +501,10 @@ JNIEXPORT void JNICALL RXTXPort(nativeSetSerialPortParams)(
 		report( "nativeSetSerialPortParams: Cannot Set Speed\n" );
 		goto fail;
 	}
+#ifdef WIN32
+	}
+#endif /* WIN32 */
+	if( !cspeed )
 #endif  /* __FreeBSD__ */
 
 	if( tcsetattr( fd, TCSANOW, &ttyset ) < 0 )
@@ -697,8 +711,6 @@ void *drain_loop( void *arg )
 #include <time.h>
 	for(i=0;;i++)
 	{
-		if( ! i%10 )
-			printf("s");
 		report("drain_loop:  looping\n");
 		if( eis->eventloop_interrupted )
 		{
@@ -717,7 +729,6 @@ void *drain_loop( void *arg )
 			{
 				if( !eis )
 				{
-					printf("drain_loop:  --------------------- !eis --------------------\n");
 					goto end;
 				}
 				report("drain_loop:  writing not set\n");
@@ -731,7 +742,6 @@ void *drain_loop( void *arg )
 	}
 end:
 	//usleep(10000);
-	printf("\n------------------ drain_loop exiting ---------------------\n");
 	report("------------------ drain_loop exiting ---------------------\n");
 	eis->closing = 1;
 	pthread_exit( NULL );
@@ -830,11 +840,8 @@ int init_threads( struct event_info_struct *eis )
 	report("init_threads: set eis\n");
 	(*eis->env)->SetIntField(eis->env, *eis->jobj, jeis, ( jint ) eis );
 	report("init_threads: creating drain_loop\n");
-	printf("\ninit_threads: -------------------- start --------------------\n");
 	pthread_create( &tid, NULL, drain_loop, (void *) eis );
-	printf("\ninit_threads: -------------------- detatch --------------------\n");
 	pthread_detach( tid );
-	printf("\ninit_threads: -------------------- stop --------------------\n");
 #endif /* TIOCSERGETLSR */
 	report("init_threads:  stop\n");
 	return( 1 );
@@ -863,8 +870,8 @@ JNIEXPORT void JNICALL RXTXPort(writeByte)( JNIEnv *env,
 		report( msg );
 		result=WRITE (fd, &byte, sizeof(unsigned char));
 	}  while (result < 0 && errno==EINTR);
-	index = master_index;
 #ifndef TIOCSERGETLSR
+	index = master_index;
 	if( index )
 	{
 		while( index->fd != fd &&
@@ -1300,6 +1307,7 @@ JNIEXPORT void JNICALL RXTXPort(setDTR)( JNIEnv *env,
 	LEAVE( "RXTXPort:setDTR" );
 	return;
 }
+
 /*----------------------------------------------------------
 RXTXPort.nativeStaticSetsetRTS
 
@@ -1441,7 +1449,7 @@ JNIEXPORT jbyte JNICALL RXTXPort(nativeGetParityErrorChar)( JNIEnv *env,
 
 	ENTER( "nativeGetParityErrorChar" );
 #ifdef WIN32
-	result = ( jint ) termiosGetParityErrorChar(
+	result = ( jbyte ) termiosGetParityErrorChar(
 			get_java_var(env, jobj, "fd", "I" ) );
 #else
 	/*
@@ -1554,6 +1562,7 @@ fail:
 	return( JNI_FALSE );
 }
 
+#ifndef WIN32
 long
 GetTickCount()
 {
@@ -1565,6 +1574,8 @@ GetTickCount()
 
 	return (now.tv_sec * 1000) + ceil(now.tv_usec / 1000);
 }
+
+#endif /* WIN32 */
 
 /*----------------------------------------------------------
 read_byte_array
@@ -1624,6 +1635,85 @@ RETRY:	if ((ret = READ( fd, buffer + bytes, left )) < 0 )
 	LEAVE( "read_byte_array" );
 	return bytes;
 }
+#ifdef asdf
+int read_byte_array(	JNIEnv *env,
+			jobject *jobj,	
+			int fd,
+			unsigned char *buffer,
+			int length,
+			int timeout )
+{
+	int ret, left, bytes = 0;
+	/* int count = 0; */
+	fd_set rfds;
+	struct timeval sleep;
+#ifndef WIN32
+	struct timeval *psleep=&sleep;
+#endif /* WIN32 */
+
+	ENTER( "read_byte_array" );
+	left = length;
+	FD_ZERO( &rfds );
+	FD_SET( fd, &rfds );
+	if( timeout != 0 )
+	{
+		sleep.tv_sec = timeout / 1000;
+		sleep.tv_usec = 1000 * ( timeout % 1000 );
+	}
+	while( bytes < length )
+	{
+         /* FIXME: In Linux, select updates the timeout automatically, so
+            other OSes will need to update it manually if they want to have
+            the same behavior.  For those OSes, timeouts will occur after no
+            data AT ALL is received for the timeout duration.  No big deal. */
+#ifndef WIN32
+		do {
+			if( timeout == 0 ) psleep = NULL;
+			ret=SELECT( fd + 1, &rfds, NULL, NULL, psleep );
+		}  while (ret < 0 && errno==EINTR);
+#else
+		/*
+		    the select() needs some work before the above will
+		    work on win32.  The select code cannot be accessed
+		    from both the Monitor Thread and the Reading Thread.
+
+		    This keeps the cpu from racing but the select() code
+		    will have to be fixed at some point.
+		*/
+		ret = RXTXPort(nativeavailable)( env, *jobj );
+#endif /* WIN32 */
+		if( ret == 0 )
+		{
+			report( "read_byte_array: select returned 0\n" );
+			LEAVE( "read_byte_array" );
+			break;
+		}
+		if( ret < 0 )
+		{
+			report( "read_byte_array: select returned -1\n" );
+			LEAVE( "read_byte_array" );
+			return -1;
+		}
+		ret = READ( fd, buffer + bytes, left );
+		if( ret == 0 )
+		{
+			report( "read_byte_array: read returned 0 bytes\n" );
+			LEAVE( "read_byte_array" );
+			break;
+		}
+		else if( ret < 0 )
+		{
+			report( "read_byte_array: read returned -1\n" );
+			LEAVE( "read_byte_array" );
+			return -1;
+		}
+		bytes += ret;
+		left -= ret;
+	}
+	LEAVE( "read_byte_array" );
+	return bytes;
+}
+#endif /* asdf */
 
 /*----------------------------------------------------------
 NativeEnableReceiveTimeoutThreshold
@@ -1642,6 +1732,7 @@ JNIEXPORT void JNICALL RXTXPort(NativeEnableReceiveTimeoutThreshold)(
 
 	ENTER( "RXTXPort:NativeEnableRecieveTimeoutThreshold" );
 	if( tcgetattr( fd, &ttyset ) < 0 ) goto fail;
+	/* TESTING ttyset.c_cc[ VMIN ] = threshold; */
 	ttyset.c_cc[ VMIN ] = 0;
 	ttyset.c_cc[ VTIME ] = vtime/100;
 	if( tcsetattr( fd, TCSANOW, &ttyset ) < 0 ) goto fail;
@@ -2270,7 +2361,6 @@ JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 	if ( !initialise_event_info_struct( &eis ) ) goto end;
 	if ( !init_threads( &eis ) ) goto end;
 	unlock_monitor_thread( &eis );
-	printf("\n------------------ drain_loop starting ---------------------\n");
 	do{
 		do {
 			/* report( "." ); */
@@ -2279,6 +2369,7 @@ JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 			/* nothing goes between this call and select */
 			if( eis.closing )
 			{
+				report("eventLoop: got interrupt\n");
 				finalize_threads( &eis );
 				finalize_event_info_struct( &eis );
 				(*env)->SetBooleanField( env, jobj,
@@ -2313,7 +2404,7 @@ RXTXCommDriver.nativeGetVersion
 JNIEXPORT jstring JNICALL RXTXCommDriver(nativeGetVersion) (JNIEnv *env,
 	jclass jclazz )
 {
-	return (*env)->NewStringUTF( env, "RXTX-1.5-9pre1" );
+	return (*env)->NewStringUTF( env, "RXTX-1.5-9pre2" );
 }
 
 /*----------------------------------------------------------
@@ -2937,7 +3028,7 @@ int send_event( struct event_info_struct *eis, jint type, int flag )
 		(*eis->env)->ExceptionDescribe(eis->env);
 		(*eis->env)->ExceptionClear(eis->env);
 	}
-#endif /* DEBUG */
+#endif /* asdf */
 	/* report("e"); */
 	LEAVE( "send_event" );
 	return(result);
