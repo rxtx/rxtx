@@ -17,7 +17,7 @@
 |   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --------------------------------------------------------------------------*/
 #include "config.h"
-#include "javax_comm_I2CPort.h"
+#include "javax_comm_I2C.h"
 #include <time.h>
 #include <unistd.h>
 #include <stdio.h>

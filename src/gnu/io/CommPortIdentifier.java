@@ -22,7 +22,7 @@ import  java.io.FileDescriptor;
 import  java.util.Vector;
 import  java.util.Enumeration;
 
-public class CommPortIdentifier 
+public class CommPortIdentifier extends Object /* extends Vector? */
 {
 	public static final int PORT_SERIAL   = 1;  // rs232 Port
 	public static final int PORT_PARALLEL = 2;  // Parallel Port
@@ -71,11 +71,11 @@ public class CommPortIdentifier
 		OS = System.getProperty("os.name");
 		if(OS.equals("Win95"))
 		{
-			System.loadLibrary("SerialW95");
+			System.out.println("Have not implemented native_psmisc_report_owner(PortName)); in CommPortIdentifier");
 		}
 		else
 		{
-			System.loadLibrary( "Serial" );
+			System.loadLibrary( "fuser" );
 		}
 	}
 	CommPortIdentifier ( String pn, CommPort cp, int pt, CommDriver driver) 
@@ -195,7 +195,7 @@ public class CommPortIdentifier
 ------------------------------------------------------------------------------*/
 	static public CommPortIdentifier getPortIdentifier(String s) throws NoSuchPortException 
 	{ 
-		if(debug) System.out.println("CommPortIdentifier:getPortIdentifier(" + s +")\nconfigure --enable-RXTXIDENT is for developers only");
+		if(debug) System.out.println("CommPortIdentifier:getPortIdentifier(" + s +")");
 		CommPortIdentifier index = CommPortIndex;
 
 		synchronized (Sync) 
@@ -221,7 +221,6 @@ public class CommPortIdentifier
 		throws NoSuchPortException 	
 	{ 
 		if(debug) System.out.println("CommPortIdentifier:getPortIdentifier(CommPort)");
-		System.out.println("configure --enable-RXTXIDENT is for developers only");
 		CommPortIdentifier c = CommPortIndex;
 		synchronized( Sync )
 		{
@@ -286,12 +285,6 @@ public class CommPortIdentifier
 		throw new UnsupportedCommOperationException();
 	}
 	private native String native_psmisc_report_owner(String PortName);
-	/*
-	private String native_psmisc_report_owner(String PortName)
-	{
-		return("soon to be known Linux Application");
-	}
-	*/
 
 /*------------------------------------------------------------------------------
 	open()

@@ -26,7 +26,7 @@
 #undef __STRICT_ANSI__
 #endif
 #include "config.h"
-#include "javax_comm_RawPort.h"
+#include "javax_comm_Raw.h"
 #include <time.h>
 #include <unistd.h>
 #include <stdio.h>
