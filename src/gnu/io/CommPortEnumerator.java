@@ -18,6 +18,8 @@
 --------------------------------------------------------------------------*/
 package  javax.comm;
 
+import java.util.*;
+
 class CommPortEnumerator implements Enumeration {
 	private CommPortIdentifier CPI;
 	private boolean debug=true;

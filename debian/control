@@ -1,0 +1,15 @@
+Source: rxtx
+Section: contrib/devel
+Priority: optional
+Maintainer: Christian Leutloff <leutloff@debian.org>
+Standards-Version: 2.5.0
+
+Package: lib-rxtx-java
+Architecture: any
+Depends: jdk1.1 (>= 1.1.7v2) | jdk1.2 | jdk1.1-native | jdk1.2-native
+Suggests: jdk-common
+Description: native interface to serial ports in java
+ This is a native library for jdk 1.1.*/1.2.*.
+ .
+ The CommAPI (javax.comm.*) from Sun is additionally needed to be able
+ to program the serial interfaces.

@@ -41,7 +41,7 @@ CLEANFILES = $(TOP)/*.class $(TOP)/javax/comm/*.class $(TOP)/jcl.jar
 SUFFIXES = .java .class
 SUFFIXES = .class .h
 
-install: all jcl install-lib
+install: all comm.jar  install-lib
 
 clean-generic:
 	rm -rf $(TOP)/$(target_alias) $(TOP)/javax 
@@ -62,7 +62,7 @@ install-lib:
 	$(LIBTOOL) --mode=install $(INSTALL_PROGRAM) libRS485.la $(RXTX_PATH);\
 	fi; \
 	)
-	$(INSTALL_PROGRAM) jcl.jar $(JPATH)/$(JCL_PATH)/
+	$(INSTALL_PROGRAM) comm.jar $(JPATH)/$(JCL_PATH)/
 run: $(TOP)/test.class all jcl
 	(cd $(TOP)/;chmod 755 *.class;\
 	LD_LIBRARY_PATH="$(target_alias)";\
@@ -156,6 +156,11 @@ $(TOP)/javax/comm/I2CPort.class $(TOP)/javax/comm/I2CPortEvent.class $(TOP)/java
 	$(JAVAC) $(srcdir)/src/I2CPort.java $(srcdir)/src/I2CPortEvent.java $(srcdir)/src/I2CPortEventListener.java
 
 I2C: $(TOP)/javax/comm/I2CPort.class $(TOP)/javax/comm/I2CPortEvent.class $(TOP)/javax/comm/I2CPortEventListener.class 
+
+$(TOP)/javax/comm/CommPortEnumerator.class $(TOP)/javax/comm/CommPortIdentifier.class: $(srcdir)/src/CommPortEnumerator.java $(srcdir)/src/CommPortIdentifier.java $(srcdir)/src/I2CPortEventListener.java 
+	$(JAVAC) $(srcdir)/src/CommPortEnumerator.java $(srcdir)/src/CommPortIdentifier.java
+
+IDENT: $(TOP)/javax/comm/CommPortEnumerator.class $(TOP)/javax/comm/CommPortIdentifier.class
 
 $(TOP)/%.class $(TOP)/javax/comm/%.class: $(srcdir)/src/%.java 
 	$(JAVAC) $< 

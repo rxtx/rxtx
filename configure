@@ -2475,7 +2475,7 @@ fi
 \$(TOP)/javax/comm/CommPortOwnershipListener.class \
 \$(TOP)/javax/comm/NoSuchPortException.class  \
 \$(TOP)/javax/comm/PortInUseException.class \
-\$(TOP)/javax/comm/CommPortIdentifier.class \
+IDENT \
 \$(TOP)/javax/comm/CpoList.class \
 \$(TOP)/javax/comm/CpoListEntry.class \
 I2C \
@@ -2888,11 +2888,11 @@ if test "$CC" = "gcc" || test "$CC"="egcs"; then
 fi
  case $OS_NAME in 
 Linux)
-	check_kernel_headers
+	#check_kernel_headers
 	check_java_headers
 	case $JAVA_VERSION in
 	1.2*) 
-		fix_parameters $JPATH/jre/lib/javax.comm.properties
+		#fix_parameters $JPATH/jre/lib/javax.comm.properties
 		#fix_comm_jar $JPATH/jre/lib/ext/comm.jar
 		JCLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:$CLASSPATH"
 		JAVA_H_CLASSPATH="-classpath .:`find $JPATH/ -name comm.jar |head -n1`"
@@ -2917,7 +2917,7 @@ Linux)
 		esac
 	;;
 	1.*) 
-		fix_parameters $JPATH/lib$KAFFE_LIB_FIX/javax.comm.properties
+		#fix_parameters $JPATH/lib$KAFFE_LIB_FIX/javax.comm.properties
 		#fix_comm_jar $JPATH/lib$KAFFE_LIB_FIX/comm.jar
 
 		check_prefix
