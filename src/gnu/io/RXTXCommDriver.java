@@ -367,7 +367,7 @@ public class RXTXCommDriver implements CommDriver
 				{
 					String[] Temp = {
 						"term",
-						"cuaa"
+						"cua"
 					};
 					CandidatePortPrefixes=Temp;
 				}
