@@ -223,7 +223,9 @@ JNIEXPORT void JNICALL RXTXPort(Initialize)(
 		sigset_t block_mask;
 		sigemptyset(&block_mask);
 		new_action.sa_handler = SIG_IGN;
+#ifdef SA_RESTART
 		new_action.sa_flags = SA_RESTART;
+#endif /* SA_RESTART */
 		new_action.sa_mask = block_mask;
 		sigaction(SIGIO, &new_action, NULL);
 	} 
@@ -2650,10 +2652,15 @@ GetTickCount()
 	gettimeofday(&now, NULL);
 	report_verbose("gettimeofday\n");
 
+#ifdef __QNX__
+	return now.tv_sec * 1000 + now.tv_usec / 1000;
+#else
 	return (now.tv_sec * 1000) + ceil(now.tv_usec / 1000);
+#endif /* __QNX__ */
+
 }
 
-#endif /* WIN32 */
+#endif /* !WIN32 */
 
 /*----------------------------------------------------------
 read_byte_array
@@ -2673,6 +2680,76 @@ read_byte_array
 		The nuts and bolts are documented in
 		NativeEnableReceiveTimeoutThreshold()
 ----------------------------------------------------------*/
+int read_byte_array( JNIEnv *env,
+                     jobject *jobj,
+                     int fd,
+                     unsigned char *buffer,
+                     int length,
+                     int timeout )
+{
+	int ret, left, bytes = 0;
+	long timeLeft, now, start = 0;
+	char msg[80];
+	struct timeval tv, *tvP;
+	fd_set rset;
+
+	report_time_start();
+	ENTER( "read_byte_array" );
+	sprintf(msg, "read_byte_array requests %i\n", length);
+	report( msg );
+	left = length;
+	if (timeout >= 0)
+		start = GetTickCount();
+	while( bytes < length )
+	{
+		if (timeout >= 0) {
+			now = GetTickCount();
+			if ( now-start >= timeout +1 )
+			return bytes;
+		}
+
+		FD_ZERO(&rset);
+		FD_SET(fd, &rset);
+
+		if (timeout >= 0){
+			timeLeft = timeout - (now - start);
+			tv.tv_sec = timeLeft / 1000;
+			tv.tv_usec = 1000 * ( timeLeft % 1000 );
+			tvP = &tv;
+		}
+		else{
+			tvP = NULL;
+		}
+
+		ret = select(fd + 1, &rset, NULL, NULL, tvP);
+		if (ret == -1){
+			report( "read_byte_array: select returned -1\n" );
+			LEAVE( "read_byte_array" );
+			return -1;
+		}
+		else if (ret > 0){
+			if ((ret = READ( fd, buffer + bytes, left )) < 0 ){
+				if (errno != EINTR && errno != EAGAIN){
+					report( "read_byte_array: read returned -1\n" );
+					LEAVE( "read_byte_array" );
+					return -1;
+				}
+			}
+			else{
+				bytes += ret;
+				left -= ret;
+			}
+		}
+	}
+
+	sprintf(msg, "read_byte_array returns %i\n", bytes);
+	report( msg );
+	LEAVE( "read_byte_array" );
+	report_time_end();
+	return bytes;
+}
+
+#ifdef asdf
 int read_byte_array(	JNIEnv *env,
 			jobject *jobj,	
 			int fd,
@@ -2715,7 +2792,6 @@ RETRY:	if ((ret = READ( fd, buffer + bytes, left )) < 0 )
 	report_time_end();
 	return bytes;
 }
-#ifdef asdf
 int read_byte_array(	JNIEnv *env,
 			jobject *jobj,	
 			int fd,
