@@ -5075,8 +5075,8 @@ int check_group_uucp()
 	testLockFile = fopen (testLockAbsFileName, "w+");
 	if (NULL == testLockFile)
 	{
-		report_error("check_group_uucp(): error testing lock file
-creation Error details: ");
+		report_error("check_group_uucp(): error testing lock file \
+			creation Error details: ");
 		report_error(strerror(errno));
 
 		free(testLockAbsFileName);
