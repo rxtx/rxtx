@@ -191,8 +191,9 @@ JNIEXPORT void JNICALL RXTXPort(Initialize)(
 	} 
 #endif /* !WIN32 */
 	ENTER( "RXTXPort:Initialize" );
-	//mexPrintf("RXTX  \
-	//Mon Jan 21 17:40:28 EST 2002\n");
+#ifdef DEBUG_MW
+	mexPrintf("RXTX Prerelease for testing  Sat Jan 26 15:32:04 MST 2002\n");
+#endif /* DEBUG_MW */
 #if defined(DEBUG) && defined(__linux__)
 	/* Lets let people who upgraded kernels know they may have problems */
 	if (uname (&name) == -1)
