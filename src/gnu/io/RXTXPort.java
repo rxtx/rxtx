@@ -30,10 +30,13 @@ import java.lang.Math;
 
 final public class RXTXPort extends SerialPort
 {
+	/* I had a report that some JRE's complain when MonitorThread
+	   tries to access private variables
+	*/
 
-	private final static boolean debug = false;
-	private final static boolean debug_verbose = false;
-	private final static boolean debug_events = false;
+	protected final static boolean debug = false;
+	protected final static boolean debug_verbose = false;
+	protected final static boolean debug_events = false;
 	static
 	{
 		if(debug ) 
