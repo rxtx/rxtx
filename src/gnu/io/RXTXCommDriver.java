@@ -131,18 +131,51 @@ public class RXTXCommDriver implements CommDriver
 		{
 			for( i = 0;i<CandidateDeviceNames.length; i++ ) {
 				for( p = 0;p<ValidPortPrefixes.length; p++ ) {
-					String PortName = new String(deviceDirectory + CandidateDeviceNames[ i ]);
-					if( CandidateDeviceNames[ i ].startsWith( ValidPortPrefixes[ p ] ) ) {
-						if (debug)
-							System.out.println("testing read on device "+CandidateDeviceNames[ i ]);
-						if (testRead(PortName, PortType))
-						{
-							CommPortIdentifier.addPortName(
+					/* this determines:
+					 * device file         Valid ports   
+					 * /dev/ttyR[0-9]*  != /dev/ttyS[0-9]*
+					 * /dev/ttySI[0-9]* != /dev/ttyS[0-9]*
+					 * /dev/ttyS[0-9]*  == /dev/ttyS[0-9]*
+
+					 * Otherwise we check some ports
+					 * multiple times.  Perl would rock
+					 * here.
+					 *
+					 * If the above passes, we try to read
+					 * from the port.  If there is no err
+					 * the port is added.
+					 * Trent
+					 */
+					String V =  ValidPortPrefixes[ p ];
+					int VL = V.length();
+					String C =   CandidateDeviceNames[ i ];
+					if( C.length() < VL ) continue;
+					String CU =
+						C.substring(VL).toUpperCase();
+					String Cl =
+						C.substring(VL).toLowerCase();
+					if( !( C.regionMatches(0, V, 0, VL ) &&
+						CU.equals( Cl ) ) )
+					{
+						continue;
+					}
+					String PortName =
+						new String(deviceDirectory +
+							C );
+					if (debug)
+					{
+						System.out.println( C +
+								" " + V );
+						System.out.println( CU +
+								" " + Cl );
+					}
+					if (testRead(PortName, PortType))
+					{
+						CommPortIdentifier.addPortName(
 								PortName,
 								PortType,
 								this
-							);
-						}
+						);
 					}
 				}
 			}
@@ -368,7 +401,7 @@ public class RXTXCommDriver implements CommDriver
 					"ttyUSB",//linux USB serial converters
 					"ttyV", // linux Comtrol VS-1000 serial controller
 					"ttyW", // linux specialix cards
-					"ttyX", // linux SpecialX serial card
+					"ttyX"  // linux SpecialX serial card
 					};
 					CandidatePortPrefixes=Temp;
 				}
