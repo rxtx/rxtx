@@ -830,7 +830,7 @@ void throw_java_exception( JNIEnv *env, char *exc, char *foo, char *msg )
 	}
 	// reduce the message size if it to large for the message buffer
 	if(MSG_SIZE < (strlen( msg ) + strlen(foo) + 5)){
-		msg[ MSG_SIZE - lstrlen(foo) - 5] = 0;
+		msg[ MSG_SIZE - strlen(foo) - 5] = 0;
 	}
 #if defined(_GNU_SOURCE)
 	snprintf( buf, 60, "%s in %s", msg, foo );
