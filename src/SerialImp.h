@@ -62,7 +62,6 @@
 #	define LOCKDIR "/var/lock"
 #endif /* __linux__ */
 #if defined(__sgi__) || defined(sgi)
-#error test
 #	define DEVICEDIR "/dev/"
 #	define LOCKDIR "/usr/spool/uucp"
 #endif /* __sgi__ || sgi */
@@ -89,6 +88,10 @@
 #	define DEVICEDIR "/dev/"
 #	define LOCKDIR ""
 #endif /* __osf__ */
+#if defined(__sun__) /* Solaris */
+#	define DEVICEDIR "/dev/"
+#	define LOCKDIR "/var/spool/lock"
+#endif /* solaris */
 #if defined(__BEOS__)
 #	define DEVICEDIR "/dev/ports/"
 #	define LOCKDIR ""
