@@ -114,6 +114,9 @@ extern int errno;
 #endif /* TRENT_IS_HERE */
 #include "SerialImp.h"
 
+
+struct preopened *preopened_port = NULL;
+
 /* this is so diff will not generate noise when merging 1.4 and 1.5 changes
  * It will eventually be removed.
  * */
@@ -253,6 +256,58 @@ JNIEXPORT void JNICALL RXTXPort(Initialize)(
 }
 
 /*----------------------------------------------------------
+RXTXPort.find_preopened_ports
+   accept:      The device to find if preopened.  ie "/dev/ttyS0"
+   perform:     find the filedescriptor if preopened
+   return:      fd
+   exceptions:  none
+   comments:    see
+			RXTXPort.nativeStaticSetDTR
+			RXTXPort.nativeStaticSetRTS
+		This is used so people can setDTR low before calling the
+		Java open().
+----------------------------------------------------------*/
+int find_preopened_ports( const char *filename )
+{
+	int fd;
+	struct preopened *p = preopened_port;
+
+	if( !p )
+	{
+		return(0);
+	}
+	for(;;)
+	{
+		if( !strcmp( p->filename, filename) )
+		{
+			fd = p->fd;
+			if( p->prev && p->next )
+			{
+				p->prev->next = p->next;
+				p->next->prev = p->prev;
+			}
+			else if ( p->prev )
+				p->prev->next = NULL;
+			else if ( p->next )
+				p->next->prev = NULL;
+			else
+			{
+				free( p );
+				preopened_port = NULL;
+			}
+			free( p );
+			return( fd );
+		}
+		if( p->next )
+		{
+			p = p->next;
+		}
+		else
+			return(0);
+	}
+}
+
+/*----------------------------------------------------------
 RXTXPort.open
 
    accept:      The device to open.  ie "/dev/ttyS0"
@@ -315,6 +370,13 @@ JNIEXPORT jint JNICALL RXTXPort(open)(
 	{
 		sprintf( message, "open: locking worked for %s\n", filename );
 		report( message );
+	}
+	/* This is used so DTR can remain low on 'open()' */
+	fd = find_preopened_ports( filename );
+	if( fd )
+	{
+		(*env)->ReleaseStringUTFChars( env, jstr, filename );
+		return (jint)fd;
 	}
 
 	do {
@@ -529,8 +591,7 @@ JNIEXPORT void JNICALL RXTXPort(nativeSetSerialPortParams)(
 		report( "nativeSetSerialPortParams: Cannot Set Speed\n" );
 		goto fail;
 	}
-#else
-#ifdef WIN32
+#endif  /* __FreeBSD__ */
 	if( !cspeed )
 	{
 		/* hang up the modem aka drop DTR  */
@@ -540,7 +601,6 @@ JNIEXPORT void JNICALL RXTXPort(nativeSetSerialPortParams)(
 		ioctl( fd, TIOCMSET, &result );
 	}
 	else {
-#endif /* WIN32 */
 	if(
 		cfsetispeed( &ttyset, cspeed ) < 0 ||
 		cfsetospeed( &ttyset, cspeed ) < 0 )
@@ -548,10 +608,7 @@ JNIEXPORT void JNICALL RXTXPort(nativeSetSerialPortParams)(
 		report( "nativeSetSerialPortParams: Cannot Set Speed\n" );
 		goto fail;
 	}
-#ifdef WIN32
 	}
-#endif /* WIN32 */
-#endif  /* __FreeBSD__ */
 
 	if( tcsetattr( fd, TCSANOW, &ttyset ) < 0 )
 	{
@@ -1364,9 +1421,61 @@ JNIEXPORT void JNICALL RXTXPort(setDTR)( JNIEnv *env,
 	LEAVE( "RXTXPort:setDTR" );
 	return;
 }
+/*----------------------------------------------------------
+RXTXPort.static_add_filename
+
+   accept:      filename and fd to save
+   perform:     add a struct holding the info to a linked list
+   return:      none
+   exceptions:  none
+   comments:    the info is checked on open() if its in the list no
+		changes are performed on the file on open()
+
+   comments:    see
+			RXTXPort.nativeStaticSetDTR
+			RXTXPort.nativeStaticSetRTS
+		This is used so people can setDTR low before calling the
+-----------------------------------------------------------*/
+
+void static_add_filename( char *filename, int fd)
+{
+	struct preopened *newp, *p = preopened_port;
+
+	newp = malloc( sizeof( struct preopened ) );
+	strcpy( newp->filename, filename );
+	newp->fd = fd;
+
+	if( !p )
+	{
+		newp->next = NULL;
+		newp->prev = NULL;
+		p = newp;
+		return;
+	}
+	for(;;)
+	{
+		if( !strcmp( p->filename, filename) )
+		{
+			/* already open */
+			return;
+		}
+		if( p->next )
+		{
+			p = p->next;
+		}
+		else
+		{
+			/* end of list */
+			newp->next = NULL;
+			newp->prev = p;
+			p->next = newp;
+			return;
+		}
+	}
+}
 
 /*----------------------------------------------------------
-RXTXPort.nativeStaticSetsetRTS
+RXTXPort.nativeStaticSetRTS
 
    accept:      new RTS state
    perform:     if flag is true, TIOCM_RTS is set
@@ -1414,8 +1523,9 @@ JNIEXPORT jboolean JNICALL RXTXPort(nativeStaticSetRTS) (JNIEnv *env,
 
 	UNLOCK( filename,  pid );
 
+	static_add_port( fd, filename );
+	
 	/* dont close the port.  Its not clear if the RTS would remain high */
-
 	(*env)->ReleaseStringUTFChars( env, jstr, filename );
 	LEAVE( "RXTXPort:nativeStaticSetRTS" );
 	return( JNI_TRUE );
@@ -1426,7 +1536,7 @@ fail:
 }
 
 /*----------------------------------------------------------
-RXTXPort.nativeStaticSetsetDTR
+RXTXPort.nativeStaticSetDTR
 
    accept:      new DTR state
    perform:     if flag is true, TIOCM_DTR is set
