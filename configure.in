@@ -475,7 +475,7 @@ HP-UX)
 	RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
 	TARGETLIB="\$(target_alias)/libSerial.la"
 	case $JAVA_VERSION in
-		HP-UX\ Java\ C.01.2*) 
+		HP-UX\ Java\ C.01.2*|HP-UX\ Java\ C.01.3*) 
 			fix_parameters $JPATH/jre/lib/javax.comm.properties
 			fix_comm_jar $JPATH/jre/lib/ext/comm.jar
 			JHOME=$JPATH"/jre/lib/ext"
