@@ -102,8 +102,8 @@ extern int errno;
 #ifdef TRENT_IS_HERE
 #define DEBUG
 #define TRACE
-#undef TIOCSERGETLSR
 /*
+#undef TIOCSERGETLSR
 #define DEBUG_MW
 #define DONT_USE_OUTPUT_BUFFER_EMPTY_CODE
 notes:
@@ -690,7 +690,7 @@ thread_write()
    comments:	
 ----------------------------------------------------------*/
 
-#ifndef TIOCSERGETLSR
+#if !defined(TIOCSERGETLSR) && !defined( WIN32 )
 void *thread_write( void *arg )
 {
 	struct event_info_struct *eis = ( struct event_info_struct * ) arg;
@@ -924,7 +924,7 @@ int spawn_write_thread( int fd, char *buff, int length,
 	return(t->length);
 #endif /* DONT_USE_OUTPUT_BUFFER_EMPTY_CODE */
 }
-#endif /* TIOCSERGETLSR */
+#endif /* TIOCSERGETLSR !WIN32 */
 /*----------------------------------------------------------
 finalize_thread_write( )
 
@@ -945,7 +945,7 @@ finalize_thread_write( )
 ----------------------------------------------------------*/
 void finalize_thread_write( struct event_info_struct *eis )
 {
-#ifndef TIOCSERGETLSR
+#if     defined(TIOCSERGETLSR) && !defined( WIN32 )
 	/* used to shut down any remaining write threads */
 
 	eis->tpid->closing = 1;
@@ -992,7 +992,7 @@ void finalize_thread_write( struct event_info_struct *eis )
 
 	/* need to clean up again after working events */
 	report("leaving finalize_thread_write\n");
-#endif /* TIOCSERGETLSR */
+#endif /* TIOCSERGETLSR & !WIN32 */
 }
 
 /*----------------------------------------------------------
@@ -1005,7 +1005,7 @@ add_tpid
    comments:    This is used to cleanup threads and make sure the
 		write()'s happen in order on systems without access to the LSR
 ----------------------------------------------------------*/
-#ifndef TIOCSERGETLSR
+#if defined(TIOCSERGETLSR) && !defined( WIN32 )
 struct tpid_info_struct *add_tpid( struct tpid_info_struct *p )
 {
 	struct tpid_info_struct *q;
@@ -1042,7 +1042,7 @@ init_thread_write( )
 ----------------------------------------------------------*/
 int init_thread_write( struct event_info_struct *eis )
 {
-#ifndef TIOCSERGETLSR
+#if !defined(TIOCSERGETLSR) && !defined(WIN32)
 	struct tpid_info_struct *t = add_tpid( NULL);
 	sigset_t newmask, oldmask;
 	struct sigaction newaction, oldaction;
@@ -2036,7 +2036,7 @@ check_line_status_register
 ----------------------------------------------------------*/
 int check_line_status_register( struct event_info_struct *eis )
 {
-#if defined TIOCSERGETLSR
+#ifdef TIOCSERGETLSR
 	struct stat fstatbuf;
 
 	if( ! eis->eventflags[SPE_OUTPUT_BUFFER_EMPTY] )
@@ -2360,7 +2360,7 @@ int initialise_event_info_struct( struct event_info_struct *eis )
 	}
 
 	for( i = 0; i < 11; i++ ) eis->eventflags[i] = 0;
-#ifndef TIOCSERGETLSR
+#if !defined(TIOCSERGETLSR) && !defined(WIN32)
 	eis->output_buffer_empty_flag = 0;
 #endif /* TIOCSERGETLSR */
 
