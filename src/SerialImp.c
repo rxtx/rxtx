@@ -3393,7 +3393,7 @@ RXTXCommDriver.nativeGetVersion
 JNIEXPORT jstring JNICALL RXTXCommDriver(nativeGetVersion) (JNIEnv *env,
 	jclass jclazz )
 {
-	return (*env)->NewStringUTF( env, "RXTX-2.1-1" );
+	return (*env)->NewStringUTF( env, "RXTX-2.1-2" );
 }
 
 /*----------------------------------------------------------
@@ -4620,6 +4620,15 @@ int check_group_uucp()
 	}
 	group_count = getgroups( NGROUPS_MAX, list );
 	list[ group_count ] = geteuid();
+
+	/* JJO changes start */
+	if( user == NULL )
+	{
+		report_error( "Not able to get user groups.\n" );
+		return 1;
+	} else
+	/* JJO changes stop */
+
 
 	if( user->pw_gid )
 	{
