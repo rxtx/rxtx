@@ -603,7 +603,9 @@ JNIEXPORT void JNICALL RXTXPort(nativeSetSerialPortParams)(
 	{
 		/* hang up the modem aka drop DTR  */
 		/* Unix should handle this */
+		/*
 		mexPrintf("dropping DTR\n");
+		*/
 		ioctl( fd, TIOCMGET, &result );
 		result &= ~TIOCM_DTR;
 		ioctl( fd, TIOCMSET, &result );
