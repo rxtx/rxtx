@@ -211,6 +211,7 @@ Trent
 #	define WRITE write
 #	define READ read
 #	define SELECT select
+/* #define TRACE */
 #ifdef TRACE
 #define ENTER(x) report("entering "x" \n");
 #define LEAVE(x) report("leaving "x" \n");
@@ -222,7 +223,7 @@ Trent
 #endif /* WIN32 */
 
 /* allow people to override the directories */
-
+/* #define USER_LOCK_DIRECTORY "/home/tjarvi/1.12/build" */
 #ifdef USER_LOCK_DIRECTORY
 #	define LOCKDIR USER_LOCK_DIRECTORY
 #endif /* USER_LOCK_DIRECTORY */
