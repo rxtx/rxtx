@@ -1,6 +1,6 @@
 /*-------------------------------------------------------------------------
 |   rxtx is a native interface to serial ports in java.
-|   Copyright 1997-2002 by Trent Jarvi taj@parcelfarce.linux.theplanet.co.uk.
+|   Copyright 1997-2002 by Trent Jarvi taj@www.linux.org.uk.
 |
 |   This library is free software; you can redistribute it and/or
 |   modify it under the terms of the GNU Library General Public
@@ -413,7 +413,11 @@ void termiosSetParityError( int, char );
 #define TIOCSERSETMULTI	0x545b
 #define TIOCMIWAIT	0x545c
 /* this would require being able to get the number of overruns ... */
-#define TIOCGICOUNT	0x545d
+/*
+	FIXME
+	frame and parity errors caused crashes in testing BlackBox
+	#define TIOCGICOUNT	0x545d
+*/
 
 /* ioctl errors */
 #define ENOIOCTLCMD	515

@@ -1,6 +1,6 @@
 /*-------------------------------------------------------------------------
 |   rxtx is a native interface to Raw ports in java.
-|   Copyright 1997-2002 by Trent Jarvi taj@parcelfarce.linux.theplanet.co.uk.
+|   Copyright 1997-2002 by Trent Jarvi taj@www.linux.org.uk.
 |
 |   This library is free software; you can redistribute it and/or
 |   modify it under the terms of the GNU Library General Public
@@ -118,7 +118,7 @@ final class Raw  extends  RawPort {
 
 	/*
 	linux/drivers/char/n_hdlc.c? FIXME
-		taj@parcelfarce.linux.theplanet.co.uk
+		taj@www.linux.org.uk
 	*/
 	/** Receive framing control 
 	*/
@@ -185,7 +185,7 @@ final class Raw  extends  RawPort {
 	/** Input/output buffers */
 	/** FIXME I think this refers to 
 		FOPEN(3)/SETBUF(3)/FREAD(3)/FCLOSE(3) 
-		taj@parcelfarce.linux.theplanet.co.uk
+		taj@www.linux.org.uk
 
 		These are native stubs...
 	*/
