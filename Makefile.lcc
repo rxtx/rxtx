@@ -1,0 +1,55 @@
+#  Copyright 2001 Valentin Pavlov
+#
+#
+#  The library loads but java APIs still need some modifications
+#  the native - too.
+#
+#  A make file for compiling rxtx with lcc contributed by Valentin Pavlov
+#  lcc may be downloaded from:  http://www.cs.virginia.edu/~lcc-win32/
+#
+#  You will need a config.h file in the src directory.  Other builds usually
+#  generate them automatically.  The following should work.
+#define HAVE_FCNTL_H
+#define HAVE_SIGNAL_H
+#undef HAVE_SYS_FCNTL_H
+#undef HAVE_SYS_FILE_H
+#undef HAVE_SYS_SIGNAL_H
+#undef HAVE_TERMIOS_H
+#undef HAVE_SYS_TIME_H
+#  if you know how to create the above in a dos Makefile send in the changes.
+#
+#  the following commands should then work fine on the command line.
+#
+#  cd src
+#  make -f ..\Makefile.lcc
+#
+#  You will need to do some programming to get this working.  rxtx has moved
+#  to full event support and the win32 code has not been updated to reflect
+#  the changes.  There is no windows parallel port code at this time.
+#
+#  Thur Jan 24 2001  put Comments in the Makefile. trentjarvi@yahoo.com.
+#                    added javac/javah/jar build rule.
+
+CFLAGS=-I\JDK\INCLUDE -I\jdk\include\win32 -I.
+CC=lcc
+LINKER=lcclnk
+OBJS=init.obj SerialImp.obj termios.obj
+SRC=init.c SerialImp.c termios.c
+LIBS=
+
+lib: $(OBJS)
+	lcclnk -dll $(OBJS) wsock32.lib -o Serial.dll
+
+init.obj:  comm.jar
+	$(CC) $(CFLAGS) init.c
+
+SerialImp.obj: comm.jar
+	$(CC) $(CFLAGS) SerialImp.c
+         
+termios.obj: comm.jar
+	$(CC) $(CFLAGS) termios.c
+
+comm.jar:
+	javac -d . -O *.java
+	jar -cf comm.jar javax
+	javah -jni javax.comm.RXTXPort javax.comm.RXTXCommDriver
