@@ -547,7 +547,7 @@ int translate_speed( JNIEnv *env, jint speed )
 
 	LEAVE( "RXTXPort:translate_speed" );
 	throw_java_exception( env, UNSUPPORTED_COMM_OPERATION,
-		"translate_speed", "speed" );
+		"", "Baud rate not supported" );
 	return 0;
 }
 
@@ -582,7 +582,7 @@ int translate_data_bits( JNIEnv *env, tcflag_t *cflag, jint dataBits )
 
 	LEAVE( "RXTXPort:translate_date_bits" );
 	throw_java_exception( env, UNSUPPORTED_COMM_OPERATION,
-		"translate_data_bits", "data bits" );
+		"", "databit value not supported" );
 	return 0;
 }
 
@@ -616,7 +616,7 @@ int translate_stop_bits( JNIEnv *env, tcflag_t *cflag, jint stopBits )
 
 	LEAVE( "RXTXPort:translate_stop_bits" );
 	throw_java_exception( env, UNSUPPORTED_COMM_OPERATION,
-		"translate_stop_bits", "stop bits" );
+		"", "stopbit value not supported" );
 	return 0;
 }
 
@@ -661,7 +661,7 @@ int translate_parity( JNIEnv *env, tcflag_t *cflag, jint parity )
 
 	LEAVE( "translate_parity" );
 	throw_java_exception( env, UNSUPPORTED_COMM_OPERATION,
-		"translate_parity", "parity" );
+		"", "parity value not supported" );
 	return 0;
 }
 
@@ -1486,7 +1486,7 @@ RXTXPort.setflowcontrol
 	FLOWCONTROL_XONXOFF_OUT output software flow control
    perform:     set flow control to flowmode
    return:      none
-   exceptions:  IOException
+   exceptions:  UnsupportedCommOperationException
    comments:  there is no differentiation between input and output hardware
               flow control
 ----------------------------------------------------------*/
@@ -1518,8 +1518,8 @@ JNIEXPORT void JNICALL RXTXPort(setflowcontrol)( JNIEnv *env,
 	return;
 fail:
 	LEAVE( "RXTXPort:setflowcontrol" );
-	throw_java_exception( env, IO_EXCEPTION, "setHWFC",
-		strerror( errno ) );
+	throw_java_exception( env, UNSUPPORTED_COMM_OPERATION, "",
+		"flow control type not supported" );
 	return;
 }
 
@@ -1934,7 +1934,7 @@ JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 	if ( !initialise_event_info_struct( &eis ) ) goto end;
 	unlock_monitor_thread( &eis );
 	do{
-		report( "." );
+		/* report( "." ); */
 		do {
 			eis.ret = SELECT( eis.fd + 1, &eis.rfds, NULL, NULL,
 					&eis.tv_sleep );
