@@ -266,6 +266,7 @@ RXTXPort.find_preopened_ports
    return:      fd
    exceptions:  none
    comments:    see
+			RXTXPort.nativeStaticSetDSR
 			RXTXPort.nativeStaticSetDTR
 			RXTXPort.nativeStaticSetRTS
 			RXTXPort.nativeStaticSetSerialPortParams
@@ -322,6 +323,51 @@ int find_preopened_ports( const char *filename )
 /*----------------------------------------------------------
 RXTXPort.open
 
+   accept:      env, file descriptor
+   perform:     set the termios struct to sane settings and
+   return:      0 on success
+   exceptions:  IOExcepiton
+   comments:    Very often people complain about not being able to get past
+                this function and it turns out to be permissions on the
+                device file or bios has the device disabled.
+----------------------------------------------------------*/
+int configure_port( int fd )
+{
+	struct termios ttyset;
+
+	if( fd < 0 ) goto fail;
+
+	if( tcgetattr( fd, &ttyset ) < 0 ) goto fail;
+	ttyset.c_iflag = INPCK;
+	ttyset.c_lflag = 0;
+	ttyset.c_oflag = 0;
+	ttyset.c_cflag = CREAD | CS8 | CLOCAL;
+	ttyset.c_cc[ VMIN ] = 0;
+	ttyset.c_cc[ VTIME ] = 0;
+
+#ifdef __FreeBSD__
+	if( cfsetspeed( &ttyset, B9600 ) < 0 ) goto fail;
+#else
+	if( cfsetispeed( &ttyset, B9600 ) < 0 ) goto fail;
+	if( cfsetospeed( &ttyset, B9600 ) < 0 ) goto fail;
+#endif
+	if( tcsetattr( fd, TCSANOW, &ttyset ) < 0 ) goto fail;
+#ifndef WIN32
+	fcntl( fd, F_SETOWN, getpid() );
+#endif /* WIN32 */
+#ifdef FASYNC
+	fcntl( fd, F_SETFL, FASYNC );
+#endif /* FASYNC */
+
+	return 0;
+
+fail:
+	return 1;
+}
+
+/*----------------------------------------------------------
+RXTXPort.open
+
    accept:      The device to open.  ie "/dev/ttyS0"
    perform:     open the device, set the termios struct to sane settings and
                 return the filedescriptor
@@ -337,7 +383,6 @@ JNIEXPORT jint JNICALL RXTXPort(open)(
 	jstring jstr
 	)
 {
-	struct termios ttyset;
 	int fd;
 	int  pid = -1;
 	char message[80];
@@ -394,31 +439,9 @@ JNIEXPORT jint JNICALL RXTXPort(open)(
 	do {
 		fd=OPEN (filename, O_RDWR | O_NOCTTY | O_NONBLOCK );
 	}  while (fd < 0 && errno==EINTR);
-	if( fd < 0 ) goto fail;
+
+	if( configure_port( fd ) ) goto fail;
 	(*env)->ReleaseStringUTFChars( env, jstr, filename );
-
-	if( tcgetattr( fd, &ttyset ) < 0 ) goto fail;
-	ttyset.c_iflag = INPCK;
-	ttyset.c_lflag = 0;
-	ttyset.c_oflag = 0;
-	ttyset.c_cflag = CREAD | CS8 | CLOCAL;
-	ttyset.c_cc[ VMIN ] = 0;
-	ttyset.c_cc[ VTIME ] = 0;
-
-#ifdef __FreeBSD__
-	if( cfsetspeed( &ttyset, B9600 ) < 0 ) goto fail;
-#else
-	if( cfsetispeed( &ttyset, B9600 ) < 0 ) goto fail;
-	if( cfsetospeed( &ttyset, B9600 ) < 0 ) goto fail;
-#endif
-	if( tcsetattr( fd, TCSANOW, &ttyset ) < 0 ) goto fail;
-#ifndef WIN32
-	fcntl( fd, F_SETOWN, getpid() );
-#endif /* WIN32 */
-#ifdef FASYNC
-	fcntl( fd, F_SETFL, FASYNC );
-#endif /* FASYNC */
-
 	sprintf( message, "open: fd returned is %i\n", fd );
 	report( message );
 	LEAVE( "RXTXPort:open" );
@@ -1002,7 +1025,9 @@ RXTXPort.writeByte
 JNIEXPORT void JNICALL RXTXPort(writeByte)( JNIEnv *env,
 	jobject jobj, jint ji )
 {
+#ifndef TIOCSERGETLSR
 	struct event_info_struct *index = master_index;
+#endif
 	unsigned char byte = (unsigned char)ji;
 	int fd = get_java_var( env, jobj,"fd","I" );
 	int result;
@@ -1050,11 +1075,13 @@ RXTXPort.writeArray
 JNIEXPORT void JNICALL RXTXPort(writeArray)( JNIEnv *env,
 	jobject jobj, jbyteArray jbarray, jint offset, jint count )
 {
+#ifndef TIOCSERGETLSR
 	struct event_info_struct *index = master_index;
+#endif /* TIOCSERGETLSR */
 	int fd = get_java_var( env, jobj,"fd","I" );
 	int result=0,total=0;
 	jbyte *body = (*env)->GetByteArrayElements( env, jbarray, 0 );
-	char message[1000];
+	//char message[1000];
 #if defined ( __sun__ )
 	struct timespec retspec;
 
@@ -1084,7 +1111,7 @@ JNIEXPORT void JNICALL RXTXPort(writeArray)( JNIEnv *env,
 	}
 	index->writing = 1;
 	report( "writeArray:  index->writing = 1" );
-#endif
+#endif /* TIOCSERGETLSR */
 	/*
 		50 ms sleep to make sure read can get in
 
@@ -1482,6 +1509,7 @@ RXTXPort.static_add_filename
 		changes are performed on the file on open()
 
    comments:    see
+			RXTXPort.nativeStaticSetDSR
 			RXTXPort.nativeStaticSetDTR
 			RXTXPort.nativeStaticSetRTS
 			RXTXPort.nativeStaticSetSerialPortParams
@@ -1527,6 +1555,72 @@ void static_add_filename( const char *filename, int fd)
 }
 
 /*----------------------------------------------------------
+RXTXPort.nativeStaticSetDSR
+
+   accept:      new RTS state
+   perform:     if flag is true, TIOCM_DSR is set
+                if flag is false, TIOCM_DSR is unset
+   return:      none
+   exceptions:  none
+   comments:    Set the DSR so it does not raise on the next open
+		needed for some funky test boards?
+
+		This is static so we can not call the open() setDSR()
+		we dont have the jobject.
+
+		First introduced in rxtx-1.5-9
+----------------------------------------------------------*/
+JNIEXPORT jboolean JNICALL RXTXPort(nativeStaticSetDSR) (JNIEnv *env,
+	jclass jclazz, jstring jstr, jboolean flag)
+{
+	int fd;
+	int  pid = -1;
+	int result;
+	const char *filename = (*env)->GetStringUTFChars( env, jstr, 0 );
+
+	ENTER( "RXTXPort:nativeStaticSetDSR" );
+#ifndef WIN32
+	pid = getpid();
+#endif /* WIN32 */
+
+	/* Open and lock the port so nothing else changes the setting */
+
+	if ( LOCK( filename, pid ) ) goto fail;;
+	
+	fd = find_preopened_ports( filename );
+	if( !fd )
+	{
+		do {
+			fd = OPEN (filename, O_RDWR | O_NOCTTY | O_NONBLOCK );
+		}  while (fd < 0 && errno==EINTR);
+		if ( configure_port( fd ) ) goto fail;
+	}
+	if ( fd < 0 ) goto fail;
+
+	/* raise the DSR */
+
+	ioctl( fd, TIOCMGET, &result );
+	if( flag == JNI_TRUE ) result |= TIOCM_DSR;
+	else result &= ~TIOCM_DSR;
+	ioctl( fd, TIOCMSET, &result );
+
+	/* Unlock the port.  Good luck! :) */
+
+	UNLOCK( filename,  pid );
+
+	static_add_filename( filename, fd );
+	
+	/* dont close the port.  Its not clear if the DSR would remain high */
+	(*env)->ReleaseStringUTFChars( env, jstr, filename );
+	LEAVE( "RXTXPort:nativeStaticSetDSR" );
+	return( JNI_TRUE );
+fail:
+	(*env)->ReleaseStringUTFChars( env, jstr, filename );
+	LEAVE( "RXTXPort:nativeStaticSetDSR" );
+	return( JNI_FALSE );
+}
+
+/*----------------------------------------------------------
 RXTXPort.nativeStaticSetRTS
 
    accept:      new RTS state
@@ -1565,6 +1659,7 @@ JNIEXPORT jboolean JNICALL RXTXPort(nativeStaticSetRTS) (JNIEnv *env,
 		do {
 			fd = OPEN (filename, O_RDWR | O_NOCTTY | O_NONBLOCK );
 		}  while (fd < 0 && errno==EINTR);
+		if ( configure_port( fd ) ) goto fail;
 	}
 	if ( fd < 0 ) goto fail;
 
@@ -1629,6 +1724,7 @@ JNIEXPORT void JNICALL RXTXPort(nativeStaticSetSerialPortParams) (JNIEnv *env,
 		do {
 			fd = OPEN (filename, O_RDWR | O_NOCTTY | O_NONBLOCK );
 		}  while (fd < 0 && errno==EINTR);
+		if ( configure_port( fd ) ) goto fail;
 	}
 
 	if ( fd < 0 )
@@ -1712,6 +1808,7 @@ JNIEXPORT jboolean JNICALL RXTXPort(nativeStaticSetDTR) (JNIEnv *env,
 		do {
 			fd = OPEN (filename, O_RDWR | O_NOCTTY | O_NONBLOCK );
 		}  while (fd < 0 && errno==EINTR);
+		if ( configure_port( fd ) ) goto fail;
 	}
 	if ( fd < 0 ) goto fail;
 
@@ -1736,6 +1833,361 @@ fail:
 	(*env)->ReleaseStringUTFChars( env, jstr, filename );
 	LEAVE( "RXTXPort:nativeStaticSetDTR" );
 	return( JNI_FALSE );
+}
+
+/*----------------------------------------------------------
+RXTXPort.nativeStaticIsRTS
+
+   accept:      filename
+   perform:     check status of RTS of preopened ports (setting lines/params
+		before calling the Java open()
+   return:      true if TIOCM_RTS is set
+                false if TIOCM_RTS is not set
+   exceptions:  none
+   comments:    RTS stands for Request to Send
+----------------------------------------------------------*/
+JNIEXPORT jboolean JNICALL RXTXPort(nativeStaticIsRTS)( JNIEnv *env,
+	jobject jobj, jstring jstr )
+{
+	unsigned int result = 0;
+	const char *filename = (*env)->GetStringUTFChars( env, jstr, 0 );
+	int fd = find_preopened_ports( filename );
+	char message[80];
+
+	ENTER( "RXTXPort:nativeStaticIsRTS" );
+	if( !fd )
+	{
+		/* Exception? FIXME */
+		return JNI_FALSE;
+	}
+	ioctl( fd, TIOCMGET, &result );
+	sprintf( message, "nativeStaticIsRTS( ) returns %i\n", result& TIOCM_RTS );
+	report( message );
+	LEAVE( "RXTXPort:nativeStaticIsRTS" );
+	if( result & TIOCM_RTS ) return JNI_TRUE;
+	else return JNI_FALSE;
+}
+/*----------------------------------------------------------
+RXTXPort.nativeStaticIsDSR
+
+   accept:      filename
+   perform:     check status of DSR of preopened ports (setting lines/params
+		before calling the Java open()
+   return:      true if TIOCM_DSR is set
+                false if TIOCM_DSR is not set
+   exceptions:  none
+   comments:    
+----------------------------------------------------------*/
+JNIEXPORT jboolean JNICALL RXTXPort(nativeStaticIsDSR)( JNIEnv *env,
+	jobject jobj, jstring jstr )
+{
+	unsigned int result = 0;
+	const char *filename = (*env)->GetStringUTFChars( env, jstr, 0 );
+	int fd = find_preopened_ports( filename );
+	char message[80];
+
+	ENTER( "RXTXPort:nativeStaticIsDSR" );
+	if( !fd )
+	{
+		/* Exception? FIXME */
+		return JNI_FALSE;
+	}
+	ioctl( fd, TIOCMGET, &result );
+	sprintf( message, "nativeStaticIsDSR( ) returns %i\n", result& TIOCM_DSR );
+	report( message );
+	LEAVE( "RXTXPort:nativeStaticIsDSR" );
+	if( result & TIOCM_DSR ) return JNI_TRUE;
+	else return JNI_FALSE;
+}
+/*----------------------------------------------------------
+RXTXPort.nativeStaticIsDTR
+
+   accept:      filename
+   perform:     check status of DTR of preopened ports (setting lines/params
+		before calling the Java open()
+   return:      true if TIOCM_DTR is set
+                false if TIOCM_DTR is not set
+   exceptions:  none
+   comments:    DTR stands for Data Terminal Ready
+----------------------------------------------------------*/
+JNIEXPORT jboolean JNICALL RXTXPort(nativeStaticIsDTR)( JNIEnv *env,
+	jobject jobj, jstring jstr )
+{
+	unsigned int result = 0;
+	const char *filename = (*env)->GetStringUTFChars( env, jstr, 0 );
+	int fd = find_preopened_ports( filename );
+	char message[80];
+
+	ENTER( "RXTXPort:nativeStaticIsDTR" );
+	if( !fd )
+	{
+		/* Exception? FIXME */
+		return JNI_FALSE;
+	}
+	ioctl( fd, TIOCMGET, &result );
+	sprintf( message, "nativeStaticIsDTR( ) returns %i\n", result& TIOCM_DTR );
+	report( message );
+	LEAVE( "RXTXPort:nativeStaticIsDTR" );
+	if( result & TIOCM_DTR ) return JNI_TRUE;
+	else return JNI_FALSE;
+}
+/*----------------------------------------------------------
+RXTXPort.nativeStaticIsCD
+
+   accept:      filename
+   perform:     check status of CD of preopened ports (setting lines/params
+		before calling the Java open()
+   return:      true if TIOCM_CD is set
+                false if TIOCM_CD is not set
+   exceptions:  none
+   comments:    CD stands for carrier detect
+----------------------------------------------------------*/
+JNIEXPORT jboolean JNICALL RXTXPort(nativeStaticIsCD)( JNIEnv *env,
+	jobject jobj, jstring jstr )
+{
+	unsigned int result = 0;
+	const char *filename = (*env)->GetStringUTFChars( env, jstr, 0 );
+	int fd = find_preopened_ports( filename );
+	char message[80];
+
+	ENTER( "RXTXPort:nativeStaticIsCD" );
+	if( !fd )
+	{
+		/* Exception? FIXME */
+		return JNI_FALSE;
+	}
+	ioctl( fd, TIOCMGET, &result );
+	sprintf( message, "nativeStaticIsCD( ) returns %i\n", result& TIOCM_CD );
+	report( message );
+	LEAVE( "RXTXPort:nativeStaticIsCD" );
+	if( result & TIOCM_CD ) return JNI_TRUE;
+	else return JNI_FALSE;
+}
+/*----------------------------------------------------------
+RXTXPort.nativeStaticIsCTS
+
+   accept:      filename
+   perform:     check status of CTS of preopened ports (setting lines/params
+		before calling the Java open()
+   return:      true if TIOCM_CTS is set
+                false if TIOCM_CTS is not set
+   exceptions:  none
+   comments:    CTS stands for Clear To Send
+----------------------------------------------------------*/
+JNIEXPORT jboolean JNICALL RXTXPort(nativeStaticIsCTS)( JNIEnv *env,
+	jobject jobj, jstring jstr )
+{
+	unsigned int result = 0;
+	const char *filename = (*env)->GetStringUTFChars( env, jstr, 0 );
+	int fd = find_preopened_ports( filename );
+	char message[80];
+
+	ENTER( "RXTXPort:nativeStaticIsCTS" );
+	if( !fd )
+	{
+		/* Exception? FIXME */
+		return JNI_FALSE;
+	}
+	ioctl( fd, TIOCMGET, &result );
+	sprintf( message, "nativeStaticIsCTS( ) returns %i\n", result& TIOCM_CTS );
+	report( message );
+	LEAVE( "RXTXPort:nativeStaticIsCTS" );
+	if( result & TIOCM_CTS ) return JNI_TRUE;
+	else return JNI_FALSE;
+}
+/*----------------------------------------------------------
+RXTXPort.nativeStaticIsRI
+
+   accept:      filename
+   perform:     check status of RI of preopened ports (setting lines/params
+		before calling the Java open()
+   return:      true if TIOCM_RI is set
+                false if TIOCM_RI is not set
+   exceptions:  none
+   comments:    RI stands for carrier detect
+----------------------------------------------------------*/
+JNIEXPORT jboolean JNICALL RXTXPort(nativeStaticIsRI)( JNIEnv *env,
+	jobject jobj, jstring jstr )
+{
+	unsigned int result = 0;
+	const char *filename = (*env)->GetStringUTFChars( env, jstr, 0 );
+	int fd = find_preopened_ports( filename );
+	char message[80];
+
+	ENTER( "RXTXPort:nativeStaticIsRI" );
+	if( !fd )
+	{
+		/* Exception? FIXME */
+		return -1;
+	}
+	ioctl( fd, TIOCMGET, &result );
+	sprintf( message, "nativeStaticRI( ) returns %i\n", result& TIOCM_RI );
+	report( message );
+	LEAVE( "RXTXPort:nativeStaticIsRI" );
+	if( result & TIOCM_RI ) return JNI_TRUE;
+	else return JNI_FALSE;
+}
+
+/*----------------------------------------------------------
+RXTXPort.nativeStaticGetBaudRate
+
+   accept:      filename
+   perform:     find the baud rate (not all buads are handled yet)
+   return:      return the baud rate or -1 if not supported yet.
+   exceptions:  
+   comments:    simple test for preopened ports
+----------------------------------------------------------*/
+JNIEXPORT jint JNICALL RXTXPort(nativeStaticGetBaudRate)( JNIEnv *env, jobject jobj, jstring jstr )
+{
+	const char *filename = (*env)->GetStringUTFChars( env, jstr, 0 );
+	int fd = find_preopened_ports( filename );
+	struct termios ttyset;
+	printf("portname = %s\n", filename);
+	(*env)->ReleaseStringUTFChars( env, jstr, filename );
+
+	ENTER( "RXTXPort:nativeStaticGetBaudRate" );
+	if( !fd )
+	{
+		/* Exception? FIXME */
+		return -1;
+	}
+	if( tcgetattr( fd, &ttyset ) < 0 )
+	{
+		report( "nativeStaticGetBaudRate: Cannot Get Serial Port Settings\n" );
+		return(-1);
+	}
+	printf("speed = %i %i\n", ttyset.c_cflag, ttyset.c_cflag&CBAUD);
+	switch( ttyset.c_cflag&CBAUD )
+	{
+		case B0:     return 0;
+		case B50:    return 50;
+		case B75:    return 75;
+		case B110:   return 110;
+		case B134:   return 134;
+		case B150:   return 150;
+		case B200:   return 200;
+		case B300:   return 300;
+		case B600:   return 600;
+		case B1200:  return 1200;
+		case B1800:  return 1800;
+		case B2400:  return 2400;
+		case B4800:  return 4800;
+		case B9600:  return 9600;
+		case B19200: return 19200;
+		case B38400: return 38400;
+		case B57600: return 57600;
+		default: return -1;
+	}
+}
+/*----------------------------------------------------------
+RXTXPort.nativeStaticGetDataBits
+
+   accept:      filename
+   perform:     find the data bits (not all buads are handled yet)
+   return:      return the data bits
+   exceptions:  
+   comments:    simple test for preopened ports
+----------------------------------------------------------*/
+JNIEXPORT jint JNICALL RXTXPort(nativeStaticGetDataBits)( JNIEnv *env, jobject jobj, jstring jstr )
+{
+	const char *filename = (*env)->GetStringUTFChars( env, jstr, 0 );
+	int fd = find_preopened_ports( filename );
+	struct termios ttyset;
+	(*env)->ReleaseStringUTFChars( env, jstr, filename );
+
+	ENTER( "RXTXPort:nativeStaticGetDataBits" );
+	if( !fd )
+	{
+		/* Exception? FIXME */
+		return -1;
+	}
+	if( tcgetattr( fd, &ttyset ) < 0 )
+	{
+		report( "nativeStaticGetDataBits: Cannot Get Serial Port Settings\n" );
+		return(-1);
+	}
+	switch( ttyset.c_cflag&CSIZE ) {
+		case CS5:  return JDATABITS_5;
+		case CS6:  return JDATABITS_6;
+		case CS7:  return JDATABITS_7;
+		case CS8:  return JDATABITS_8;
+		default:  return(-1);
+	}
+}
+/*----------------------------------------------------------
+RXTXPort.nativeStaticGetParity
+
+   accept:      filename
+   perform:     find the parity
+   return:      return the parity
+   exceptions:  
+   comments:    simple test for preopened ports
+----------------------------------------------------------*/
+JNIEXPORT jint JNICALL RXTXPort(nativeStaticGetParity)( JNIEnv *env, jobject jobj, jstring jstr )
+{
+	const char *filename = (*env)->GetStringUTFChars( env, jstr, 0 );
+	int fd = find_preopened_ports( filename );
+	struct termios ttyset;
+	(*env)->ReleaseStringUTFChars( env, jstr, filename );
+
+	ENTER( "RXTXPort:nativeStaticGetParity" );
+	if( !fd )
+	{
+		/* Exception? FIXME */
+		return -1;
+	}
+	if( tcgetattr( fd, &ttyset ) < 0 )
+	{
+		report( "nativeStaticGetParity: Cannot Get Serial Port Settings\n" );
+		return(-1);
+	}
+#ifdef CMSPAR
+	switch( ttyset.c_cflag&(PARENB|PARODD|CMSPAR ) ) {
+#else
+	switch( ttyset.c_cflag&(PARENB|PARODD) ) {
+#endif /* CMSPAR */
+		case 0: return JPARITY_NONE;
+		case PARENB: return JPARITY_EVEN;
+		case PARENB | PARODD: return JPARITY_ODD;
+#ifdef CMSPAR
+		case PARENB | PARODD | CMSPAR: return JPARITY_MARK;
+		case PARENB | CMSPAR: return JPARITY_SPACE;
+#endif /* CMSPAR */
+		default:  return(-1);
+	}
+}
+/*----------------------------------------------------------
+RXTXPort.nativeStaticGetStopBits
+
+   accept:      filename
+   perform:     find the stop bits 
+   return:      return the stop bits
+   exceptions:  
+   comments:    simple test for preopened ports
+----------------------------------------------------------*/
+JNIEXPORT jint JNICALL RXTXPort(nativeStaticGetStopBits)( JNIEnv *env, jobject jobj, jstring jstr )
+{
+	const char *filename = (*env)->GetStringUTFChars( env, jstr, 0 );
+	int fd = find_preopened_ports( filename );
+	struct termios ttyset;
+	(*env)->ReleaseStringUTFChars( env, jstr, filename );
+
+	ENTER( "RXTXPort:nativeStaticGetStopBits" );
+	if( !fd )
+	{
+		/* Exception? FIXME */
+		return -1;
+	}
+	if( tcgetattr( fd, &ttyset ) < 0 )
+	{
+		report( "nativeStaticGetStopBits: Cannot Get Serial Port Settings\n" );
+		return(-1);
+	}
+	switch( ttyset.c_cflag&(CSTOPB) ) {
+		case 0: return STOPBITS_1;
+		case CSTOPB:  return STOPBITS_2;
+		default:  return  STOPBITS_1_5;
+	}
 }
 
 /*----------------------------------------------------------
@@ -2544,14 +2996,14 @@ void report_serial_events( struct event_info_struct *eis )
 		{
 			report_verbose("report_serial_events: ignoring DATA_AVAILABLE\n");
 			//report(".");
-			usleep(20000);
+			usleep(1000);
 			return;
 		}
 		report("report_serial_events: sending DATA_AVAILABLE\n");
 		if(!send_event( eis, SPE_DATA_AVAILABLE, 1 ))
 		{
 			/* select wont block */
-			usleep(20000);
+			usleep(1000);
 			//system_wait();
 		}
 	}
@@ -2695,7 +3147,7 @@ JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 				LEAVE("eventLoop");
 				return;
 			}
-			usleep(10000);
+			usleep(1000);
 			// Trent system_wait();
 		}  while ( eis.ret < 0 && errno == EINTR );
 		if( eis.ret >= 0 )

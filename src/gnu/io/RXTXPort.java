@@ -1246,12 +1246,39 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	private native static void nativeStaticSetSerialPortParams( String f,
 		int b, int d, int s, int p )
 		throws UnsupportedCommOperationException;
+	private native static boolean nativeStaticSetDSR( String port,
+							boolean flag )
+		throws UnsupportedCommOperationException;
 	private native static boolean nativeStaticSetDTR( String port,
 							boolean flag )
 		throws UnsupportedCommOperationException;
 	private native static boolean nativeStaticSetRTS( String port,
 							boolean flag )
 		throws UnsupportedCommOperationException;
+
+	private native static boolean nativeStaticIsDSR( String port )
+		throws UnsupportedCommOperationException;
+	private native static boolean nativeStaticIsDTR( String port )
+		throws UnsupportedCommOperationException;
+	private native static boolean nativeStaticIsRTS( String port )
+		throws UnsupportedCommOperationException;
+	private native static boolean nativeStaticIsCTS( String port )
+		throws UnsupportedCommOperationException;
+	private native static boolean nativeStaticIsCD( String port )
+		throws UnsupportedCommOperationException;
+	private native static boolean nativeStaticIsRI( String port )
+		throws UnsupportedCommOperationException;
+
+	private native static int nativeStaticGetBaudRate( String port )
+		throws UnsupportedCommOperationException;
+	private native static int nativeStaticGetDataBits( String port )
+		throws UnsupportedCommOperationException;
+	private native static int nativeStaticGetParity( String port )
+		throws UnsupportedCommOperationException;
+	private native static int nativeStaticGetStopBits( String port )
+		throws UnsupportedCommOperationException;
+
+
 	private native byte nativeGetParityErrorChar( )
 		throws UnsupportedCommOperationException;
 	private native boolean nativeSetParityErrorChar( byte b )
@@ -1281,6 +1308,83 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	private native boolean nativeGetCallOutHangup()
 		throws UnsupportedCommOperationException;
 
+	/**
+	*  Extension to CommAPI
+	*  This is an extension to CommAPI.  It may not be supported on
+	*  all operating systems.
+	*
+	*  This is only accurate up to 38600 baud currently.
+	*
+	*  @param  port the name of the port thats been preopened
+	*  @return BaudRate on success
+	*  @throws UnsupportedCommOperationException;
+	*
+	*/
+	public static int staticGetBaudRate( String port )
+		throws UnsupportedCommOperationException
+	{
+		if ( debug )
+			System.out.println(
+				"RXTXPort:staticGetBaudRate( " + port + " )");
+		return(nativeStaticGetBaudRate( port ));
+	}
+	/**
+	*  Extension to CommAPI
+	*  This is an extension to CommAPI.  It may not be supported on
+	*  all operating systems.
+	*
+	*  @param  port the name of the port thats been preopened
+	*  @return DataBits on success
+	*  @throws UnsupportedCommOperationException;
+	*
+	*/
+	public static int staticGetDataBits( String port )
+		throws UnsupportedCommOperationException
+	{
+		if ( debug )
+			System.out.println(
+				"RXTXPort:staticGetDataBits( " + port + " )");
+		return(nativeStaticGetDataBits( port ) );
+	}
+
+	/**
+	*  Extension to CommAPI
+	*  This is an extension to CommAPI.  It may not be supported on
+	*  all operating systems.
+	*
+	*  @param  port the name of the port thats been preopened
+	*  @return Parity on success
+	*  @throws UnsupportedCommOperationException;
+	*
+	*/
+	public static int staticGetParity( String port )
+		throws UnsupportedCommOperationException
+	{
+		if ( debug )
+			System.out.println(
+				"RXTXPort:staticGetParity( " + port + " )");
+		return( nativeStaticGetParity( port ) );
+	}
+
+	/**
+	*  Extension to CommAPI
+	*  This is an extension to CommAPI.  It may not be supported on
+	*  all operating systems.
+	*
+	*  @param  port the name of the port thats been preopened
+	*  @return StopBits on success
+	*  @throws UnsupportedCommOperationException;
+	*
+	*/
+	public static int staticGetStopBits( String port )
+		throws UnsupportedCommOperationException
+	{
+		if ( debug )
+			System.out.println(
+				"RXTXPort:staticGetStopBits( " + port + " )");
+			return(nativeStaticGetStopBits( port ) );
+	}
+
 	/** 
 	*  Extension to CommAPI
 	*  This is an extension to CommAPI.  It may not be supported on
@@ -1307,6 +1411,30 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 				"RXTXPort:staticSetSerialPortParams( " +
 				f + " " + b + " " + d + " " + s + " " + p );
 		nativeStaticSetSerialPortParams( f, b, d, s, p );
+	}
+
+	/**
+	*  Extension to CommAPI
+	*  This is an extension to CommAPI.  It may not be supported on
+	*  all operating systems.
+	*
+	*  Open the port and set DSR.  remove lockfile and do not close
+	*  This is so some software can appear to set the DSR before opening
+	*  the port a second time later on.  Open will raise the DSR and
+	*  SR when called again later so setting DSR low will not do much.
+	*
+	*  @return true on success
+	*  @throws UnsupportedCommOperationException;
+	*
+	*/
+
+	public static boolean staticSetDSR( String port, boolean flag )
+		throws UnsupportedCommOperationException
+	{
+		if ( debug )
+			System.out.println( "RXTXPort:staticSetDSR( " + port +
+						" " + flag );
+		return( nativeStaticSetDSR( port, flag ) );
 	}
 
 	/**
@@ -1356,6 +1484,128 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 						" " + flag );
 		return( nativeStaticSetRTS( port, flag ) );
 	}
+
+	/**
+	*  Extension to CommAPI
+	*  This is an extension to CommAPI.  It may not be supported on
+	*  all operating systems.
+	*
+	*  find the fd and return RTS without using a Java open() call
+	*
+	*  @param String port
+	*  @return none
+	*  @throws UnsupportedCommOperationException;
+	*
+	*/
+
+	public static boolean staticIsRTS( String port )
+		throws UnsupportedCommOperationException
+	{
+		if ( debug )
+			System.out.println( "RXTXPort:staticIsRTS( " + port + " )" );
+		return( nativeStaticIsRTS( port ) );
+	}
+	/**
+	*  Extension to CommAPI
+	*  This is an extension to CommAPI.  It may not be supported on
+	*  all operating systems.
+	*
+	*  find the fd and return CD without using a Java open() call
+	*
+	*  @param String port
+	*  @return none
+	*  @throws UnsupportedCommOperationException;
+	*
+	*/
+
+	public static boolean staticIsCD( String port )
+		throws UnsupportedCommOperationException
+	{
+		if ( debug )
+			System.out.println( "RXTXPort:staticIsCD( " + port + " )" );
+		return( nativeStaticIsCD( port ) );
+	}
+	/**
+	*  Extension to CommAPI
+	*  This is an extension to CommAPI.  It may not be supported on
+	*  all operating systems.
+	*
+	*  find the fd and return CTS without using a Java open() call
+	*
+	*  @param String port
+	*  @return none
+	*  @throws UnsupportedCommOperationException;
+	*
+	*/
+
+	public static boolean staticIsCTS( String port )
+		throws UnsupportedCommOperationException
+	{
+		if ( debug )
+			System.out.println( "RXTXPort:staticIsCTS( " + port + " )" );
+		return( nativeStaticIsCTS( port ) );
+	}
+	/**
+	*  Extension to CommAPI
+	*  This is an extension to CommAPI.  It may not be supported on
+	*  all operating systems.
+	*
+	*  find the fd and return DSR without using a Java open() call
+	*
+	*  @param String port
+	*  @return none
+	*  @throws UnsupportedCommOperationException;
+	*
+	*/
+
+	public static boolean staticIsDSR( String port )
+		throws UnsupportedCommOperationException
+	{
+		if ( debug )
+			System.out.println( "RXTXPort:staticIsDSR( " + port + " )" );
+		return( nativeStaticIsDSR( port ) );
+	}
+	/**
+	*  Extension to CommAPI
+	*  This is an extension to CommAPI.  It may not be supported on
+	*  all operating systems.
+	*
+	*  find the fd and return DTR without using a Java open() call
+	*
+	*  @param String port
+	*  @return none
+	*  @throws UnsupportedCommOperationException;
+	*
+	*/
+
+	public static boolean staticIsDTR( String port )
+		throws UnsupportedCommOperationException
+	{
+		if ( debug )
+			System.out.println( "RXTXPort:staticIsDTR( " + port + " )" );
+		return( nativeStaticIsDTR( port ) );
+	}
+	/**
+	*  Extension to CommAPI
+	*  This is an extension to CommAPI.  It may not be supported on
+	*  all operating systems.
+	*
+	*  find the fd and return RI without using a Java open() call
+	*
+	*  @param String port
+	*  @return none
+	*  @throws UnsupportedCommOperationException;
+	*
+	*/
+
+	public static boolean staticIsRI( String port )
+		throws UnsupportedCommOperationException
+	{
+		if ( debug )
+			System.out.println( "RXTXPort:staticIsRI( " + port + " )" );
+		return( nativeStaticIsRI( port ) );
+	}
+
 
 	/**
 	*  Extension to CommAPI

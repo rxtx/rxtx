@@ -516,9 +516,10 @@ JNIEXPORT jint JNICALL LPRPort(nativeavailable)( JNIEnv *env,
 {
 	int fd = get_java_var( env, jobj,"fd","I" );
 	int result;
+/*
 	char message[80];
 
-/*	ENTER( "LPRPort:nativeavailable" );
+	ENTER( "LPRPort:nativeavailable" );
 */
 /*
     On SCO OpenServer FIONREAD always fails for serial devices,
