@@ -51,6 +51,7 @@
 #ifdef HAVE_TERMIOS_H
 #	include <termios.h>
 #endif /* HAVE_TERMIOS_H */
+#   include <signal.h>
 #ifdef HAVE_SIGNAL_H
 #   include <signal.h>
 #endif /* HAVE_SIGNAL_H */
@@ -1005,7 +1006,7 @@ add_tpid
    comments:    This is used to cleanup threads and make sure the
 		write()'s happen in order on systems without access to the LSR
 ----------------------------------------------------------*/
-#if defined(TIOCSERGETLSR) && !defined( WIN32 )
+#if !defined(TIOCSERGETLSR) && !defined( WIN32 )
 struct tpid_info_struct *add_tpid( struct tpid_info_struct *p )
 {
 	struct tpid_info_struct *q;
@@ -1042,7 +1043,7 @@ init_thread_write( )
 ----------------------------------------------------------*/
 int init_thread_write( struct event_info_struct *eis )
 {
-#if !defined(TIOCSERGETLSR) && !defined(WIN32)
+#if !defined(TIOCSERGETLSR) & !defined(WIN32)
 	struct tpid_info_struct *t = add_tpid( NULL);
 	sigset_t newmask, oldmask;
 	struct sigaction newaction, oldaction;
