@@ -21,10 +21,10 @@ This is the INSTALL file for RXTX.  Fri Aug 23 15:49:49 MDT 2002
 If, while following the instructions, you find this file unclear or incorrect 
 please make a note and email the details to taj@www.linux.org.uk.
 
-A note about rxtx 1.5:
+A note about rxtx 2.1:
 
-rxtx 1.5 replaces the entire CommAPI.  Every effort is made to conform to
-CommAPI but out of respect for our friends at Sun the package name of 1.5 has
+rxtx 2.1 replaces the entire CommAPI.  Every effort is made to conform to
+CommAPI but out of respect for our friends at Sun the package name of 2.1 has
 been moved to gnu.io.  A script is offered in contrib/ChangePackage.sh that
 will switch source tree's between javax.comm and gnu.io.
 
@@ -115,8 +115,8 @@ A.  Japanese
 
 	With the packages installed, proceed to build and install rxtx.
 
-		$ tar -xzvf rxtx-1.5.tar.gz
-		$ cd rxtx-1.5
+		$ tar -xzvf rxtx-2.1.tar.gz
+		$ cd rxtx-2.1
 		$ ./configure  (follow the instructions)
 		$ make install (gmake if your system uses that convention)
 		Read "R.  How can I use Lock Files with rxtx?"
@@ -131,13 +131,13 @@ A.  Japanese
 
 		Sun's comm.jar is not required.  It is a valid option on
 		some platforms.  IT WILL CREATE CHAOS if you have it installed
-		while trying to build rxtx 1.5.
+		while trying to build rxtx 2.1.
 
 		http://java.sun.com/products/javacomm/index.html
 		
 	C.  Installing javax.comm.properties.
 
-		javax.comm.properties is not currently required by rxtx-1.5
+		javax.comm.properties is not currently required by rxtx-2.1
 
 	D.  Add RXTXcomm.jar to your CLASSPATH.
 
