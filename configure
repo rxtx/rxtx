@@ -2530,12 +2530,18 @@ Linux)
 				find $JPATH/share/kaffe/ -name [cK]lasses.[jz][ai][rp]
 			elif [ -d $JPATH/lib/ ]; then
 				find $JPATH/lib/ -name [cK]lasses.[jz][ai][rp]
+			fi`":"`
+			if [ -d $JPATH/share/kaffe/ ]; then
+				find $JPATH/share/kaffe/ -name comm.jar
+			elif [ -d $JPATH/lib/ ]; then
+				find $JPATH/lib/ -name comm.jar
 			fi`
+
 		if test x"$RXTX_PATH" = x;then
 			#  We are not using kaffe
 			check_prefix
 			RXTX_PATH="\$(prefix)/lib/"
-			#JAVAH_FIX="if [ ! -d com ]; then if [ ! -f \$(JPATH)/lib/comm.jar ]; then echo \"Please install comm.jar from CommAPI in \$(JPATH)/java/lib/ 1>&2\"; else mkdir -p com/sun/comm;\$(JAR) -xf \$(JPATH)/lib/comm.jar;  fi; fi;";
+			JAVAH_FIX="if [ ! -d com ]; then if [ ! -f \$(JPATH)/lib/comm.jar ]; then echo \"Please install comm.jar from CommAPI in \$(JPATH)/java/lib/ 1>&2\"; else mkdir -p com/sun/comm;\$(JAR) -xf \$(JPATH)/lib/comm.jar;  fi; fi;";
 		fi;
 		if test x"$JHOME" = x;then
 			JHOME=$JPATH/"lib"
