@@ -1,0 +1,132 @@
+#-------------------------------------------------------------------------
+#   rxtx is a native interface to serial ports in java.
+#   Copyright 1997-2001 by Trent Jarvi trentjarvi@yahoo.com.
+#
+#   This library is free software; you can redistribute it and/or
+#   modify it under the terms of the GNU Library General Public
+#   License as published by the Free Software Foundation; either
+#   version 2 of the License, or (at your option) any later version.
+#
+#   This library is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+#   Library General Public License for more details.
+#
+#   You should have received a copy of the GNU Library General Public
+#   License along with this library; if not, write to the Free
+#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#-------------------------------------------------------------------------
+
+#  This Makefile works on windows 98 in a cygwin bash shell
+#  The configure is avoided on win32 because java.home a different absolute
+#  path than bash.  I tried a few ways of getting around it without success.
+#  Its easier to just adjust the paths here.
+#
+#  The cross compiling will remain in auto*
+#
+#  The cygwin used was a full/default install including mingw32 version
+#  cygwin version 1.1.7 
+#  www.cygwin.com
+#  jdk was 1.2.2 any thing 1.2.0 or later should work.
+#  java.sun.com
+#  java was mounted in /usr/java/jdk
+#  in bash:
+#	mkdir /usr/java
+#	mount C:\\jdk /usr/java
+#	export PATH=/usr/java/jdk/bin:$PATH
+#       tar xzvf rxtx-1.5-?.tar.gz
+#	cd rxtx-1.5-?
+#	make -f Makefile.mingw32
+#	make -f Makefile.mingw32 install
+#
+
+######################
+#  Directories
+######################
+
+# path to the source code (directory with SerialImp.c)
+SRC=../src
+# path to the java native interface headers (directory with jni.h)
+JDKINCLUDE=/usr/java/jdk/include
+# path to the mingw32 libraries (directory with libmingw32.a)
+MINGLIBS=-L /usr/lib/mingw
+# for install.  
+JREHOME=/usr/java/jdk/jre
+
+######################
+#  Tools
+######################
+
+AS=as
+CC=gcc
+LD=ld
+DLLTOOL=dlltool
+# this looks like a nice tool but I was not able to get symbols in the dll.
+# the old way still works.
+DLLWRAP=dllwrap
+
+JAVAH=javah
+JAR=jar
+JAVAC=javac
+
+######################
+#  Tool Flags
+######################
+
+CFLAGS= $(INCLUDE) -mno-cygwin -DWIN32 -D __int64="long long" -mno-fp-ret-in-387 -Wall 
+INCLUDE= -I . -I $(JDKINCLUDE) -I $(JDKINCLUDE)/win32 -I $(SRC)
+JAVAHFLAGS= -jni
+LIBS=$(MINGLIBS) -luser32 -lgdi32 -lcomdlg32 -lkernel32 -ladvapi32 -lmingw32 -lmoldname -lcrtdll
+
+######################
+#  End of user defined variables
+######################
+
+CLASSES = $(patsubst $(SRC)/%.java,javax/comm/%.class,$(wildcard $(SRC)/*.java))
+javafiles = $(wildcard $(SRC)/*.java)
+javahfiles = $(patsubst $(SRC)/%.java,%,$(wildcard $(SRC)/*.java))
+cfiles=$(wildcard $(SRC)/*.c)
+includes=$(wildcard $(SRC)/*.h)
+OBJECTS=termios.o SerialImp.o fixup.o init.o 
+
+# this is an old crusty, way of generating dlls.  It works.
+
+all:  Serial.dll
+
+Serial.dll:  $(OBJECTS)
+	$(LD) --base-file Serial.base --dll -o Serial.dll $(OBJECTS) $(LIBS) -e _dll_entry@12
+# --base-file Serial.base
+	 echo EXPORTS >Serial.def;for i in `nm Serial.dll | grep "T _Java"|cut -b 13-`;do echo -n $$i|sed s#@.*##;echo "="$$i;done >> Serial.def
+	$(DLLTOOL) --as=$(AS) --dllname Serial.dll --def Serial.def --base-file Serial.base --output-exp Serial.exp
+	$(LD) --base-file Serial.base Serial.exp -dll -o Serial.dll $(OBJECTS) $(LIBS) -e _dll_entry@12
+# --base-file Serial.base
+	$(DLLTOOL) --as=$(AS) --dllname Serial.dll --def Serial.def --base-file Serial.base --output-exp Serial.exp
+	$(LD) --base-file Serial.base Serial.exp -dll -o Serial.dll $(OBJECTS) $(LIBS) -e _dll_entry@12
+
+# This should replace the mess above if it worked.
+# nm shows no symbols in the dll produced.  The old stuff above works ok.
+#	$(DLLWRAP) --output-def Serial.def --output-exp Serial.exp --add-stdcall-alias --driver-name gcc -mwindows --target=i386-mingw32 -o Serial.dll $(OBJECTS) $(LIBS) -s -mno-cygwin
+
+%.o: $(SRC)/%.c comm.jar config.h
+	$(CC) $(CFLAGS) -c $(SRC)/$*.c -o $*.o
+
+%.o: $(SRC)/%.cc comm.jar config.h
+	$(CC) $(CFLAGS) -c $(SRC)/$*.cc -o $*.o
+
+
+comm.jar: $(javafiles) 
+	$(JAVAC) -d . $(javafiles) 
+	$(JAR) -cf comm.jar $(CLASSES)
+	$(JAVAH) $(JAVAHFLAGS) `(for i in $(javahfiles);do \
+		if grep -q native.*\( $(SRC)/$$i.java; then \
+			echo javax.comm.$$i; \
+		fi; \
+	done)`
+
+config.h:
+	printf 	"#define HAVE_FCNTL_H 1\n#define HAVE_SIGNAL_H 1\n#define HAVE_SYS_FCNTL_H 1\n#define HAVE_SYS_FILE_H 1\n#define HAVE_SYS_SIGNAL_H 1\n#define HAVE_TERMIOS_H 1\n" > config.h
+
+
+install: all
+	cp comm.jar $(JREHOME)/lib/ext
+	cp Serial.dll $(JREHOME)/bin
