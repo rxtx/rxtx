@@ -36,6 +36,7 @@ final class RXTXPort extends SerialPort
 	static
 	{
 		System.loadLibrary( "Serial" );
+                Initialize();
 	}
 
 
