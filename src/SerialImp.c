@@ -1583,6 +1583,8 @@ RXTXPort.nativeStaticSetsetRTS
 
 		This is static so we can not call the open() setDTR()
 		we dont have the jobject.
+
+		First introduced in rxtx-1.5-9
 ----------------------------------------------------------*/
 JNIEXPORT jboolean JNICALL RXTXPort(nativeStaticSetRTS) (JNIEnv *env,
 	jclass jclazz, jstring jstr, jboolean flag)
@@ -1641,6 +1643,8 @@ RXTXPort.nativeStaticSetsetDTR
 
 		This is static so we can not call the open() setDTR()
 		we dont have the jobject.
+
+		First introduced in rxtx-1.5-9
 ----------------------------------------------------------*/
 JNIEXPORT jboolean JNICALL RXTXPort(nativeStaticSetDTR) (JNIEnv *env,
 	jclass jclazz, jstring jstr, jboolean flag)
@@ -2588,6 +2592,24 @@ JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 	} while( 1 );
 end:
 	report( "<RXTXPort:eventLoop\n" );
+}
+
+/*----------------------------------------------------------
+RXTXCommDriver.nativeGetVersion
+
+   accept:      none
+   perform:     return the current version 
+   return:      version
+   exceptions:  none
+   comments:    This is used to avoid mixing versions of the .jar and
+		native library.
+		First introduced in rxtx-1.5-9
+		
+----------------------------------------------------------*/
+JNIEXPORT jstring JNICALL RXTXCommDriver(nativeGetVersion) (JNIEnv *env,
+	jclass jclazz )
+{
+	return (*env)->NewStringUTF( env, "RXTX-1.5-9pre1" );
 }
 
 /*----------------------------------------------------------
