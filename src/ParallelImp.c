@@ -829,7 +829,7 @@ void throw_java_exception( JNIEnv *env, char *exc, char *foo, char *msg )
 		return;
 	}
 	// reduce the message size if it to large for the message buffer
-	if(MSG_SIZE < (lstrlen( msg ) + lstrlen(foo) + 5)){
+	if(MSG_SIZE < (strlen( msg ) + strlen(foo) + 5)){
 		msg[ MSG_SIZE - lstrlen(foo) - 5] = 0;
 	}
 #if defined(_GNU_SOURCE)
