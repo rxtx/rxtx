@@ -20,10 +20,12 @@ package javax.comm;
 import java.io.*;
 import java.util.*;
 
-
 /**
-  * SerialPort
-  */
+* @author Trent Jarvi
+* @version %I%, %G%
+* @since JDK1.0
+*/
+
 public abstract class SerialPort extends CommPort {
 	public static final int  DATABITS_5             =5;
 	public static final int  DATABITS_6             =6;
@@ -43,13 +45,13 @@ public abstract class SerialPort extends CommPort {
 	public static final int  FLOWCONTROL_XONXOFF_IN =4;
 	public static final int  FLOWCONTROL_XONXOFF_OUT=8;
 
-	public abstract void setSerialPortParams( int b, int d, int s, int p ) 
+	public abstract void setSerialPortParams( int b, int d, int s, int p )
 		throws UnsupportedCommOperationException;
 	public abstract int getBaudRate();
 	public abstract int getDataBits();
 	public abstract int getStopBits();
 	public abstract int getParity();
-	public abstract void setFlowControlMode( int flowcontrol ) 
+	public abstract void setFlowControlMode( int flowcontrol )
 		throws UnsupportedCommOperationException;
 	public abstract int getFlowControlMode();
 	public abstract boolean isDTR();
@@ -61,7 +63,7 @@ public abstract class SerialPort extends CommPort {
 	public abstract boolean isRI();
 	public abstract boolean isRTS();
 	public abstract void sendBreak( int duration );
-	public abstract void addEventListener( SerialPortEventListener lsnr ) 
+	public abstract void addEventListener( SerialPortEventListener lsnr )
 		throws TooManyListenersException;
 	public abstract void removeEventListener();
 	public abstract void notifyOnDataAvailable( boolean enable );
@@ -75,7 +77,7 @@ public abstract class SerialPort extends CommPort {
 	public abstract void notifyOnFramingError( boolean enable );
 	public abstract void notifyOnBreakInterrupt( boolean enable );
 /*
-	public abstract void setRcvFifoTrigger(int trigger); 
+	public abstract void setRcvFifoTrigger(int trigger);
          deprecated
 */
 

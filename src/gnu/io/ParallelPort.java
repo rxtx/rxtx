@@ -23,9 +23,12 @@ import java.util.*;
 
 
 /**
-  * ParallelPort
-  */
-public  abstract class ParallelPort extends CommPort 
+* @author Trent Jarvi
+* @version %I%, %G%
+* @since JDK1.0
+*/
+
+public  abstract class ParallelPort extends CommPort
 {
 	public static final int  LPT_MODE_ANY   =0;
 	public static final int  LPT_MODE_SPP   =1;
@@ -55,7 +58,7 @@ public  abstract class ParallelPort extends CommPort
 	public int  PAR_EV_BUFFER   2
 	public ParallelPort(){}
 	private native static void Initialize();
-	public LPRPort( String name ) throws IOException; 
+	public LPRPort( String name ) throws IOException;
 	private native int open( String name ) throws IOException;
 	private int fd;
 	private final ParallelOutputStream out = new ParallelOutputStream();
@@ -63,7 +66,7 @@ public  abstract class ParallelPort extends CommPort
 	private final ParallelInputStream in = new ParallelInputStream();
 	public InputStream getInputStream();
 	private int lprmode=LPT_MODE_ANY;
-	public native boolean setLPRMode(int mode) 
+	public native boolean setLPRMode(int mode)
 		throws UnsupportedCommOperationException;
         private int speed;
         public int getBaudRate();
@@ -75,7 +78,7 @@ public  abstract class ParallelPort extends CommPort
 	public int getParity();
 	private native void nativeClose();
 	public void close();
-	public void enableReceiveFraming( int f ) 
+	public void enableReceiveFraming( int f )
 		throws UnsupportedCommOperationException;
 	public void disableReceiveFraming() {}
 	public boolean isReceiveFramingEnabled();
@@ -91,16 +94,16 @@ public  abstract class ParallelPort extends CommPort
 	public int getReceiveThreshold();
 	public boolean isReceiveThresholdEnabled();
 	public native void setInputBufferSize( int size );
-	public native int getInputBufferSize(); 
+	public native int getInputBufferSize();
 	public native void setOutputBufferSize( int size );
 	public Abstract int getOutputBufferSize();
 	private native void writeByte( int b ) throws IOException;
-	private native void writeArray( byte b[], int off, int len ) 
+	private native void writeArray( byte b[], int off, int len )
 		throws IOException;
 	private native void drain() throws IOException;
 	private native int nativeavailable() throws IOException;
 	private native int readByte() throws IOException;
-	private native int readArray( byte b[], int off, int len ) 
+	private native int readArray( byte b[], int off, int len )
 		throws IOException;
 	private ParallelPortEventListener PPEventListener;
 	private MonitorThread monThread;

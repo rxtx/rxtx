@@ -1,3 +1,5 @@
+/* Non functional contact trentjarvi@yahoo.com for details */
+
 /*-------------------------------------------------------------------------
 |   rxtx is a native interface to serial ports in java.
 |   Copyright 1997-2000 by Trent Jarvi trentjarvi@yahoo.com.
@@ -25,19 +27,26 @@ import java.util.*;
 * @since JDK1.0
 */
 
-public class ParallelPortEvent extends EventObject
-{
-	static public final int  PAR_EV_ERROR   =1;
-	static public final int  PAR_EV_BUFFER  =2;
 
+public class RS485PortEvent extends EventObject
+{
+	public static final int DATA_AVAILABLE      =1;
+	public static final int OUTPUT_BUFFER_EMPTY =2;
+	public static final int CTS                 =3;
+	public static final int DSR                 =4;
+	public static final int RI                  =5;
+	public static final int CD                  =6;
+	public static final int OE                  =7;
+	public static final int PE                  =8;
+	public static final int FE                  =9;
+	public static final int BI                 =10;
 
 	private boolean OldValue;
 	private boolean NewValue;
 	private int eventType;
 	/*public int eventType           =0; depricated */
 
-	public ParallelPortEvent(ParallelPort srcport, int eventtype, 
-		boolean oldvalue, boolean newvalue)
+	public RS485PortEvent(RS485Port srcport, int eventtype, boolean oldvalue, boolean newvalue)
 	{
 		super( srcport );	
 		OldValue=oldvalue;

@@ -19,9 +19,25 @@
 package javax.comm;
 import java.util.*;
 
+/**
+* The port requested is currently in use
+* @author Trent Jarvi
+* @version %I%, %G%
+* @since JDK1.0
+*/
+
+
 public class PortInUseException extends Exception
 {
+/**
+the owner of the port requested.
+*/
 	public String currentOwner;
+/**
+* create a instance of the Exception and store the current owner
+*
+* @param str	detailed information about the current owner
+*/
 	PortInUseException( String str )
 	{
 		currentOwner=str;

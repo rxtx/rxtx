@@ -20,6 +20,13 @@ package  javax.comm;
 
 import java.util.Enumeration;
 
+/**
+* @author Trent Jarvi
+* @version %I%, %G%
+* @since JDK1.0
+*/
+
+
 class CommPortEnumerator implements Enumeration
 {
 	private CommPortIdentifier index;

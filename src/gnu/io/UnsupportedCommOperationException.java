@@ -20,16 +20,29 @@ package javax.comm;
 import java.util.*;
 
 /**
+* Exception thrown when a method does not support the requested functionality.
 * @author Trent Jarvi
 * @version %I%, %G%
 * @since JDK1.0
 */
 
-public interface CommPortOwnershipListener extends EventListener
+public class UnsupportedCommOperationException extends Exception
 {
-	public static final int PORT_OWNED               =1;
-	public static final int PORT_UNOWNED             =2;
-	public static final int PORT_OWNERSHIP_REQUESTED =3;
-
-	public abstract void ownershipChange( int type );
+/**
+* create an instances with no message about why the Exception was thrown.
+* @since JDK1.0
+*/
+	public UnsupportedCommOperationException()
+	{
+		super();
+	}
+/**
+* create an instance with a message about why the Exception was thrown.
+* @param str	A detailed message explaining the reason for the Exception.
+* @since JDK1.0
+*/
+	public UnsupportedCommOperationException( String str )
+	{
+		super( str );
+	}
 }

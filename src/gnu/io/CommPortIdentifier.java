@@ -22,6 +22,12 @@ import  java.io.FileDescriptor;
 import  java.util.Vector;
 import  java.util.Enumeration;
 
+/**
+* @author Trent Jarvi
+* @version %I%, %G%
+* @since JDK1.0
+*/
+
 public class CommPortIdentifier extends Object /* extends Vector? */
 {
 	public static final int PORT_SERIAL   = 1;  // rs232 Port

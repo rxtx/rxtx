@@ -25,11 +25,10 @@ import java.util.*;
 * @since JDK1.0
 */
 
-public interface CommPortOwnershipListener extends EventListener
-{
-	public static final int PORT_OWNED               =1;
-	public static final int PORT_UNOWNED             =2;
-	public static final int PORT_OWNERSHIP_REQUESTED =3;
 
-	public abstract void ownershipChange( int type );
+public interface CommDriver
+{
+	public abstract CommPort getCommPort(String portName,int portType);
+	public abstract void initialize();
 }
+

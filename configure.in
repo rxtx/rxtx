@@ -20,6 +20,7 @@ AC_INIT(src/SerialImp.c)
 AM_CONFIG_HEADER(config.h)
 AC_CANONICAL_SYSTEM
 AC_MSG_WARN(Trying libtool.  If the following fails install libtool)
+AC_DISABLE_STATIC
 AM_PROG_LIBTOOL
 AM_INIT_AUTOMAKE(Serial,1.2.10)
 AC_PROG_CC
@@ -32,14 +33,11 @@ AC_PROG_GCC_TRADITIONAL
 AC_SUBST(WINDOWS_JAVA_INCLUDE)
 AC_SUBST(JAVAINCLUDE)
 AC_SUBST(JAVANATINC)
-AC_SUBST(JCLASSPATH)
-AC_SUBST(JAVA_H_CLASSPATH)
+AC_SUBST(CLASSPATH)
 AC_SUBST(TOP)
-AC_SUBST(JHOME)
 AC_SUBST(TARGETLIB)
 AC_SUBST(LDFLAG)
 AC_SUBST(CFLAGS)
-AC_SUBST(VERBOSE_IOEXCEPTIONS)
 AC_SUBST(THREAD_FLAG)
 AC_SUBST(OS_NAME)
 AC_SUBST(OS_ARCH)
@@ -52,8 +50,19 @@ AC_SUBST(JAVA_CLASS_PATH)
 AC_SUBST(JAVA_CLASS_VERSION)
 AC_SUBST(JAVAH_FIX)
 AC_SUBST(JPATH)
-AC_SUBST(RXTX_DEST)
-JPATH=lib
+AC_SUBST(JHOME)
+AC_SUBST(RXTX_PATH)
+AC_SUBST(JAVAH)
+AC_SUBST(JAVAC)
+AC_SUBST(JAR)
+AC_SUBST(JAVADOC)
+AC_SUBST(EXTENSION)
+AC_SUBST(LIBTOOL_FIX)
+AC_SUBST(LDFLAGS)
+
+JHOME=
+RXTX_PATH=
+EXTENSION="c"
 TOP="`pwd`"
 
 
@@ -62,14 +71,6 @@ TOP="`pwd`"
 	CFLAGS="$CFLAGS -D_POSIX_SOURCE";;
 	*);;
 esac]
-AC_ARG_ENABLE(RXTXIDENT,
-	[  --enable-RXTXIDENT      RXTX CommPortIdentifier support (not implemented) [default=no]],
-	echo $enable_RXTXIDENT, 
-	enable_RXTXIDENT="yes"
-)
-	if test x$enable_RXTXIDENT = xyes; then 
-	echo;
-	fi
 AC_ARG_ENABLE(PRINTER,
 	[  --enable-PRINTER        PRINTER support (experimental) [default=yes]],
 	echo $enable_PRINTER,
@@ -85,77 +86,30 @@ AC_ARG_ENABLE(PRINTER,
 	else
 		TARGETLIB="\$(target_alias)/libSerial.la"
 	fi
-#AC_ARG_ENABLE
-#(
-#	VERBOSE,
-#	[  --enable-VERBOSE        more verbose native io messages [default=yes]],
-#	echo $enable_VERBOSE, 
-#	enable_VERBOSE="yes"
-#)
-#   if test x$enable_VERBOSE = xno; then 
-#      VERBOSE_IOEXCEPTIONS="-DNO_VERBOSE_IOEXCEPTIONS"
-#   fi
-
-AC_ARG_ENABLE(NATIVETHREADS,
-	[  --enable-NATIVETHREADS  Use jdk native-threads.  Overrides environment ],
-	echo $enable_NATIVETHREADS, 
-	enable_NATIVETHREADS="no"
-)
-if test x$enable_NATIVETHREADS = xyes; then 
-	THREAD_FLAG="native"
-else
-	THREAD_FLAG=""
-fi
-AC_ARG_ENABLE(FULL_EVENT, 
-	[  --enable-FULL_EVENT     Full event notification (linux 2.2)],
-	if test x$enable_FULL_EVENT = xyes; then 
-		CFLAGS="$CFLAGS -DFULL_EVENT"
-		THREADS_FLAG="native"
-	fi
-)
-
-AC_ARG_ENABLE(JDK_HOME,
-	[  --enable-JDK_HOME       get JDK location from \$JDK_HOME],
-	if test x$enable_JDK_HOME = xyes; then 
-		JHOME="`echo $JDK_HOME`"
-		if test x$JDK_HOME = x; then
-			AC_MSG_ERROR([Could not find java in \$JDK_HOME.])
-		fi
-	fi
-)
 AC_ARG_ENABLE(DEBUG,
 	[  --enable-DEBUG          Print debugging info from SerialImp.c],
 	if test x$enable_DEBUG = xyes; then 
 		CFLAGS="$CFLAGS -DDEBUG"
 	fi
 )
-if test "$JHOME" = ""; then
-	JHOME="`which java | sed s#/\bin\/java##`"
-	if test x$JHOME = x; then
-		AC_MSG_WARN([Could not find java in \$PATH.  Trying \$JDK_HOME.])
-		if test x$JDK_HOME = x; then
-			AC_MSG_ERROR([Could not find java in \$JDK_HOME.])
-		fi
-	JHOME="`echo $JDK_HOME`"
-	fi
-fi
-JAVANATINC="\$(JHOME)/`cd $JHOME; find ./include -name jni_md.h|sed s#jni_md\\\\.h##|sed s#\\\\.\\\\/## |head -n1`"
-if [ test `find $JHOME/include -name jni_md.h|wc -l` != "1" ]; then
+find_java_native_include()
+{
+JAVANATINC="-I \$(JPATH)/`cd $JPATH; find ./include -name $1|sed s#$1##|head -n1`"
+if [ test `find $JPATH/include -name $1|wc -l` != "1" ]; then
 	echo 1>&2
 	echo WARNING:  configure is having a hard time determining which  1>&2
-	echo directory contains the file jni_md.h.  Edit Makefile and fix the  1>&2
+	echo directory contains the file $1.  Edit Makefile and fix the  1>&2
 	echo variable JAVANATINC to point to the correct directory. 1>&2
 	echo 1>&2
 	echo The following options are available: 1>&2
-	find $JHOME/include -name jni_md.h|sed s#jni_md\.h## 1>&2
+	find $JPATH/include -name $1|sed s#jni_md\.h## 1>&2
 	echo 1>&2
 	echo If there are more than one option available the first was selected.  1>&2
 	echo 1>&2
-	echo Press enter to continue.
-	read REPLY
 fi
-	
-
+}
+build_conftest()
+{
 cat > conftest.java << EOF
 /* this may be usefull for getting around java cobwebs during build */
 public class conftest 
@@ -166,54 +120,41 @@ public class conftest
 	}
 }
 EOF
+javac conftest.java
+}
 
-$JHOME/bin/javac conftest.java
-echo $ac_n checking os.name  " " 1>&6
-OS_NAME=`$JHOME/bin/java conftest "os.name"`
-echo $OS_NAME 1>&6
-echo $ac_n checking os.arch   " " 1>&6
-OS_ARCH=`$JHOME/bin/java conftest "os.arch"`
-echo $OS_ARCH 1>&6
-echo $ac_n checking java.version   " " 1>&6
-JAVA_VERSION=`$JHOME/bin/java conftest "java.version"`
-echo $JAVA_VERSION 1>&6
-echo $ac_n checking java.vendor " " 1>&6
-JAVA_VENDOR=`java conftest "java.vendor"`
-echo $JAVA_VENDOR 1>&6
+run_conftest()
+{
+	echo $ac_n checking $1   " " 1>&6
+	VAR=`java conftest $1`
+	echo $VAR  1>&6
+	echo $VAR
+	return
+}
+
+build_conftest
+JPATH=`run_conftest java.home| sed s#\/jre\\$##g`
+if test x$JPATH = x; then
+	AC_MSG_ERROR([Make sure java is in your path before running configure])
+fi
+echo adjusted java.home is $JPATH
+if test "$target_alias" = i386-mingw32 ;then
+	OS_NAME=WIN32
+else
+	OS_NAME=`run_conftest os.name`
+fi
+OS_ARCH=`run_conftest os.arch`
+#JAVA_CLASS_PATH=`run_conftest java.class.path`
+#JAVA_LIBRARY_PATH=`run_conftest java.library.path`
+JAVA_VENDOR=`run_conftest java.vendor`
+JAVA_VERSION=`run_conftest java.version`
+rm -f conftest.java
+rm -f conftest.class
 
 echo $ac_n checking os.version   " " 1>&6
 OS_VERSION=`uname -r`
 echo $OS_VERSION 1>&6
-rm -f conftest.java
-rm -f conftest.class
 
-#Did you ever think about installing the jar in the standard extension path for
-#jdk 1.2?  I manually moved comm.jar and jcl.jar to /usr/local/jdk/jre/lib/ext
-#and now I don't need them in my classpath.  I also moved libSerial.so to
-#/usr/local/jdk/jre/lib/i386, which is searched automatically for native libs.
-#This seems to be the 'standard' way of doing things in 1.2.  Do you think it's
-#a good idea?
-fix_parameters()
-{
-	if [ ! grep -q "Driver=javax.comm.RXTXCommDriver" $1 ]; then 
-		echo "------------------------------------------------------" 1>&2
-		echo "RxTx requires the following information in" 1>&2
-		echo " $1:" 1>&2
-		echo 1>&2
-		echo "Driver=javax.comm.RXTXCommDriver" 1>&2
-		echo 1>&2
-		echo "The command configure will use to fix this is:" 1>&2
-		echo 1>&2
-		echo "echo \"Driver=javax.comm.RXTXCommDriver\" > $1" 1>&2
-		echo 1>&2
-		echo "------------------------------------------------------" 1>&2
-		echo $ac_n "Is it ok to place it there now? [[y/n]] "
-		read REPLY
-		if [ test "$REPLY" = "y" || test "$REPLY" = "Y" ];then 1>&2
-			echo "Driver=javax.comm.RXTXCommDriver" > $1; 1>&2
-		fi;
-	fi;
-}
 check_prefix()
 {
 	if test $prefix != "/usr";then 
@@ -222,8 +163,6 @@ check_prefix()
 		echo "          Unless /usr/local/lib or the specified prefix is in"  1>&2
 		echo "          the linkers path this will cause problems later on." 1>&2
 		echo 1>&2
-		echo "          Press enter to continue."
-		read  REPLY
 	fi
 }
 # an attempt to compile on libc5 linux machines
@@ -248,8 +187,8 @@ EOF
 		echo 1>&2
 		echo "       WARNING:  Older libc on linux detected.  Patching a local copy of jni_md.h" 1>&2
 		echo 1>&2
-		ln -s `find $JHOME/include -name jni.h` .
-		cp `find $JHOME/include -name typedefs_md.h` .
+		ln -s `find $JPATH/include -name jni.h` .
+		cp `find $JPATH/include -name typedefs_md.h` .
 		# not pretty.  could be cleaned up
 		patch << EOF
 --- typedefs_md.h	Tue Jan 11 14:17:08 2000
@@ -388,164 +327,127 @@ EOF
 }
 fix_comm_jar()
 {
-	if ! test -f $1;then
+	if test -f $1;then
 		echo "------------------------------------------------------" 1>&2
-		echo "The JCL extension to RxTx requires comm.jar" 1>&2
-		echo "If you intend to use RxTx for commapi support comm.jar" 1>&2
-		echo "needs to be located in $1" 1>&2
+		echo "WARNING:  A comm.jar file is alread installed" 1>&2
+		echo "make install will overwrite it" 1>&2
 		echo 1>&2
-		echo "You can either quit configure and place the jar in the" 1>&2
-		echo "correct location or let this script do it." 1>&2
-		echo  1>&2
+		echo $1
+		echo 1>&2
 		echo "------------------------------------------------------" 1>&2
-		echo $ac_n "Do you wish to [[Q]]uit or use the [[S]]cript? [[Q/S]] "
-		read REPLY
-		if [ test "$REPLY" = "q" || test "$REPLY" = "Q" ];then
-			echo "When you are done rerun configure"
-			exit
-		else if [ test "$REPLY" = "s" || test "$REPLY" = "S" ];then
-			FILE="null"
-			until test -f $FILE;do
-				echo "Please enter the full path to comm.jar (example /home/fred/commapi/comm.jar):"
-				read FILE
-			done;
-			if grep -q Win32 $FILE;then 
-				echo 1>&2
-				echo WARNING: 1>&2
-				echo 1>&2
-				echo "I've detected A Windows version of comm.jar.   This is known to not work with"  1>&2
-				echo "rxtx on UNIX.  Go to  http://java.sun.com/products/javacomm/index.html and " 1>&2
-				echo "get the solaris-x86 CommAPI if your target is unix."  1>&2
-				echo  1>&2
-				echo "Press enter to continue."
-				read REPLY
-			fi 
-			echo $ac_n "Is it ok to copy $FILE to $1?[[y/n]] "
-			read REPLY
-			if [ test "$REPLY" = "y" || test "$REPLY" = "Y" ];then
-				cp $FILE $1
-				return
-			fi;
-		fi;fi;
-		echo "configure is unable to continue.  Please try again or manual fix the problem." 1>&2
-		exit
-	
 	fi;
 }
 
-JAVAINCLUDE="\$(JHOME)/include"
+JAVAINCLUDE="-I \$(JPATH)/include"
 if test "$CC" = "gcc" || test "$CC"="egcs"; then
 	case $JAVA_VENDOR in
-	Tran*) #FIXME
+	Tran*)
+		find_java_native_include jni.h
+		JAVAH="kaffeh \$(CLASSPATH) -d \$(DEST) -jni"
+		JAVAC="javac \$(CLASSPATH) -d \$(TOP)/ -O"
+		JAR="jar"
+		JAVADOC="javadoc \$(CLASSPATH)"
 		CFLAGS="$CFLAGS -D_BSD_SOURCE"
-		fix_javanatinc jni.h
 		JAVAINCLUDE=""
-		KAFFE_LIB_FIX="/kaffe"
+		JAVAH_FIX="if test ! -d \$(target_alias);then  mkdir \$(target_alias);fi;"
+		JHOME=$JPATH"/share/kaffe/"
+		RXTX_PATH=$JPATH"/lib/kaffe/"
 		;;
 	IBM*)
+		find_java_native_include jni_md.h
+		JAVAH="javah -d \$(DEST) -jni"
+		JAVAC="javac -d \$(TOP)/ -O"
+		JAR="jar"
+		JAVADOC="javadoc"
 		CFLAGS="$CFLAGS -D_BSD_SOURCE"
 		;;
 	*)
+		find_java_native_include jni_md.h
+		JAVAH="javah -d \$(DEST) -jni"
+		JAVAC="javac -d \$(TOP)/ -O"
+		JAR="jar"
+		JAVADOC="javadoc"
 		CFLAGS="$CFLAGS -D_BSD_SOURCE"
 		;;
 	esac
 fi
+if [ test -d $JPATH/share/kaffe/ ]
+	then fix_comm_jar $JPATH/share/kaffe/comm.jar
+elif [ test -d $JPATH/jre/lib/ext ]
+	then fix_comm_jar $JPATH/lib/ext/comm.jar
+elif [ test -d $JPATH/lib ] 
+	then fix_comm_jar $JPATH/lib/comm.jar
+fi
 [ case $OS_NAME in 
 Linux)
-	#check_kernel_headers
+	check_kernel_headers
 	check_java_headers
 	case $JAVA_VERSION in
 	1.2*|1.3*) 
-		#fix_parameters $JHOME/jre/lib/javax.comm.properties
-		#fix_comm_jar $JHOME/jre/lib/ext/comm.jar
-		JCLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:$CLASSPATH"
-		JAVA_H_CLASSPATH="-classpath .:`find $JHOME/ -name comm.jar |head -n1`"
-		JPATH=$JHOME/"jre/lib/ext"
-
-		case $OS_ARCH in
-		i386)
-			RXTX_DEST="\$(JHOME)/jre/lib/i386"
-		;;
-		*)
-			# best we can do without knowing what java returns
-			RXTX_DEST="\$(JHOME)/jre/lib/\$(OS_ARCH)"
-		;;
-		esac
-		case $OS_VERSION in
-		2.2.*|2.3.*)
-			CFLAGS="$CFLAGS -DFULL_EVENT"
-		;;
-		1.*|2.0.*|2.1.*)
-		;;
-		esac
+		#fix_parameters $JPATH/jre/lib/javax.comm.properties
+		CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:"`find $JPATH/ -name comm.jar |head -n1`
+		JHOME=$JPATH"/jre/lib/ext"
+		RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
 	;;
 	1.*) 
-		#fix_parameters $JHOME/lib$KAFFE_LIB_FIX/javax.comm.properties
-		#fix_comm_jar $JHOME/lib$KAFFE_LIB_FIX/comm.jar
-
-		check_prefix
-		JCLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:\$(JHOME)/lib/classes.zip:\$(JHOME)/lib/comm.jar:\$(JHOME)/lib/jcl.jar:$CLASSPATH"
-		JAVA_H_CLASSPATH="\$(JCLASSPATH)"
-		RXTX_DEST="\$(prefix)/lib/"
-		JAVAH_FIX="if [ ! \$(THREADS_FLAG) ] && [ ! -d com ]; then if [ ! -f \$(JHOME)/lib/comm.jar ]; then echo \"Please install comm.jar from CommAPI in \$(JHOME)/java/lib/ 1>&2\"; else mkdir -p com/sun/comm;\$(JAR) -xf \$(JHOME)/lib/comm.jar;  fi; fi;"
-		JPATH=$JHOME/"lib"
-		case $OS_VERSION in
-		2.2.*|2.3.*)
-			CFLAGS="$CFLAGS -DFULL_EVENT"
-		;;
-		1.*|2.0.*|2.1.*)
-		;;
-		esac
+		CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:"` \
+			if [ -d $JPATH/share/kaffe/ ]; then
+				find $JPATH/share/kaffe/ -name [cK]lasses.[jz][ai][rp]
+			elif [ -d $JPATH/lib/ ]; then
+				find $JPATH/lib/ -name [cK]lasses.[jz][ai][rp]
+			fi`
+		if test x"$RXTX_PATH" = x;then
+			#  We are not using kaffe
+			check_prefix
+			RXTX_PATH="\$(prefix)/lib/"
+			#JAVAH_FIX="if [ ! -d com ]; then if [ ! -f \$(JPATH)/lib/comm.jar ]; then echo \"Please install comm.jar from CommAPI in \$(JPATH)/java/lib/ 1>&2\"; else mkdir -p com/sun/comm;\$(JAR) -xf \$(JPATH)/lib/comm.jar;  fi; fi;";
+		fi;
+		if test x"$JHOME" = x;then
+			JHOME=$JPATH/"lib"
+		fi
 	;;
 	esac 
 ;;
 *BSD)
-	RXTX_DEST="\$(prefix)/lib"
-	JPATH=$JHOME/"lib"
+	RXTX_PATH="\$(prefix)/lib"
+	JHOME=$JPATH/"lib"
 	CFLAGS="$CFLAGS -D_NO_POSIX=1 -D_NO_XOPEN4=1"
-	JCLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:\$(JHOME)/lib/classes.zip:\$(JHOME)/lib/comm.jar:\$(JHOME)/lib/jcl.jar:$CLASSPATH"
+	CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/comm.jar:$CLASSPATH"
+	TARGETLIB="\$(target_alias)/libSerial.la"
 	case $JAVA_VERSION in
 	1.2*) 
-		fix_parameters $JHOME/jre/lib/javax.comm.properties
-		#fix_comm_jar $JHOME/jre/lib/ext/comm.jar
-		JCLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:$CLASSPATH"
+		CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:$CLASSPATH"
 	;;
 	1.*) 
 		check_prefix
-		fix_parameters $JHOME/lib/javax.comm.properties
-		#fix_comm_jar $JHOME/lib/comm.jar
 	;;
 	*)
 	;;
 	esac
 ;;
 irix*)
-	JPATH=$JHOME/"lib"
+	JHOME=$JPATH/"lib"
 	CFLAGS="$CFLAGS -D_NO_POSIX=1 -D_NO_XOPEN4=1"
-	JCLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:\$(JHOME)/lib/classes.zip:\$(JHOME)/lib/comm.jar:\$(JHOME)/lib/jcl.jar:$CLASSPATH"
+	CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/comm.jar:$CLASSPATH"
+	TARGETLIB="\$(target_alias)/libSerial.la"
 ;;
 HP-UX)
 	echo I\'m In $OS_NAME
+	TARGETLIB="\$(target_alias)/libSerial.la"
 	CFLAGS="-g -O2  -D__hpux__ -D_HPUX_SOURCE -D_NO_POSIX=1 -D_NO_XOPEN4=1"
-	RXTX_DEST="\$(JHOME)/jre/lib/\$(OS_ARCH)"
+	RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
 	TARGETLIB="\$(target_alias)/libSerial.la"
 	case $JAVA_VERSION in
 		HP-UX\ Java\ C.01.18*) 
 			echo I\'m in $JAVA_VERSION
-			fix_parameters $JHOME/lib/javax.comm.properties
-			fix_comm_jar $JHOME/lib/comm.jar
-			JPATH=$JHOME/"lib"
-			JCLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:\$(JHOME)/lib/classes.zip:\$(JHOME)/lib/comm.jar:\$(JHOME)/lib/jcl.jar:$CLASSPATH"
-			JAVA_H_CLASSPATH="\$(JCLASSPATH)"
-			RXTX_DEST="\$(prefix)/lib/"
+			JHOME=$JPATH/"lib"
+			CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/comm.jar:$CLASSPATH"
+			RXTX_PATH="\$(prefix)/lib/"
 		;;
 		*)
-			fix_parameters $JHOME/lib/javax.comm.properties
-			fix_comm_jar $JHOME/lib/comm.jar
-			JPATH=$JHOME/"lib"
-			JCLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:\$(JHOME)/lib/classes.zip:\$(JHOME)/lib/comm.jar:\$(JHOME)/lib/jcl.jar:$CLASSPATH"
-			JAVA_H_CLASSPATH="\$(JCLASSPATH)"
-			RXTX_DEST="\$(prefix)/lib/"
+			JHOME=$JPATH/"lib"
+			CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/comm.jar:$CLASSPATH"
+			RXTX_PATH="\$(prefix)/lib/"
 			echo WARNING $JAVA_VERSION is untested please email this message to TrentJarvi@yahoo.com and let me know if it works.
 		;;
 	esac
@@ -574,22 +476,58 @@ HP-UX)
 		;;
 	esac
 ;;
-*)
-	JPATH=$JHOME/"lib"
+BeOS)
+	JHOME=$JPATH"/share/kaffe"
+	RXTX_PATH="\$(JPATH)/lib/"
 	CFLAGS="$CFLAGS -D_NO_POSIX=1 -D_NO_XOPEN4=1"
-	JCLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:\$(JHOME)/lib/classes.zip:\$(JHOME)/lib/comm.jar:\$(JHOME)/lib/jcl.jar:$CLASSPATH"
+	CLASSPATH="-classpath .:\$(TOP):\$(TOP)/../src:\$(JPATH)/share/kaffe/Klasses.jar:\$(JPATH)/lib/comm.jar:$CLASSPATH"
+	TARGETLIB="\$(target_alias)/libSerial.la"
+	EXTENSION="cpp"
+	LDFLAGS="-ldevice"
+#  sigh, from ltconfig 
+#  beos*)
+#     if $LD --help 2>&1 | egrep ': supported targets:.* elf' > /dev/null; then
+#       allow_undefined_flag=unsupported
+#       # Joseph Beckenbach <jrb3@best.com> says some releases of gcc
+#       # support --undefined.  This deserves some investigation.  FIXME
+
+	LIBTOOL_FIX="sed s/deplibs_check_method=\\\"unknown\\\"/deplibs_check_method=\\\"pass_all\\\"/1 libtool > libtool.tmp; sed s/allow_undefined_flag=\\\"unsupported\\\"/allow_undefined_flag=\\\"supported\\\"/1 libtool.tmp > libtool;rm libtool.tmp;"
+
+
 ;;
-esac ]
-# blah
-if test "$target_alias" = i386-mingw32;then
+WIN32)
+	case $JAVA_VERSION in
+	1.2*|1.3*)
+		CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:`find $JPATH/ -name comm.jar |head -n1`:$CLASSPATH"
+		JHOME=$JPATH"/jre/lib/ext"
+	;;
+	1.*)
+		CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/comm.jar:$CLASSPATH"
+		RXTX_PATH="\$(prefix)/lib/"
+		#JAVAH_FIX="if [ ! -d com ]; then if [ ! -f \$(JPATH)/lib/comm.jar ]; then echo \"Please install comm.jar from CommAPI in \$(JPATH)/java/lib/ 1>&2\"; else mkdir -p com/sun/comm;\$(JAR) -xf \$(JPATH)/lib/comm.jar;  fi; fi;"
+		JHOME=$JPATH/"lib"
+	;;
+	esac
+	if test x$WIN32INCLUDE = x; then
 	echo "We need to know what directory the windows java include files"
 	echo "are located in.  Please enter the directory now."
 	echo
 	echo "example /home/jarvi/win32java/include"
 	echo
 	read REPLY
-	WINDOWS_JAVA_INCLUDE="$REPLY"
-fi;
+	WINDOWS_JAVA_INCLUDE="-I $REPLY -I $REPLY/win32"
+	else
+	WINDOWS_JAVA_INCLUDE="-I $WIN32INCLUDE -I $WIN32INCLUDE/win32"
+	fi
+	TARGETLIB="\$(target_alias)/Serial.dll"
+;;
+*)
+	TARGETLIB="\$(target_alias)/libSerial.la"
+	JHOME=$JPATH/"lib"
+	CFLAGS="$CFLAGS -D_NO_POSIX=1 -D_NO_XOPEN4=1"
+	CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/comm.jar:$CLASSPATH"
+;;
+esac ]
 
 AC_OUTPUT(Makefile)
 
@@ -600,15 +538,9 @@ AC_OUTPUT(Makefile)
 
 
 # Toys.  Gota lovem.
-#echo $ac_n checking java.home   " "
-#JAVA_HOME=`java conftest "java.home"`
-#echo $JAVA_HOME
 #echo $ac_n checking java.library.path   " "
 #JAVA_LIBRARY_PATH=`java conftest "java.library.path"`
 #echo $JAVA_LIBRARY_PATH
-#echo $ac_n checking java.class.path   " "
-#JAVA_CLASS_PATH=`java conftest "java.class.path"`
-#echo $JAVA_CLASS_PATH
 #echo $ac_n checking java.class.version   " "
 #JAVA_CLASS_VERSION=`java conftest "java.class.version"`
 #echo $JAVA_CLASS_VERSION

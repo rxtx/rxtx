@@ -1,5 +1,5 @@
 /*-------------------------------------------------------------------------
-|   rxtx is a native interface to Raw ports in java.
+|   rxtx is a native interface to RS485 ports in java.
 |   Copyright 1997-2000 by Trent Jarvi trentjarvi@yahoo.com.
 |
 |   This library is free software; you can redistribute it and/or
@@ -24,15 +24,15 @@ import java.lang.Math;
 
 /**
 * @author Trent Jarvi
-* @version $Id$
+* @version %I%, %G%
 * @since JDK1.0
 */
 
-final class Raw  extends  RawPort {
+final class RS485  extends  RS485Port {
 
 	static 
 	{
-		System.loadLibrary( "Raw" );
+		System.loadLibrary( "RS485" );
 		Initialize();
 	}
 
@@ -41,48 +41,47 @@ final class Raw  extends  RawPort {
 	private native static void Initialize();
 
 
-	/** Actual RawPort wrapper class */
+	/** Actual RS485Port wrapper class */
 
 
 	/** Open the named port */
-	public Raw( String name ) throws IOException {
-		ciAddress=Integer.parseInt(name);
-		open( ciAddress );
+	public RS485( String name ) throws IOException {
+		fd = open( name );
 	}
-	private native int open( int ciAddress ) throws IOException;
+	private native int open( String name ) throws IOException;
 
 
 	/** File descriptor */
-	private int ciAddress;
+	private int fd;
 
 	/** DSR flag **/
 	static boolean dsrFlag = false;
 
 	/** Output stream */
-	private final RawOutputStream out = new RawOutputStream();
+	private final RS485OutputStream out = new RS485OutputStream();
 	public OutputStream getOutputStream() { return out; }
 
 
 	/** Input stream */
-	private final RawInputStream in = new RawInputStream();
+	private final RS485InputStream in = new RS485InputStream();
 	public InputStream getInputStream() { return in; }
 
 
 
 
-	/** Set the RawPort parameters */
-	public void setRawPortParams( int b, int d, int s, int p )
+	/** Set the RS485Port parameters */
+	public void setRS485PortParams( int b, int d, int s, int p )
 		throws UnsupportedCommOperationException
 	{
-		nativeSetRawPortParams( b, d, s, p );
+		nativeSetRS485PortParams( b, d, s, p );
 		speed = b;
 		dataBits = d;
 		stopBits = s;
 		parity = p;
 	}
 
-	/** Set the native Raw port parameters */
-	private native void nativeSetRawPortParams( int speed, int dataBits,
+	/** Set the native RS485 port parameters */
+	private native void nativeSetRS485PortParams( int speed, int dataBits,
 		int stopBits, int parity ) throws UnsupportedCommOperationException;
 
 	/** Line speed in bits-per-second */
@@ -94,16 +93,16 @@ final class Raw  extends  RawPort {
 	public int getDataBits() { return dataBits; }
 
 	/** Stop bits port parameter */
-	private int stopBits=RawPort.STOPBITS_1;
+	private int stopBits=RS485Port.STOPBITS_1;
 	public int getStopBits() { return stopBits; }
 
 	/** Parity port parameter */
-	private int parity= RawPort.PARITY_NONE;
+	private int parity= RS485Port.PARITY_NONE;
 	public int getParity() { return parity; }
 
 
 	/** Flow control */
-	private int flowmode = RawPort.FLOWCONTROL_NONE;
+	private int flowmode = RS485Port.FLOWCONTROL_NONE;
 	public void setFlowControlMode( int flowcontrol ) {
 		try { setflowcontrol( flowcontrol ); }
 		catch( IOException e ) {
@@ -228,29 +227,29 @@ final class Raw  extends  RawPort {
 	private native void drain() throws IOException;
 
 
-	/** Raw read methods */
+	/** RS485 read methods */
 	private native int nativeavailable() throws IOException;
 	private native int readByte() throws IOException;
 	private native int readArray( byte b[], int off, int len ) 
 		throws IOException;
 
 
-	/** Raw Port Event listener */
-	private RawPortEventListener SPEventListener;
+	/** RS485 Port Event listener */
+	private RS485PortEventListener SPEventListener;
 
 	/** Thread to monitor data */
 	private MonitorThread monThread;
 
-	/** Process RawPortEvents */
+	/** Process RS485PortEvents */
 	native void eventLoop();
 	private int dataAvailable=0;
 	public void sendEvent( int event, boolean state ) {
 		switch( event ) {
-			case RawPortEvent.DATA_AVAILABLE:
+			case RS485PortEvent.DATA_AVAILABLE:
 				dataAvailable=1;
 				if( monThread.Data ) break;
 				return;
-			case RawPortEvent.OUTPUT_BUFFER_EMPTY:
+			case RS485PortEvent.OUTPUT_BUFFER_EMPTY:
 				if( monThread.Output ) break;
 				return;
 /*
@@ -261,49 +260,49 @@ final class Raw  extends  RawPort {
 					if (!dsrFlag) 
 					{
 						dsrFlag = true;
-						RawPortEvent e = new RawPortEvent(this, RawPortEvent.DSR, !dsrFlag, dsrFlag );
+						RS485PortEvent e = new RS485PortEvent(this, RS485PortEvent.DSR, !dsrFlag, dsrFlag );
 					}
 				}
 				else if (dsrFlag)
 				{
 					dsrFlag = false;
-					RawPortEvent e = new RawPortEvent(this, RawPortEvent.DSR, !dsrFlag, dsrFlag );
+					RS485PortEvent e = new RS485PortEvent(this, RS485PortEvent.DSR, !dsrFlag, dsrFlag );
 				}
 */
-			case RawPortEvent.CTS:
+			case RS485PortEvent.CTS:
 				if( monThread.CTS ) break;
 				return;
-			case RawPortEvent.DSR:
+			case RS485PortEvent.DSR:
 				if( monThread.DSR ) break;
 				return;
-			case RawPortEvent.RI:
+			case RS485PortEvent.RI:
 				if( monThread.RI ) break;
 				return;
-			case RawPortEvent.CD:
+			case RS485PortEvent.CD:
 				if( monThread.CD ) break;
 				return;
-			case RawPortEvent.OE:
+			case RS485PortEvent.OE:
 				if( monThread.OE ) break;
 				return;
-			case RawPortEvent.PE:
+			case RS485PortEvent.PE:
 				if( monThread.PE ) break;
 				return;
-			case RawPortEvent.FE:
+			case RS485PortEvent.FE:
 				if( monThread.FE ) break;
 				return;
-			case RawPortEvent.BI:
+			case RS485PortEvent.BI:
 				if( monThread.BI ) break;
 				return;
 			default:
 				System.err.println("unknown event:"+event);
 				return;
 		}
-		RawPortEvent e = new RawPortEvent(this, event, !state, state );
-		if( SPEventListener != null ) SPEventListener.RawEvent( e );
+		RS485PortEvent e = new RS485PortEvent(this, event, !state, state );
+		if( SPEventListener != null ) SPEventListener.RS485Event( e );
 	}
 
 	/** Add an event listener */
-	public void addEventListener( RawPortEventListener lsnr )
+	public void addEventListener( RS485PortEventListener lsnr )
 		throws TooManyListenersException
 	{
 		if( SPEventListener != null ) throw new TooManyListenersException();
@@ -311,7 +310,7 @@ final class Raw  extends  RawPort {
 		monThread = new MonitorThread();
 		monThread.start(); 
 	}
-	/** Remove the Raw port event listener */
+	/** Remove the RS485 port event listener */
 	public void removeEventListener() {
 		SPEventListener = null;
 		if( monThread != null ) {
@@ -335,24 +334,24 @@ final class Raw  extends  RawPort {
 
 
 	/** Close the port */
-	private native int nativeClose();
+	private native void nativeClose();
 	public void close() {
 		setDTR(false);
 		setDSR(false);
 		nativeClose();
 		super.close();
-		ciAddress = 0;
+		fd = 0;
 	}
 
 
 	/** Finalize the port */
 	protected void finalize() {
-		close();
+		if( fd > 0 ) close();
 	}
 
 
-        /** Inner class for RawOutputStream */
-        class RawOutputStream extends OutputStream {
+        /** Inner class for RS485OutputStream */
+        class RS485OutputStream extends OutputStream {
                 public void write( int b ) throws IOException {
                         writeByte( b );
                 }
@@ -367,8 +366,8 @@ final class Raw  extends  RawPort {
                 }
         }
 
-	/** Inner class for RawInputStream */
-	class RawInputStream extends InputStream {
+	/** Inner class for RS485InputStream */
+	class RS485InputStream extends InputStream {
 		public int read() throws IOException {
 			dataAvailable=0;
 			return readByte();
@@ -391,7 +390,7 @@ final class Raw  extends  RawPort {
 			find the lowest nonzero value
 			timeout and threshold are handled on the native side
 			see  NativeEnableReceiveTimeoutThreshold in
-			RawImp.c
+			RS485Imp.c
 		*/
 			while(intArray[i]==0 && i < intArray.length) i++;
 			Minimum=intArray[i];
@@ -415,7 +414,7 @@ final class Raw  extends  RawPort {
 	}
 	class MonitorThread extends Thread {
 	/** Note: these have to be separate boolean flags because the
-	   RawPortEvent constants are NOT bit-flags, they are just
+	   RS485PortEvent constants are NOT bit-flags, they are just
 	   defined as integers from 1 to 10  -DPL */
 		private boolean CTS=false;
 		private boolean DSR=false;
@@ -431,10 +430,5 @@ final class Raw  extends  RawPort {
 		public void run() {
 			eventLoop();
 		}
-	}
-	public String getVersion()
-	{
-		String Version="$Id$";
-		return(Version);
 	}
 }

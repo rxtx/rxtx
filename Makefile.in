@@ -84,8 +84,10 @@ CATALOGS = @CATALOGS@
 CATOBJEXT = @CATOBJEXT@
 CC = @CC@
 CFLAGS = @CFLAGS@
+CLASSPATH = @CLASSPATH@
 DATADIRNAME = @DATADIRNAME@
 DLLTOOL = @DLLTOOL@
+EXTENSION = @EXTENSION@
 GENCAT = @GENCAT@
 GMOFILES = @GMOFILES@
 GMSGFMT = @GMSGFMT@
@@ -96,20 +98,25 @@ INSTOBJEXT = @INSTOBJEXT@
 INTLDEPS = @INTLDEPS@
 INTLLIBS = @INTLLIBS@
 INTLOBJS = @INTLOBJS@
+JAR = @JAR@
+JAVAC = @JAVAC@
+JAVADOC = @JAVADOC@
+JAVAH = @JAVAH@
 JAVAH_FIX = @JAVAH_FIX@
 JAVAINCLUDE = @JAVAINCLUDE@
 JAVANATINC = @JAVANATINC@
 JAVA_CLASS_PATH = @JAVA_CLASS_PATH@
 JAVA_CLASS_VERSION = @JAVA_CLASS_VERSION@
 JAVA_HOME = @JAVA_HOME@
-JAVA_H_CLASSPATH = @JAVA_H_CLASSPATH@
 JAVA_LIBRARY_PATH = @JAVA_LIBRARY_PATH@
 JAVA_VENDOR = @JAVA_VENDOR@
 JAVA_VERSION = @JAVA_VERSION@
-JCLASSPATH = @JCLASSPATH@
 JHOME = @JHOME@
+JPATH = @JPATH@
 LDFLAG = @LDFLAG@
+LDFLAGS = @LDFLAGS@
 LIBTOOL = @LIBTOOL@
+LIBTOOL_FIX = @LIBTOOL_FIX@
 LN_S = @LN_S@
 MAKEINFO = @MAKEINFO@
 MKINSTALLDIRS = @MKINSTALLDIRS@
@@ -122,12 +129,12 @@ PACKAGE = @PACKAGE@
 POFILES = @POFILES@
 POSUB = @POSUB@
 RANLIB = @RANLIB@
-RXTX_DEST = @RXTX_DEST@
+RXTX_PATH = @RXTX_PATH@
 TARGETLIB = @TARGETLIB@
 THREAD_FLAG = @THREAD_FLAG@
+TOP = @TOP@
 USE_INCLUDED_LIBINTL = @USE_INCLUDED_LIBINTL@
 USE_NLS = @USE_NLS@
-VERBOSE_IOEXCEPTIONS = @VERBOSE_IOEXCEPTIONS@
 VERSION = @VERSION@
 WINDOWS_JAVA_INCLUDE = @WINDOWS_JAVA_INCLUDE@
 l = @l@
@@ -135,31 +142,26 @@ l = @l@
 srcdir = @srcdir@
 VPATH = @srcdir@
 
-WJI = -I @WINDOWS_JAVA_INCLUDE@ -I @WINDOWS_JAVA_INCLUDE@/win32 
 AUTOMAKE_OPTIONS = foreign
-TOP = @TOP@
-JDIR = $(TOP)/javax/comm
-JPATH = @JPATH@
-INCLUDES = -I $(TOP) -I $(DEST) -I . -I $(JAVAINCLUDE) -I $(JAVANATINC)
-NSJAVA = 1
-THREADS_FLAG = @THREAD_FLAG@
+INCLUDES = -I $(TOP) -I $(DEST) -I . $(JAVAINCLUDE) $(JAVANATINC)
+####################### vars for rxtx-1.4->1.5 transition
+JARTARGET = comm.jar
+CLASSDIR = javax.comm
+CLASSTOP = javax
+CLASSDEST = javax/comm
 ####################### tools
-JAVAC = javac $(JCLASSPATH):$(COMM_JAR_PATH):$(JCL_JAR_PATH) -d $(TOP)/ -O 
-JAVAH = javah $(JAVA_H_CLASSPATH) -d $(DEST) -jni
-JAVA = java $(JCLASSPATH)
-JAR = jar 
-JAVADOC = javadoc $(JCLASSPATH)
-LIBTOOLC = $(SHELL) $(TOP)/libtool --mode=compile $(CC) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) $(VERBOSE_IOEXCEPTIONS) -c
-LIBTOOL_INST = $(SHELL) $(TOP)/libtool --mode=install $(INSTALL_PROGRAM) 
-LINK = $(SHELL) $(TOP)/libtool --mode=link $(CC) $(CFLAGS) $(LDFLAGS) -version-info 1:0:1
+LIBTOOLC = $(TOP)/libtool --mode=compile $(CC) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) $(VERBOSE_IOEXCEPTIONS) -c
+LIBTOOL_INST = $(TOP)/libtool --mode=install $(INSTALL_PROGRAM)
+LINK = $(TOP)/libtool --mode=link $(CC) $(CFLAGS) $(LDFLAGS) -version-info 1:0:1
 ####################### dirs
 SPATH = $(srcdir)/src
-DEST = $(TOP)/$(target_alias)
-LIBS = $(TARGETLIB)
+DEST = $(target_alias)
 ####################### rules
-CLASSES = $(patsubst $(SPATH)/%.java,$(TOP)/javax/comm/%.class,$(wildcard $(SPATH)/*.java))
+CLASSES = $(patsubst $(SPATH)/%.java,$(TOP)/$(CLASSDEST)/%.class,$(wildcard $(SPATH)/*.java))
 javafiles = $(wildcard $(SPATH)/*.java)
 javahfiles = $(patsubst $(SPATH)/%.java,%,$(wildcard $(SPATH)/*.java))
+#######################
+CLEANFILES = $(TOP)/*.class $(TOP)/$(CLASSDEST)/*.class $(TOP)/$(JARTARGET)
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = config.h
@@ -341,42 +343,43 @@ all-redirect all-am all installdirs mostlyclean-generic \
 distclean-generic clean-generic maintainer-clean-generic clean \
 mostlyclean distclean maintainer-clean
 
-#######################  
 
 #  compile src/SerialImp.c and simular files into libraries.
-$(target_alias)/lib%.la: $(SPATH)/%Imp.c 
-	@(cd $(DEST); \
-	$(LIBTOOLC) ../$(SPATH)/$*Imp.c -o $(DEST)/$*Imp.lo; \
-	$(LINK) -o lib$*.la -rpath $(RXTX_DEST) $(DEST)/$*Imp.lo)
+$(target_alias)/lib%.la: $(SPATH)/%Imp.@EXTENSION@ $(CLASSES)
+	@( \
+	$(LIBTOOL_FIX) \
+	cd $(DEST); \
+	$(LIBTOOLC) ../$(SPATH)/$*Imp.@EXTENSION@ -o $(TOP)/$(DEST)/$*Imp.lo; \
+	$(LINK) -o lib$*.la -rpath $(RXTX_PATH) $(TOP)/$(DEST)/$*Imp.lo)
 
 #  compile src/RXTXPort.java and simular files into classes
 #  then create the .jar file
 $(CLASSES): $(javafiles) $(TOP)/Makefile
+	$(JAVAH_FIX)
 	$(JAVAC) $(javafiles)
 	@$(JAVAH) `(for i in $(javahfiles);do \
 		if grep -q native.*\( $(SPATH)/$$i.java; then \
-			echo javax.comm.$$i; \
+			echo $(CLASSDIR).$$i; \
 		fi; \
 	done)`
-	$(JAR) cf comm.jar javax/comm/*
+	$(JAR) cf $(JARTARGET) $(CLASSTOP)/*
 
-#  install libSerial.so into the proper directory and copy comm.jar to its
+#  install libSerial.so into the proper directory and copy $(JARTARGET) to its
 #  proper location
 install: all
 	@$(LIBTOOL_INST) \
-	`for i in $(LIBS);do \
+	`for i in $(TARGETLIB);do \
 		if [ -f $$i ];then \
-		echo $$i; \
+			echo $$i; \
 		fi; \
-	done` $(RXTX_DEST) 
-	$(INSTALL_PROGRAM) comm.jar $(JPATH)/
+	done` $(RXTX_PATH)
+	$(INSTALL_PROGRAM) $(JARTARGET) $(JHOME)/
 
 clean-generic:
-	rm -rf $(DEST) $(TOP)/javax 
+	rm -rf $(DEST) $(TOP)/$(CLASSTOP)
 	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
-all: $(CLASSES) $(LIBS)
-	@echo "make install will install RxTx"
+all: $(TARGETLIB)
 
 #  create the javadoc files.
 docs: $(CLASSES)
@@ -384,11 +387,11 @@ docs: $(CLASSES)
 
 ################  WIN32 CrossCompiling from here down #######################
 
-borg: $(CLASSES)
-	gcc -DWIN32 -D __int64="long long" -mno-fp-ret-in-387 -b$(target_alias) -I $(TOP) -I $(DEST) -I . $(WJI) -I $(SPATH) -Wall -c $(SPATH)/SerialImp.c -o $(TOP)/$(target_alias)/SerialImp.o
-	gcc -DWIN32 -D __int64="long long" -mno-fp-ret-in-387 -b$(target_alias) -I $(TOP) -I $(DEST) -I . $(WJI) -I $(SPATH) -Wall -c $(SPATH)/termios.c -o $(TOP)/$(target_alias)/termios.o
-	gcc -DWIN32 -D __int64="long long" -mno-fp-ret-in-387 -b$(target_alias) -I $(TOP) -I $(DES%) -I . $(WJI) -I $(SPATH) -Wall -c $(SPATH)/fixup.c -o $(TOP)/$(target_alias)/fixup.o
-	gcc -DWIN32 -D __int64="long long" -mno-fp-ret-in-387 -b$(target_alias) -I $(TOP) -I $(DEST) -I . $(WJI) -I $(SPATH)  -Wall -c $(SPATH)/init.cc -o $(DEST)/init.o
+$(DEST)/Serial.dll: $(CLASSES) $(TOP)/Makefile
+	gcc -DWIN32 -D __int64="long long" -mno-fp-ret-in-387 -b$(target_alias) -I $(TOP) -I $(DEST) -I . $(WINDOWS_JAVA_INCLUDE) -I $(SPATH) -Wall -c $(SPATH)/SerialImp.c -o $(DEST)/SerialImp.o
+	gcc -DWIN32 -D __int64="long long" -mno-fp-ret-in-387 -b$(target_alias) -I $(TOP) -I $(DEST) -I . $(WINDOWS_JAVA_INCLUDE) -I $(SPATH) -Wall -c $(SPATH)/termios.c -o $(DEST)/termios.o
+	gcc -DWIN32 -D __int64="long long" -mno-fp-ret-in-387 -b$(target_alias) -I $(TOP) -I $(DEST) -I . $(WINDOWS_JAVA_INCLUDE) -I $(SPATH) -Wall -c $(SPATH)/fixup.c -o $(DEST)/fixup.o
+	gcc -DWIN32 -D __int64="long long" -mno-fp-ret-in-387 -b$(target_alias) -I $(TOP) -I $(DEST) -I . $(WINDOWS_JAVA_INCLUDE) -I $(SPATH) -Wall -c $(SPATH)/init.cc -o $(DEST)/init.o
 	ld --base-file $(target_alias)/Serial.base --dll -o $(target_alias)/Serial.dll $(target_alias)/termios.o $(target_alias)/SerialImp.o $(target_alias)/fixup.o $(target_alias)/init.o -luser32 -lgdi32 -lcomdlg32 -lkernel32 -ladvapi32 -lmingw32 -lmoldname -lcrtdll -e _dll_entry@12 --base-file $(target_alias)/Serial.base
 	 echo EXPORTS >$(target_alias)/Serial.def;for i in `nm i386-mingw32/Serial.dll | grep "T _Java"|cut -b 13-`;do echo -n $$i|sed s#@.*##;echo "="$$i;done >> $(target_alias)/Serial.def
 	dlltool -b$(target_alias) --as=as --dllname $(target_alias)/Serial.dll --def $(target_alias)/Serial.def --base-file $(target_alias)/Serial.base --output-exp $(target_alias)/Serial.exp

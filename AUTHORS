@@ -1,6 +1,8 @@
 This package is not the result of one persons time.  Recognition is given
 to the following people for their assistance.
 
+Brian Hindman  <bjhindman@yahoo.com>  Brian initiated the BeOS port and implemented most of the functions.
+
 Chris Portal <cportal@mathworks.com> Joey Armstrong <joeya@mathworks.com>
 did some intense testing and debugging of RS232 on Linux.
 

@@ -26,6 +26,19 @@
 #define LPT_MODE_ECP	4
 #define LPT_MODE_NIBBLE	5
 
+/* some popular releases of Slackware do not have SSIZE_MAX */
+
+#ifndef SSIZE_MAX
+#	if defined(INT_MAX)
+#		define SSIZE_MAX  INT_MAX
+#	elif defined(MAXINT)
+#		define SSIZE_MAX MAXINT
+#	else
+#		define SSIZE_MAX 2147483647 /* ugh */
+#	endif
+#endif
+
+
 /* javax.comm.ParallelPortEvent constants */
 #define PAR_EV_ERROR	1
 #define PAR_EV_BUFFER	2

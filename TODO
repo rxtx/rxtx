@@ -37,6 +37,10 @@ Win95/98 with mingw32
 	http://msdn.microsoft.com/library/techart/msdn_serial.htm
 	for documentation.   WaitForSingleObject() may be of use.
 
+BeOS
+	BeOS support is in the early stages.  It should read and write bytes
+	See the BeOS documentation for more information.
+
 RXTXPort.java
 	framing control -?-
 	buffer control -?-

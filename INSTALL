@@ -16,7 +16,7 @@
 |   License along with this library; if not, write to the Free
 |   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --------------------------------------------------------------------------*/
-This is the INSTALL file for RXTX.  Jun 13 2000
+This is the INSTALL file for RXTX.  Sept 20 2000
 
 If, while following the instructions, you find this file unclear or incorrect 
 please make a note and email the details to trentjarvi@yahoo.com.  
@@ -28,13 +28,12 @@ please make a note and email the details to trentjarvi@yahoo.com.
 2.  BUILDING COMMAPI SUPPORT
 
 	A.  Quick Install
-	B.  Installing sun's comm.jar
+	B.  Uninstalling Sun's comm.jar
 	C.  installing javax.comm.properties.
 	D.  Add comm.jar to your CLASSPATH.
 	E.  Build and Install the jar.
-	F.  Add jcl.jar to your CLASSPATH
-	G.  Where did everything end up?
-	H.  Cross Compiling for Win32 support
+	F.  Where did everything end up?
+	G.  Cross Compiling for Win32 support
 
 3.  COMMON PROBLEMS
 
@@ -42,20 +41,20 @@ please make a note and email the details to trentjarvi@yahoo.com.
 	    gnu.io.RXTXCommDriver
 	B.  Exception in thread "main" java.lang.UnsatisfiedLinkError: 
 	    no Serial in java.library.path
-	C.  No serial ports found!
-	D.  I Can Not Open the Port.
-	E.  java.lang.NoClassDefFoundError: javax/comm/CommPort
-	F.  The Compiler Cannot Find Java Include Files
-	G.  Configure says 'unterminated sed command' and stops 
-	H.  Java Can Not Find libstdc++-libc6.0-1.so.2 
-	I.  BlackBox Can Not Handle all the ports!
-	J.  Illegal use of nonvirtal function call!
-	K.  My libc5 Linux system is generating SIGSEGV
-	L.  AM_PROG_LIBTOOL not found in library
-	M.  Problems with RMISecurityManager()
-	O.  Which Wires Should be Connected?
-	P.  Which Device Should be Used?
-	Q.  It Did Not Work! 
+	C.  I Can Not Open the Port.
+	D.  java.lang.NoClassDefFoundError: javax/comm/CommPort
+	E.  The Compiler Cannot Find Java Include Files
+	F.  Configure says 'unterminated sed command' and stops 
+	G.  Java Can Not Find libstdc++-libc6.0-1.so.2 
+	H.  BlackBox Can Not Handle all the ports!
+	I.  Illegal use of nonvirtal function call!
+	J.  My libc5 Linux system is generating SIGSEGV
+	K.  AM_PROG_LIBTOOL not found in library
+	L.  Problems with RMISecurityManager()
+	M.  Which Wires Should be Connected?
+	N.  Which Device Should be Used?
+	O.  It Did Not Work! 
+	P.  Which jdk should be used? 
 
 -------------------------------------------------------------------------------
 1.  INSTALL INSTRUCTIONS IN OTHER LANGUAGES
@@ -89,71 +88,36 @@ A.  Japanese
 		gnu make-3.77
 		jdk 1.2+ or 1.1 	Preferably the native threads version of
 		                        jdk. 
-		commapi 2.0             the x86 Solaris version
 
 	With the packages installed, proceed to build and install rxtx.
 
-		$ tar -xzvf rxtx-1.4.tar.gz
-		$ cd rxtx-1.4
+		$ tar -xzvf rxtx-1.5.tar.gz
+		$ cd rxtx-1.5
 		$ ./configure  (follow the instructions)
 		$ make install
 
 	If that does not work or you do not want a script messing with the 
 	system, read on..
 
-	B.  Installing sun's comm.jar
+	B.  Uninstalling Sun's comm.jar
+
+		Sun's comm.jar is not required.  It is a valid option on
+		some platforms.  IT WILL CREATE CHAOS if you have it installed
+		while trying to build rxtx 1.5.
 
 		http://java.sun.com/products/javacomm/index.html
 		
-		Obtain javacomm20-x86.tar.Z from Sun.
-
-		This is the x86 Solaris version of commapi.
-		Do not try to use the win32 version.  It will not work.
-
-		extract the files from the archive
-
-		$ tar -xzvf javacomm20-x86.tar.Z
-
-		Place comm.jar in the proper directory.  Everyone likes to 
-		put Java in different locations.  I'll use /usr/local/java
-		throughout this document.
-
-		jdk-1.1:
-
-			/usr/local/java/lib/comm.jar
-
-		jdk-1.2 and newer:
-
-			/usr/local/java/jre/lib/ext/comm.jar
-
 	C.  Installing javax.comm.properties.
 
-		javax.comm.properties needs the following text in it:
-
-		Driver=gnu.io.RXTXCommDriver
-
-		Some people have said it requires a blank line after the text.
-
-		The file goes in different locations depending upon your jdk
-		version
-
-		jdk-1.1:
-
-			/usr/local/java/lib
-
-		jdk-1.2 and newer:
-
-			/usr/local/java/jre/lib
-	
-		SEE: commapi/PlatformSpecific.html from Sun's commapi package 
-		for details.
+		javax.comm.properties is not currently required by rxtx-1.5
 
 	D.  Add comm.jar to your CLASSPATH.
 
 		jdk-1.1:
 
 			make sure /usr/local/java/lib/comm.jar is in your
-			CLASSPATH.
+			CLASSPATH.  If you want to use apps that require
+			comm.jar.
 
 			in bash:
 
@@ -165,54 +129,33 @@ A.  Japanese
 
 	E.  Build and Install the jar.
 
-		make jcl 	to build jcl.jar
+		make    	to build comm.jar and the libraries
 		make install 	to place the jar and libraries in the correct 
 		                location
 
-	F.  Add jcl.jar to your CLASSPATH
-		
-		jdk-1.1:
-
-			make sure /usr/local/java/lib/jcl.jar is in your
-			CLASSPATH. 
-
-			in bash:
-
-			$ export CLASSPATH=/usr/local/java/lib/comm.jar: \
-				/usr/local/java/jcl.jar:.
-
-
-		jdk-1.2 and newer:
-
-			No changes are needed.
-		
-		This completes the process.
-
-	G.  Where did everything end up?
+	F.  Where did everything end up?
 
 		Lets assume the top java directory is /usr/local/java
 
 		jdk-1.2 the files go in
 		
-			/usr/local/java/jre/lib/ext/jcl.jar
 			/usr/local/java/jre/lib/ext/comm.jar
 			/usr/local/java/jre/lib/$(ARCH)/libSerial.so.
 			/usr/local/java/jre/lib/$(ARCH)/libParallel.so.
-			/usr/local/java/jre/lib/javax.comm.properties
+			/usr/local/java/jre/lib/$(ARCH)/lib/...
 
 		jdk-1.1.* the files go in 
 
-			/usr/local/java/lib/jcl.jar
 			/usr/local/java/lib/comm.jar
 			/usr/lib/libSerial.so.
 			/usr/lib/libParallel.so.
-			/usr/local/java/lib/javax.comm.properties
+			/usr/lib/...
 
 			The libSerial.so libParallel.so are placed in 
 			/usr/lib so people don't have to change with their 
 			LD_LIBRARY_PATH.
 
-	H.  Cross Compiling for Win32 support
+	G.  Cross Compiling for Win32 support
 
 		Get the Sun CommAPI if you want a plug-in solution.  The code 
 		is provided for people that may have demanding needs and coding
@@ -227,7 +170,7 @@ A.  Japanese
 		ftp://24.1.180.14/pub
 
 		I built the dll with jdk-1.2.2 for linux using jdk-1.2.2 
-		include files from win32.
+		include files from the win32 JDK.
 
 		Make sure that ming32 bin dir is the first in your path (at 
 		least before /usr/bin/gcc)
@@ -242,6 +185,12 @@ A.  Japanese
 			$ mkdir /home/jarvi/win32java
 			$ cp -r /mnt/win98//java/include /home/jarvi/win32java
 
+			If your are developing win32 support you may want to
+			export the location to make the config script 
+			non interactive
+
+			$ export WIN32INCLUDE=/home/jarvi/tools/win32-include
+
 		run configure to generate a Makefile
 
 			$ cd /home/jarvi/rxtx-*
@@ -252,8 +201,7 @@ A.  Japanese
 
 		build the class files and dll.
 
-			$ make jcl
-			$ make borg
+			$ make
 
 		the files will be located in
 
@@ -271,10 +219,10 @@ A.  I get java.lang.UnsatisfiedLinkError: nSetOwner while loading driver
     gnu.io.RXTXCommDriver when using rxtx.
 
 	SetOwner appears to be some win32 call.
-	Do not use the win32 CommAPI files.  Get the Solaris version.
-	"javacomm20-x86.tar.Z" 
+	Do not use the Sun's win32 CommAPI files.  Get the Solaris version.
+	"javacomm20-x86.tar.Z" and rxtx-1.4 if you want Sun's solution.
 
-	See Also: 2-B.  Installing sun's comm.jar
+	See Also: 2-B.  Installing Sun's comm.jar (IE its not needed at all)
 
 B.  Exception in thread "main" java.lang.UnsatisfiedLinkError: no Serial in 
     java.library.path
@@ -301,56 +249,7 @@ B.  Exception in thread "main" java.lang.UnsatisfiedLinkError: no Serial in
 
 	$ mv /usr/local/lib/libSerial.* /usr/local/java/jre/lib/i386/
 
-C.  No serial ports found!
-
-	There are three ways this can be generated.  
-
-		1.  deleting or misplacing javax.comm.properties
-		2.  a typo in javax.comm.properties
-		3.  forgetting to put jcl.jar in CLASSPATH
-
-	see also D.  I Can Not Open the Port.
-
-	now for an example of each.
-
-	1. deleting or misplacing javax.comm.properties
-
-	assume the following is working:
-
-	/usr/local/java/jre/lib/ext/comm.jar
-	/usr/local/java/jre/lib/ext/jcl.jar
-	/usr/local/java/jre/lib/ext/BlackBox.jar
-	/usr/local/java/jre/lib/javax.comm.properties
-
-	Deleting javax.comm.properties or placing it in 
-	/usr/local/java/lib/javax.comm.properties results in
-
-	$ java BlackBox
-	No serial ports found!
-
-	2.  a typo in javax.comm.properties
-
-	lets break the properties files
-	$ vi /usr/local/java/lib/javax.comm.properties
-	>place intentional typo in the file<
-	$ java BlackBox
-	Caught java.lang.ClassNotFoundException: gnu.io.rXTXCommDriver 
-	while loading driver gnu.io.rXTXCommDriver
-	No serial ports found!
-	      note------------------^
-
-	$ vi /usr/local/java/lib/javax.comm.properties
-	>fix typo<
-
-	3.  forgetting to put jcl.jar in CLASSPATH
-
-	export CLASSPATH=./java/lib/comm.jar:.:./java/lib/classes.zip
-	$ java BlackBox
-	Caught java.lang.ClassNotFoundException: gnu.io.RXTXCommDriver 
-	while loading driver gnu.io.RXTXCommDriver
-	No serial ports found!
- 
-D.  I Can Not Open the Port.
+C.  I Can Not Open the Port.
 
 	If your not able to open the port (read the errors carefully) then you 
 	may not have permission to use the device.  Redhat Linux ships with the
@@ -365,20 +264,18 @@ D.  I Can Not Open the Port.
 	should fix the problem.  Be sure to check the file CommAPI for common 
 	mistakes.
 
-	see also: C.  No serial ports found!
-
-E.  java.lang.NoClassDefFoundError: javax/comm/CommPort
+D.  java.lang.NoClassDefFoundError: javax/comm/CommPort
 
 	comm.jar is probably not in your classpath or not located in
 	the proper directory.
 
 	for example, lets not include comm.jar
 
-	export CLASSPATH=..java/lib/jcl.jar:.:../java/lib/classes.zip
+	export CLASSPATH=../java/lib/classes.zip
 	$ java BlackBoxException in thread "main"
 	java.lang.NoClassDefFoundError: javax/comm/CommPort
 
-F.  The Compiler Cannot Find Java Include Files
+E.  The Compiler Cannot Find Java Include Files
 
 	Check to top of the Makefile to make sure we agree on the location of
 	the include files that came with the jdk.  Specifically:
@@ -388,14 +285,13 @@ F.  The Compiler Cannot Find Java Include Files
 	also check the classpath
 	CLASSPATH = ...
 
-G. Configure says 'unterminated sed command' and stops 
+F. Configure says 'unterminated sed command' and stops 
 
 	Unterminated sed command errors usually result from `find` producing 
 	unexpected results.   If you are unsure remove all comm.jar and 
-	javax.comm.properties files and use configure to place them in the 
-	correct place. 
+	configure to place in in the correct place. 
 
-H.  Java Can Not Find libstdc++-libc6.0-1.so.2 
+G.  Java Can Not Find libstdc++-libc6.0-1.so.2 
 
 	jdk-1.2 on redhat systems may note that Java complains about not being
 	able to find libstdc++-libc6.0-1.so.2.  A symbolic link can be used to 
@@ -405,7 +301,7 @@ H.  Java Can Not Find libstdc++-libc6.0-1.so.2
 	ls -l /usr/lib/libstdc++-libc6.0-1.so.2
  	/usr/lib/libstdc++-libc6.0-1.so.2 -> libstdc++.so.2.8.0
 
-I.  BlackBox Can Not Handle all the ports!
+H.  BlackBox Can Not Handle all the ports!
 
 	BlackBox has a hard coded limit in BlackBox.java that prevents it from 
 	running if you don't specify a port.  We are considering alternative 
@@ -418,7 +314,7 @@ I.  BlackBox Can Not Handle all the ports!
 		
 	just change 50 to say 256.
 
-J.  Illegal use of nonvirtal function call!
+I.  Illegal use of nonvirtal function call!
 
 	Exception in thread "main" java.lang.VerifyError: (class: 
 	gnu/io/RXTXPort$SerialOutputStream, method: flush signature: ()V) 
@@ -441,14 +337,14 @@ J.  Illegal use of nonvirtal function call!
 	In other words start with a fresh build directory, rebuild, and 
 	reinstall to avoid the problem.
 
-K.  My libc5 Linux system is generating SIGSEGV
+J.  My libc5 Linux system is generating SIGSEGV
 
 	Older Linux Systems (libc5) should upgrade to a glibc system with 
 	libpthread-0.7 or newer.  We have run into many problems with older 
 	libraries.  SIGSEGV was the most common symptom.  Reported by  Peter 
 	Bennett <bencom@bencom.co.nz>
 
-L.  AM_PROG_LIBTOOL not found in library
+K.  AM_PROG_LIBTOOL not found in library
 
 	cd. && aclocal
 	aclocal:configure.in: 23: macro 'AM_PROG_LIBTOOL' not found in library
@@ -457,18 +353,18 @@ L.  AM_PROG_LIBTOOL not found in library
 	If your positive things are setup right you may try the autogen.sh 
 	script to try regenerating the scripts with your tools.
 
-M.  Problems with RMISecurityManager()
+L.  Problems with RMISecurityManager()
 
 	Please see the file RMISecurityManager.html 
 
-O.  Which Wires Should be Connected?
+M.  Which Wires Should be Connected?
 
 	With the DB25 use 2 (TX), 3 (RX) and 7 (GD) to connect to the device.
 	With the DB9  use 2 (RX), 3 (TX) and 5 (GD) to connect to the device.
 
 	You will need to hook up more than that for hardware flow control.
 
-P.  Which Device Should be Used?
+N.  Which Device Should be Used?
 
 	Linux serial ports should use /dev/ttyS?
 	specialx, cyclades and isdn4 linux have been reported to work.
@@ -477,8 +373,10 @@ P.  Which Device Should be Used?
 	netbsd uses tty0?
 	Irix  uses ttyd? ttym? ttyf?
 	HP-UX uses tty0p? tty1p?
+	BeOS uses /dev/ports/serial?
+	Win32 uses COM?
   
-Q.  It Did Not Work! 
+O.  It Did Not Work! 
 
 	There are sure to be bugs.  The goal is to make the install as painless
 	as possible.  Send back comments if something could be easier.
@@ -508,6 +406,38 @@ make --version
 
 
 	mail any bugs to trentjarvi@yahoo.com.  
+
+P.  Which jdk should be used? 
+
+	Ideally any jdk would be fine.  Here is a list of jdk's tried on
+	RedHat 6.0/kernel 2.2.17pre13 with various versions of glibc.
+
+                 Sun            IBM           Blackdown
+                 2.1.2_006      1.3.0         1.1.8v1
+                 green  native  green native  green native
+                 ------------------------------------------
+glibc-2.1.1-6   | OK   | *1   | *2   | *2   | OK   | *3   |
+                -------------------------------------------
+glibc-2.1.2-11  | OK   | *1   | OK   | OK   | OK   | OK   |
+                -------------------------------------------
+glibc-2.1.2-17  | OK   | *1   | OK   | OK   | OK   | OK   |
+                -------------------------------------------
+glibc-2.1.3-15  | OK   | *1   | OK   | OK   | OK   | OK   |
+                -------------------------------------------
+
+1)  BlackBox (a demo application shipped with CommAPI locks after multiple 
+    open()/close()
+
+2) java wont start "Unable to load /usr/local/java/jre/bin/libhpi.so: symbol
+sem_wait, version GLIBC_2.1 not defined in file libpthread.so.0 with link time
+reference Could not create the Java virtual machine."
+
+3) java wont start "error in loading shared libraries:
+/usr/local/java/bin/../lib/i686/native_threads/libjava.so: symbol sem_init,
+version GLIBC_2.1 not defined in file libpthread.so.0 with link time reference"
+
+conclusion?  avoid Sun's native threads unless you can figure out whats going
+wrong.
 
 You made it this far.. what is one more line.
 

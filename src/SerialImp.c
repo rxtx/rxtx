@@ -25,7 +25,6 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <limits.h>
-#include <termios.h>
 #ifndef WIN32
 #include <sys/ioctl.h>
 #include <sys/param.h>
@@ -60,7 +59,7 @@
 
 extern int errno;
 #include "SerialImp.h"
-/* #define DEBUG_TIMEOUT */
+/* #define DEBUG */
 
 /* this is so diff will not generate noise when merging 1.4 and 1.5 changes
  * It will eventually be removed.
@@ -100,10 +99,10 @@ JNIEXPORT void JNICALL RXTXPort(Initialize)(
 	/* Lets let people who upgraded kernels know they may have problems */
 	if (uname (&name) == -1)
 	{
-		fprintf(stderr,"RXTX WARNING:  cannot get system name\n");
+		report("RXTX WARNING:  cannot get system name\n");
 		return;
 	}
-	if(strcmp(name.release,UTS_RELEASE)!=0)
+	if(!strcmp(name.release,UTS_RELEASE))
 	{
 		fprintf(stderr, LINUX_KERNEL_VERSION_ERROR, UTS_RELEASE,
 			name.release);
@@ -157,16 +156,13 @@ JNIEXPORT jint JNICALL RXTXPort(open)(
 	if( cfsetospeed( &ttyset, B9600 ) < 0 ) goto fail;
 #endif
 	if( tcsetattr( fd, TCSANOW, &ttyset ) < 0 ) goto fail;
-
 #ifndef WIN32
 	fcntl( fd, F_SETOWN, getpid() );
 #endif /* WIN32 */
-#ifdef HOSED
 #ifdef FASYNC
 	fcntl( fd, F_SETFL, FASYNC );
 #endif /* FASYNC */
 
-#endif
 	return (jint)fd;
 
 fail:
@@ -222,7 +218,6 @@ JNIEXPORT void JNICALL RXTXPort(nativeSetSerialPortParams)(
 	if( cfsetospeed( &ttyset, cspeed ) < 0 ) goto fail;
 #endif
 	if( tcsetattr( fd, TCSANOW, &ttyset ) < 0 ) goto fail;
-	/* dump_termios("set",*ttyset); */
 	return;
 
 fail:
@@ -261,7 +256,9 @@ int translate_speed( JNIEnv *env, jint speed )
 		case 38400:	return B38400;
 		case 57600:	return B57600;
 		case 115200:	return B115200;
+#ifdef B230400
 		case 230400:	return B230400;
+#endif
 #ifdef B460800
 		case 460800:	return B460800;
 #endif
@@ -281,7 +278,7 @@ int translate_speed( JNIEnv *env, jint speed )
 					0 if an exception is thrown
    exceptions: UnsupportedCommOperationException
 ----------------------------------------------------------*/
-int translate_data_bits( JNIEnv *env, int *cflag, jint dataBits )
+int translate_data_bits( JNIEnv *env, tcflag_t *cflag, jint dataBits )
 {
 	int temp = (*cflag) & ~CSIZE;
 
@@ -316,12 +313,15 @@ int translate_data_bits( JNIEnv *env, int *cflag, jint dataBits )
    comments:   If you specify 5 data bits and 2 stop bits, the port will
                allegedly use 1.5 stop bits.  Does anyone care?
 ----------------------------------------------------------*/
-int translate_stop_bits( JNIEnv *env, int *cflag, jint stopBits )
+int translate_stop_bits( JNIEnv *env, tcflag_t *cflag, jint stopBits )
 {
 	switch( stopBits ) {
 		case STOPBITS_1:
 			(*cflag) &= ~CSTOPB;
 			return 1;
+		/*  ok.. lets try putting it in and see if anyone notices */
+		case STOPBITS_1_5:
+			translate_data_bits( env, cflag, DATABITS_5 );
 		case STOPBITS_2:
 			(*cflag) |= CSTOPB;
 			return 1;
@@ -343,33 +343,26 @@ int translate_stop_bits( JNIEnv *env, int *cflag, jint stopBits )
    comments:   The CMSPAR bit should be used for 'mark' and 'space' parity,
                but it's not in glibc's includes.  Oh well, rarely used anyway.
 ----------------------------------------------------------*/
-int translate_parity( JNIEnv *env, int *cflag, jint parity )
+int translate_parity( JNIEnv *env, tcflag_t *cflag, jint parity )
 {
 	(*cflag) &= ~(PARENB | PARODD);
 	switch( parity ) {
 		case PARITY_NONE:
 			return 1;
-#ifdef CMSPAR
 		case PARITY_EVEN:
 			(*cflag) |= PARENB;
 			return 1;
 		case PARITY_ODD:
 			(*cflag) |= PARENB | PARODD;
 			return 1;
+#ifdef CMSPAR
 		case PARITY_MARK:
 			(*cflag) |= PARENB | PARODD | CMSPAR;
 			return 1;
 		case PARITY_SPACE:
 			(*cflag) |= PARENB | CMSPAR;
 			return 1;
-#else
-		case PARITY_EVEN:
-			(*cflag) |= PARENB;
-			return 1;
-		case PARITY_ODD:
-			(*cflag) |= PARENB | PARODD;
-			return 1;
-#endif
+#endif /* CMSPAR */
 	}
 
 	throw_java_exception( env, UNSUPPORTED_COMM_OPERATION,
@@ -792,9 +785,7 @@ NativeEnableReceiveTimeoutThreshold
    comments:    This is actually all handled in read with select in
                 canonical input mode.
 ----------------------------------------------------------*/
-
-JNIEXPORT
-void JNICALL RXTXPort(NativeEnableReceiveTimeoutThreshold)(
+JNIEXPORT void JNICALL RXTXPort(NativeEnableReceiveTimeoutThreshold)(
 	JNIEnv *env, jobject jobj, jint vtime, jint threshold, jint buffer)
 {
 	int fd = get_java_var( env, jobj,"fd","I" );
@@ -851,7 +842,7 @@ RXTXPort.readArray
 ----------------------------------------------------------*/
 JNIEXPORT jint JNICALL RXTXPort(readArray)( JNIEnv *env,
 	jobject jobj, jbyteArray jbarray, jint offset, jint length )
-{ 
+{
 	int bytes;
 	jbyte *body;
 	unsigned char *buffer;
@@ -907,7 +898,6 @@ JNIEXPORT jint JNICALL RXTXPort(nativeavailable)( JNIEnv *env,
 		return -1;
 	}
 	else return (jint)result;
-
 }
 
 /*----------------------------------------------------------
@@ -962,93 +952,75 @@ RXTXPort.eventLoop
    perform:     periodically check for SerialPortEvents
    return:      none
    exceptions:  none
-   comments:    FIXME This is probably wrong on bsd.
+   comments:
 ----------------------------------------------------------*/
-JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env,
-	jobject jobj )
+JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 {
 	int fd, ret, change;
 	fd_set rfds;
 	struct timeval tv_sleep;
+	unsigned int mflags, omflags;
+	jboolean interrupted = 0;
+#if defined TIOCSERGETLSR
 	struct stat fstatbuf;
-	unsigned int mflags;
+#endif /* TIOCSERGETLSR */
+
 #if defined(TIOCGICOUNT)
 	struct serial_icounter_struct sis, osis;
 	/* JK00: flag if this can be used on this port */
 	int has_tiocgicount = 1;
 #endif /* TIOCGICOUNT */
+
 #if defined(TIOCSERGETLSR)
 	int has_tiocsergetlsr = 1;
-#endif
-	unsigned int omflags;
+#endif /* TIOCSERGETLSR */
 
-	jmethodID sendEvent, interrupt;
-	jboolean interrupted = 0;
-	jclass jclazz, jthread;
-	jthrowable exception;
-	jclazz = (*env)->GetObjectClass( env, jobj );
-	fd = fd = get_java_var(env, jobj, "fd", "I");
-	sendEvent = (*env)->GetMethodID( env, jclazz, "sendEvent", "(IZ)Z" );
-	jthread = (*env)->FindClass( env, "java/lang/Thread" );
-	interrupt = (*env)->GetStaticMethodID( env, jthread, "interrupted",
-		"()Z" );
+	fd = get_java_var(env, jobj, "fd", "I");
+
+#if defined(TIOCGICOUNT)
 	/* Some multiport serial cards do not implement TIOCGICOUNT ... */
 	/* So use the 'dumb' mode to enable using them after all! JK00 */
-#if defined(TIOCGICOUNT)
 	if( ioctl( fd, TIOCGICOUNT, &osis ) < 0 ) {
-		fprintf( stderr, "Port does not support TIOCGICOUNT events\n" );
+		report("Port does not support TIOCGICOUNT events\n" );
 		has_tiocgicount = 0;
-		/* return;  */
 	}
-#else
-	fprintf( stderr, "Port does not support all Hardware events\n" );
 #endif /*  TIOCGICOUNT */
+
+#if defined(TIOCSERGETLSR)
 	/* JK00: work around for multiport cards without TIOCSERGETLSR */
 	/* Cyclades is one of those :-(				       */
-#if defined(TIOCSERGETLSR)
 	if( ioctl( fd, TIOCSERGETLSR, &change ) ) {
-		fprintf( stderr, "Port does not support TIOCSERGETLSR\n" );
+		report("Port does not support TIOCSERGETLSR\n" );
 			has_tiocsergetlsr = 0;
 	}
-#endif
+#endif /* TIOCSERGETLSR */
 
 	if( ioctl( fd, TIOCMGET, &omflags) <0 ) {
-		fprintf( stderr, "Port does not support events\n" );
+		report("Port does not support events\n" );
  		return;
 	}
 
 	FD_ZERO( &rfds );
 	while( !interrupted ) {
-		interrupted = (*env)->CallStaticBooleanMethod( env, jthread,
-			interrupt );
 		FD_SET( fd, &rfds );
-		/* Check every 1 second, or on receive data */
-		tv_sleep.tv_sec = 1;
-		tv_sleep.tv_usec = 0;
+		tv_sleep.tv_sec = 0;
+		tv_sleep.tv_usec = 100000;
 		do {
 			ret=select( fd + 1, &rfds, NULL, NULL, &tv_sleep );
 		}  while (ret < 0 && errno==EINTR);
-		if( ret < 0 ) {
-			fprintf( stderr, "select() Failed\n" );
-			break;
-		}
+		if( ret < 0 ) break;
+
+		interrupted = is_interrupted(env, jobj);
+		if(interrupted) return;
 
 #if defined TIOCSERGETLSR
 		/* JK00: work around for Multi IO cards without TIOCSERGETLSR */
 		if( has_tiocsergetlsr ) {
-
 			if (fstat(fd, &fstatbuf))  break;
-
-			if( ioctl( fd, TIOCSERGETLSR, &change ) ) {
-				fprintf( stderr, "TIOCSERGETLSR Failed\n" );
-				break;
-			}
-			else if( change ) {
-				interrupted=(*env)->CallBooleanMethod( env,
-					jobj, sendEvent,
-					(jint)SPE_OUTPUT_BUFFER_EMPTY,
-					JNI_TRUE );
-			}
+			if( ioctl( fd, TIOCSERGETLSR, &change ) ) break;
+			else if( change )
+				send_event( env, jobj, SPE_OUTPUT_BUFFER_EMPTY,
+					1 );
 		}
 #endif /* TIOCSERGETLSR */
 #if defined(TIOCGICOUNT)
@@ -1061,110 +1033,242 @@ JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env,
 	 */
 		/* JK00: only use it if supported by this port */
 		if (has_tiocgicount) {
-			if( ioctl( fd, TIOCGICOUNT, &sis ) ) {
-				fprintf( stderr, "TIOCGICOUNT Failed\n" );
-				break;
-			}
+			if( ioctl( fd, TIOCGICOUNT, &sis ) ) break;
 			while( sis.frame != osis.frame ) {
-				interrupted = (*env)->CallBooleanMethod( env,
-					jobj, sendEvent, (jint)SPE_FE,
-					JNI_TRUE );
+				send_event( env, jobj, SPE_FE, 1);
 				osis.frame++;
 			}
 			while( sis.overrun != osis.overrun ) {
-				interrupted = (*env)->CallBooleanMethod( env,
-					jobj, sendEvent,
-					(jint)SPE_OE, JNI_TRUE );
+				send_event( env, jobj, SPE_OE, 1);
 				osis.overrun++;
 			}
 			while( sis.parity != osis.parity ) {
-				interrupted = (*env)->CallBooleanMethod( env,
-					jobj, sendEvent,
-					(jint)SPE_PE, JNI_TRUE );
+				send_event( env, jobj, SPE_PE, 1);
 				osis.parity++;
 			}
 			while( sis.brk != osis.brk ) {
-				interrupted = (*env)->CallBooleanMethod( env,
-					jobj, sendEvent, (jint)SPE_BI,
-					JNI_TRUE );
+				send_event( env, jobj, SPE_BI, 1);
 				osis.brk++;
 			}
 			osis = sis;
 		}
 #endif /*  TIOCGICOUNT */
-		if( ioctl( fd, TIOCMGET, &mflags ) ) {
-			fprintf( stderr, "TIOCMGET Failed\n" );
-			break;
-		}
 	       /* A Portable implementation */
+
+		if( ioctl( fd, TIOCMGET, &mflags ) ) break;
+
 		change = (mflags&TIOCM_CTS) - (omflags&TIOCM_CTS);
-		if( change ) {
-			fprintf(stderr, "Sending SPE_CTS\n");
-			interrupted = (*env)->CallBooleanMethod( env, jobj,
-				sendEvent, (jint)SPE_CTS, JNI_TRUE );
-		}
+		if( change ) send_event( env, jobj, SPE_CTS, change );
+
 		change = (mflags&TIOCM_DSR) - (omflags&TIOCM_DSR);
-		if( change ) {
-			fprintf(stderr, "Sending SPE_DSR\n");
-			interrupted = (*env)->CallBooleanMethod( env, jobj,
-				sendEvent, (jint)SPE_DSR, JNI_TRUE );
-		}
+		if( change ) send_event( env, jobj, SPE_DSR, change );
+
 		change = (mflags&TIOCM_RNG) - (omflags&TIOCM_RNG);
-		if( change ) {
-			fprintf(stderr, "Sending SPE_RI\n");
-			interrupted = (*env)->CallBooleanMethod( env, jobj,
-				sendEvent, (jint)SPE_RI, JNI_TRUE );
-		}
+		if( change ) send_event( env, jobj, SPE_RI, change );
+
 		change = (mflags&TIOCM_CD) - (omflags&TIOCM_CD);
-		if( change ) {
-			fprintf(stderr, "Sending SPE_CD\n");
-			interrupted = (*env)->CallBooleanMethod( env, jobj,
-				sendEvent, (jint)SPE_CD, JNI_TRUE );
-		}
+		if( change ) send_event( env, jobj, SPE_CD, change );
+
 		omflags = mflags;
-		if( ioctl( fd, FIONREAD, &change ) ) {
-			fprintf( stderr, "FIONREAD Failed\n" );
-		}
-		else if( change ) {
-			interrupted = (*env)->CallBooleanMethod( env, jobj,
-				sendEvent, (jint)SPE_DATA_AVAILABLE, JNI_TRUE );
-			if( !interrupted )
-				usleep(1000); /* select wont block */
+
+		ioctl( fd, FIONREAD, &change );
+		if( change ) {
+			if(!send_event( env, jobj, SPE_DATA_AVAILABLE, 1 ))
+				usleep(100000); /* select wont block */
 		}
 	}
-	printf("EventLoop Bailing\n");
 	return;
 }
 
 /*----------------------------------------------------------
- send_modem_events
+ isDeviceGood
 
-   accept:      int    event     SerialPortEvent constant
-                int    change    Number of times this event happened
-                int    state     current state: 0 is false, nonzero is true
-   perform:     Send the necessary events
+   accept:      a port name
+   perform:     see if the port is valid on this OS.
+   return:      JNI_TRUE if it exhists otherwise JNI_FALSE
+   exceptions:  none
+   comments:
+----------------------------------------------------------*/
+JNIEXPORT jboolean  JNICALL RXTXCommDriver(isDeviceGood)(JNIEnv *env,
+	jobject jobj, jstring tty_name)
+{
+
+	jboolean result;
+	static struct stat mystat;
+	char teststring[256];
+	int fd,i;
+	const char *name = (*env)->GetStringUTFChars(env, tty_name, 0);
+	char *KnownPorts[]= PORTS;
+
+	i=0;while(KnownPorts[i])
+	{
+		if(!strcmp(KnownPorts[i],name)) break;
+		i++;
+	}
+	if(!KnownPorts[i]) return JNI_FALSE;
+
+	for(i=0;i<64;i++){
+#if defined(_GNU_SOURCE)
+		snprintf(teststring, 256, "%s%s%i",DEVICEDIR,name, i);
+#else
+		sprintf(teststring,"%s%s%i",DEVICEDIR,name, i);
+#endif /* _GNU_SOURCE */
+		stat(teststring,&mystat);
+		if(S_ISCHR(mystat.st_mode)){
+			fd=open(teststring,O_RDONLY|O_NONBLOCK);
+			if (fd>0){
+				close(fd);
+				result=JNI_TRUE;
+				break;
+			}
+		}
+		result=JNI_FALSE;
+	}
+#if defined(_GNU_SOURCE)
+	snprintf(teststring, 256, "%s%s",DEVICEDIR,name);
+#else
+	sprintf(teststring,"%s%s",DEVICEDIR,name);
+#endif /* _GNU_SOURCE */
+	stat(teststring,&mystat);
+	if(S_ISCHR(mystat.st_mode)){
+		fd=open(teststring,O_RDONLY|O_NONBLOCK);
+		if (fd>0){
+			close(fd);
+			result=JNI_TRUE;
+		}
+	}
+	(*env)->ReleaseStringUTFChars(env, tty_name, name);
+	return(result);
+}
+/*----------------------------------------------------------
+ setInputBufferSize
+
+   accept:      
+   perform:     
    return:      none
    exceptions:  none
-   comments:    Since the interrupt counters tell us how many times the
-                state has changed, we can send a SerialPortEvent for each
-                interrupt (change) that has occured.  If we don't do this,
-                we'll miss a whole bunch of events.
+   comments:    see fopen/fclose/fwrite/fread man pages.
 ----------------------------------------------------------*/
-void send_modem_events( JNIEnv *env, jobject jobj, jmethodID method,
-	int event, int change, int state )
+JNIEXPORT void JNICALL RXTXPort(setInputBufferSize)(JNIEnv *env,
+	jobject jobj,  jint size )
 {
-	int i, s;
-	jboolean flag;
-	if( state ) s = 1;
-	else s = 0;
+	report("setInputBufferSize is not implemented\n");
+}
+/*----------------------------------------------------------
+ getIputBufferSize
 
-	for( i = 0; i < change; i++ ) {
-		if( ( change + s + i ) % 2 ) flag = JNI_FALSE;
-		else flag = JNI_TRUE;
-		(*env)->CallVoidMethod( env, jobj, method, (jint)event, flag );
-	}
+   accept:      
+   perform:     
+   return:      none
+   exceptions:  none
+   comments:    see fopen/fclose/fwrite/fread man pages.
+----------------------------------------------------------*/
+JNIEXPORT jint JNICALL RXTXPort(getInputBufferSize)(JNIEnv *env,
+	jobject jobj)
+{
+	report("getInputBufferSize is not implemented\n");
+	return(1);
+}
+/*----------------------------------------------------------
+ setOutputBufferSize
+
+   accept:      
+   perform:     
+   return:      none
+   exceptions:  none
+   comments:    see fopen/fclose/fwrite/fread man pages.
+----------------------------------------------------------*/
+JNIEXPORT void JNICALL RXTXPort(setOutputBufferSize)(JNIEnv *env,
+	jobject jobj, jint size )
+{
+	report("setOutputBufferSize is not implemented\n");
+}
+/*----------------------------------------------------------
+ getOutputBufferSize
+
+   accept:      
+   perform:     
+   return:      none
+   exceptions:  none
+   comments:    see fopen/fclose/fwrite/fread man pages.
+----------------------------------------------------------*/
+JNIEXPORT jint JNICALL RXTXPort(getOutputBufferSize)(JNIEnv *env,
+	jobject jobj)
+{
+	report("getOutputBufferSize is not implemented\n");
+	return(1);
 }
 
+/*----------------------------------------------------------
+ is_interrupted
+
+   accept:      
+   perform:     see if the port is being closed. 
+   return:      a positive value if the port is being closed.
+   exceptions:  none
+   comments:
+----------------------------------------------------------*/
+jboolean is_interrupted(JNIEnv *env, jobject jobj)
+{
+	jmethodID foo;
+	jclass jclazz;
+	int result;
+
+	(*env)->ExceptionClear(env);
+
+	jclazz = (*env)->GetObjectClass( env, jobj );
+	if(jclazz == NULL) return JNI_TRUE;
+
+	foo = (*env)->GetMethodID( env, jclazz, "checkMonitorThread", "()Z");
+	if(foo == NULL) return JNI_TRUE;
+
+	result = (*env)->CallBooleanMethod( env, jobj, foo );
+
+#ifdef DEBUG
+	if((*env)->ExceptionOccurred(env)) {
+		report ("an error occured calling sendEvent()\n");
+		(*env)->ExceptionDescribe(env);
+		(*env)->ExceptionClear(env);
+	}
+#endif /* DEBUG */
+	(*env)->DeleteLocalRef( env, jclazz );
+
+	return(result);
+}
+
+/*----------------------------------------------------------
+ send_event
+
+   accept:      The event type and the event state     
+   perform:     if state is > 0 send a JNI_TRUE event otherwise send JNI_FALSE
+   return:      a positive value if the port is being closed.
+   exceptions:  none
+   comments:
+----------------------------------------------------------*/
+int send_event(JNIEnv *env, jobject jobj, jint type, int flag)
+{
+	int result;
+	jmethodID foo;
+	jclass jclazz = (*env)->GetObjectClass( env, jobj );
+
+	if(jclazz == NULL) return JNI_TRUE;
+	foo = (*env)->GetMethodID( env, jclazz, "sendEvent", "(IZ)Z" );
+
+	(*env)->ExceptionClear(env);
+
+	result = (*env)->CallBooleanMethod( env, jobj, foo, type, 
+		flag > 0 ? JNI_TRUE : JNI_FALSE );
+
+#ifdef DEBUG
+	if((*env)->ExceptionOccurred(env)) {
+		report ("an error occured calling sendEvent()\n");
+		(*env)->ExceptionDescribe(env);
+		(*env)->ExceptionClear(env);
+	}
+#endif /* DEBUG */
+	(*env)->DeleteLocalRef( env, jclazz );
+	return(result);
+}
 /*----------------------------------------------------------
 get_java_var
 
@@ -1179,6 +1283,7 @@ int get_java_var( JNIEnv *env, jobject jobj, char *id, char *type )
 	int result = 0;
 	jclass jclazz = (*env)->GetObjectClass( env, jobj );
 	jfieldID jfd = (*env)->GetFieldID( env, jclazz, id, type );
+
 	if( !jfd ) {
 		(*env)->ExceptionDescribe( env );
 		(*env)->ExceptionClear( env );
@@ -1187,6 +1292,10 @@ int get_java_var( JNIEnv *env, jobject jobj, char *id, char *type )
 	result = (int)( (*env)->GetIntField( env, jobj, jfd ) );
 /* ct7 & gel * Added DeleteLocalRef */
 	(*env)->DeleteLocalRef( env, jclazz );
+#ifdef DEBUG
+	if(!strncmp("fd",id,2) && result == 0)
+		report("invalid file descriptor\n");
+#endif
 	return result;
 }
 
@@ -1221,97 +1330,32 @@ void throw_java_exception( JNIEnv *env, char *exc, char *foo, char *msg )
 	(*env)->DeleteLocalRef( env, clazz );
 }
 
-JNIEXPORT jboolean  JNICALL RXTXCommDriver(isDeviceGood)(JNIEnv *env,
-	jobject jobj, jstring tty_name){
+/*----------------------------------------------------------
+ report
 
-	jboolean result;
-	static struct stat mystat;
-	char teststring[256];
-	int fd,i;
-    	const char *name = (*env)->GetStringUTFChars(env, tty_name, 0);
-#if defined(__linux__)
-	char *KnownPorts[]={ "lp", "comx", "holter", "modem", "ttyircomm", \
-		"ttycosa0c", "ttycosa1c", "ttyC", "ttyCH", "ttyD", "ttuE", \
-		"ttyF", "ttyH", "ttyI", "ttyL", "ttyM", "ttyMX", "ttyP", \
-		"ttyR", "ttyS", "ttySI", "ttySR", "ttyS", "ttySI", "ttySR", \
-		"ttyT", "ttyUSB", "ttyV", "ttyW", "ttyX", NULL };
-#endif
-#if defined(__irix__)
-	char *KnownPorts[] = { "lp", "ttyf", "ttym", "ttyq", "ttyd", NULL };
-#endif
-#if defined(__FreeBSD__)
-	char *KnownPorts[] = { "lp", "cuaa", NULL };
-#endif
-#if defined(__NetBSD__)
-	char *KnownPorts[] = { "lp", "tty0", NULL };
-#endif
-#if defined(__hpux__)
-	char *KnownPorts[] = { "lp", "tty0p", "tty1p", NULL };
-#endif
-	i=0;while(KnownPorts[i])
-	{
-		if(!strcmp(KnownPorts[i],name)) break;
-		i++;
-	}
-	if(!KnownPorts[i]) return JNI_FALSE;
-
-	for(i=0;i<64;i++){
-		sprintf(teststring,"/dev/%s%i",name, i);
-		stat(teststring,&mystat);
-		if(S_ISCHR(mystat.st_mode)){
-			fd=open(teststring,O_RDONLY|O_NONBLOCK);
-			if (fd>0){
-				close(fd);
-				result=JNI_TRUE;
-				break;
-			}
-			result=JNI_FALSE;
-		}
-		else result=JNI_FALSE;
-	}
-	sprintf(teststring,"/dev/%s",name);
-	stat(teststring,&mystat);
-	if(S_ISCHR(mystat.st_mode)){
-		fd=open(teststring,O_RDONLY|O_NONBLOCK);
-		if (fd>0){
-			close(fd);
-			result=JNI_TRUE;
-		}
-	}
-	(*env)->ReleaseStringUTFChars(env, tty_name, name);
-	return(result);
-}
-JNIEXPORT void JNICALL RXTXPort(setInputBufferSize)(JNIEnv *env,
-	jobject jobj,  jint size )
+   accept:      string to send to stderr     
+   perform:     if DEBUG is defined send the string to stderr.
+   return:      none
+   exceptions:  none
+   comments:
+----------------------------------------------------------*/
+void report(char *msg)
 {
 #ifdef DEBUG
-	fprintf(stderr,"setInputBufferSize is not implemented\n");
+	fprintf(stderr, msg);
 #endif
-}
-JNIEXPORT jint JNICALL RXTXPort(getInputBufferSize)(JNIEnv *env,
-	jobject jobj)
-{
-#ifdef DEBUG
-	fprintf(stderr,"getInputBufferSize is not implemented\n");
-#endif
-	return(1);
-}
-JNIEXPORT void JNICALL RXTXPort(setOutputBufferSize)(JNIEnv *env,
-	jobject jobj, jint size )
-{
-#ifdef DEBUG
-	fprintf(stderr,"setOutputBufferSize is not implemented\n");
-#endif
-}
-JNIEXPORT jint JNICALL RXTXPort(getOutputBufferSize)(JNIEnv *env,
-	jobject jobj)
-{
-#ifdef DEBUG
-	fprintf(stderr,"getOutputBufferSize is not implemented\n");
-#endif
-	return(1);
 }
 
+/*----------------------------------------------------------
+ dump_termios
+
+   accept:      string to indicate where this was called.
+                termios struct
+   perform:     print the termios struct to stderr.
+   return:      none
+   exceptions:  none
+   comments:    used to debug the termios struct.
+----------------------------------------------------------*/
 void dump_termios(char *foo,struct termios *ttyset)
 {
 	int i;

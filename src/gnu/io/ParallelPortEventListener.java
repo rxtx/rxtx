@@ -1,4 +1,4 @@
-/*--------------------------------------------------------------------------
+/*-------------------------------------------------------------------------
 |   rxtx is a native interface to serial ports in java.
 |   Copyright 1997-2000 by Trent Jarvi trentjarvi@yahoo.com.
 |
@@ -17,6 +17,7 @@
 |   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --------------------------------------------------------------------------*/
 package javax.comm;
+
 import java.util.*;
 
 /**
@@ -25,11 +26,7 @@ import java.util.*;
 * @since JDK1.0
 */
 
-public interface CommPortOwnershipListener extends EventListener
+public interface ParallelPortEventListener extends EventListener
 {
-	public static final int PORT_OWNED               =1;
-	public static final int PORT_UNOWNED             =2;
-	public static final int PORT_OWNERSHIP_REQUESTED =3;
-
-	public abstract void ownershipChange( int type );
+	public abstract void parallelEvent(ParallelPortEvent ev );
 }

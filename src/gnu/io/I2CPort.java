@@ -1,4 +1,7 @@
 /* Non functional contact trentjarvi@yahoo.com for details */
+
+
+
 /*-------------------------------------------------------------------------
 |   rxtx is a native interface to serial ports in java.
 |   Copyright 1997-2000 by Trent Jarvi trentjarvi@yahoo.com.
@@ -28,7 +31,7 @@ import java.util.*;
 * @since JDK1.0
 */
 
-abstract class RawPort extends CommPort {
+abstract class I2CPort extends CommPort {
 	public static final int  DATABITS_5             =5;
 	public static final int  DATABITS_6             =6;
 	public static final int  DATABITS_7             =7;
@@ -46,10 +49,38 @@ abstract class RawPort extends CommPort {
 	public static final int  FLOWCONTROL_RTSCTS_OUT =2;
 	public static final int  FLOWCONTROL_XONXOFF_IN =4;
 	public static final int  FLOWCONTROL_XONXOFF_OUT=8;
-	public static final int  WRITE_SIZE             =8;
-	public static final int  IO_PORT                =0x378;
 
-	public abstract void setRawPortParams( int b, int d, int s, int p ) throws UnsupportedCommOperationException;
-	public abstract void addEventListener( RawPortEventListener lsnr ) throws TooManyListenersException;
+	public abstract void setI2CPortParams( int b, int d, int s, int p ) throws UnsupportedCommOperationException;
+	public abstract int getBaudRate();
+	public abstract int getDataBits();
+	public abstract int getStopBits();
+	public abstract int getParity();
+	public abstract void setFlowControlMode( int flowcontrol ) throws UnsupportedCommOperationException;
+	public abstract int getFlowControlMode();
+	public abstract boolean isDTR();
+	public abstract void setDTR( boolean state );
+	public abstract void setRTS( boolean state );
+	public abstract boolean isCTS();
+	public abstract boolean isDSR();
+	public abstract boolean isCD();
+	public abstract boolean isRI();
+	public abstract boolean isRTS();
+	public abstract void sendBreak( int duration );
+	public abstract void addEventListener( I2CPortEventListener lsnr ) throws TooManyListenersException;
 	public abstract void removeEventListener();
+	public abstract void notifyOnDataAvailable( boolean enable );
+	public abstract void notifyOnOutputEmpty( boolean enable );
+	public abstract void notifyOnCTS( boolean enable );
+	public abstract void notifyOnDSR( boolean enable );
+	public abstract void notifyOnRingIndicator( boolean enable );
+	public abstract void notifyOnCarrierDetect( boolean enable );
+	public abstract void notifyOnOverrunError( boolean enable );
+	public abstract void notifyOnParityError( boolean enable );
+	public abstract void notifyOnFramingError( boolean enable );
+	public abstract void notifyOnBreakInterrupt( boolean enable );
+/*
+	public abstract void setRcvFifoTrigger(int trigger); 
+         deprecated
+*/
+
 }
