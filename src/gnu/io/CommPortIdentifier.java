@@ -32,6 +32,7 @@ public class CommPortIdentifier
 	public static final int PORT_PARALLEL = 2;  // Parallel Port
 	public static final int PORT_I2C      = 3;  // i2c Port
 	public static final int PORT_RS485    = 4;  // rs485 Port
+	public static final int PORT_RAW      = 5;  // Raw Port
 	private String PortName;
 	private boolean Available = true;    
 	private String Owner;    
@@ -42,7 +43,6 @@ public class CommPortIdentifier
 	private int PortType;
 	private static boolean debug=true;
 	static Object Sync;
-	private static String Properties;
 	CpoList cpoList = new CpoList();
 	OwnershipEventThread oeThread;
 
@@ -61,7 +61,6 @@ public class CommPortIdentifier
 	{
 		if(debug) System.out.println("CommPortIdentifier:static initialization()");
 		Sync = new Object();
-		Properties=System.getProperty("java.home")+"//lib//javax.com.properties";
 		try 
 		{
 			CommDriver RXTXDriver = (CommDriver) Class.forName("javax.comm.RXTXCommDriver").newInstance();
@@ -95,11 +94,6 @@ public class CommPortIdentifier
 	{ 
 
 		if(debug) System.out.println("CommPortIdentifier:addPortName("+s+")");
-		SecurityManager MySecurity = System.getSecurityManager();
-		if (MySecurity != null) 
-		{
-			MySecurity.checkRead(Properties);
-		}
 		AddIdentifierToList(new CommPortIdentifier(s, null, type, c));
 	}
 /*------------------------------------------------------------------------------
@@ -180,28 +174,19 @@ public class CommPortIdentifier
 ------------------------------------------------------------------------------*/
 	static public CommPortIdentifier getPortIdentifier(String s) throws NoSuchPortException 
 	{ 
-		if(debug) System.out.println("CommPortIdentifier:getPortIdentifier(" + s +")");
-		System.out.println("configure --enable-RXTXIDENT is for developers only");
-		SecurityManager MySecurity = System.getSecurityManager();
-		if (MySecurity != null) 
-		{ 
-			MySecurity.checkRead(Properties); 
-		}
+		if(debug) System.out.println("CommPortIdentifier:getPortIdentifier(" + s +")\nconfigure --enable-RXTXIDENT is for developers only");
 		CommPortIdentifier index = CommPortIndex;
 
 		synchronized (Sync) 
 		{
 			while (index != null) 
 			{
-				if (index.PortName.equals(s))
-					break;
+				if (index.PortName.equals(s)) break;
 				index = index.next;
 			}
 		}
-		if (index != null) 
-			return index;
-		else 
-			throw new NoSuchPortException();
+		if (index != null) return index;
+		else throw new NoSuchPortException();
 	}
 /*------------------------------------------------------------------------------
 	getPortIdentifier()
@@ -242,7 +227,7 @@ public class CommPortIdentifier
 	public int getPortType() 
 	{ 
 		if(debug) System.out.println("FIXME CommPortIdentifier:getPortType()");
-		return(1);
+		return(PortType);
 	}
 /*------------------------------------------------------------------------------
 	isCurrentlyOwned()
@@ -252,7 +237,7 @@ public class CommPortIdentifier
 	exceptions:
 	comments:     FIXME  This is where we want to use psutils code.
 ------------------------------------------------------------------------------*/
-	public boolean isCurrentlyOwned() 
+	public synchronized boolean isCurrentlyOwned() 
 	{ 
 		if(debug) System.out.println("FIXME CommPortIdentifier:isCurrentlyOwned()");
 		return(false);
@@ -265,7 +250,7 @@ public class CommPortIdentifier
 	exceptions:
 	comments:     FIXME
 ------------------------------------------------------------------------------*/
-	public CommPort open(FileDescriptor f) throws UnsupportedCommOperationException 
+	public synchronized CommPort open(FileDescriptor f) throws UnsupportedCommOperationException 
 	{ 
 		if(debug) System.out.println("FIXME CommPortIdentifier:open(FileDescriptor)");
 		throw new UnsupportedCommOperationException();
@@ -338,7 +323,7 @@ public class CommPortIdentifier
 		if(debug) System.out.println("FIXME CommPortIdentifier:internalClosePort()");
 	}
 /*------------------------------------------------------------------------------
-	ireOwnershipEvent()
+	fireOwnershipEvent()
 	accept:
 	perform:
 	return:

@@ -24,6 +24,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <limits.h>
+#include <termios.h>
 #ifndef WIN32
 #include <sys/ioctl.h>
 #include <sys/param.h>
@@ -52,6 +54,9 @@
 #	include <linux/serial.h>
 #	include <linux/version.h>
 #endif
+#if defined(__hpux__)
+#include <sys/modem.h>
+#endif
 
 extern int errno;
 #include "SerialImp.h"
@@ -63,6 +68,7 @@ RXTXPort.Initialize
    accept:      none
    perform:     Initialize the native library
    return:      none
+   exceptions:  none
 ----------------------------------------------------------*/
 JNIEXPORT void JNICALL Java_javax_comm_RXTXPort_Initialize( 
 	JNIEnv *env,
@@ -146,13 +152,15 @@ JNIEXPORT jint JNICALL Java_javax_comm_RXTXPort_open(
 
 #ifndef WIN32
 	fcntl( fd, F_SETOWN, getpid() );
-	fcntl( fd, F_SETFL, FASYNC );
 #endif /* WIN32 */
+#ifdef FASYNC
+	fcntl( fd, F_SETFL, FASYNC );
+#endif /* FASYNC */
 
 	return (jint)fd;
 
 fail:
-	throw_java_exception( env, IO_EXCEPTION, "open", strerror( errno ) );
+	throw_java_exception( env, PORT_IN_USE_EXCEPTION, "open", strerror( errno ) );
 	return -1;
 }
 
@@ -774,7 +782,9 @@ NativeEnableReceiveTimeoutThreshold
                 canonical input mode.
 ----------------------------------------------------------*/ 
  
-JNIEXPORT void JNICALL Java_javax_comm_RXTXPort_NativeEnableReceiveTimeoutThreshold(JNIEnv *env, jobject jobj, jint vtime, jint threshold, jint buffer)
+JNIEXPORT 
+void JNICALL Java_javax_comm_RXTXPort_NativeEnableReceiveTimeoutThreshold(
+	JNIEnv *env, jobject jobj, jint vtime, jint threshold, jint buffer)
 {
 	int fd = get_java_var( env, jobj,"fd","I" );
 	struct termios ttyset;
@@ -1198,49 +1208,31 @@ JNIEXPORT jboolean  JNICALL Java_javax_comm_RXTXCommDriver_IsDeviceGood(JNIEnv *
     	const char *name = (*env)->GetStringUTFChars(env, tty_name, 0);
 
 #if defined(__linux__)
-	if(!strcmp(name,"tty0")|| !strcmp(name,"ttyd")||
-		!strcmp(name,"ttyq")|| !strcmp(name,"ttym")||
-		!strcmp(name,"ttyf")|| !strcmp(name,"cuaa")
-		)
-	{
-#ifdef DEBUG
-		fprintf(stderr,"DEBUG: Ignoring Port %s\*\n",name);
+	char *KnownPorts[]={ "lp", "comx", "holter", "modem", "ttyircomm", \
+		"ttycosa0c", "ttycosa1c", "ttyC", "ttyCH", "ttyD", "ttuE", \
+		"ttyF", "ttyH", "ttyI", "ttyL", "ttyM", "ttyMX", "ttyP", \
+		"ttyR", "ttyS", "ttySI", "ttySR", "ttyS", "ttySI", "ttySR", \
+		"ttyT", "ttyUSB", "ttyV", "ttyW", "ttyX", NULL };
 #endif
-		return(JNI_FALSE);
-	}
+#if defined(__irix__)
+	char *KnownPorts[] = { "lp", "ttyf", "ttym", "ttyq", "ttyd", NULL };
 #endif
 #if defined(__FreeBSD__)
-	if(!strcmp(name,"tty0")|| !strcmp(name,"ttyd")||
-		!strcmp(name,"ttyq")|| !strcmp(name,"ttym")||
-		!strcmp(name,"ttyf")|| !strcmp(name,"ttyS")||
-		!strcmp(name,"ttyI")|| !strcmp(name,"ttyW")||
-		!strcmp(name,"ttyC")|| !strcmp(name,"ttyR")||
-		!strcmp(name,"ttyE")
-		)
-	{
-#ifdef DEBUG
-		fprintf(stderr,"DEBUG: Ignoring Port %s*\n",name);
-#endif
-		return(JNI_FALSE);
-	}
+	char *KnownPorts[] = { "lp", "cuaa", NULL };
 #endif
 #if defined(__NetBSD__)
-	if(     !strcmp(name,"ttyd")||
-		!strcmp(name,"ttyq")|| !strcmp(name,"ttym")||
-		!strcmp(name,"ttyf")|| !strcmp(name,"ttyS")||
-		!strcmp(name,"ttyI")|| !strcmp(name,"ttyW")||
-		!strcmp(name,"ttyq")|| !strcmp(name,"ttym")||
-		!strcmp(name,"ttyf")|| !strcmp(name,"cuaa")||
-		!strcmp(name,"ttyC")|| !strcmp(name,"ttyR")||
-		!strcmp(name,"ttyM")|| !strcmp(name,"ttyE")
-		)
+	char *KnownPorts[] = { "lp", "tty0", NULL };
+#endif
+#if defined(__hpux__)
+	char *KnownPorts[] = { "lp", "tty0p", "tty1p", NULL };
+#endif
+	i=0;while(KnownPorts[i])
 	{
-#ifdef DEBUG
-		fprintf(stderr,"DEBUG: Ignoring Port %s*\n",name);
-#endif
-		return(JNI_FALSE);
+		if(!strcmp(KnownPorts[i],name)) break;
+		i++;
 	}
-#endif
+	if(!KnownPorts[i]) return JNI_FALSE;
+
 	for(i=0;i<64;i++){
 		sprintf(teststring,"/dev/%s%i",name, i);
 		stat(teststring,&mystat);
@@ -1267,26 +1259,30 @@ JNIEXPORT jboolean  JNICALL Java_javax_comm_RXTXCommDriver_IsDeviceGood(JNIEnv *
 	(*env)->ReleaseStringUTFChars(env, tty_name, name);
 	return(result);
 }
-JNIEXPORT void JNICALL Java_javax_comm_RXTXPort_setInputBufferSize(JNIEnv *env, jobject jobj,  jint size )
+JNIEXPORT void JNICALL Java_javax_comm_RXTXPort_setInputBufferSize(JNIEnv *env,
+	jobject jobj,  jint size )
 {
 #ifdef DEBUG
 	fprintf(stderr,"setInputBufferSize is not implemented\n");
 #endif
 }
-JNIEXPORT jint JNICALL Java_javax_comm_RXTXPort_getInputBufferSize(JNIEnv *env, jobject jobj)
+JNIEXPORT jint JNICALL Java_javax_comm_RXTXPort_getInputBufferSize(JNIEnv *env,
+	jobject jobj)
 {
 #ifdef DEBUG
 	fprintf(stderr,"getInputBufferSize is not implemented\n");
 #endif
 	return(1);
 }
-JNIEXPORT void JNICALL Java_javax_comm_RXTXPort_setOutputBufferSize(JNIEnv *env, jobject jobj, jint size )
+JNIEXPORT void JNICALL Java_javax_comm_RXTXPort_setOutputBufferSize(JNIEnv *env,
+	jobject jobj, jint size )
 {
 #ifdef DEBUG
 	fprintf(stderr,"setOutputBufferSize is not implemented\n");
 #endif
 }
-JNIEXPORT jint JNICALL Java_javax_comm_RXTXPort_getOutputBufferSize(JNIEnv *env, jobject jobj)
+JNIEXPORT jint JNICALL Java_javax_comm_RXTXPort_getOutputBufferSize(JNIEnv *env,
+	jobject jobj)
 {
 #ifdef DEBUG
 	fprintf(stderr,"getOutputBufferSize is not implemented\n");

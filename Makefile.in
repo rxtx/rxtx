@@ -1,4 +1,4 @@
-# Makefile.in generated automatically by automake 1.4a from Makefile.am
+# Makefile.in generated automatically by automake 1.4 from Makefile.am
 
 # Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
@@ -31,10 +31,7 @@
 
 
 SHELL = @SHELL@
-
-srcdir = @srcdir@
 top_srcdir = @top_srcdir@
-VPATH = @srcdir@
 prefix = @prefix@
 exec_prefix = @exec_prefix@
 
@@ -65,10 +62,9 @@ AUTOMAKE = @AUTOMAKE@
 AUTOHEADER = @AUTOHEADER@
 
 INSTALL = @INSTALL@
-INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@ $(AM_INSTALL_PROGRAM_FLAGS)
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
-INSTALL_STRIP_FLAG =
 transform = @program_transform_name@
 
 NORMAL_INSTALL = :
@@ -112,13 +108,12 @@ JAVA_LIBRARY_PATH = @JAVA_LIBRARY_PATH@
 JAVA_VENDOR = @JAVA_VENDOR@
 JAVA_VERSION = @JAVA_VERSION@
 JCLASSPATH = @JCLASSPATH@
-LD = @LD@
 LDFLAG = @LDFLAG@
 LN_S = @LN_S@
 MAKEINFO = @MAKEINFO@
 MKINSTALLDIRS = @MKINSTALLDIRS@
 MSGFMT = @MSGFMT@
-NM = @NM@
+OBJDUMP = @OBJDUMP@
 OS_ARCH = @OS_ARCH@
 OS_NAME = @OS_NAME@
 OS_VERSION = @OS_VERSION@
@@ -131,11 +126,13 @@ TARGETLIB = @TARGETLIB@
 THREAD_FLAG = @THREAD_FLAG@
 USE_INCLUDED_LIBINTL = @USE_INCLUDED_LIBINTL@
 USE_NLS = @USE_NLS@
-USE_SYMBOL_UNDERSCORE = @USE_SYMBOL_UNDERSCORE@
 VERBOSE_IOEXCEPTIONS = @VERBOSE_IOEXCEPTIONS@
 VERSION = @VERSION@
 WINDOWS_JAVA_INCLUDE = @WINDOWS_JAVA_INCLUDE@
 l = @l@
+
+srcdir = @srcdir@
+VPATH = @srcdir@
 
 WJI = -I @WINDOWS_JAVA_INCLUDE@ -I @WINDOWS_JAVA_INCLUDE@/win32 
 AUTOMAKE_OPTIONS = foreign
@@ -143,6 +140,8 @@ TOP = @TOP@
 JPATH = @JPATH@
 JCL_PATH = @JCL_PATH@
 INCLUDES = -I $(TOP) -I $(TOP)/$(target_alias) -I . -I $(JAVAINCLUDE) -I $(JAVANATINC)
+NSJAVA = 1
+THREADS_FLAG = @THREAD_FLAG@
 JAVAC = $(JPATH)/bin/javac $(JCLASSPATH):$(COMM_JAR_PATH):$(JCL_JAR_PATH) -d $(TOP)/ -O 
 JAVAH = $(JPATH)/bin/javah $(JAVA_H_CLASSPATH) -d $(TOP)/$(target_alias) -jni
 JAVA = $(JPATH)/bin/java $(JCLASSPATH)
@@ -153,6 +152,7 @@ LINK = $(LIBTOOL) --mode=link $(CC) $(CFLAGS) $(LDFLAGS) -version-info 1:0:1
 SERIAL_HEADER = $(TOP)/$(target_alias)/javax_comm_RXTXPort.h $(TOP)/$(target_alias)/javax_comm_RXTXCommDriver.h
 PARALLEL_HEADER = $(TOP)/$(target_alias)/javax_comm_LPRPort.h
 I2C_HEADER = $(TOP)/$(target_alias)/javax_comm_I2CPort.h 
+Raw_HEADER = $(TOP)/$(target_alias)/javax_comm_RawPort.h 
 RS485_HEADER = $(TOP)/$(target_alias)/javax_comm_RS485Port.h
 CLEANFILES = $(TOP)/*.class $(TOP)/javax/comm/*.class $(TOP)/jcl.jar
 SUFFIXES = .class .h
@@ -297,7 +297,7 @@ uninstall: uninstall-am
 all-am: Makefile config.h
 all-redirect: all-am
 install-strip:
-	$(MAKE) $(AM_MAKEFLAGS) INSTALL_STRIP_FLAG=-s install
+	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install
 installdirs:
 
 
@@ -338,8 +338,6 @@ all-redirect all-am all installdirs mostlyclean-generic \
 distclean-generic clean-generic maintainer-clean-generic clean \
 mostlyclean distclean maintainer-clean
 
-export NSJAVA=1
-export THREADS_FLAG=@THREAD_FLAG@
 
 install: all comm.jar  install-lib 
 
@@ -358,6 +356,9 @@ install-lib:
 	if [ -f libI2C.la ];then \
 	$(LIBTOOL) --mode=install $(INSTALL_PROGRAM) libI2C.la $(RXTX_PATH);\
 	fi; \
+	if [ -f libRaw.la ];then \
+	$(LIBTOOL) --mode=install $(INSTALL_PROGRAM) libRaw.la $(RXTX_PATH);\
+	fi; \
 	if [ -f libRS485.la ];then \
 	$(LIBTOOL) --mode=install $(INSTALL_PROGRAM) libRS485.la $(RXTX_PATH);\
 	fi; \
@@ -366,21 +367,20 @@ install-lib:
 run: $(TOP)/test.class all jcl
 	(cd $(TOP)/;chmod 755 *.class;\
 	LD_LIBRARY_PATH="$(target_alias)";\
-	export LD_LIBRARY_PATH;\
 	$(JAVA) test)
 
-all: $(IDENTIFIERS) $(TARGETLIB)
+all: @IDENTIFIERS@ @TARGETLIB@
 	@echo -e "\n\nIf you have javax.comm.* and java.comm.* in your CLASSPATH, type make jcl to"
 	@echo -e "build the javacomm20-x86.tar.Z supporting classes.\n"
 	@echo "Note: CLASSPATH was grabbed during the configure stage.  Modification of the"
 	@echo "environment variable will not change the behavior of make without rerunning" 
 	@echo  -e "configure or editing the Makefile. \n"
 
-jcl:  $(TOP)/javax/comm/RXTXCommDriver.class $(TOP)/javax/comm/RXTXPort.class $(TOP)/javax/comm/RXTXPort.class $(IDENTIFIERS)
+jcl:  $(TOP)/javax/comm/RXTXCommDriver.class $(TOP)/javax/comm/RXTXPort.class $(TOP)/javax/comm/RXTXPort.class @IDENTIFIERS@
 	$(JAR) cf jcl.jar javax/comm/*
 	@echo "make install will install RxTx"
 
-comm:  $(TOP)/javax/comm/RXTXCommDriver.class $(TOP)/javax/comm/RXTXPort.class $(TOP)/javax/comm/RXTXPort.class $(IDENTIFIERS)
+comm:  $(TOP)/javax/comm/RXTXCommDriver.class $(TOP)/javax/comm/RXTXPort.class $(TOP)/javax/comm/RXTXPort.class @IDENTIFIERS@
 	$(JAR) cf comm.jar javax/comm/*
 	@echo "make install will install RxTx"
 
@@ -395,47 +395,53 @@ $(TOP)/javax/comm/RXTXCommDriver.class $(TOP)/javax/comm/RXTXPort.class \
 
 $(TOP)/$(target_alias)/libParallel.la: $(TOP)/$(target_alias)/ParallelImp.lo
 	( cd $(TOP)/$(target_alias); \
-	$(LINK) -o libParallel.la -rpath $(RXTX_PATH) $(<F); \
-	for I in .libs/*.so*;do cp $$I . ;done;)
+	$(LINK) -o libParallel.la -rpath $(RXTX_PATH) $(TOP)/$(target_alias)/ParallelImp.lo;)
 
 $(TOP)/$(target_alias)/ParallelImp.lo: $(srcdir)/src/ParallelImp.c \
                                   $(PARALLEL_HEADER) \
 				  $(TOP)/Makefile
 	(cd $(TOP)/$(target_alias); \
-	$(LIBTOOL) --mode=compile $(CC) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) @VERBOSE_IOEXCEPTIONS@ -c ../$< )
+	$(LIBTOOL) --mode=compile $(CC) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) @VERBOSE_IOEXCEPTIONS@ -c  ../$(srcdir)/src/ParallelImp.c -o $(TOP)/$(target_alias)/ParallelImp.lo; )
 
 $(TOP)/$(target_alias)/libSerial.la: $(TOP)/$(target_alias)/SerialImp.lo
 	( cd $(TOP)/$(target_alias); \
-	$(LINK) -o libSerial.la -rpath $(RXTX_PATH) $(<F); \
-	for I in .libs/*.so*;do cp $$I . ;done;)
+	$(LINK) -o libSerial.la -rpath $(RXTX_PATH) $(TOP)/$(target_alias)/SerialImp.lo; )
 
 $(TOP)/$(target_alias)/SerialImp.lo: $(srcdir)/src/SerialImp.c \
                                   $(SERIAL_HEADER) \
 				  $(TOP)/Makefile
 	(cd $(TOP)/$(target_alias); \
-	$(LIBTOOL) --mode=compile $(CC) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) @VERBOSE_IOEXCEPTIONS@ -c ../$< )
+	$(LIBTOOL) --mode=compile $(CC) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) @VERBOSE_IOEXCEPTIONS@ -c  ../$(srcdir)/src/SerialImp.c -o $(TOP)/$(target_alias)/SerialImp.lo; )
 
 $(TOP)/$(target_alias)/libI2C.la: $(TOP)/$(target_alias)/I2CImp.lo
 	( cd $(TOP)/$(target_alias); \
-	$(LINK) -o libI2C.la -rpath $(RXTX_PATH) $(<F); \
-	for I in .libs/*.so*;do cp $$I . ;done;)
+	$(LINK) -o libI2C.la -rpath $(RXTX_PATH) $(TOP)/$(target_alias)/I2CImp.lo; )
 
 $(TOP)/$(target_alias)/I2CImp.lo: $(srcdir)/src/I2CImp.c \
                                   $(I2C_HEADER) \
 				  $(TOP)/Makefile
 	(cd $(TOP)/$(target_alias); \
-	$(LIBTOOL) --mode=compile $(CC) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) @VERBOSE_IOEXCEPTIONS@ -c ../$< )
+	$(LIBTOOL) --mode=compile $(CC) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) @VERBOSE_IOEXCEPTIONS@ -c ../$(srcdir)/src/I2CImp.c -o $(TOP)/$(target_alias)/I2CImp.lo; )
 
 $(TOP)/$(target_alias)/libRS485.la: $(TOP)/$(target_alias)/RS485Imp.lo
 	( cd $(TOP)/$(target_alias); \
-	$(LINK) -o libRS485.la -rpath $(RXTX_PATH) $(<F); \
-	for I in .libs/*.so*;do cp $$I . ;done;)
+	$(LINK) -o libRS485.la -rpath $(RXTX_PATH) $(TOP)/$(target_alias)/RS485Imp.lo; )
+
+$(TOP)/$(target_alias)/libRaw.la: $(TOP)/$(target_alias)/RawImp.lo
+	( cd $(TOP)/$(target_alias); \
+	$(LINK) -o libRaw.la -rpath $(RXTX_PATH) $(TOP)/$(target_alias)/RawImp.lo; )
+
+$(TOP)/$(target_alias)/RawImp.lo: $(srcdir)/src/RawImp.c \
+                                  $(Raw_HEADER) \
+				  $(TOP)/Makefile
+	(cd $(TOP)/$(target_alias); \
+	$(LIBTOOL) --mode=compile $(CC) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) @VERBOSE_IOEXCEPTIONS@ -c ../$(srcdir)/src/RawImp.c -o $(TOP)/$(target_alias)/RawImp.lo; )
 
 $(TOP)/$(target_alias)/RS485Imp.lo: $(srcdir)/src/RS485Imp.c \
                                   $(RS485_HEADER) \
 				  $(TOP)/Makefile
 	(cd $(TOP)/$(target_alias); \
-	$(LIBTOOL) --mode=compile $(CC) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) @VERBOSE_IOEXCEPTIONS@ -c ../$< )
+	$(LIBTOOL) --mode=compile $(CC) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) @VERBOSE_IOEXCEPTIONS@ -c ../$(srcdir)/src/RS485Imp.c -o $(TOP)/$(target_alias)/RS485Imp.lo;)
 
 $(TOP)/javax/comm/ParallelPort.class $(TOP)/javax/comm/ParallelPortEvent.class $(TOP)/javax/comm/ParallelPortEventListener.class: $(srcdir)/src/ParallelPort.java $(srcdir)/src/ParallelPortEvent.java $(srcdir)/src/ParallelPortEventListener.java
 	$(JAVAC) $(srcdir)/src/ParallelPort.java $(srcdir)/src/ParallelPortEvent.java $(srcdir)/src/ParallelPortEventListener.java
@@ -457,6 +463,11 @@ $(TOP)/javax/comm/I2CPort.class $(TOP)/javax/comm/I2CPortEvent.class $(TOP)/java
 
 I2C: $(TOP)/javax/comm/I2CPort.class $(TOP)/javax/comm/I2CPortEvent.class $(TOP)/javax/comm/I2CPortEventListener.class 
 
+$(TOP)/javax/comm/RawPort.class $(TOP)/javax/comm/RawPortEvent.class $(TOP)/javax/comm/RawPortEventListener.class: $(srcdir)/src/RawPort.java $(srcdir)/src/RawPortEvent.java $(srcdir)/src/RawPortEventListener.java 
+	$(JAVAC) $(srcdir)/src/RawPort.java $(srcdir)/src/RawPortEvent.java $(srcdir)/src/RawPortEventListener.java
+
+Raw: $(TOP)/javax/comm/RawPort.class $(TOP)/javax/comm/RawPortEvent.class $(TOP)/javax/comm/RawPortEventListener.class 
+
 $(TOP)/javax/comm/CommPortEnumerator.class $(TOP)/javax/comm/CommPortIdentifier.class $(TOP)/javax/comm/CpoListEntry.class $(TOP)/javax/comm/CPOList.class $(TOP)/javax/comm/OwnershipEventThread.class: $(srcdir)/src/CommPortEnumerator.java $(srcdir)/src/CommPortIdentifier.java $(srcdir)/src/CpoList.java  $(srcdir)/src/CpoListEntry.java $(srcdir)/src/OwnershipEventThread.java
 	$(JAVAC) $(srcdir)/src/CommPortEnumerator.java $(srcdir)/src/CommPortIdentifier.java  $(srcdir)/src/CpoList.java  $(srcdir)/src/CpoListEntry.java $(srcdir)/src/OwnershipEventThread.java
 
@@ -465,7 +476,7 @@ IDENT: $(TOP)/javax/comm/CommPortEnumerator.class $(TOP)/javax/comm/CommPortIden
 $(TOP)/%.class $(TOP)/javax/comm/%.class: $(srcdir)/src/%.java 
 	$(JAVAC) $< 
 
-$(I2C_HEADER) $(RS485_HEADER) $(SERIAL_HEADER) $(PARALLEL_HEADER): $(TOP)/javax/comm/RXTXPort.class
+$(I2C_HEADER) $(Raw_HEADER) $(RS485_HEADER) $(SERIAL_HEADER) $(PARALLEL_HEADER): $(TOP)/javax/comm/RXTXPort.class
 	$(JAVAH) javax.comm.`echo $(@F) | sed s#\.h##|sed s#javax_comm_##`
 	touch $(TOP)/$(target_alias)/$(@F)
 

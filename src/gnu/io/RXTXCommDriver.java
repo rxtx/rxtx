@@ -154,6 +154,7 @@ public class RXTXCommDriver implements CommDriver {
 		};
 		String[] AllKnownRS485Ports={};
 		String[] AllKnownI2CPorts={};
+		String[] AllKnownRAWPorts={};
 		RegisterValidPorts(
 			devs,
 			getPortPrefixes(AllKnownSerialPorts),
@@ -173,6 +174,11 @@ public class RXTXCommDriver implements CommDriver {
 			devs,
 			getPortPrefixes(AllKnownI2CPorts),
 			CommPortIdentifier.PORT_I2C
+		);
+		RegisterValidPorts(
+			devs,
+			getPortPrefixes(AllKnownRAWPorts),
+			CommPortIdentifier.PORT_RAW
 		);
 	}
 
@@ -199,6 +205,10 @@ public class RXTXCommDriver implements CommDriver {
 			else if (portType==CommPortIdentifier.PORT_I2C)
 			{
 				return new I2C( portName ); 
+			}
+			else if (portType==CommPortIdentifier.PORT_RAW)
+			{
+				return new Raw( portName ); 
 			}
 			else if (portType==CommPortIdentifier.PORT_RS485)
 			{

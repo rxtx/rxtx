@@ -25,9 +25,10 @@ import java.lang.Math;
 /**
   * RXTXPort
   */
-final class RXTXPort extends SerialPort {
+final class RXTXPort extends SerialPort
+{
 
-	static 
+	static
 	{
 		System.loadLibrary( "Serial" );
 		Initialize();
@@ -43,13 +44,16 @@ final class RXTXPort extends SerialPort {
 
 
 	/** Open the named port */
-	public RXTXPort( String name ) throws IOException {
+	public RXTXPort( String name )
+	{
 		if (debug) System.out.println("RXTXPort:RXTXPort("+name+")");
-		fd = open( name );
+		try {
+			fd = open( name );
+		} catch ( PortInUseException e ){}
 		System.out.println("RXTXPort:RXTXPort("+name+") fd = " + fd);
 	}
-	private native int open( String name ) throws IOException;
-
+	private native synchronized int open( String name )
+		throws PortInUseException;
 
 	/** File descriptor */
 	private int fd;
@@ -82,7 +86,8 @@ final class RXTXPort extends SerialPort {
 
 	/** Set the native serial port parameters */
 	private native void nativeSetSerialPortParams( int speed, int dataBits,
-		int stopBits, int parity ) throws UnsupportedCommOperationException;
+		int stopBits, int parity )
+		throws UnsupportedCommOperationException;
 
 	/** Line speed in bits-per-second */
 	private int speed=9600;
@@ -103,9 +108,11 @@ final class RXTXPort extends SerialPort {
 
 	/** Flow control */
 	private int flowmode = SerialPort.FLOWCONTROL_NONE;
-	public void setFlowControlMode( int flowcontrol ) {
+	public void setFlowControlMode( int flowcontrol )
+	{
 		try { setflowcontrol( flowcontrol ); }
-		catch( IOException e ) {
+		catch( IOException e )
+		{
 			e.printStackTrace();
 			return;
 		}
@@ -119,7 +126,7 @@ final class RXTXPort extends SerialPort {
 	linux/drivers/char/n_hdlc.c? FIXME
 		trentjarvi@yahoo.com
 	*/
-	/** Receive framing control 
+	/** Receive framing control
 	*/
 	public void enableReceiveFraming( int f )
 		throws UnsupportedCommOperationException
@@ -136,54 +143,72 @@ final class RXTXPort extends SerialPort {
 
 	public native int NativegetReceiveTimeout();
 	public native boolean NativeisReceiveTimeoutEnabled();
-	public native void NativeEnableReceiveTimeoutThreshold(int time, int threshold,int InputBuffer);
-	public void disableReceiveTimeout(){
+	public native void NativeEnableReceiveTimeoutThreshold(int time,
+		int threshold,int InputBuffer);
+	public void disableReceiveTimeout()
+	{
 		enableReceiveTimeout(0);
 	}
-	public void enableReceiveTimeout( int time ){
-		if( time >= 0 )  {
+	public void enableReceiveTimeout( int time )
+	{
+		if( time >= 0 )
+		{
 			timeout = time;
-			NativeEnableReceiveTimeoutThreshold( time , threshold, InputBuffer );
+			NativeEnableReceiveTimeoutThreshold( time , threshold,
+				InputBuffer );
 		}
-		else {
-			System.out.println("Invalid timeout");
+		else
+		{
+			throw new IllegalArgumentException
+			(
+				"Unexpected negative timeout value"
+			);
 		}
 	}
-	public boolean isReceiveTimeoutEnabled(){
+	public boolean isReceiveTimeoutEnabled()
+	{
 		return(NativeisReceiveTimeoutEnabled());
 	}
-	public int getReceiveTimeout(){
+	public int getReceiveTimeout()
+	{
 		return(NativegetReceiveTimeout( ));
 	}
 
 	/** Receive threshold control */
-	
+
 	private int threshold = 0;
-	
-	public void enableReceiveThreshold( int thresh ){
+
+	public void enableReceiveThreshold( int thresh )
+	{
 		if(thresh >=0)
 		{
 			threshold=thresh;
-			NativeEnableReceiveTimeoutThreshold(timeout, threshold, InputBuffer);
+			NativeEnableReceiveTimeoutThreshold(timeout, threshold,
+				InputBuffer);
 		}
 		else /* invalid thresh */
 		{
-			System.out.println("Invalid Threshold");
+			throw new IllegalArgumentException
+			(
+				"Unexpected negative threshold value"
+			);
 		}
 	}
-	public void disableReceiveThreshold() { 
+	public void disableReceiveThreshold() {
 		enableReceiveThreshold(0);
 	}
-	public int getReceiveThreshold(){
+	public int getReceiveThreshold()
+	{
 		return threshold;
 	}
-	public boolean isReceiveThresholdEnabled(){
+	public boolean isReceiveThresholdEnabled()
+	{
 		return(threshold>0);
 	}
 
 	/** Input/output buffers */
-	/** FIXME I think this refers to 
-		FOPEN(3)/SETBUF(3)/FREAD(3)/FCLOSE(3) 
+	/** FIXME I think this refers to
+		FOPEN(3)/SETBUF(3)/FREAD(3)/FCLOSE(3)
 		trentjarvi@yahoo.com
 
 		These are native stubs...
@@ -192,7 +217,12 @@ final class RXTXPort extends SerialPort {
 	private int OutputBuffer=0;
 	public void setInputBufferSize( int size )
 	{
-		InputBuffer=size;
+		if( size < 0 )
+			throw new IllegalArgumentException
+			(
+				"Unexpected negative buffer size value"
+			);
+		else InputBuffer=size;
 	}
 	public int getInputBufferSize()
 	{
@@ -200,7 +230,12 @@ final class RXTXPort extends SerialPort {
 	}
 	public void setOutputBufferSize( int size )
 	{
-		OutputBuffer=size;
+		if( size < 0 )
+			throw new IllegalArgumentException
+			(
+				"Unexpected negative buffer size value"
+			);
+		else OutputBuffer=size;
 	}
 	public int getOutputBufferSize()
 	{
@@ -230,7 +265,7 @@ final class RXTXPort extends SerialPort {
 	/** RXTXPort read methods */
 	private native int nativeavailable() throws IOException;
 	private native int readByte() throws IOException;
-	private native int readArray( byte b[], int off, int len ) 
+	private native int readArray( byte b[], int off, int len )
 		throws IOException;
 
 
@@ -243,8 +278,10 @@ final class RXTXPort extends SerialPort {
 	/** Process SerialPortEvents */
 	native void eventLoop();
 	private int dataAvailable=0;
-	public void sendEvent( int event, boolean state ) {
-		switch( event ) {
+	public void sendEvent( int event, boolean state )
+	{
+		switch( event )
+		{
 			case SerialPortEvent.DATA_AVAILABLE:
 				dataAvailable=1;
 				if( monThread.Data ) break;
@@ -257,7 +294,7 @@ final class RXTXPort extends SerialPort {
 				return;
 				if (isDSR())
 				{
-					if (!dsrFlag) 
+					if (!dsrFlag)
 					{
 						dsrFlag = true;
 						SerialPortEvent e = new SerialPortEvent(this, SerialPortEvent.DSR, !dsrFlag, dsrFlag );
@@ -297,7 +334,8 @@ final class RXTXPort extends SerialPort {
 				System.err.println("unknown event:"+event);
 				return;
 		}
-		SerialPortEvent e = new SerialPortEvent(this, event, !state, state );
+		SerialPortEvent e = new SerialPortEvent(this, event, !state,
+			state );
 		if( SPEventListener != null ) SPEventListener.serialEvent( e );
 	}
 
@@ -305,37 +343,72 @@ final class RXTXPort extends SerialPort {
 	public void addEventListener( SerialPortEventListener lsnr )
 		throws TooManyListenersException
 	{
-		if( SPEventListener != null ) throw new TooManyListenersException();
+		if( SPEventListener != null )
+			throw new TooManyListenersException();
 		SPEventListener = lsnr;
 		monThread = new MonitorThread();
-		monThread.start(); 
+		monThread.setDaemon(true);
+		monThread.start();
 	}
 	/** Remove the serial port event listener */
-	public void removeEventListener() {
+	public void removeEventListener()
+	{
 		SPEventListener = null;
-		if( monThread != null ) {
+		if( monThread != null )
+		{
 			monThread.interrupt();
 			monThread = null;
 		}
 	}
 
-	public void notifyOnDataAvailable( boolean enable ) { monThread.Data = enable; }
+	public void notifyOnDataAvailable( boolean enable )
+	{
+		monThread.Data = enable;
+	}
 
-	public void notifyOnOutputEmpty( boolean enable ) { monThread.Output = enable; }
+	public void notifyOnOutputEmpty( boolean enable )
+	{
+		monThread.Output = enable;
+	}
 
-	public void notifyOnCTS( boolean enable ) { monThread.CTS = enable; }
-	public void notifyOnDSR( boolean enable ) { monThread.DSR = enable; }
-	public void notifyOnRingIndicator( boolean enable ) { monThread.RI = enable; }
-	public void notifyOnCarrierDetect( boolean enable ) { monThread.CD = enable; }
-	public void notifyOnOverrunError( boolean enable ) { monThread.OE = enable; }
-	public void notifyOnParityError( boolean enable ) { monThread.PE = enable; }
-	public void notifyOnFramingError( boolean enable ) { monThread.FE = enable; }
-	public void notifyOnBreakInterrupt( boolean enable ) { monThread.BI = enable; }
+	public void notifyOnCTS( boolean enable )
+	{
+		monThread.CTS = enable;
+	}
+	public void notifyOnDSR( boolean enable )
+	{
+		monThread.DSR = enable;
+	}
+	public void notifyOnRingIndicator( boolean enable )
+	{
+		monThread.RI = enable;
+	}
+	public void notifyOnCarrierDetect( boolean enable )
+	{
+		monThread.CD = enable;
+	}
+	public void notifyOnOverrunError( boolean enable )
+	{
+		monThread.OE = enable;
+	}
+	public void notifyOnParityError( boolean enable )
+	{
+		monThread.PE = enable;
+	}
+	public void notifyOnFramingError( boolean enable )
+	{
+		monThread.FE = enable;
+	}
+	public void notifyOnBreakInterrupt( boolean enable )
+	{
+		monThread.BI = enable;
+	}
 
 
 	/** Close the port */
 	private native void nativeClose();
-	public void close() {
+	public void close()
+	{
 		setDTR(false);
 		setDSR(false);
 		nativeClose();
@@ -345,74 +418,110 @@ final class RXTXPort extends SerialPort {
 
 
 	/** Finalize the port */
-	protected void finalize() {
+	protected void finalize()
+	{
 		if( fd > 0 ) close();
 	}
 
 
         /** Inner class for SerialOutputStream */
-        class SerialOutputStream extends OutputStream {
-                public void write( int b ) throws IOException {
+        class SerialOutputStream extends OutputStream
+	{
+                public void write( int b ) throws IOException
+		{
                         writeByte( b );
                 }
-                public void write( byte b[] ) throws IOException {
+                public void write( byte b[] ) throws IOException
+		{
                         writeArray( b, 0, b.length );
                 }
-                public void write( byte b[], int off, int len ) throws IOException {
+                public void write( byte b[], int off, int len )
+			throws IOException
+		{
                         writeArray( b, off, len );
                 }
-                public void flush() throws IOException {
+                public void flush() throws IOException
+		{
                         drain();
                 }
         }
 
 	/** Inner class for SerialInputStream */
-	class SerialInputStream extends InputStream {
-		public int read() throws IOException {
+	class SerialInputStream extends InputStream
+	{
+		public int read() throws IOException
+		{
 			dataAvailable=0;
 			return readByte();
 		}
-		public int read( byte b[] ) throws IOException 
+		public int read( byte b[] ) throws IOException
 		{
 			return read ( b, 0, b.length);
 		}
-		public int read( byte b[], int off, int len ) throws IOException 
+/*
+read(byte b[], int, int)
+Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputStream.html#read(byte[], int, int)
+*/
+		public int read( byte b[], int off, int len )
+			throws IOException
 		{
+			/*
+			 * Some sanity checks
+			 */
+			if( b==null )
+				throw new NullPointerException();
+
+			if( (off < 0) || (len < 0) || (off+len > b.length))
+				throw new IndexOutOfBoundsException();
+
+			/*
+			 * Return immediately if len==0
+			 */
+			if( len==0 ) return 0;
+
+			/*
+			 * Reset dataAvailable notification flag
+			 */
 			dataAvailable=0;
-			int i=0, Minimum=0;
-			int intArray[] = 
+
+
+			/*
+			 * See how many bytes we should read
+			 */
+			int Minimum = Math.min( len, Math.max(InputBuffer,1) );
+
+			if( threshold==0 )
 			{
-				b.length,
-				InputBuffer, 
-				len
-			};
-		/*
-			find the lowest nonzero value
-			timeout and threshold are handled on the native side
-			see  NativeEnableReceiveTimeoutThreshold in
-			SerialImp.c
-		*/
-			while(intArray[i]==0 && i < intArray.length) i++;
-			Minimum=intArray[i];
-			while( i < intArray.length )
-			{
-				if(intArray[i] > 0 )
-				{
-					Minimum=Math.min(Minimum,intArray[i]);
-				}
-				i++;
+			/*
+			 * If threshold is disabled, read should return as soon
+			 * as data are available (up to the amount of available
+			 * bytes in order to avoid blocking)
+			 * Read may return earlier depending of the receive time
+			 * out.
+			 */
+				if( available()==0 )
+					Minimum = 1;
+				else
+					Minimum = Math.min(Minimum,available());
 			}
-			Minimum=Math.min(Minimum,threshold);
-			if(Minimum == 0) Minimum=1;
-			int Available=available();
-			int Ret = readArray( b, off, Minimum);
-			return Ret;
+			else
+			{
+			/*
+			 * Threshold is enabled. Read should return when
+			 * 'threshold' bytes have been received (or when the
+			 * receive timeout expired)
+			 */
+				Minimum = Math.min(Minimum, threshold);
+			}
+			return readArray( b, off, Minimum);
 		}
-		public int available() throws IOException {
+		public int available() throws IOException
+		{
 			return nativeavailable();
 		}
 	}
-	class MonitorThread extends Thread {
+	class MonitorThread extends Thread
+	{
 	/** Note: these have to be separate boolean flags because the
 	   SerialPortEvent constants are NOT bit-flags, they are just
 	   defined as integers from 1 to 10  -DPL */
@@ -427,7 +536,8 @@ final class RXTXPort extends SerialPort {
 		private boolean Data=false;
 		private boolean Output=false;
 		MonitorThread() { }
-		public void run() {
+		public void run()
+		{
 			eventLoop();
 		}
 	}

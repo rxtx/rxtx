@@ -16,14 +16,17 @@
 #   License along with this library; if not, write to the Free
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #-------------------------------------------------------------------------
+srcdir = @srcdir@
+VPATH = @srcdir@
+
 WJI= -I @WINDOWS_JAVA_INCLUDE@ -I @WINDOWS_JAVA_INCLUDE@/win32 
 AUTOMAKE_OPTIONS = foreign
 TOP=@TOP@
 JPATH=@JPATH@
 JCL_PATH=@JCL_PATH@
 INCLUDES= -I $(TOP) -I $(TOP)/$(target_alias) -I . -I $(JAVAINCLUDE) -I $(JAVANATINC)
-export NSJAVA=1
-export THREADS_FLAG=@THREAD_FLAG@
+NSJAVA=1
+THREADS_FLAG=@THREAD_FLAG@
 JAVAC=$(JPATH)/bin/javac $(JCLASSPATH):$(COMM_JAR_PATH):$(JCL_JAR_PATH) -d $(TOP)/ -O 
 JAVAH=$(JPATH)/bin/javah $(JAVA_H_CLASSPATH) -d $(TOP)/$(target_alias) -jni
 JAVA=$(JPATH)/bin/java $(JCLASSPATH)
@@ -34,6 +37,7 @@ LINK = $(LIBTOOL) --mode=link $(CC) $(CFLAGS) $(LDFLAGS) -version-info 1:0:1
 SERIAL_HEADER = $(TOP)/$(target_alias)/javax_comm_RXTXPort.h $(TOP)/$(target_alias)/javax_comm_RXTXCommDriver.h
 PARALLEL_HEADER = $(TOP)/$(target_alias)/javax_comm_LPRPort.h
 I2C_HEADER = $(TOP)/$(target_alias)/javax_comm_I2CPort.h 
+Raw_HEADER = $(TOP)/$(target_alias)/javax_comm_RawPort.h 
 RS485_HEADER = $(TOP)/$(target_alias)/javax_comm_RS485Port.h
 CLEANFILES = $(TOP)/*.class $(TOP)/javax/comm/*.class $(TOP)/jcl.jar
 #LTLIBRARIES =     $(lib_LTLIBRARIES)
@@ -58,6 +62,9 @@ install-lib:
 	if [ -f libI2C.la ];then \
 	$(LIBTOOL) --mode=install $(INSTALL_PROGRAM) libI2C.la $(RXTX_PATH);\
 	fi; \
+	if [ -f libRaw.la ];then \
+	$(LIBTOOL) --mode=install $(INSTALL_PROGRAM) libRaw.la $(RXTX_PATH);\
+	fi; \
 	if [ -f libRS485.la ];then \
 	$(LIBTOOL) --mode=install $(INSTALL_PROGRAM) libRS485.la $(RXTX_PATH);\
 	fi; \
@@ -66,21 +73,20 @@ install-lib:
 run: $(TOP)/test.class all jcl
 	(cd $(TOP)/;chmod 755 *.class;\
 	LD_LIBRARY_PATH="$(target_alias)";\
-	export LD_LIBRARY_PATH;\
 	$(JAVA) test)
 
-all: $(IDENTIFIERS) $(TARGETLIB)
+all: @IDENTIFIERS@ @TARGETLIB@
 	@echo -e "\n\nIf you have javax.comm.* and java.comm.* in your CLASSPATH, type make jcl to"
 	@echo -e "build the javacomm20-x86.tar.Z supporting classes.\n"
 	@echo "Note: CLASSPATH was grabbed during the configure stage.  Modification of the"
 	@echo "environment variable will not change the behavior of make without rerunning" 
 	@echo  -e "configure or editing the Makefile. \n"
 
-jcl:  $(TOP)/javax/comm/RXTXCommDriver.class $(TOP)/javax/comm/RXTXPort.class $(TOP)/javax/comm/RXTXPort.class $(IDENTIFIERS)
+jcl:  $(TOP)/javax/comm/RXTXCommDriver.class $(TOP)/javax/comm/RXTXPort.class $(TOP)/javax/comm/RXTXPort.class @IDENTIFIERS@
 	$(JAR) cf jcl.jar javax/comm/*
 	@echo "make install will install RxTx"
 
-comm:  $(TOP)/javax/comm/RXTXCommDriver.class $(TOP)/javax/comm/RXTXPort.class $(TOP)/javax/comm/RXTXPort.class $(IDENTIFIERS)
+comm:  $(TOP)/javax/comm/RXTXCommDriver.class $(TOP)/javax/comm/RXTXPort.class $(TOP)/javax/comm/RXTXPort.class @IDENTIFIERS@
 	$(JAR) cf comm.jar javax/comm/*
 	@echo "make install will install RxTx"
 
@@ -95,47 +101,54 @@ $(TOP)/javax/comm/RXTXCommDriver.class $(TOP)/javax/comm/RXTXPort.class \
 
 $(TOP)/$(target_alias)/libParallel.la: $(TOP)/$(target_alias)/ParallelImp.lo
 	( cd $(TOP)/$(target_alias); \
-	$(LINK) -o libParallel.la -rpath $(RXTX_PATH) $(<F); \
-	for I in .libs/*.so*;do cp $$I . ;done;)
+	$(LINK) -o libParallel.la -rpath $(RXTX_PATH) $(TOP)/$(target_alias)/ParallelImp.lo;)
 
 $(TOP)/$(target_alias)/ParallelImp.lo: $(srcdir)/src/ParallelImp.c \
                                   $(PARALLEL_HEADER) \
 				  $(TOP)/Makefile
 	(cd $(TOP)/$(target_alias); \
-	$(LIBTOOL) --mode=compile $(CC) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) @VERBOSE_IOEXCEPTIONS@ -c ../$< )
+	$(LIBTOOL) --mode=compile $(CC) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) @VERBOSE_IOEXCEPTIONS@ -c ../$(srcdir)/src/ParallelImp.c -o $(TOP)/$(target_alias)/ParallelImp.lo; )
 
 $(TOP)/$(target_alias)/libSerial.la: $(TOP)/$(target_alias)/SerialImp.lo
 	( cd $(TOP)/$(target_alias); \
-	$(LINK) -o libSerial.la -rpath $(RXTX_PATH) $(<F); \
-	for I in .libs/*.so*;do cp $$I . ;done;)
+	$(LINK) -o libSerial.la -rpath $(RXTX_PATH) $(TOP)/$(target_alias)/SerialImp.lo; )
 
 $(TOP)/$(target_alias)/SerialImp.lo: $(srcdir)/src/SerialImp.c \
                                   $(SERIAL_HEADER) \
 				  $(TOP)/Makefile
 	(cd $(TOP)/$(target_alias); \
-	$(LIBTOOL) --mode=compile $(CC) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) @VERBOSE_IOEXCEPTIONS@ -c ../$< )
+	$(LIBTOOL) --mode=compile $(CC) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) @VERBOSE_IOEXCEPTIONS@ -c ../$(srcdir)/src/SerialImp.c -o $(TOP)/$(target_alias)/SerialImp.lo; )
 
 $(TOP)/$(target_alias)/libI2C.la: $(TOP)/$(target_alias)/I2CImp.lo
 	( cd $(TOP)/$(target_alias); \
-	$(LINK) -o libI2C.la -rpath $(RXTX_PATH) $(<F); \
-	for I in .libs/*.so*;do cp $$I . ;done;)
+	$(LINK) -o libI2C.la -rpath $(RXTX_PATH) $(TOP)/$(target_alias)/I2CImp.lo; )
+
 
 $(TOP)/$(target_alias)/I2CImp.lo: $(srcdir)/src/I2CImp.c \
                                   $(I2C_HEADER) \
 				  $(TOP)/Makefile
 	(cd $(TOP)/$(target_alias); \
-	$(LIBTOOL) --mode=compile $(CC) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) @VERBOSE_IOEXCEPTIONS@ -c ../$< )
+	$(LIBTOOL) --mode=compile $(CC) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) @VERBOSE_IOEXCEPTIONS@ -c ../$(srcdir)/src/I2CImp.c -o $(TOP)/$(target_alias)/I2CImp.lo; )
 
 $(TOP)/$(target_alias)/libRS485.la: $(TOP)/$(target_alias)/RS485Imp.lo
 	( cd $(TOP)/$(target_alias); \
-	$(LINK) -o libRS485.la -rpath $(RXTX_PATH) $(<F); \
-	for I in .libs/*.so*;do cp $$I . ;done;)
+	$(LINK) -o libRS485.la -rpath $(RXTX_PATH) $(TOP)/$(target_alias)/RS485Imp.lo; )
+
+$(TOP)/$(target_alias)/libRaw.la: $(TOP)/$(target_alias)/RawImp.lo
+	( cd $(TOP)/$(target_alias); \
+	$(LINK) -o libRaw.la -rpath $(RXTX_PATH) $(TOP)/$(target_alias)/RawImp.lo; )
+
+$(TOP)/$(target_alias)/RawImp.lo: $(srcdir)/src/RawImp.c \
+                                  $(Raw_HEADER) \
+				  $(TOP)/Makefile
+	(cd $(TOP)/$(target_alias); \
+	$(LIBTOOL) --mode=compile $(CC) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) @VERBOSE_IOEXCEPTIONS@ -c ../$(srcdir)/src/RawImp.c -o $(TOP)/$(target_alias)/RawImp.lo; )
 
 $(TOP)/$(target_alias)/RS485Imp.lo: $(srcdir)/src/RS485Imp.c \
                                   $(RS485_HEADER) \
 				  $(TOP)/Makefile
 	(cd $(TOP)/$(target_alias); \
-	$(LIBTOOL) --mode=compile $(CC) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) @VERBOSE_IOEXCEPTIONS@ -c ../$< )
+	$(LIBTOOL) --mode=compile $(CC) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) @VERBOSE_IOEXCEPTIONS@ -c ../$(srcdir)/src/RS485Imp.c -o $(TOP)/$(target_alias)/RS485Imp.lo;)
 
 $(TOP)/javax/comm/ParallelPort.class $(TOP)/javax/comm/ParallelPortEvent.class $(TOP)/javax/comm/ParallelPortEventListener.class: $(srcdir)/src/ParallelPort.java $(srcdir)/src/ParallelPortEvent.java $(srcdir)/src/ParallelPortEventListener.java
 	$(JAVAC) $(srcdir)/src/ParallelPort.java $(srcdir)/src/ParallelPortEvent.java $(srcdir)/src/ParallelPortEventListener.java
@@ -157,6 +170,11 @@ $(TOP)/javax/comm/I2CPort.class $(TOP)/javax/comm/I2CPortEvent.class $(TOP)/java
 
 I2C: $(TOP)/javax/comm/I2CPort.class $(TOP)/javax/comm/I2CPortEvent.class $(TOP)/javax/comm/I2CPortEventListener.class 
 
+$(TOP)/javax/comm/RawPort.class $(TOP)/javax/comm/RawPortEvent.class $(TOP)/javax/comm/RawPortEventListener.class: $(srcdir)/src/RawPort.java $(srcdir)/src/RawPortEvent.java $(srcdir)/src/RawPortEventListener.java 
+	$(JAVAC) $(srcdir)/src/RawPort.java $(srcdir)/src/RawPortEvent.java $(srcdir)/src/RawPortEventListener.java
+
+Raw: $(TOP)/javax/comm/RawPort.class $(TOP)/javax/comm/RawPortEvent.class $(TOP)/javax/comm/RawPortEventListener.class 
+
 $(TOP)/javax/comm/CommPortEnumerator.class $(TOP)/javax/comm/CommPortIdentifier.class $(TOP)/javax/comm/CpoListEntry.class $(TOP)/javax/comm/CPOList.class $(TOP)/javax/comm/OwnershipEventThread.class: $(srcdir)/src/CommPortEnumerator.java $(srcdir)/src/CommPortIdentifier.java $(srcdir)/src/CpoList.java  $(srcdir)/src/CpoListEntry.java $(srcdir)/src/OwnershipEventThread.java
 	$(JAVAC) $(srcdir)/src/CommPortEnumerator.java $(srcdir)/src/CommPortIdentifier.java  $(srcdir)/src/CpoList.java  $(srcdir)/src/CpoListEntry.java $(srcdir)/src/OwnershipEventThread.java
 
@@ -165,21 +183,21 @@ IDENT: $(TOP)/javax/comm/CommPortEnumerator.class $(TOP)/javax/comm/CommPortIden
 $(TOP)/%.class $(TOP)/javax/comm/%.class: $(srcdir)/src/%.java 
 	$(JAVAC) $< 
 
-$(I2C_HEADER) $(RS485_HEADER) $(SERIAL_HEADER) $(PARALLEL_HEADER): $(TOP)/javax/comm/RXTXPort.class
+$(I2C_HEADER) $(Raw_HEADER) $(RS485_HEADER) $(SERIAL_HEADER) $(PARALLEL_HEADER): $(TOP)/javax/comm/RXTXPort.class
 	$(JAVAH) javax.comm.`echo $(@F) | sed s#\.h##|sed s#javax_comm_##`
 	touch $(TOP)/$(target_alias)/$(@F)
 
 borg: $(TOP)/javax/comm/RXTXCommDriver.class $(TOP)/javax/comm/RXTXPort.class $(TOP)/javax/comm/LPRPort.class $(SERIAL_HEADER)
-	gcc -DWIN32 -D  __int64="long long"  -mno-fp-ret-in-387 -b$(target_alias) -I $(TOP) -I $(TOP)/$(target_alias) -I . $(WJI) -I ../src/ -Wall -c ../src/SerialImp.c -o  $(TOP)/$(target_alias)/SerialImp.o
-	gcc -DWIN32 -D  __int64="long long"  -mno-fp-ret-in-387 -b$(target_alias) -I $(TOP) -I $(TOP)/$(target_alias) -I . $(WJI) -I ../src/ -Wall -c ../src/termios.c -o  $(TOP)/$(target_alias)/termios.o
-	gcc -DWIN32 -D  __int64="long long"  -mno-fp-ret-in-387 -b$(target_alias) -I $(TOP) -I $(TOP)/$(target_alias) -I . $(WJI) -I ../src/ -Wall -c ../src/fixup.c -o  $(TOP)/$(target_alias)/fixup.o
-	gcc -DWIN32 -D  __int64="long long"  -mno-fp-ret-in-387 -b$(target_alias) -I $(TOP) -I $(TOP)/$(target_alias) -I . $(WJI) -I ../src/ -Wall -c ../src/init.cc -o  $(TOP)/$(target_alias)/init.o
-	ld --base-file $(target_alias)/Serial.base  --dll -o  $(target_alias)/Serial.dll $(target_alias)/termios.o $(target_alias)/SerialImp.o $(target_alias)/fixup.o $(target_alias)/init.o  -luser32 -lgdi32 -lcomdlg32 -lkernel32 -ladvapi32 -lmingw32 -lmoldname -lcrtdll -e _dll_entry@12 --base-file $(target_alias)/Serial.base
+	gcc -DWIN32 -D  __int64="long long"  -mno-fp-ret-in-387 -b$(target_alias) -I $(TOP) -I $(TOP)/$(target_alias) -I . $(WJI) -I ../src/ -Wall -c ../src/SerialImp.c -o $(TOP)/$(target_alias)/SerialImp.o
+	gcc -DWIN32 -D  __int64="long long"  -mno-fp-ret-in-387 -b$(target_alias) -I $(TOP) -I $(TOP)/$(target_alias) -I . $(WJI) -I ../src/ -Wall -c ../src/termios.c -o $(TOP)/$(target_alias)/termios.o
+	gcc -DWIN32 -D  __int64="long long"  -mno-fp-ret-in-387 -b$(target_alias) -I $(TOP) -I $(TOP)/$(target_alias) -I . $(WJI) -I ../src/ -Wall -c ../src/fixup.c -o $(TOP)/$(target_alias)/fixup.o
+	gcc -DWIN32 -D  __int64="long long"  -mno-fp-ret-in-387 -b$(target_alias) -I $(TOP) -I $(TOP)/$(target_alias) -I . $(WJI) -I ../src/ -Wall -c ../src/init.cc -o $(TOP)/$(target_alias)/init.o
+	ld --base-file $(target_alias)/Serial.base  --dll -o $(target_alias)/Serial.dll $(target_alias)/termios.o $(target_alias)/SerialImp.o $(target_alias)/fixup.o $(target_alias)/init.o  -luser32 -lgdi32 -lcomdlg32 -lkernel32 -ladvapi32 -lmingw32 -lmoldname -lcrtdll -e _dll_entry@12 --base-file $(target_alias)/Serial.base
 	 echo EXPORTS >$(target_alias)/Serial.def;for i in `nm i386-mingw32/Serial.dll | grep "T _Java"|cut -b 13-`;do echo -n $$i|sed s#@.*##;echo "="$$i;done >> $(target_alias)/Serial.def
 	dlltool  -b$(target_alias) --as=as --dllname $(target_alias)/Serial.dll  --def $(target_alias)/Serial.def --base-file $(target_alias)/Serial.base --output-exp $(target_alias)/Serial.exp
-	ld --base-file $(target_alias)/Serial.base $(target_alias)/Serial.exp -dll -o  $(target_alias)/Serial.dll $(target_alias)/termios.o $(target_alias)/SerialImp.o $(target_alias)/fixup.o $(target_alias)/init.o  -luser32 -lgdi32 -lcomdlg32 -lkernel32 -ladvapi32 -lmingw32 -lmoldname -lcrtdll -e _dll_entry@12 --base-file $(target_alias)/Serial.base
+	ld --base-file $(target_alias)/Serial.base $(target_alias)/Serial.exp -dll -o $(target_alias)/Serial.dll $(target_alias)/termios.o $(target_alias)/SerialImp.o $(target_alias)/fixup.o $(target_alias)/init.o  -luser32 -lgdi32 -lcomdlg32 -lkernel32 -ladvapi32 -lmingw32 -lmoldname -lcrtdll -e _dll_entry@12 --base-file $(target_alias)/Serial.base
 	dlltool   -b$(target_alias) --as=as --dllname $(target_alias)/Serial.dll  --def $(target_alias)/Serial.def --base-file $(target_alias)/Serial.base --output-exp $(target_alias)/Serial.exp
-	ld $(target_alias)/Serial.exp -dll -o  $(target_alias)/Serial.dll $(target_alias)/termios.o $(target_alias)/SerialImp.o $(target_alias)/fixup.o $(target_alias)/init.o  -luser32 -lgdi32 -lcomdlg32 -lkernel32 -ladvapi32 -lmingw32 -lmoldname -lcrtdll -e _dll_entry@12 --base-file $(target_alias)/Serial.base
+	ld $(target_alias)/Serial.exp -dll -o $(target_alias)/Serial.dll $(target_alias)/termios.o $(target_alias)/SerialImp.o $(target_alias)/fixup.o $(target_alias)/init.o  -luser32 -lgdi32 -lcomdlg32 -lkernel32 -ladvapi32 -lmingw32 -lmoldname -lcrtdll -e _dll_entry@12 --base-file $(target_alias)/Serial.base
 
 docs:
 	mkdir javax;

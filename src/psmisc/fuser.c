@@ -22,6 +22,7 @@ is provided "as is" and without any express or implied warranties.
 #include <linux/major.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <stdlib.h>
 
 #define COMM_LEN 16
 #define PROC_BASE  "/proc"
@@ -36,14 +37,6 @@ is provided "as is" and without any express or implied warranties.
 #define FLAG_VERB  4	/* show verbose output */
 #define FLAG_DEV   8	/* show all processes using this device */
 void parse_args(char *);
-
-typedef struct _unix_cache {
-    dev_t fs_dev;
-    ino_t fs_ino;
-    ino_t net_ino;
-    struct _unix_cache *next;
-} UNIX_CACHE;
-
 typedef struct {
     const char *name;
 } SPACE_DSC;
@@ -78,7 +71,6 @@ typedef struct file_dsc {
 static SPACE_DSC name_spaces[] = { };
 static FILE_DSC *files = NULL;
 static FILE_DSC *last_named = NULL;
-//static UNIX_CACHE *unix_cache = NULL;
 static int all = 0,found_item = 0;
 
 static void add_file(const char *path,unsigned long device,unsigned long inode, pid_t pid,int ref)
@@ -264,11 +256,9 @@ static void enter_item(const char *name,int flags,int sig_number,dev_t dev, ino_
  void parse_args(char *argv)
 {
     SPACE_DSC *name_space;
-    //char path[PATH_MAX+1];
     int flags,silent,sig_number,no_files;
     SPACE_DSC *this_name_space;
     struct stat st;
-    //char *here;
 
     flags = silent = 0;
     sig_number = SIGKILL;
