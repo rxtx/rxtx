@@ -20,14 +20,10 @@
    fear he who enter here.  It appears that things have changed.  An attempt
    has been made to put things the way the should be.
 
-	basic problem is LP_P* appears to be ifdefed __KERNEL__ in the
-        lp.h header file on linux.  It also looks as if LP_P* should be
-        LP_* for POSIX compliance.  So... Some P's got chopped out.
-        Its not clear what LP_PACK is supposed to become so its commented out
-        below.
+        It compiles and ParallelBlackBox runs.  No further guarantees.
 
-        Some errors may have occured during the change.  It compiles and
-        ParallelBlackBox runs.  No further garantees.
+	Well... One.. it will print "Hello World!" on an epson DX 10 printer.
+	you know.. the 10 character per second daisy wheel printer ;)
 
         - Trent Jarvi
 */
@@ -72,6 +68,7 @@ extern int errno;
 #include "ParallelImp.h"
 
 #define LPRPort(foo) Java_javax_comm_LPRPort_ ## foo
+#define DEBUG
 
 /*----------------------------------------------------------
 LPRPort.getOutputBufferFree
@@ -144,6 +141,7 @@ JNIEXPORT jboolean JNICALL LPRPort(isPaperOut)(JNIEnv *env,
 	return( status & LP_NOPA ? JNI_TRUE : JNI_FALSE );
 #else
 /*  FIXME??  */
+	printf("ParallelImp.c LPGETSTATUS not defined\n");
 	return(JNI_TRUE);
 #endif
 }
@@ -164,6 +162,7 @@ JNIEXPORT jboolean JNICALL LPRPort(isPrinterBusy)(JNIEnv *env,
 	ioctl(fd, LPGETSTATUS, &status);
 #else
 /*  FIXME??  */
+	printf("ParallelImp.c LPGETSTATUS not defined\n");
 #endif
 #if defined(__linux__)
 	return( status & LP_BUSY ? JNI_TRUE : JNI_FALSE );
@@ -191,6 +190,7 @@ JNIEXPORT jboolean JNICALL LPRPort(isPrinterError)(JNIEnv *env,
 	return( status & LP_ERR ? JNI_TRUE : JNI_FALSE );
 #else
 /*  FIXME??  */
+	printf("ParallelImp.c LPGETSTATUS not defined\n");
 	return(JNI_FALSE);
 #endif
 }
@@ -212,6 +212,7 @@ JNIEXPORT jboolean JNICALL LPRPort(isPrinterSelected)(JNIEnv *env,
 	return( status & LP_SELEC ? JNI_TRUE : JNI_FALSE );
 #else
 /*  FIXME??  */
+	printf("ParallelImp.c LPGETSTATUS not defined\n");
 	return(JNI_FALSE);
 #endif
 }
@@ -235,7 +236,10 @@ JNIEXPORT jboolean JNICALL LPRPort(isPrinterTimedOut)(JNIEnv *env,
 	return( status & LP_BUSY ? JNI_TRUE : JNI_FALSE );
 #endif
 #if defined(__FreeBSD__)
+	printf("ParallelImp.c LPGETSTATUS not defined\n");
+	/*
 	return( status & EBUSY ? JNI_TRUE : JNI_FALSE );
+	*/
 #endif
 	return( JNI_FALSE );
 }
@@ -577,7 +581,7 @@ JNIEXPORT void JNICALL LPRPort(eventLoop)( JNIEnv *env,
 		ioctl( fd, LPGETSTATUS, &pflags );
 #else
 	/*  FIXME??  */
-#	error Trent never looked at this.
+	printf("ParallelImp.c LPGETSTATUS is undefined!\n");
 #endif
 
 /*
@@ -600,14 +604,14 @@ JNIEXPORT void JNICALL LPRPort(eventLoop)( JNIEnv *env,
 #if defined (__linux__)
 		/* unchanged input, active low */
 		if (pflags&LP_NOPA)   /* unchanged input, active high */
-			send_event( env, jobj, PAR_EV_ERROR, JNI_TRUE );
+			send_event( env, jobj, PAR_EV_ERROR, 1 );
 		if (pflags&LP_SELEC)  /* unchanged input, active high */
-			send_event( env, jobj, PAR_EV_ERROR, JNI_TRUE );
+			send_event( env, jobj, PAR_EV_ERROR, 1 );
 		if (pflags&LP_ERR)  /* unchanged input, active low */
-			send_event( env, jobj, PAR_EV_ERROR, JNI_TRUE );
+			send_event( env, jobj, PAR_EV_ERROR, 1 );
 #else
 	/*  FIXME??  */
-#	error Trent never looked at this.
+	printf("ParallelImp.c LPGETSTATUS is undefined!\n");
 #endif
 		usleep(1000);
 	}
@@ -675,6 +679,23 @@ void throw_java_exception( JNIEnv *env, char *exc, char *foo, char *msg )
 /* ct7 * Added DeleteLocalRef */
 	(*env)->DeleteLocalRef( env, clazz );
 }
+
+/*----------------------------------------------------------
+ report
+
+   accept:      string to send to stderr     
+   perform:     if DEBUG is defined send the string to stderr.
+   return:      none
+   exceptions:  none
+   comments:
+----------------------------------------------------------*/
+void report(char *msg)
+{
+#ifdef DEBUG
+        fprintf(stderr, msg);
+#endif /* DEBUG */
+}
+
 /*----------------------------------------------------------
  is_interrupted
 

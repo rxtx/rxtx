@@ -77,12 +77,10 @@ public class CommPortIdentifier extends Object /* extends Vector? */
 		OS = System.getProperty("os.name");
 		if(OS.toLowerCase().indexOf("linux") == -1)
 		{
-			System.out.println("Have not implemented native_psmisc_report_owner(PortName)); in CommPortIdentifier");
+			if (debug)
+				System.out.println("Have not implemented native_psmisc_report_owner(PortName)); in CommPortIdentifier");
 		}
-		else
-		{
-			System.loadLibrary( "fuser" );
-		}
+		System.loadLibrary( "fuser" );
 	}
 	CommPortIdentifier ( String pn, CommPort cp, int pt, CommDriver driver) 
 	{
@@ -336,20 +334,8 @@ public class CommPortIdentifier extends Object /* extends Vector? */
 		}
 		else
 		{
-			String OS;
-
-			OS = System.getProperty("os.name");
-
-			if (debug) System.out.println("RXTXDriver.getCommPort() Yikes!");
-			if(OS.toLowerCase().indexOf("linux") != -1)
-			{
-				System.out.println("In!");
-				throw new PortInUseException(
+			throw new PortInUseException(
 					native_psmisc_report_owner(PortName));
-			}
-			else
-				throw new PortInUseException(
-					"Unknown Application");
 		}
 	}
 /*------------------------------------------------------------------------------

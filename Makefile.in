@@ -113,6 +113,7 @@ JAVA_VENDOR = @JAVA_VENDOR@
 JAVA_VERSION = @JAVA_VERSION@
 JHOME = @JHOME@
 JPATH = @JPATH@
+LD = @LD@
 LDFLAG = @LDFLAG@
 LDFLAGS = @LDFLAGS@
 LIBTOOL = @LIBTOOL@
@@ -121,6 +122,7 @@ LN_S = @LN_S@
 MAKEINFO = @MAKEINFO@
 MKINSTALLDIRS = @MKINSTALLDIRS@
 MSGFMT = @MSGFMT@
+NM = @NM@
 OBJDUMP = @OBJDUMP@
 OS_ARCH = @OS_ARCH@
 OS_NAME = @OS_NAME@
@@ -174,7 +176,7 @@ ltconfig ltmain.sh missing mkinstalldirs
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = gtar
+TAR = tar
 GZIP_ENV = --best
 all: all-redirect
 .SUFFIXES:
@@ -270,7 +272,7 @@ distdir: $(DISTFILES)
 	@for file in $(DISTFILES); do \
 	  d=$(srcdir); \
 	  if test -d $$d/$$file; then \
-	    cp -pr $$d/$$file $(distdir)/$$file; \
+	    cp -pr $$/$$file $(distdir)/$$file; \
 	  else \
 	    test -f $(distdir)/$$file \
 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \

@@ -1,3 +1,11 @@
+#include "javax_comm_CommPortIdentifier.h"
+#ifndef __linux__
+JNIEXPORT jstring JNICALL Java_javax_comm_CommPortIdentifier_native_1psmisc_1report_1owner (JNIEnv *env, jobject obj, jstring arg)
+{
+	return (*env)->NewStringUTF(env, "Unknown Application");
+	//return("Unknown Application\n");
+}
+#else
 /* loosly based on fuser.c by Werner Almesberger. */
 
 /* Copyright 1993-1998 Werner Almesberger. See file COPYING for details. 
@@ -23,7 +31,6 @@ is provided "as is" and without any express or implied warranties.
 #include <unistd.h>
 #include <sys/types.h>
 #include <stdlib.h>
-#include "javax_comm_CommPortIdentifier.h"
 
 #define COMM_LEN 16
 #define PROC_BASE  "/proc"
@@ -291,5 +298,6 @@ JNIEXPORT jstring JNICALL Java_javax_comm_CommPortIdentifier_native_1psmisc_1rep
 	const char *str = (*env)->GetStringUTFChars(env, arg, 0);
         show_user(str,returnstring);
 	(*env)->ReleaseStringUTFChars(env, arg, str);
-	return (*env)->NewStringUTF(env, returnstring);;
+	return (*env)->NewStringUTF(env, returnstring);
 }
+#endif /* __linux__ */

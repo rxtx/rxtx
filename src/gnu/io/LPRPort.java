@@ -208,26 +208,40 @@ final class LPRPort extends ParallelPort
 		return(true);
 	}
 
-	public synchronized void sendEvent( int event, boolean state )
+	public synchronized boolean sendEvent( int event, boolean state )
 	{
+		/* Let the native side know its time to die */
 
-		if ( fd == 0 ) return;  /* close() was called */
+		if ( fd == 0 || PPEventListener == null || monThread == null )
+		{
+			return(true);
+		}
 
 		switch( event )
 		{
 			case ParallelPortEvent.PAR_EV_BUFFER:
 				if(  monThread.monBuffer ) break;
-				return;
+				return(false);
 			case ParallelPortEvent.PAR_EV_ERROR:
 				if(  monThread.monError ) break;
-				return;
+				return(false);
 			default:
+				System.err.println("unknown event:"+event);
+				return(false);
 		}
-		ParallelPortEvent e =
-			new ParallelPortEvent(this, event, !state, state );
+		ParallelPortEvent e = new ParallelPortEvent(this, event, !state,
+			state );
 		if( PPEventListener != null )
 			PPEventListener.parallelEvent( e );
-		try{Thread.sleep(50);} catch(Exception exc){}
+		if ( fd == 0 || PPEventListener == null || monThread == null )
+		{
+			return(true);
+		}
+		else
+		{
+			try{Thread.sleep(50);} catch(Exception exc){}
+			return(false);
+		}
 	}
 
 	/** Add an event listener */

@@ -1117,12 +1117,12 @@ JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 JNIEXPORT jboolean  JNICALL RXTXCommDriver(isDeviceGood)(JNIEnv *env,
 	jobject jobj, jstring tty_name)
 {
-
 	jboolean result;
 	static struct stat mystat;
 	char teststring[256];
 	int fd,i;
 	const char *name = (*env)->GetStringUTFChars(env, tty_name, 0);
+
 
 	for(i=0;i<64;i++){
 #if defined(_GNU_SOURCE)
@@ -1131,6 +1131,8 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(isDeviceGood)(JNIEnv *env,
 		sprintf(teststring,"%s%s%i",DEVICEDIR,name, i);
 #endif /* _GNU_SOURCE */
 		stat(teststring,&mystat);
+/* XXX the following hoses freebsd when it tries to open the port later on */
+#ifndef __FreeBSD__
 		if(S_ISCHR(mystat.st_mode)){
 			fd=open(teststring,O_RDONLY|O_NONBLOCK);
 			if (fd>0){
@@ -1138,8 +1140,14 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(isDeviceGood)(JNIEnv *env,
 				result=JNI_TRUE;
 				break;
 			}
+			else 
+				result=JNI_FALSE;
 		}
-		result=JNI_FALSE;
+		else
+			result=JNI_FALSE;
+#else
+		result=JNI_TRUE;
+#endif  /* __FreeBSD __ */
 	}
 #if defined(_GNU_SOURCE)
 	snprintf(teststring, 256, "%s%s",DEVICEDIR,name);
@@ -1155,6 +1163,7 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(isDeviceGood)(JNIEnv *env,
 		}
 	}
 	(*env)->ReleaseStringUTFChars(env, tty_name, name);
+	return( JNI_TRUE );
 	return(result);
 }
 

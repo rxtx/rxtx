@@ -405,10 +405,24 @@ public class RXTXCommDriver implements CommDriver
 	* IBM
 	*/
 		String[] AllKnownParallelPorts;
-		if(osName.equals("Linux"))
+		if(osName.equals("Linux")
+/*
+			|| osName.equals("NetBSD") FIXME
+			|| osName.equals("HP-UX")  FIXME
+			|| osName.equals("Irix")   FIXME
+			|| osName.equals("BeOS")   FIXME
+*/
+			)
 		{
 			String[] temp={
-				"lp"    // linux printer port
+				"lp"    
+			};
+			AllKnownParallelPorts=temp;
+		}
+		else if(osName.equals("FreeBSD"))
+		{
+			String[] temp={
+				"lpt"    
 			};
 			AllKnownParallelPorts=temp;
 		}
