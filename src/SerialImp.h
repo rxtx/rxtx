@@ -68,8 +68,14 @@ struct tpid_info_struct
 	int write_counter, closing, tcdrain;
 	pthread_t tpid;
 
-	pthread_mutex_t *mutex;
-	pthread_cond_t *cpt;
+	pthread_mutex_t *mutex_writing;
+	pthread_mutex_t *mutex_draining;
+	pthread_mutex_t *mutex_closing;
+	pthread_mutex_t *mutex_event;
+	pthread_cond_t *cpt_writing;
+	pthread_cond_t *cpt_draining;
+	pthread_cond_t *cpt_closing;
+	pthread_cond_t *cpt_event;
 	//pthread_attr_t *attr;
 
 	int length;

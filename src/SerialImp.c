@@ -99,11 +99,10 @@
 #endif /* HAVE_GRP_H */
 
 extern int errno;
-#undef TIOCSERGETLSR
-#define SIGNALS
 #ifdef TRENT_IS_HERE
+#undef TIOCSERGETLSR
+//#define DEBUG
 /*
-#define DEBUG
 #define DEBUG_MW
 #define DONT_USE_OUTPUT_BUFFER_EMPTY_CODE
 notes:
@@ -691,78 +690,85 @@ void *thread_write( void *arg )
 	struct tpid_info_struct *t = eis->tpid;
 	int result;
 
+	report("thread_write: lock writing\n");
+	pthread_mutex_lock( t->mutex_writing );
+	report("thread_write: lock closing\n");
+	pthread_mutex_lock( t->mutex_closing );
 	if( !eis->jclazz )
 	{
 		report("thread_write: jclazz is borked\n");
 		return( NULL );
 	}
-#ifdef SIGNALS
-	report("thread_write: lock\n");
-	pthread_mutex_lock( t->mutex );
-#endif /* SIGNALS */
 	report("thread_write: have jclazz\n");
-	while( t->tcdrain == 1 ) usleep(2000);
+	pthread_mutex_lock( t->mutex_draining );
+	while( t->tcdrain == 1 )
+	{
+		/* this causes a 'race' */
+		report("thread_write: waiting for a drain\n");
+		pthread_cond_wait( t->cpt_event, t->mutex_draining );
+	}
+	pthread_mutex_unlock( t->mutex_draining );
 	if( !t->closing )
 	{
 		result = write( eis->fd, t->buff, t->length );
 		t->length = result;
+		report("thread_write: cond_signal\n");
+		pthread_cond_signal( t->cpt_writing );
+		report("thread_write: mutex_unlock\n");
+		pthread_mutex_unlock( t->mutex_writing );
 	}
 	else
 	{
 		t->length = 0;
-#ifdef SIGNALS
-		pthread_cond_signal( t->cpt );
+		pthread_cond_signal( t->cpt_writing );
 		report("thread_write: cond_signal\n");
-#else
-		t->done = 1;
-#endif
+		report("thread_write: mutex_unlock\n");
+		pthread_mutex_unlock( t->mutex_writing );
 		goto fail;
 	}
-
-#ifdef SIGNALS
-	report("thread_write: cond_signal\n");
-	pthread_cond_signal( t->cpt );
-	report("thread_write: mutex_unlock\n");
-	pthread_mutex_unlock( t->mutex );
-#endif
-	t->done = 1;
-	if( t->closing) goto fail;
 	report("thread_write: tcdrain\n");
+	pthread_mutex_lock( t->mutex_draining );
 	t->tcdrain = 1;
-	if( t->closing) goto fail;
-	if( tcdrain( eis->fd ) == 0 && t->done == 1 )
+	if( tcdrain( eis->fd ) == 0 )
 	{
-		report("thread_write: lock\n");
-		pthread_mutex_lock( t->mutex );
-		while(eis->output_buffer_empty_flag == 1 ) 
+		report("thread_write: lock event\n");
+		pthread_mutex_lock( t->mutex_event );
+		while( eis->output_buffer_empty_flag == 1 ) 
 		{
-			report("thread_write: cond_wait\n");
-			pthread_cond_wait( t->cpt, t->mutex );
+			report(">thread_write: cond_wait\n");
+			pthread_cond_wait( t->cpt_event, t->mutex_event );
+			report("<thread_write: cond_wait\n");
 		}
 		if( eis ) 
 		{
 			report("thread_write: setting OUTPUT_BUFFER_EMPTY\n" );
-			//send_event( eis, SPE_OUTPUT_BUFFER_EMPTY, 1 );
-			//send_event( eis, SPE_DATA_AVAILABLE, 1 );
 			eis->output_buffer_empty_flag = 1;
 		}
-		else goto fail;
+		else
+		{
+			t->tcdrain = 0;
+			pthread_cond_signal( t->cpt_draining );
+			report("thread_write: unlocking drain/event\n");
+			pthread_mutex_unlock( t->mutex_draining );
+			pthread_mutex_unlock( t->mutex_event );
+			goto fail;
+		}
 		report("thread_write: mutex_unlock\n");
-		pthread_mutex_unlock( t->mutex );
+		pthread_mutex_unlock( t->mutex_event );
 	}
 	else report("thread_write: NOT sending the blasted OUTPUT_BUFFER_EMPTY\n" );
 	t->tcdrain = 0;
-	if( t->closing) goto fail;
-	//if( !t->tcdrain ) t->inuse = 0;
 	report("thread_write: pthread_exit(NULL)\n" );
+	pthread_cond_signal( t->cpt_closing );
+	pthread_mutex_unlock( t->mutex_closing );
+	report("thread_write: signal draining\n" );
+	pthread_cond_signal( t->cpt_draining );
+	pthread_mutex_unlock( t->mutex_draining );
+
 	pthread_exit( NULL );
 	/* -Wall ?fix */
 	return( NULL );
 fail:
-#ifdef SIGNALS
-	report("thread_write: pthread_mutex_unlock\n");
-	pthread_mutex_unlock( t->mutex );
-#endif /* SIGNALS */
 	report("thread_write: thread_write returning with errors\n");
 	pthread_exit( NULL );
 	/* -Wall ?fix */
@@ -791,7 +797,7 @@ int spawn_write_thread( int fd, char *buff, int length,
 #ifdef DONT_USE_OUTPUT_BUFFER_EMPTY_CODE
 	return(write( fd, buff, length )); 
 #else
-	//if( t->closing ); return -1;
+
 	eis = (struct event_info_struct * )
 		get_java_var( env, *jobj, "eis", "I" );
 	sprintf( msg, "spawn_write_thread: got eis %i\n", (int) eis );
@@ -811,22 +817,19 @@ int spawn_write_thread( int fd, char *buff, int length,
 	t->inuse = 1;
 	if ( t->closing )
 	{
-		report_warning( "spqn_write_thread: closing\n");
+		report_warning( "spawn_write_thread: closing\n");
 		return( write( fd, buff, length )); 
 	}
 
-#ifdef SIGNALS
 	report("spawn_write_thread: lock mutex\n");
-	pthread_mutex_lock( t->mutex );
-	while( t->write_counter && !t->closing )
+	pthread_mutex_lock( t->mutex_closing );
+	pthread_mutex_lock( t->mutex_writing );
+	while( t->write_counter )
 	{
 		report("spawn_write_thread: mutex locked\n");
-		pthread_cond_wait( t->cpt, t->mutex );
+		pthread_cond_wait( t->cpt_writing, t->mutex_writing );
+		if( t->closing ) return -1;
 	}
-#else
-	while( t->write_counter && !t->closing ) usleep(2000);
-	t->done = 0;
-#endif
 
 	if( t->closing ) return( 0 );
 
@@ -837,27 +840,21 @@ int spawn_write_thread( int fd, char *buff, int length,
 	/* queue next write */
 	t->write_counter++;
 
-	//sprintf(msg, "spawn_write_thread: %s %i\n", buff, length);
-	//report( msg );
-
 	/*----------------------------------------------*/
 	report("spawn_write_thread: create thread_write\n");
+	pthread_mutex_unlock( t->mutex_closing );
 	pthread_create( &t->tpid, NULL, thread_write, eis );
 	pthread_detach( t->tpid );
 	/*----------------------------------------------*/
-#ifdef SIGNALS
 	report(">spawn_write_thread: cond_wait\n");
-	pthread_cond_wait( t->cpt, t->mutex );
-#else
-	while(! t->done ) usleep(1000);
-#endif
+	pthread_cond_wait( t->cpt_writing, t->mutex_writing );
 	t->write_counter--;
-#ifdef SIGNALS
 	report("spawn_write_thread: unlock mutex\n");
-	pthread_mutex_unlock( t->mutex );
+	pthread_mutex_unlock( t->mutex_writing );
+	pthread_mutex_unlock( t->mutex_closing );
 	report("<spawn_write_thread: cond_wait\n");
-#endif
 	sprintf(msg, "spawn_write_thread: returning return = %i\n", t->length );
+	printf(msg, "spawn_write_thread: returning return = %i\n", t->length );
 	report( msg );
 	return(t->length);
 #endif /* DONT_USE_OUTPUT_BUFFER_EMPTY_CODE */
@@ -880,35 +877,26 @@ void finalize_thread_write( struct event_info_struct *eis )
 	report("entering finalize_thread_write\n");
 	if( ! eis ) return;
 	if( ! eis->tpid ) return;
+	pthread_mutex_lock( eis->tpid->mutex_closing );
 	eis->tpid->closing = 1;
-#ifdef SIGNALS
-	pthread_mutex_lock( eis->tpid->mutex );
 	while( eis->tpid->write_counter )
 	{
 		report("finalize_thread_write: mutex locked\n");
-		pthread_cond_wait( eis->tpid->cpt, eis->tpid->mutex );
+		pthread_cond_wait( eis->tpid->cpt_writing, eis->tpid->mutex_closing );
 	}
 	report(">finalize_thread_write: mutex_unlock\n");
-	pthread_mutex_unlock( eis->tpid->mutex );
+	pthread_mutex_unlock( eis->tpid->mutex_closing );
 	report("<finalize_thread_write: mutex_unlock\n");
-#else
-	/*
-	   FIXME let any tcdrain's finish.  I'd rather use the conditions
-	   with pthreads but that causes problems in some applications
-	*/
-	usleep(200000);
-	while( eis->tpid->write_counter &&
-		//eis->output_buffer_empty_flag &&
-		eis->tpid->inuse
-	)
-		usleep(100);
-#endif
-	if ( eis->tpid->cpt )
+	if ( eis->tpid->cpt_writing && eis->tpid->cpt_closing )
 	{
-		pthread_cond_destroy( eis->tpid->cpt );
-		report(">finalize_thread_write: free cpt\n");
-		free( eis->tpid->cpt );
-		report("<finalize_thread_write: free cpt\n");
+		pthread_cond_destroy( eis->tpid->cpt_writing );
+		pthread_cond_destroy( eis->tpid->cpt_closing );
+		pthread_cond_destroy( eis->tpid->cpt_event );
+		report(">finalize_thread_write: destroy cpt_writing/cpt_closing\n");
+		free( eis->tpid->cpt_writing );
+		free( eis->tpid->cpt_closing );
+		free( eis->tpid->cpt_event );
+		report("<finalize_thread_write: free event/cpt_closing\n");
 	}
 	report(">finalize_thread_write: free tpid\n");
 	if ( eis->tpid ) free( eis->tpid );
@@ -1001,13 +989,25 @@ int init_thread_write( struct event_info_struct *eis )
 	sigprocmask( SIG_SETMASK, &newmask, &oldmask );
 
 	eis->tpid = t;
-	t->mutex = malloc(sizeof(pthread_mutex_t));
-	t->cpt = malloc(sizeof(pthread_cond_t));
+	t->mutex_writing = malloc(sizeof(pthread_mutex_t));
+	t->mutex_draining = malloc(sizeof(pthread_mutex_t));
+	t->mutex_closing = malloc(sizeof(pthread_mutex_t));
+	t->mutex_event = malloc(sizeof(pthread_mutex_t));
+	t->cpt_writing = malloc(sizeof(pthread_cond_t));
+	t->cpt_draining = malloc(sizeof(pthread_cond_t));
+	t->cpt_closing = malloc(sizeof(pthread_cond_t));
+	t->cpt_event = malloc(sizeof(pthread_cond_t));
 
 	report("init_thread_write: init mutex\n");
-	pthread_mutex_init( t->mutex, NULL );
+	pthread_mutex_init( t->mutex_writing, NULL );
+	pthread_mutex_init( t->mutex_draining, NULL );
+	pthread_mutex_init( t->mutex_closing, NULL );
+	pthread_mutex_init( t->mutex_event, NULL );
 	report("init_thread_write: init cond\n");
-	pthread_cond_init( t->cpt, NULL );
+	pthread_cond_init( t->cpt_writing, NULL );
+	pthread_cond_init( t->cpt_draining, NULL );
+	pthread_cond_init( t->cpt_closing, NULL );
+	pthread_cond_init( t->cpt_event, NULL );
 	report("init_thread_write: get eis\n");
 	jeis  = (*eis->env)->GetFieldID( eis->env, eis->jclazz, "eis", "I" );
 	report("init_thread_write: set eis\n");
@@ -1033,6 +1033,7 @@ JNIEXPORT void JNICALL RXTXPort(writeByte)( JNIEnv *env,
 	unsigned char byte = (unsigned char)ji;
 	int fd = get_java_var( env, jobj,"fd","I" );
 	int result;
+	char msg[80];
 
 	ENTER( "RXTXPort:writeByte" );
 	/*
@@ -1045,10 +1046,11 @@ JNIEXPORT void JNICALL RXTXPort(writeByte)( JNIEnv *env,
 	   other systems use the API write directly
 	*/
 	do {
+		sprintf( msg, "writeByte %c>>\n", byte );
+		report( msg );
 #ifdef TIOCSERGETLSR
 		result=WRITE (fd, &byte, sizeof(unsigned char));
 #else
-		printf("writeByte %c>>\n", byte);
 		result=spawn_write_thread (fd, &byte, sizeof(unsigned char),
 						env, &jobj);
 		report("writeByte<<\n");
@@ -1057,10 +1059,6 @@ JNIEXPORT void JNICALL RXTXPort(writeByte)( JNIEnv *env,
 	LEAVE( "RXTXPort:writeByte" );
 	if(result >= 0)
 	{
-/*
-		report_verbose( "writeByte: sending OUTPUT_BUFFER_EMPTY\n" );
-		send_event( env, jobj, SPE_OUTPUT_BUFFER_EMPTY, 1 );
-*/
 		return;
 	}
 	throw_java_exception( env, IO_EXCEPTION, "writeByte",
@@ -1762,6 +1760,7 @@ JNIEXPORT jint JNICALL RXTXPort(readByte)( JNIEnv *env,
 	unsigned char buffer[ 1 ];
 	int fd = get_java_var( env, jobj,"fd","I" );
 	int timeout = get_java_var( env, jobj, "timeout", "I" );
+	char msg[80];
 
 	ENTER( "RXTXPort:readByte" );
 	bytes = read_byte_array( env, &jobj, fd, buffer, 1, timeout );
@@ -1772,6 +1771,8 @@ JNIEXPORT jint JNICALL RXTXPort(readByte)( JNIEnv *env,
 		return -1;
 	}
 	LEAVE( "RXTXPort:readByte" );
+	sprintf( msg, "readByte return(%i)\n", bytes ? buffer[ 0 ] : -1 );
+	report( msg );
 	return (bytes ? (jint)buffer[ 0 ] : -1);
 }
 
@@ -1833,37 +1834,38 @@ JNIEXPORT jint JNICALL RXTXPort(nativeavailable)( JNIEnv *env,
 	int result;
 	char message[80];
 
-	printf("=====================native available==============\n");
 	ENTER( "RXTXPort:nativeavailable" );
-	if( ioctl( fd, FIONREAD, &result ) )
+/*
+    On SCO OpenServer FIONREAD always fails for serial devices,
+    so try ioctl FIORDCHK instead; will only tell us whether
+    bytes are available, not how many, but better than nothing.
+
+    This turns out to be true on Solaris also.  taj.
+*/
+#ifdef FIORDCHK  /* __unixware__ __sun__ probably others */
+	result = ioctl(fd, FIORDCHK, 0);
+#else
+	if( ioctl( fd, FIONREAD, &result ) < 0 )
 	{
-#if defined(__unixware__)
-	/*
-	    On SCO OpenServer FIONREAD always fails for serial devices,
-	    so try ioctl FIORDCHK instead; will only tell us whether
-	    bytes are available, not how many, but better than nothing.
-	*/
-		result = ioctl(fd, FIORDCHK, 0);
-		sprintf(message, "    nativeavailable: FIORDCHK result %d, errno %d\n", result , result == -1 ? errno : 0);
-		report( message );
-		if (result == -1) {
-#endif /* __unixware__ || defined(__sun__) */
-			LEAVE( "RXTXPort:nativeavailable IOException" );
-			throw_java_exception( env, IO_EXCEPTION,
-						"nativeavailable",
-			strerror( errno ) );
-			return -1;
-#if defined(__unixware__)
-		} else
-		{
-			LEAVE( "RXTXPort:nativeavailable" );
-			return (jint)result;
-		}
-#endif /* __unixware__ || defined(__sun__) */
+		goto fail;
 	}
-	else
-		report("RXTXPort:nativeavailable:  FIONREAD failed\n");
+#endif /* FIORDCHK */
+	if (result == -1) {
+		goto fail;
+	}
+	if( result )
+	{
+		sprintf(message, "    nativeavailable: FIORDCHK result %d,
+				errno %d\n", result , result == -1 ? errno : 0);
+		report( message );
+	}
 	LEAVE( "RXTXPort:nativeavailable" );
+	return (jint)result;
+fail:
+	report("RXTXPort:nativeavailable:  ioctl() failed\n");
+	LEAVE( "RXTXPort:nativeavailable" );
+	throw_java_exception( env, IO_EXCEPTION, "nativeavailable",
+		strerror( errno ) );
 	return (jint)result;
 }
 
@@ -1974,14 +1976,14 @@ int check_line_status_register( struct event_info_struct *eis )
 	{
 		report("check_line_status_register: sending SPE_OUTPUT_BUFFER_EMPTY\n");
 		report("check_line_status_register: lock\n");
-		pthread_mutex_lock( eis->tpid->mutex );
+		pthread_mutex_lock( eis->tpid->mutex_event );
 		send_event( eis, SPE_OUTPUT_BUFFER_EMPTY, 1 );
 		//send_event( eis, SPE_DATA_AVAILABLE, 1 );
 		eis->output_buffer_empty_flag = 0;
 		report("check_line_status_register: cond_signal\n");
-		pthread_cond_signal( eis->tpid->cpt );
+		pthread_cond_signal( eis->tpid->cpt_event );
 		report("check_line_status_register: unlock\n");
-		pthread_mutex_unlock( eis->tpid->mutex );
+		pthread_mutex_unlock( eis->tpid->mutex_event );
 	}
 #endif /* TIOCSERGETLSR */
 	return( 0 );
@@ -2075,10 +2077,12 @@ int port_has_changed_fionread( struct event_info_struct *eis )
 
 	rc = ioctl( eis->fd, FIONREAD, &change );
 	sprintf( message, "port_has_changed_fionread: change is %i ret is %i\n", change, eis->ret );
-#if defined(__unixware__)
+#if defined(__unixware__) || defined(__sun__)
 	/*
 	   On SCO OpenServer FIONREAD always fails for serial devices,
 	   so rely upon select() result to know whether data available.
+
+	   This is true for Solaris, also.  taj.
 	*/
 	if( (rc != -1 && change) || (rc == -1 && eis->ret > 0) ) 
 		return( 1 );
@@ -2087,9 +2091,8 @@ int port_has_changed_fionread( struct event_info_struct *eis )
 	report_verbose( message );
 	if( change )
 		return( 1 );
-#endif /* __unixware__ */
+#endif /* __unixware__  || __sun__ */
 	return( 0 );
-		
 }
 		
 /*----------------------------------------------------------
