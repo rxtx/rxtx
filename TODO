@@ -1,8 +1,13 @@
-This is TODO  Thu Jun 21 13:42:32 MDT 2001
+This is TODO  Tue Nov 13 14:54:06 MST 2001
 
-HIGH PRIORITY TODO's 
+----------------------------------------------------------------------------
+
+	HIGH PRIORITY TODO's 
+
+----------------------------------------------------------------------------
 
 The following TODO's will be implemented in the near future.
+(most are done now)
 
 1) Verify that the contrib/LeakTest1 does not illustrate a memory leak when
    run on win32.  A noticable leak on linux happens after 8000 times through
@@ -33,16 +38,17 @@ The following TODO's will be implemented in the near future.
 
 Sat Jul 28 09:55:37 MDT 2001
 
+----------------------------------------------------------------------------
 
+	REMAINING TODOS
 
-
-REMAINING TODOS
+----------------------------------------------------------------------------
 
 The following TODO's are known to need work but will not be implmented in the
 near future.
 
 The system crashes with a NullPointException if you enable notifications
-before your register a listener.
+before you register a listener.
  
 Example:
     notifyOnDataAvailable(true);
@@ -76,6 +82,12 @@ useless.  No insight from jdb.  The green threads are working.
 I'd suggest avoiding native threads with 1.2.2_006 unless you can figure out
 whats going wrong.
 
+----------------------------------------------------------------------------
+
+	Porting Status.
+
+----------------------------------------------------------------------------
+
 Irix SerialPort support
 	I've heard it works.  I didnt get an exact diff back but it should work.
 	rxtx-1.5 has not been tested.  Last report was that the library built
@@ -87,31 +99,43 @@ Irix SerialPort support
 	/usr/include/standars.h:156: warning: `_NO_XOPEN4' redefined
 	ld32: WARING 84: /usr/lib32/libc.so is not used for resolving any symbol
 
-HP-UX   I've heard it works.  The fix was distructive to other ports by hard
-        coding the device files.  An attempt was made to add what was required.
-	rxtx-1.5 has not been tested
-	
 *BSD SerialPort support
 	freebsd serial works.
 	kernel specific implementations
 	possibly a buggy event loop.
 
-Win95/98 with mingw32
-	The maintainer has integrated Wayne Roberts improvements.  The code
-	95% there but needs work.
-	for starters look at select()
-	http://msdn.microsoft.com/library/techart/msdn_serial.htm
-	for documentation.   WaitForSingleObject() may be of use.
-	eventLoop() uses ioctls() that have not been implemented in termios.c
-	FIONREAD support is also missing
+AIX
+	It has not been confirmed that AIX works.
+
+WinCE
+	It has not been confirmed that WinCE works.
+
+The following should work with Serial communication.  Sometimes breakage slips
+in.
+
+	Solaris (x86/Sparc), OpenUnix, UnixWare, Digital Unix, True64,
+	Mac OS X, HP-UX.
+
+If you would like to donate ssh access for any of these for compile tests before
+release contact trentjarvi@yahoo.com.  We have Solaris x86 2.6 and 2.8.  Also
+a DEC UDB without an OS.  Binaries will be offered if access to build boxes is
+ provided.
+
+Win95/98/ME/NT/2K/XP with mingw32
+
+	Long story there.  Ever put together a few hundred lines of code for
+	fun and then have to support it 4 years later?
+	
+	It started as mentioned with some toy code while playing with cross
+	compilers.
+	The Wayne Roberts provided many improvements. 
+	Another big push was made after this.
+	The code should be fairly good now.
+	Some of the builds are hairy.
 
 	The library was tested  (rxtx-1.5-4).  The library built and installed
-	using lcc and mingw32(on windows and from linux) BlackBox runs but 
-	does not work.  Significant work is required.
-
-	Older versions (rxtx 1.3?) provided simple read/write/set/get
-	functionality.  The code is being included as a starting point for
-	possible future win32 support
+	using lcc and mingw32(on windows and from linux)
+	The library passed multiple tests after rxtx-1.5-7.
 
 	files:
 		SerialImp.c   termios based JNI code
@@ -139,8 +163,13 @@ Win95/98 with mingw32
 BeOS
 	BeOS support is in the early stages.  It should read and write bytes
 	See the BeOS documentation for more information.  See rxtx-1.5 for 
-	details
+	details.  This effort is mostly abandoned.
 
+----------------------------------------------------------------------------
+
+	File specific thoughts
+
+----------------------------------------------------------------------------
 RXTXPort.java
 	framing control -?-
 	buffer control -?-
@@ -157,12 +186,12 @@ ParallelPort support.  Needs some code.
 	are mainstream.
 	
 ----------------------------------------------------------------------------
-From This point on, You need to use rxtx 1.5.  All of this work is 
-being done in the development branch of the cvs archive.
+	From This point on, You need to use rxtx 1.5.  All of this work is 
+	being done in the development branch of the cvs archive.
 
-cvs checkout -r commapi-0-0-1 rxtx-devel 
+	cvs checkout -r commapi-0-0-1 rxtx-devel 
 
-gets the recent work.
+	gets the recent work.
 ----------------------------------------------------------------------------
 
 RS485 Support
@@ -252,6 +281,10 @@ sent
 Add more documentation.
 ------------------
 
-IDEAS:
+----------------------------------------------------------------------------
+
+	IDEAS
+
+----------------------------------------------------------------------------
 
 Make rxtx apps capable of being spawned from mgetty.  <gluck@tempo-services.com.au>
