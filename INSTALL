@@ -297,7 +297,7 @@ A.  Japanese
 
 			rxtx-*/build/...
 
-		If your looking at rxtx as an example of cross-compiling you 
+		If you're looking at rxtx as an example of cross-compiling you 
 		may be interested in looking at the examples provided at:
 
 			ftp.xraylith.wisc.edu
@@ -341,7 +341,7 @@ B.  Exception in thread "main" java.lang.UnsatisfiedLinkError: no Serial in
 
 C.  I Can Not Open the Port.
 
-	If your not able to open the port (read the errors carefully) then you 
+	If you're not able to open the port (read the errors carefully) then you 
 	may not have permission to use the device.  Redhat Linux ships with the
 	following permissions:
 
@@ -353,6 +353,8 @@ C.  I Can Not Open the Port.
 
 	should fix the problem.  Be sure to check the file CommAPI for common 
 	mistakes.
+
+	Make sure that the user can create lock files see R.
 
 D.  java.lang.NoClassDefFoundError: gnu/io/CommPort
 
@@ -440,7 +442,7 @@ K.  AM_PROG_LIBTOOL not found in library
 	aclocal:configure.in: 23: macro 'AM_PROG_LIBTOOL' not found in library
 	make:***[aclocal.m4]Error 1
 
-	If your positive things are setup right you may try the autogen.sh 
+	If you're positive things are setup right you may try the autogen.sh 
 	script to try regenerating the scripts with your tools.
 
 L.  Problems with RMISecurityManager()
@@ -580,7 +582,7 @@ Do not change the number (14).  Whatever is in your group file is correct.
 User jarvi in this case can now use rxtx with lock files.
 
 The lock file code does not support kermit style lock files or lock files in
-/var/spool.  Its sure to fail if your using subdirectories in /dev or do not
+/var/spool.  Its sure to fail if you're using subdirectories in /dev or do not
 have /dev.
 
 S.  How can I tell which version of rxtx is installed?
@@ -601,7 +603,7 @@ an example would be:
 
         "RXTX-1.5-4"
 
-A change in the MAJOR version would suggest your in trouble.
+A change in the MAJOR version would suggest you're in trouble.
 
 Odd MINOR version are reserved for development.  Even MINOR versions are
 reserved for 'stable' releases.
