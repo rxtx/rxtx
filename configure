@@ -1123,12 +1123,7 @@ NONE) lt_target="$host" ;;
 esac
 
 # Check for any special flags to pass to ltconfig.
-#
-# the following will cause an existing older ltconfig to fail, so
-# we ignore this at the expense of the cache file... Checking this 
-# will just take longer ... bummer!
-#libtool_flags="--cache-file=$cache_file"
-#
+libtool_flags="--cache-file=$cache_file"
 test "$enable_shared" = no && libtool_flags="$libtool_flags --disable-shared"
 test "$enable_static" = no && libtool_flags="$libtool_flags --disable-static"
 test "$enable_fast_install" = no && libtool_flags="$libtool_flags --disable-fast-install"
@@ -1150,8 +1145,8 @@ test x"$silent" = xyes && libtool_flags="$libtool_flags --silent"
 case "$lt_target" in
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 1154 "configure"' > conftest.$ac_ext
-  if { (eval echo configure:1155: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  echo '#line 1149 "configure"' > conftest.$ac_ext
+  if { (eval echo configure:1150: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
     case "`/usr/bin/file conftest.o`" in
     *32-bit*)
       LD="${LD-ld} -32"
@@ -1172,19 +1167,19 @@ case "$lt_target" in
   SAVE_CFLAGS="$CFLAGS"
   CFLAGS="$CFLAGS -belf"
   echo $ac_n "checking whether the C compiler needs -belf""... $ac_c" 1>&6
-echo "configure:1176: checking whether the C compiler needs -belf" >&5
+echo "configure:1171: checking whether the C compiler needs -belf" >&5
 if eval "test \"`echo '$''{'lt_cv_cc_needs_belf'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1181 "configure"
+#line 1176 "configure"
 #include "confdefs.h"
 
 int main() {
 
 ; return 0; }
 EOF
-if { (eval echo configure:1188: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:1183: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   lt_cv_cc_needs_belf=yes
 else
@@ -1297,7 +1292,7 @@ exec 5>>./config.log
 # SVR4 /usr/ucb/install, which tries to use the nonexistent group "staff"
 # ./install, which can be erroneously created by make from ./install.sh.
 echo $ac_n "checking for a BSD compatible install""... $ac_c" 1>&6
-echo "configure:1301: checking for a BSD compatible install" >&5
+echo "configure:1296: checking for a BSD compatible install" >&5
 if test -z "$INSTALL"; then
 if eval "test \"`echo '$''{'ac_cv_path_install'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -1350,7 +1345,7 @@ test -z "$INSTALL_SCRIPT" && INSTALL_SCRIPT='${INSTALL_PROGRAM}'
 test -z "$INSTALL_DATA" && INSTALL_DATA='${INSTALL} -m 644'
 
 echo $ac_n "checking whether build environment is sane""... $ac_c" 1>&6
-echo "configure:1354: checking whether build environment is sane" >&5
+echo "configure:1349: checking whether build environment is sane" >&5
 # Just in case
 sleep 1
 echo timestamp > conftestfile
@@ -1407,7 +1402,7 @@ test "$program_suffix" != NONE &&
 test "$program_transform_name" = "" && program_transform_name="s,x,x,"
 
 echo $ac_n "checking whether ${MAKE-make} sets \${MAKE}""... $ac_c" 1>&6
-echo "configure:1411: checking whether ${MAKE-make} sets \${MAKE}" >&5
+echo "configure:1406: checking whether ${MAKE-make} sets \${MAKE}" >&5
 set dummy ${MAKE-make}; ac_make=`echo "$2" | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_prog_make_${ac_make}_set'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -1453,7 +1448,7 @@ EOF
 
 missing_dir=`cd $ac_aux_dir && pwd`
 echo $ac_n "checking for working aclocal""... $ac_c" 1>&6
-echo "configure:1457: checking for working aclocal" >&5
+echo "configure:1452: checking for working aclocal" >&5
 # Run test in a subshell; some versions of sh will print an error if
 # an executable is not found, even if stderr is redirected.
 # Redirect stdin to placate older versions of autoconf.  Sigh.
@@ -1466,7 +1461,7 @@ else
 fi
 
 echo $ac_n "checking for working autoconf""... $ac_c" 1>&6
-echo "configure:1470: checking for working autoconf" >&5
+echo "configure:1465: checking for working autoconf" >&5
 # Run test in a subshell; some versions of sh will print an error if
 # an executable is not found, even if stderr is redirected.
 # Redirect stdin to placate older versions of autoconf.  Sigh.
@@ -1479,7 +1474,7 @@ else
 fi
 
 echo $ac_n "checking for working automake""... $ac_c" 1>&6
-echo "configure:1483: checking for working automake" >&5
+echo "configure:1478: checking for working automake" >&5
 # Run test in a subshell; some versions of sh will print an error if
 # an executable is not found, even if stderr is redirected.
 # Redirect stdin to placate older versions of autoconf.  Sigh.
@@ -1492,7 +1487,7 @@ else
 fi
 
 echo $ac_n "checking for working autoheader""... $ac_c" 1>&6
-echo "configure:1496: checking for working autoheader" >&5
+echo "configure:1491: checking for working autoheader" >&5
 # Run test in a subshell; some versions of sh will print an error if
 # an executable is not found, even if stderr is redirected.
 # Redirect stdin to placate older versions of autoconf.  Sigh.
@@ -1505,7 +1500,7 @@ else
 fi
 
 echo $ac_n "checking for working makeinfo""... $ac_c" 1>&6
-echo "configure:1509: checking for working makeinfo" >&5
+echo "configure:1504: checking for working makeinfo" >&5
 # Run test in a subshell; some versions of sh will print an error if
 # an executable is not found, even if stderr is redirected.
 # Redirect stdin to placate older versions of autoconf.  Sigh.
@@ -1519,7 +1514,7 @@ fi
 
 
 echo $ac_n "checking how to run the C preprocessor""... $ac_c" 1>&6
-echo "configure:1523: checking how to run the C preprocessor" >&5
+echo "configure:1518: checking how to run the C preprocessor" >&5
 # On Suns, sometimes $CPP names a directory.
 if test -n "$CPP" && test -d "$CPP"; then
   CPP=
@@ -1534,13 +1529,13 @@ else
   # On the NeXT, cc -E runs the code through the compiler's parser,
   # not just through cpp.
   cat > conftest.$ac_ext <<EOF
-#line 1538 "configure"
+#line 1533 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1544: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1539: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   :
@@ -1551,13 +1546,13 @@ else
   rm -rf conftest*
   CPP="${CC-cc} -E -traditional-cpp"
   cat > conftest.$ac_ext <<EOF
-#line 1555 "configure"
+#line 1550 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1561: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1556: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   :
@@ -1568,13 +1563,13 @@ else
   rm -rf conftest*
   CPP="${CC-cc} -nologo -E"
   cat > conftest.$ac_ext <<EOF
-#line 1572 "configure"
+#line 1567 "configure"
 #include "confdefs.h"
 #include <assert.h>
 Syntax Error
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1578: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1573: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   :
@@ -1602,17 +1597,17 @@ for ac_hdr in fcntl.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
-echo "configure:1606: checking for $ac_hdr" >&5
+echo "configure:1601: checking for $ac_hdr" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1611 "configure"
+#line 1606 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1616: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1611: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -1642,17 +1637,17 @@ for ac_hdr in sys/fcntl.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
-echo "configure:1646: checking for $ac_hdr" >&5
+echo "configure:1641: checking for $ac_hdr" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1651 "configure"
+#line 1646 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1656: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1651: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -1682,17 +1677,17 @@ for ac_hdr in sys/file.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
-echo "configure:1686: checking for $ac_hdr" >&5
+echo "configure:1681: checking for $ac_hdr" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1691 "configure"
+#line 1686 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1696: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1691: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -1722,17 +1717,17 @@ for ac_hdr in sys/time.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
-echo "configure:1726: checking for $ac_hdr" >&5
+echo "configure:1721: checking for $ac_hdr" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1731 "configure"
+#line 1726 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1736: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1731: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -1762,17 +1757,17 @@ for ac_hdr in sys/signal.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
-echo "configure:1766: checking for $ac_hdr" >&5
+echo "configure:1761: checking for $ac_hdr" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1771 "configure"
+#line 1766 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1776: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1771: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -1802,17 +1797,17 @@ for ac_hdr in signal.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
-echo "configure:1806: checking for $ac_hdr" >&5
+echo "configure:1801: checking for $ac_hdr" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1811 "configure"
+#line 1806 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1816: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1811: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -1842,17 +1837,17 @@ for ac_hdr in termios.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
-echo "configure:1846: checking for $ac_hdr" >&5
+echo "configure:1841: checking for $ac_hdr" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1851 "configure"
+#line 1846 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1856: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1851: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -1882,17 +1877,17 @@ for ac_hdr in grp.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
-echo "configure:1886: checking for $ac_hdr" >&5
+echo "configure:1881: checking for $ac_hdr" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1891 "configure"
+#line 1886 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1896: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1891: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -1922,17 +1917,17 @@ for ac_hdr in pwd.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
-echo "configure:1926: checking for $ac_hdr" >&5
+echo "configure:1921: checking for $ac_hdr" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1931 "configure"
+#line 1926 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1936: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1931: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -1960,13 +1955,13 @@ done
 
 if test $ac_cv_prog_gcc = yes; then
     echo $ac_n "checking whether ${CC-cc} needs -traditional""... $ac_c" 1>&6
-echo "configure:1964: checking whether ${CC-cc} needs -traditional" >&5
+echo "configure:1959: checking whether ${CC-cc} needs -traditional" >&5
 if eval "test \"`echo '$''{'ac_cv_prog_gcc_traditional'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
     ac_pattern="Autoconf.*'x'"
   cat > conftest.$ac_ext <<EOF
-#line 1970 "configure"
+#line 1965 "configure"
 #include "confdefs.h"
 #include <sgtty.h>
 Autoconf TIOCGETP
@@ -1984,7 +1979,7 @@ rm -f conftest*
 
   if test $ac_cv_prog_gcc_traditional = no; then
     cat > conftest.$ac_ext <<EOF
-#line 1988 "configure"
+#line 1983 "configure"
 #include "confdefs.h"
 #include <termio.h>
 Autoconf TCGETA
@@ -2359,10 +2354,10 @@ if test "$CC" = "gcc" || test "$CC"="egcs"; then
 	case $JAVA_VENDOR in
 	Tran*)
 		find_java_native_include jni.h
-		JAVAH="\$(JPATH)/bin/kaffeh \$(CLASSPATH) -d \$(DEST) -jni"
-		JAVAC="\$(JPATH)/bin/javac \$(CLASSPATH) -d \$(TOP)/ -O"
+		JAVAH="\$(JPATH)/bin/kaffeh -classpath \$(CLASSPATH) -d \$(DEST) -jni"
+		JAVAC="\$(JPATH)/bin/javac -classpath \$(CLASSPATH) -d \$(TOP)/ -O"
 		JAR="\$(JPATH)/bin/jar"
-		JAVADOC="\$(JPATH)/bin/javadoc \$(CLASSPATH)"
+		JAVADOC="\$(JPATH)/bin/javadoc -classpath \$(CLASSPATH)"
 		CFLAGS="$CFLAGS -D_BSD_SOURCE"
 		JAVAINCLUDE=""
 		JAVAH_FIX="if test ! -d \$(target_alias);then  mkdir \$(target_alias);fi;"
@@ -2371,8 +2366,8 @@ if test "$CC" = "gcc" || test "$CC"="egcs"; then
 		;;
 	*)
 		find_java_native_include jni_md.h
-		JAVAH="\$(JPATH)/bin/javah \$(CLASSPATH) -d \$(DEST) -jni"
-		JAVAC="\$(JPATH)/bin/javac \$(CLASSPATH) -d \$(TOP)/ -O"
+		JAVAH="\$(JPATH)/bin/javah -classpath \$(CLASSPATH) -d \$(DEST) -jni"
+		JAVAC="\$(JPATH)/bin/javac -classpath \$(CLASSPATH) -d \$(TOP)/ -O"
 		JAR="\$(JPATH)/bin/jar"
 		JAVADOC="\$(JPATH)/bin/javadoc"
 		CFLAGS="$CFLAGS -D_BSD_SOURCE"
@@ -2399,12 +2394,12 @@ Linux)
 
 	1.2*|1.3*|1.4*) 
 		#fix_parameters $JPATH/jre/lib/javax.comm.properties
-		CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:"`find $JPATH/ -name comm.jar |head -n1`
+		CLASSPATH=".:\$(TOP):\$(TOP)/src:"`find $JPATH/ -name comm.jar |head -n1`
 		JHOME=$JPATH"/jre/lib/ext"
 		RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
 	;;
-	1.*) 
-		CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:"` \
+	1.1*) 
+		CLASSPATH=".:\$(TOP):\$(TOP)/src:"` \
 			if [ -d $JPATH/share/kaffe/ ]; then
 				find $JPATH/share/kaffe/ -name [cK]lasses.[jz][ai][rp]
 			elif [ -d $JPATH/lib/ ]; then
@@ -2437,6 +2432,9 @@ Linux)
 	esac 
 
 	# Cross Compilers
+		echo ----------------------------
+		echo $target_os
+		echo ----------------------------
 	case $target_os in 
 	linux*)
 	;;
@@ -2450,6 +2448,13 @@ Linux)
 	;;
 	freebsd*)
 	;;
+	solaris*)
+		TARGETLIB="\$(target_alias)/libSerial.la \
+			\$(target_alias)/libfuser.la"
+		echo ----------------------------
+		echo $target_os
+		echo ----------------------------
+	;;
 	esac
 ;;
 
@@ -2458,18 +2463,18 @@ Linux)
 	TARGETLIB="\$(target_alias)/libSerial.la \
 			\$(target_alias)/libParallel.la"
 	case $JAVA_VERSION in
-	1.2*|1.3*) 
+	1.2*|1.3*|1.4*) 
 		#fix_parameters $JPATH/jre/lib/javax.comm.properties
 		fix_comm_jar $JPATH/jre/lib/ext/comm.jar
-		CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:"`find $JPATH/ -name comm.jar |head -n1`
+		CLASSPATH=".:\$(TOP):\$(TOP)/src:"`find $JPATH/ -name comm.jar |head -n1`
 		RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
 		JHOME=$JPATH/"jre/lib/ext"
 	;;
-	1.*) 
+	1.1*) 
 		check_prefix
 		#fix_parameters $JPATH/lib/javax.comm.properties
 		fix_comm_jar $JPATH/lib/comm.jar
-		CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:"` \
+		CLASSPATH=".:\$(TOP):\$(TOP)/src:"` \
 			if [ -d $JPATH/share/kaffe/ ]; then
 				find $JPATH/share/kaffe/ -name [cK]lasses.[jz][ai][rp]
 			elif [ -d $JPATH/lib/ ]; then
@@ -2506,7 +2511,7 @@ Linux)
 Irix*)
 	JHOME=$JPATH/"lib"
 	CFLAGS="$CFLAGS -I/usr/include"
-	CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/comm.jar:$CLASSPATH"
+	CLASSPATH=".:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/comm.jar:$CLASSPATH"
 	RXTX_PATH="\$(JPATH)/lib/\$(OS_ARCH)"
 	TARGETLIB="\$(target_alias)/libSerial.la"
 ;;
@@ -2520,7 +2525,7 @@ HP-UX)
 			#fix_parameters $JPATH/jre/lib/javax.comm.properties
 			fix_comm_jar $JPATH/jre/lib/ext/comm.jar
 			JHOME=$JPATH"/jre/lib/ext"
-			CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/jre/lib/ext/comm.jar:$CLASSPATH"
+			CLASSPATH=".:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/jre/lib/ext/comm.jar:$CLASSPATH"
 			RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
 			echo WARNING $JAVA_VERSION is untested please email this message to TrentJarvi@yahoo.com and let me know if it works.
 		;;
@@ -2528,14 +2533,14 @@ HP-UX)
 			#fix_parameters $JPATH/lib/javax.comm.properties
 			fix_comm_jar $JPATH/lib/comm.jar
 			JHOME=$JPATH/"lib"
-			CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/comm.jar:$CLASSPATH"
+			CLASSPATH=".:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/comm.jar:$CLASSPATH"
 			RXTX_PATH="\$(prefix)/lib/"
 		;;
 		*)
 			#fix_parameters $JPATH/lib/javax.comm.properties
 			fix_comm_jar $JPATH/lib/comm.jar
 			JHOME=$JPATH"/lib"
-			CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/comm.jar:$CLASSPATH"
+			CLASSPATH=".:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/comm.jar:$CLASSPATH"
 			RXTX_PATH="\$(prefix)/lib/"
 			echo WARNING $JAVA_VERSION is untested please email this message to TrentJarvi@yahoo.com and let me know if it works.
 		;;
@@ -2565,8 +2570,9 @@ BeOS)
 	JHOME=$JPATH"/share/kaffe"
 	RXTX_PATH="\$(JPATH)/lib/"
 	CFLAGS="$CFLAGS -D_NO_POSIX=1 -D_NO_XOPEN4=1"
-	CLASSPATH="-classpath .:\$(TOP):\$(TOP)/../src:\$(JPATH)/share/kaffe/Klasses.jar:\$(JPATH)/lib/comm.jar:$CLASSPATH"
-	TARGETLIB="\$(target_alias)/libSerial.la"
+	CLASSPATH=".:\$(TOP):\$(TOP)/../src:\$(JPATH)/share/kaffe/Klasses.jar:\$(JPATH)/lib/comm.jar:$CLASSPATH"
+	TARGETLIB="\$(target_alias)/libSerial.la \
+			\$(target_alias)/libfuser.la"
 	EXTENSION="cpp"
 	LDFLAGS="-ldevice"
 #  sigh, from ltconfig 
@@ -2584,11 +2590,11 @@ BeOS)
 WIN32)
 	case $JAVA_VERSION in
 	1.2*|1.3*)
-		CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:`find $JPATH/ -name comm.jar |head -n1`:$CLASSPATH"
+		CLASSPATH=".:\$(TOP):\$(TOP)/src:`find $JPATH/ -name comm.jar |head -n1`:$CLASSPATH"
 		JHOME=$JPATH"/jre/lib/ext"
 	;;
-	1.*)
-		CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/comm.jar:$CLASSPATH"
+	1.1*)
+		CLASSPATH=".:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/comm.jar:$CLASSPATH"
 		RXTX_PATH="\$(prefix)/lib/"
 		#JAVAH_FIX="if [ ! -d com ]; then if [ ! -f \$(JPATH)/lib/comm.jar ]; then echo \"Please install comm.jar from CommAPI in \$(JPATH)/java/lib/ 1>&2\"; else mkdir -p com/sun/comm;\$(JAR) -xf \$(JPATH)/lib/comm.jar;  fi; fi;"
 		JHOME=$JPATH/"lib"
@@ -2616,18 +2622,34 @@ Mac\ OS\ X)
 	JHOME=$JPATH"/lib/ext"
 	CFLAGS="$CFLAGS -bundle"
 	LDFLAGS="$LDFLAGS -module -framework JavaVM -framework IOKit -framework CoreFoundation"
-	CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/ext/comm.jar:$CLASSPATH"
+	CLASSPATH=".:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/ext/comm.jar:$CLASSPATH"
 	#  email trentjarvi@yahoo.com if you know a nicer fix.
 	LIBTOOL_FIX="sed s/echo\ so/echo\ jnilib/g libtool > tmp; mv tmp libtool; chmod +x libtool;"
 ;;
 
 Solaris*)
-	TARGETLIB="\$(target_alias)/libSerial.la"
-	RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
-	JHOME=$JPATH/"lib"
-	CFLAGS="$CFLAGS -D_NO_POSIX=1 -D_NO_XOPEN4=1"
-	CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/comm.jar:$CLASSPATH"
-
+	case $JAVA_VERSION in
+	1.2*|1.3*|1.4*) 
+		TARGETLIB="\$(target_alias)/libSerial.la \
+				\$(target_alias)/libfuser.la"
+		RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
+		JHOME=$JPATH/"lib"
+		CFLAGS="$CFLAGS -D_NO_POSIX=1 -D_NO_XOPEN4=1"
+		CLASSPATH=".:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/comm.jar:$CLASSPATH"
+	;;
+	1.1*)
+		echo "BINGO"
+		TARGETLIB="\$(target_alias)/libSerial.la \
+				\$(target_alias)/libfuser.la"
+		RXTX_PATH="\$(JPATH)/lib/"
+		JHOME=$JPATH/"lib"
+		CFLAGS="$CFLAGS -D_NO_POSIX=1 -D_NO_XOPEN4=1"
+		echo start
+		echo $CLASSPATH
+		CLASSPATH=".:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/comm.jar:$CLASSPATH"
+		echo end
+	;;
+	esac
 ;;
 
 OS*2)
@@ -2636,7 +2658,7 @@ OS*2)
 	RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
 	JHOME=$JPATH/"lib"
 	CFLAGS="$CFLAGS -D_NO_POSIX=1 -D_NO_XOPEN4=1"
-	CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/comm.jar:$CLASSPATH"
+	CLASSPATH=".:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/comm.jar:$CLASSPATH"
 
 ;;
 
@@ -2645,7 +2667,7 @@ AIX)
 	RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
 	JHOME=$JPATH/"lib"
 	CFLAGS="$CFLAGS -D_NO_POSIX=1 -D_NO_XOPEN4=1"
-	CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/comm.jar:$CLASSPATH"
+	CLASSPATH=".:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/comm.jar:$CLASSPATH"
 
 ;;
 
@@ -2654,7 +2676,7 @@ Digital\ Unix)
 	RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
 	JHOME=$JPATH/"lib"
 	CFLAGS="$CFLAGS -D_NO_POSIX=1 -D_NO_XOPEN4=1 -pthread"
-	CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/comm.jar:$CLASSPATH"
+	CLASSPATH=".:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/comm.jar:$CLASSPATH"
 
 ;;
 
@@ -2664,7 +2686,7 @@ NetWare*)
 	RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
 	JHOME=$JPATH/"lib"
 	CFLAGS="$CFLAGS -D_NO_POSIX=1 -D_NO_XOPEN4=1"
-	CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/comm.jar:$CLASSPATH"
+	CLASSPATH=".:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/comm.jar:$CLASSPATH"
 
 ;;
 
@@ -2673,7 +2695,7 @@ MPE*)
 	RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
 	JHOME=$JPATH/"lib"
 	CFLAGS="$CFLAGS -D_NO_POSIX=1 -D_NO_XOPEN4=1"
-	CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/comm.jar:$CLASSPATH"
+	CLASSPATH=".:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/comm.jar:$CLASSPATH"
 ;;
 
 *)
@@ -2681,7 +2703,7 @@ MPE*)
 	RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
 	JHOME=$JPATH/"lib"
 	CFLAGS="$CFLAGS -D_NO_POSIX=1 -D_NO_XOPEN4=1"
-	CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/comm.jar:$CLASSPATH"
+	CLASSPATH=".:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/comm.jar:$CLASSPATH"
 ;;
 esac 
 
