@@ -3280,8 +3280,8 @@ int fhs_lock( const char *filename )
 	if( fd < 0 )
 	{
 		sprintf( message,
-			"RXTX fhs_lock() Error: creating lock file: %s\n",
-			file );
+			"RXTX fhs_lock() Error: creating lock file: %s: %s\n",
+			file, strerror(errno) );
 		report_error( message );
 		return 1;
 	}
