@@ -725,8 +725,8 @@ int set_port_params( JNIEnv *env, int fd, int cspeed, int dataBits,
 		/* Unix should handle this */
 		/*
 		mexPrintf("dropping DTR\n");
-		*/
 		printf("dropping DTR\n");
+		*/
 		ioctl( fd, TIOCMGET, &result );
 		result &= ~TIOCM_DTR;
 		ioctl( fd, TIOCMSET, &result );
