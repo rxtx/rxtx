@@ -254,6 +254,16 @@ public class CommPortIdentifier extends Object /* extends Vector? */
 	static public Enumeration getPortIdentifiers() 
 	{ 
 		if(debug) System.out.println("static CommPortIdentifier:getPortIdentifiers()");
+		CommPortIndex = null;
+		try 
+		{
+			CommDriver RXTXDriver = (CommDriver) Class.forName("gnu.io.RXTXCommDriver").newInstance();
+			RXTXDriver.initialize();
+		} 
+		catch (Throwable e) 
+		{
+			System.err.println(e + " thrown while loading " + "gnu.io.RXTXCommDriver");
+		}
 		return new CommPortEnumerator();
 	}
 /*------------------------------------------------------------------------------
