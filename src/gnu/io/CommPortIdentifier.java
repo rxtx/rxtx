@@ -16,7 +16,7 @@
 |   License along with this library; if not, write to the Free
 |   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --------------------------------------------------------------------------*/
-package  javax.comm;
+package  gnu.io;
 
 import  java.io.FileDescriptor;
 import  java.util.Vector;
@@ -64,12 +64,12 @@ public class CommPortIdentifier extends Object /* extends Vector? */
 		Sync = new Object();
 		try 
 		{
-			CommDriver RXTXDriver = (CommDriver) Class.forName("javax.comm.RXTXCommDriver").newInstance();
+			CommDriver RXTXDriver = (CommDriver) Class.forName("gnu.io.RXTXCommDriver").newInstance();
 			RXTXDriver.initialize();
 		} 
 		catch (Throwable e) 
 		{
-			System.err.println(e + "thrown while loading " + "javax.comm.RXTXCommDriver");
+			System.err.println(e + "thrown while loading " + "gnu.io.RXTXCommDriver");
 		}
 
 		String OS;
@@ -80,7 +80,7 @@ public class CommPortIdentifier extends Object /* extends Vector? */
 			if (debug)
 				System.out.println("Have not implemented native_psmisc_report_owner(PortName)); in CommPortIdentifier");
 		}
-		System.loadLibrary( "Serial" );
+		System.loadLibrary( "fuser" );
 	}
 	CommPortIdentifier ( String pn, CommPort cp, int pt, CommDriver driver) 
 	{
