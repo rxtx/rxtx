@@ -132,7 +132,8 @@ struct event_info_struct
 #endif /* __FreeBSD__ */
 #if defined(__APPLE__)
 #	define DEVICEDIR "/dev/"
-#	define LOCKDIR "/var/spool/uucp"
+/*#	define LOCKDIR "/var/spool/uucp"*/
+#	define LOCKDIR "/var/lock"
 #	define LOCKFILEPREFIX "LK."
 #	define UUCP
 #endif /* __APPLE__ */
