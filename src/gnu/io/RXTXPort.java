@@ -78,6 +78,8 @@ final class RXTXPort extends SerialPort
 
 	/** File descriptor */
 	private int fd = 0;
+	/** pid for lock files */
+	int pid = 0;
 
 	/** DSR flag **/
 	static boolean dsrFlag = false;
@@ -658,12 +660,13 @@ final class RXTXPort extends SerialPort
 			System.out.println("RXTXPort:removeEventListener()");
 		if( monThreadisInterrupted == true )
 		{
+			System.out.println("RXTXPort:removeEventListener() already interrupted");
 			monThread = null;
 			SPEventListener = null;
 			Runtime.getRuntime().gc();
 			return;
 		}
-		if( monThread != null && monThread.isAlive() )
+		else if( monThread != null && monThread.isAlive() )
 		{
 			if (debug)
 				System.out.println("RXTXPort:Interrupt=true");
@@ -674,6 +677,14 @@ final class RXTXPort extends SerialPort
 				/* yikes */
 				ex.printStackTrace();
 			}
+			while( monThread.isAlive() )
+			{
+				System.out.println("MonThread is stillalive!");
+				try {
+					Thread.sleep( 2 );
+				} catch( Exception e ){} 
+			}
+			
 		}
 		monThread = null;
 		SPEventListener = null;
@@ -782,13 +793,20 @@ final class RXTXPort extends SerialPort
 	{
 		if (debug)
 			System.out.println("RXTXPort:close(" + this.name + " )"); 
-		if ( fd <= 0 ) return;
+		if ( fd <= 0 )
+		{
+			System.out.println( "RXTXPort:close detected bad File Descriptor" );
+			return;
+		}
 		setDTR(false);
 		setDSR(false);
 		nativeClose( this.name );
 		super.close();
 
-		removeEventListener();
+		if ( ! monThreadisInterrupted )
+		{
+			removeEventListener();
+		}
 
 		fd = 0;
 		Runtime.getRuntime().gc();
@@ -1015,6 +1033,7 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 				System.out.println("eventLoop is interrupted?");
 			}
 			eventLoop();
+
 			if (debug)
 				System.out.println("eventLoop() returned"); 
 		}

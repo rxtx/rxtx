@@ -216,8 +216,25 @@ JNIEXPORT jint JNICALL RXTXPort(open)(
 {
 	struct termios ttyset;
 	int fd;
-	const char *filename = (*env)->GetStringUTFChars( env, jstr, 0 );
+	int  pid;
 	char message[80];
+	const char *filename;
+	jclass jclazz = (*env)->GetObjectClass( env, jobj );
+	jfieldID jfid = (*env)->GetFieldID( env, jclazz, "pid", "I" );
+
+	if( !jfid ) {
+		(*env)->ExceptionDescribe( env );
+		(*env)->ExceptionClear( env );
+		(*env)->DeleteLocalRef( env, jclazz );
+		return -1;
+	}
+
+	pid = getpid();
+
+	(*env)->SetIntField(env, jobj, jfid, ( jint ) pid );
+	(*env)->DeleteLocalRef( env, jclazz );
+
+ 	filename = (*env)->GetStringUTFChars( env, jstr, 0 );
 
 	/* 
 		LOCK is one of three functions defined in SerialImp.h
@@ -292,9 +309,20 @@ RXTXPort.nativeClose
 JNIEXPORT void JNICALL RXTXPort(nativeClose)( JNIEnv *env,
 	jobject jobj,jstring jstr )
 {
-	int result;
+	int result, pid;
 	int fd = get_java_var( env, jobj,"fd","I" );
 	const char *filename = (*env)->GetStringUTFChars( env, jstr, 0 );
+	jclass jclazz = (*env)->GetObjectClass( env, jobj );
+	jfieldID jfid = (*env)->GetFieldID( env, jclazz, "pid", "I" );
+
+	if( !pid ) {
+		(*env)->ExceptionDescribe( env );
+		(*env)->ExceptionClear( env );
+		(*env)->DeleteLocalRef( env, jclazz );
+		return;
+	}
+
+	pid = (int)( (*env)->GetIntField( env, jobj, jfid ) );
 
 	/* 
 		UNLOCK is one of three functions defined in SerialImp.h
@@ -310,8 +338,9 @@ JNIEXPORT void JNICALL RXTXPort(nativeClose)( JNIEnv *env,
 		do {
 			result=CLOSE (fd);
 		}  while (result < 0 && errno==EINTR);
-		UNLOCK(filename);
+		UNLOCK(filename, pid);
 	}
+	(*env)->DeleteLocalRef( env, jclazz );
 	(*env)->ReleaseStringUTFChars( env, jstr, filename );
 	LEAVE( "RXTXPort:nativeClose" );
 	return;
@@ -832,7 +861,6 @@ JNIEXPORT jboolean JNICALL RXTXPort(NativeisReceiveTimeoutEnabled)(
 {
 	int fd = get_java_var( env, jobj,"fd","I" );
 	struct termios ttyset;
-
 	ENTER( "RXTXPort:NativeisRecieveTimeoutEnabled()" );
 	if( tcgetattr( fd, &ttyset ) < 0 ) goto fail;
 	LEAVE( "RXTXPort:NativeisRecieveTimeoutEnabled()" );
@@ -1661,7 +1689,8 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(testRead)(
 	*/
 
 END:
-	UNLOCK(name);
+	/* We opened the file in this thread, use this pid to unlock */
+	UNLOCK(name, getpid() );
 	(*env)->ReleaseStringUTFChars( env, tty_name, name );
 	CLOSE( fd );
 	LEAVE( "RXTXPort:testRead" );
@@ -1800,6 +1829,8 @@ JNIEXPORT jboolean JNICALL RXTXCommDriver(registerKnownPorts)(JNIEnv *env,
 		PORT_TYPE_RS485,
 		PORT_TYPE_RAW};
 	jboolean result = JNI_FALSE;
+	char message[80];
+
 	switch(portType) {
 		case PORT_TYPE_SERIAL:
 #if defined(__APPLE__)
@@ -1813,7 +1844,13 @@ JNIEXPORT jboolean JNICALL RXTXCommDriver(registerKnownPorts)(JNIEnv *env,
 		case PORT_TYPE_I2C:      break;
 		case PORT_TYPE_RS485:    break;
 		case PORT_TYPE_RAW:      break;
-		default: printf( "unknown portType %d handed to native RXTXCommDriver.registerKnownPorts() method.\n", (int) portType );
+		default:
+			sprintf( message, "unknown portType %d handed to \
+				native RXTXCommDriver.registerKnownPorts() \
+				 method.\n",
+				(int) portType
+			);
+			report( message );
 	}
 	return result;
 }
@@ -2206,6 +2243,8 @@ int fhs_lock( const char *filename )
 		return 1;
 	}
 	sprintf( lockinfo, "%10d\n",(int) getpid() );
+	sprintf( message, "CREATING LOCK: %s\n", lockinfo );
+	report( message );
 	write( fd, lockinfo, 11 );
 	close( fd );
 	return 0;
@@ -2358,7 +2397,7 @@ int check_lock_status( const char *filename )
                 differently and there are other proposed changes to the
 		Filesystem Hierachy Standard
 ----------------------------------------------------------*/
-void fhs_unlock( const char *filename )
+void fhs_unlock( const char *filename, int openpid )
 {
 	char file[80],*p;
 	int i;
@@ -2369,9 +2408,14 @@ void fhs_unlock( const char *filename )
 	while( *( p - 1 ) != '/' && i-- != 1 ) p--;
 	sprintf( file, "%s/LCK..%s", LOCKDIR, p );
 
-	if( !check_lock_pid( file ) )
+	if( !check_lock_pid( file, openpid ) )
 	{
 		unlink(file);
+		report("Removing LockFile\n");
+	}
+	else
+	{
+		report("Unable to remove LockFile\n");
 	}
 }
 
@@ -2384,7 +2428,7 @@ void fhs_unlock( const char *filename )
    exceptions: none 
    comments:   http://docs.freebsd.org/info/uucp/uucp.info.UUCP_Lock_Files.html 
 ----------------------------------------------------------*/
-void uucp_unlock( const char *filename )
+void uucp_unlock( const char *filename, int openpid )
 {
 	struct stat buf;
 	char file[80],*p, message[80];
@@ -2413,7 +2457,7 @@ void uucp_unlock( const char *filename )
 		report( "uucp() unlock no such lockfile\n" );
 		return;
 	}
-	if( !check_lock_pid( file ) )
+	if( !check_lock_pid( file, openpid ) )
 	{ 
 		sprintf( message, "uucp unlinking %s\n", file );
 		report( message );
@@ -2435,10 +2479,11 @@ void uucp_unlock( const char *filename )
    exceptions: none
    comments:   
 ----------------------------------------------------------*/
-int check_lock_pid( const char *file )
+int check_lock_pid( const char *file, int openpid )
 {
-	int fd;
+	int fd, lockpid;
 	char pid_buffer[12];
+	char message[80];
 
 	fd=open( file, O_RDONLY );
 	if ( fd < 0 )
@@ -2452,8 +2497,13 @@ int check_lock_pid( const char *file )
 	}
 	close( fd );
 	pid_buffer[11] = '\0';
-	if ( atol( pid_buffer ) != getpid() )
+	lockpid = atol( pid_buffer );
+	/* Native threads JVM's have multiple pids */
+	if ( lockpid != getpid() && lockpid != getppid() && lockpid != openpid )
 	{
+		sprintf(message, "lock = %s pid = %i gpid=%i openpid=%i\n",
+			pid_buffer, getpid(), getppid(), openpid );
+		report( message );
 		return( 1 );
 	}
 	return( 0 );

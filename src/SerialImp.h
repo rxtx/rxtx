@@ -232,14 +232,14 @@ int lock_device( const char * );
 void unlock_device( const char * );
 int is_device_locked( const char * );
 int check_lock_status( const char * );
-void fhs_unlock(const char * );
+void fhs_unlock(const char *, int );
 int fhs_lock( const char *);
-void uucp_unlock( const char * );
+void uucp_unlock( const char *, int );
 int uucp_lock( const char * );
 int system_does_not_lock( const char * );
 void system_does_not_unlock( const char * );
 int check_group_uucp();
-int check_lock_pid( const char * );
+int check_lock_pid( const char *, int );
 
 #define UNEXPECTED_LOCK_FILE "RXTX Error:  Unexpected lock file: %s\n Please report to the RXTX developers\n"
 #define LINUX_KERNEL_VERSION_ERROR "\n\n\nRXTX WARNING:  This library was compiled to run with OS release %s and you are currently running OS release %s.  In some cases this can be a problem.  Try recompiling RXTX if you notice strange behavior.  If you just compiled RXTX make sure /usr/include/linux is a symbolic link to the include files that came with the kernel source and not an older copy.\n\n\npress enter to continue\n"
