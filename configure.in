@@ -473,8 +473,7 @@ Linux)
 	freebsd*)
 	;;
 	solaris*)
-		TARGETLIB="\$(target_alias)/libSerial.la \
-			\$(target_alias)/libfuser.la"
+		TARGETLIB="\$(target_alias)/libSerial.la"
 		echo ----------------------------
 		echo $target_os
 		echo ----------------------------
@@ -595,8 +594,7 @@ BeOS)
 	RXTX_PATH="\$(JPATH)/lib/"
 	CFLAGS="$CFLAGS -D_NO_POSIX=1 -D_NO_XOPEN4=1"
 	CLASSPATH=".:\$(TOP):\$(TOP)/../src:\$(JPATH)/share/kaffe/Klasses.jar:\$(JPATH)/lib/comm.jar:$CLASSPATH"
-	TARGETLIB="\$(target_alias)/libSerial.la \
-			\$(target_alias)/libfuser.la"
+	TARGETLIB="\$(target_alias)/libSerial.la"
 	EXTENSION="cpp"
 	LDFLAGS="-ldevice"
 #  sigh, from ltconfig 
@@ -654,8 +652,7 @@ Mac\ OS\ X)
 Solaris*)
 	case $JAVA_VERSION in
 	1.2*|1.3*|1.4*) 
-		TARGETLIB="\$(target_alias)/libSerial.la \
-				\$(target_alias)/libfuser.la"
+		TARGETLIB="\$(target_alias)/libSerial.la"
 		RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
 		JHOME=$JPATH/"lib"
 		CFLAGS="$CFLAGS -D_NO_POSIX=1 -D_NO_XOPEN4=1"
@@ -663,8 +660,7 @@ Solaris*)
 	;;
 	1.1*)
 		echo "BINGO"
-		TARGETLIB="\$(target_alias)/libSerial.la \
-				\$(target_alias)/libfuser.la"
+		TARGETLIB="\$(target_alias)/libSerial.la"
 		RXTX_PATH="\$(JPATH)/lib/"
 		JHOME=$JPATH/"lib"
 		CFLAGS="$CFLAGS -D_NO_POSIX=1 -D_NO_XOPEN4=1"
