@@ -230,7 +230,10 @@ JNIEXPORT void JNICALL RXTXPort(Initialize)(
 	} 
 #endif /* !WIN32 */
 	ENTER( "RXTXPort:Initialize" );
+#ifdef PRERELEASE
+	/*  this is just for avoiding confusion while testing new libraries */
 	mexPrintf("RXTX Prerelease for testing  Tue Feb  5 13:53:33 MST 2002\n");
+#endif /* PRERELEASE */
 #ifdef DEBUG_MW
 #endif /* DEBUG_MW */
 #if DEBUG_TIMING
