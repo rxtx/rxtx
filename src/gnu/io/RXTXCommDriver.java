@@ -253,7 +253,7 @@ public class RXTXCommDriver implements CommDriver
 			val = System.getProperty("javax.comm.RS485Ports");
 		if (val != null)
 		{
-			addSpecifiedPorts(val, CommPortIdentifier.PORT_PARALLEL);
+			addSpecifiedPorts(val, CommPortIdentifier.PORT_RS485);
 			found = true;
 		}
 
@@ -262,7 +262,7 @@ public class RXTXCommDriver implements CommDriver
 			val = System.getProperty("javax.comm.I2CPorts");
 		if (val != null)
 		{
-			addSpecifiedPorts(val, CommPortIdentifier.PORT_PARALLEL);
+			addSpecifiedPorts(val, CommPortIdentifier.PORT_I2C);
 			found = true;
 		}
 
@@ -271,7 +271,7 @@ public class RXTXCommDriver implements CommDriver
 			val = System.getProperty("javax.comm.RawPorts");
 		if (val != null)
 		{
-			addSpecifiedPorts(val, CommPortIdentifier.PORT_PARALLEL);
+			addSpecifiedPorts(val, CommPortIdentifier.PORT_RAW);
 			found = true;
 		}
 
