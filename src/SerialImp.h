@@ -228,6 +228,51 @@ Trent
 #	define WRITE write
 #	define READ read
 #	define SELECT select
+struct timeval snow, enow, seloop, eeloop;
+#define report_time_start_rs( ) \
+{ \
+	gettimeofday(&snow, NULL); \
+}
+#define report_time_end_rs( ) \
+{ \
+	gettimeofday(&enow, NULL); \
+	mexPrintf("%8i sec : %8i usec\n", enow.tv_sec - snow.tv_sec, enow.tv_sec - snow.tv_sec?snow.tv_usec-enow.tv_usec:enow.tv_usec - snow.tv_usec); \
+}
+#ifdef DEBUG_TIMING
+struct timeval snow, enow, seloop, eeloop;
+#define report_time_eventLoop( ) { \
+	if ( seloop.tv_sec == eeloop.tv_sec && seloop.tv_usec == eeloop.tv_usec ) \
+	{ \
+		gettimeofday(&eeloop, NULL); \
+		seloop.tv_sec = eeloop.tv_sec; \
+		seloop.tv_usec = eeloop.tv_usec; \
+		mexPrintf("%8i sec : %8i usec\n", eeloop.tv_sec - seloop.tv_sec, eeloop.tv_usec - seloop.tv_usec); \
+	} \
+}
+#define report_time( ) \
+{ \
+	struct timeval now; \
+	gettimeofday(&now, NULL); \
+	mexPrintf("%8s : %5i : %8i sec : %8i usec\n", __TIME__, __LINE__, now.tv_sec, now.tv_usec); \
+}
+#define report_time_start( ) \
+{ \
+	gettimeofday(&snow, NULL); \
+	mexPrintf("%8s : %5i : %8i sec : %8i usec", __TIME__, __LINE__, snow.tv_sec, snow.tv_usec); \
+}
+#define report_time_end( ) \
+{ \
+	gettimeofday(&enow, NULL); \
+	mexPrintf("%8i sec : %8i usec\n", enow.tv_sec - snow.tv_sec, enow.tv_sec - snow.tv_sec?snow.tv_usec-enow.tv_usec:enow.tv_usec - snow.tv_usec); \
+}
+#else
+#define report_time_eventLoop( ){};
+#define report_time( ) {}
+#define report_time_start( ) {}
+#define report_time_end( ) {}
+
+#endif /* DEBUG_TIMING */
+
 /* #define TRACE */
 #ifdef TRACE
 #define ENTER(x) report("entering "x" \n");
