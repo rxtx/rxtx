@@ -423,7 +423,7 @@ JNIEXPORT void JNICALL RXTXPort(nativeSetSerialPortParams)(
 		goto fail;
 	}
 
-#ifdef TIOCGSERIAL
+#ifdef TIOCGSERIAL && !defined(WIN32)
 	if ( cspeed > 1000000 )
 	{
 		/*
@@ -477,7 +477,7 @@ JNIEXPORT void JNICALL RXTXPort(nativeSetSerialPortParams)(
 
 		cspeed = 38400;
 	}
-#endif /* TIOCGSERIAL */
+#endif /* TIOCGSERIAL  !WIN32 */
 
 #ifdef __FreeBSD__
 	if( cfsetspeed( &ttyset, cspeed ) < 0 )
