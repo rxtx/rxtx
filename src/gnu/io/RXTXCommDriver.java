@@ -345,8 +345,8 @@ public class RXTXCommDriver implements CommDriver
 			System.out.println("scanning device directory "+deviceDirectory+" for ports of type "+PortType);
 		if(osName.toLowerCase().indexOf("windows") != -1 )
 		{
-			String[] temp = { "COM1", "COM2","COM3","COM4" };
-			/*FIXME Untested , "COM5", COM6", COM7", "COM8"  */
+			String[] temp = { "COM1", "COM2","COM3","COM4",
+			"COM5", "COM6", "COM7", "COM8" };
 			CandidateDeviceNames=temp;
 		}
 		else if ( osName.equals("Solaris") || osName.equals("SunOS"))
