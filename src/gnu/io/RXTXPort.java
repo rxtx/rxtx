@@ -460,10 +460,10 @@ final public class RXTXPort extends SerialPort
 	*  @param duration
 	*/
 	public native void sendBreak( int duration );
-	protected native void writeByte( int b ) throws IOException;
-	protected native void writeArray( byte b[], int off, int len )
+	protected native void writeByte( int b, boolean i ) throws IOException;
+	protected native void writeArray( byte b[], int off, int len, boolean i )
 		throws IOException;
-	protected native void nativeDrain() throws IOException;
+	protected native void nativeDrain( boolean i ) throws IOException;
 
 	/** RXTXPort read methods */
 	protected native int nativeavailable() throws IOException;
@@ -626,7 +626,7 @@ final public class RXTXPort extends SerialPort
 		if(monThreadisInterrupted) 
 		{
 			if( debug_events )
-				System.out.println( "return" );
+				System.out.println( "sendEvent return" );
 			return(true);
 		}
 		if( SPEventListener != null )
@@ -987,7 +987,7 @@ final public class RXTXPort extends SerialPort
 	*/
 			waitForTheNativeCodeSilly();
 			if ( fd == 0 ) throw new IOException();
-			writeByte( b );
+			writeByte( b, monThreadisInterrupted );
 		}
 	/**
 	*  @param b[]
@@ -1007,7 +1007,7 @@ final public class RXTXPort extends SerialPort
 	*/
 			if ( fd == 0 ) throw new IOException();
 			waitForTheNativeCodeSilly();
-			writeArray( b, 0, b.length );
+			writeArray( b, 0, b.length, monThreadisInterrupted );
 			if (debug)
 				System.out.println("Leaving RXTXPort:SerialOutputStream:write(" +b.length  +")");
 		}
@@ -1041,7 +1041,7 @@ final public class RXTXPort extends SerialPort
 			}
 	*/
 			waitForTheNativeCodeSilly();
-			writeArray( send, 0, len );
+			writeArray( send, 0, len, monThreadisInterrupted );
 			if( debug )
 				System.out.println("Leaving RXTXPort:SerialOutputStream:write(" + send.length + " " + off + " " + len + " " +") "  /*+ new String(send)*/ );
 		}
@@ -1061,7 +1061,7 @@ final public class RXTXPort extends SerialPort
 			}
 	*/
 			waitForTheNativeCodeSilly();
-			nativeDrain();
+			nativeDrain( monThreadisInterrupted );
 			if (debug)
 				System.out.println("RXTXPort:SerialOutputStream:flush() leave");
 		}

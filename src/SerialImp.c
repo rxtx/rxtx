@@ -1153,12 +1153,13 @@ int init_threads( struct event_info_struct *eis )
 RXTXPort.writeByte
 
    accept:      byte to write (passed as int)
+                jboolean interrupted (no events if true)
    perform:     write a single byte to the port
    return:      none
    exceptions:  IOException
 ----------------------------------------------------------*/
 JNIEXPORT void JNICALL RXTXPort(writeByte)( JNIEnv *env,
-	jobject jobj, jint ji )
+	jobject jobj, jint ji, jboolean interrupted )
 {
 #ifndef TIOCSERGETLSR
 	struct event_info_struct *index = master_index;
@@ -1176,14 +1177,17 @@ JNIEXPORT void JNICALL RXTXPort(writeByte)( JNIEnv *env,
 		result=WRITE (fd, &byte, sizeof(unsigned char));
 	}  while (result < 0 && errno==EINTR);
 #ifndef TIOCSERGETLSR
-	index = master_index;
-	if( index )
+	if( ! interrupted )
 	{
-		while( index->fd != fd &&
-			index->next ) index = index->next;
+		index = master_index;
+		if( index )
+		{
+			while( index->fd != fd &&
+				index->next ) index = index->next;
+		}
+		index->writing = 1;
+		report( "writeByte:  index->writing = 1" );
 	}
-	index->writing = 1;
-	report( "writeByte:  index->writing = 1" );
 #endif
 	sprintf( msg, "RXTXPort:writeByte %i\n", result );
 	report( msg );
@@ -1203,12 +1207,14 @@ RXTXPort.writeArray
    accept:      jbarray: bytes used for writing
                 offset: offset in array to start writing
                 count: Number of bytes to write
+                jboolean interrupted (no events if true)
    perform:     write length bytes of jbarray
    return:      none
    exceptions:  IOException
 ----------------------------------------------------------*/
 JNIEXPORT void JNICALL RXTXPort(writeArray)( JNIEnv *env,
-	jobject jobj, jbyteArray jbarray, jint offset, jint count )
+	jobject jobj, jbyteArray jbarray, jint offset, jint count,
+		jboolean interrupted )
 {
 #ifndef TIOCSERGETLSR
 	struct event_info_struct *index = master_index;
@@ -1230,7 +1236,7 @@ JNIEXPORT void JNICALL RXTXPort(writeArray)( JNIEnv *env,
 
 	report_time_start();
 	ENTER( "writeArray" );
-	/* warning Will Rogers */
+	/* warning Roy Rogers */
 	/*
 	sprintf( message, "::::RXTXPort:writeArray(%s);\n", (char *) body );
 	report_verbose( message );
@@ -1245,13 +1251,16 @@ JNIEXPORT void JNICALL RXTXPort(writeArray)( JNIEnv *env,
 	}  while ( ( total < count ) || (result < 0 && errno==EINTR ) );
 	(*env)->ReleaseByteArrayElements( env, jbarray, body, 0 );
 #ifndef TIOCSERGETLSR
-	if( index )
+	if( !interrupted )
 	{
-		while( index->fd != fd &&
-			index->next ) index = index->next;
+		if( index )
+		{
+			while( index->fd != fd &&
+				index->next ) index = index->next;
+		}
+		index->writing = 1;
+		report( "writeArray:  index->writing = 1" );
 	}
-	index->writing = 1;
-	report( "writeArray:  index->writing = 1" );
 #endif /* TIOCSERGETLSR */
 	/*
 		50 ms sleep to make sure read can get in
@@ -1274,7 +1283,7 @@ JNIEXPORT void JNICALL RXTXPort(writeArray)( JNIEnv *env,
 /*----------------------------------------------------------
 RXTXPort.nativeDrain
 
-   accept:      none
+   accept:      jboolean interrupted (no events if true)
    perform:     wait until all data is transmitted
    return:      none
    exceptions:  IOException
@@ -1285,7 +1294,7 @@ RXTXPort.nativeDrain
                 true...  Thread.yeild() was suggested.
 ----------------------------------------------------------*/
 JNIEXPORT void JNICALL RXTXPort(nativeDrain)( JNIEnv *env,
-	jobject jobj )
+	jobject jobj, jboolean interrupted )
 {
 	int fd = get_java_var( env, jobj,"fd","I" );
 	struct event_info_struct *eis = ( struct event_info_struct * ) get_java_var( env, jobj, "eis", "I" );
@@ -1306,6 +1315,7 @@ JNIEXPORT void JNICALL RXTXPort(nativeDrain)( JNIEnv *env,
 	LEAVE( "RXTXPort:drain()" );
 	if( result ) throw_java_exception( env, IO_EXCEPTION, "nativeDrain",
 		strerror( errno ) );
+	if( interrupted ) return;
 #if !defined(TIOCSERGETLSR) && !defined(WIN32)
 	if( eis && eis->writing )
 	{
