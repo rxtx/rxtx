@@ -1701,6 +1701,7 @@ int get_java_var( JNIEnv *env, jobject jobj, char *id, char *type )
 	if( !jfd ) {
 		(*env)->ExceptionDescribe( env );
 		(*env)->ExceptionClear( env );
+		(*env)->DeleteLocalRef( env, jclazz );
 		return result;
 	}
 	result = (int)( (*env)->GetIntField( env, jobj, jfd ) );
