@@ -25,12 +25,12 @@
 #ifdef __STRICT_ANSI__
 #undef __STRICT_ANSI__
 #endif
-#if defined(__MWERKS__)//dima
+#if defined(__MWERKS__)/* dima */
 #include "Raw.h"
-#else//dima
+#else /* dima */
 #include "config.h"
 #include "gnu_io_Raw.h"
-#endif//dima
+#endif /* dima */
 #include <time.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -61,9 +61,9 @@
 #	include <linux/serial.h>
 #	include <linux/version.h>
 #endif
-#ifndef __APPLE__ //dima
+#ifndef __APPLE__  /* dima */
 #include <sys/io.h>
-#endif//dima
+#endif /* dima */
 
 extern int errno;
 #include "I2CImp.h"
@@ -194,8 +194,7 @@ RawPort.Java_Bus_read32
    return:      none
    exceptions:  none
 ----------------------------------------------------------*/
-//////////////////////////////////////////////////////////
-// This Function is called from Java to write to an 32 bit bus
+/*  This Function is called from Java to write to a 32 bit bus */
 JNIEXPORT void JNICALL Java_Bus_write32
   (JNIEnv * env, jobject poObj, jint piPort, jint piData)
 {
@@ -265,9 +264,9 @@ JNIEXPORT void JNICALL Java_gnu_io_RawPort_nativeSetRawPortParams(
 	int cspeed = translate_speed( env, speed );
 	if( !cspeed ) return;
 	if( tcgetattr( fd, &ttyset ) < 0 ) goto fail;
-	if( !translate_data_bits( env, (int *)&(ttyset.c_cflag), dataBits ) ) return;//dima c_flag darwin unsigned long
-	if( !translate_stop_bits( env, (int *)&(ttyset.c_cflag), stopBits ) ) return;//dima c_flag darwin unsigned long
-	if( !translate_parity( env, (int *)&(ttyset.c_cflag), parity ) ) return;//dima c_flag darwin unsigned long
+	if( !translate_data_bits( env, (int *)&(ttyset.c_cflag), dataBits ) ) return; /* dima c_flag darwin unsigned long */
+	if( !translate_stop_bits( env, (int *)&(ttyset.c_cflag), stopBits ) ) return; /* dima c_flag darwin unsigned long */
+	if( !translate_parity( env, (int *)&(ttyset.c_cflag), parity ) ) return;/* dima c_flag darwin unsigned long */
 #ifdef __FreeBSD__
 	if( cfsetspeed( &ttyset, cspeed ) < 0 ) goto fail;
 #else

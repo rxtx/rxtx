@@ -1248,7 +1248,7 @@ JNIEXPORT void JNICALL RXTXPort(writeByte)( JNIEnv *env,
 	}  while (result < 0 && errno==EINTR);
 	if( result < 0 )
 	{
-		//mexPrintf("GOT IT!!!\n");
+		/* mexPrintf("GOT IT!!!\n"); */
 		goto fail;
 	}
 /*
@@ -1259,7 +1259,7 @@ JNIEXPORT void JNICALL RXTXPort(writeByte)( JNIEnv *env,
 		result=tcdrain(fd);
 		count++;
 	}  while (result && errno==EINTR && count <3);
-#endif *//* __sun __ */
+#endif */ /* __sun __ */
 #ifndef TIOCSERGETLSR
 	if( ! interrupted )
 	{
@@ -1321,8 +1321,8 @@ JNIEXPORT void JNICALL RXTXPort(writeArray)( JNIEnv *env,
 #endif /* __sun__ */
 	fd = get_java_var( env, jobj,"fd","I" );
 	body = (*env)->GetByteArrayElements( env, jbarray, 0 );
-	//result=WRITE (fd, body + total + offset, count - total); 
-	//(*env)->ReleaseByteArrayElements( env, jbarray, body, 0 );
+	/* result=WRITE (fd, body + total + offset, count - total); 
+	(*env)->ReleaseByteArrayElements( env, jbarray, body, 0 ); */
 /* return; OH CRAP */
 
 	report_time_start();
@@ -1342,7 +1342,7 @@ JNIEXPORT void JNICALL RXTXPort(writeArray)( JNIEnv *env,
 	}  while ( ( total < count ) && (result < 0 && errno==EINTR ) );
 	if( result < 0 )
 	{
-		//mexPrintf("GOT IT!!!\n");
+		/* mexPrintf("GOT IT!!!\n"); */
 		goto fail;
 	}
 /*
@@ -1353,7 +1353,7 @@ JNIEXPORT void JNICALL RXTXPort(writeArray)( JNIEnv *env,
 		result=tcdrain(fd);
 		icount++;
 	}  while (result && errno==EINTR && icount <3);
-#endif *//* __sun__ */
+#endif */ /* __sun__ */
 	(*env)->ReleaseByteArrayElements( env, jbarray, body, 0 );
 #ifndef TIOCSERGETLSR
 	if( !interrupted )
@@ -2781,7 +2781,7 @@ int read_byte_array( JNIEnv *env,
 {
 	int ret, left, bytes = 0;
 	long timeLeft, now = 0, start = 0;
-	//char msg[80];
+	/* char msg[80]; */
 	struct timeval tv, *tvP;
 	fd_set rset;
 	/* TRENT */
@@ -2800,7 +2800,7 @@ int read_byte_array( JNIEnv *env,
 	left = length;
 	if (timeout >= 0)
 		start = GetTickCount();
-	while( bytes < length &&  count++ < 20 ) // && !is_interrupted( eis ) )
+	while( bytes < length &&  count++ < 20 ) /* && !is_interrupted( eis ) )*/
 	{
 		if (timeout >= 0) {
 			now = GetTickCount();
@@ -2862,7 +2862,7 @@ int read_byte_array( JNIEnv *env,
 		Nicolas <ripley@8d.com>
 		*/
 			else {
-				//usleep(10);
+				/* usleep(10); */
 				usleep(1000);
 			}
 		}
@@ -3191,7 +3191,7 @@ JNIEXPORT jint JNICALL RXTXPort(readByte)( JNIEnv *env,
 	unsigned char buffer[ 1 ];
 	int fd = get_java_var( env, jobj,"fd","I" );
 	int timeout = get_java_var( env, jobj, "timeout", "I" );
-	//char msg[80];
+	/* char msg[80]; */
 
 /*
 	ENTER( "RXTXPort:readByte" );
@@ -3230,7 +3230,7 @@ JNIEXPORT jint JNICALL RXTXPort(readArray)( JNIEnv *env,
 {
 	int bytes;
 	jbyte *body;
-	//char msg[80];
+	/* char msg[80]; */
 	int fd = get_java_var( env, jobj, "fd", "I" );
 	int timeout = get_java_var( env, jobj, "timeout", "I" );
 
@@ -3286,7 +3286,7 @@ JNIEXPORT jint JNICALL RXTXPort(readTerminatedArray)( JNIEnv *env,
 {
 	int bytes, total = 0;
 	jbyte *body, *terminator;
-	//char msg[80];
+	/* char msg[80]; */
 	int fd = get_java_var( env, jobj, "fd", "I" );
 	int timeout = get_java_var( env, jobj, "timeout", "I" );
 

@@ -1238,7 +1238,7 @@ int serial_write( int fd, char *Str, int length )
 {
 	unsigned long nBytes;
 	struct termios_list *index;
-	//COMSTAT Stat;
+	/* COMSTAT Stat; */
 	int old_flag;
 
 	ENTER( "serial_write" );
@@ -1266,9 +1266,9 @@ int serial_write( int fd, char *Str, int length )
 		WaitForSingleObject( index->wol.hEvent,100 );
 		if ( GetLastError() != ERROR_IO_PENDING )
 		{
-			//ClearErrors( index, &Stat );
+			/* ClearErrors( index, &Stat ); */
 			report( "serial_write error\n" );
-			//report("Condition 1 Detected in write()\n");
+			/* report("Condition 1 Detected in write()\n"); */
 			YACK();
 			errno = EIO;
 			nBytes=-1;
@@ -1280,30 +1280,30 @@ int serial_write( int fd, char *Str, int length )
 		{
 			if ( GetLastError() != ERROR_IO_INCOMPLETE )
 			{
-				//report("Condition 2 Detected in write()\n");
+				/* report("Condition 2 Detected in write()\n"); */
 				YACK();
 				errno = EIO;
 				nBytes = -1;
 				goto end;
-				//ClearErrors( index, &Stat );
+				/* ClearErrors( index, &Stat ); */
 			}
 		}
 	}
 	else
 	{
-		//ClearErrors( index, &Stat );
-		//report("Condition 3 Detected in write()\n");
+		/* ClearErrors( index, &Stat ); */
+		/* report("Condition 3 Detected in write()\n"); */
 		YACK();
 		errno = EIO;
-		//report( "serial_write bailing!\n" );
+		/* report( "serial_write bailing!\n" ); */
 		return(-1);
 	}
 end:
 	/* FlushFileBuffers( index->hComm ); */
 	index->event_flag |= EV_TXEMPTY;
-	//ClearErrors( index, &Stat );
+	/* ClearErrors( index, &Stat ); */
 	SetCommMask( index->hComm, index->event_flag );
-	//ClearErrors( index, &Stat );
+	/* ClearErrors( index, &Stat ); */
 	index->event_flag = old_flag;
 	index->tx_happened = 1; 
 	LEAVE( "serial_write" );
@@ -1403,7 +1403,7 @@ int serial_read( int fd, void *vb, int size )
 	while ( size > 0 )
 	{
 		nBytes = 0;
-		//ret = ClearErrors( index, &stat);
+		/* ret = ClearErrors( index, &stat); */
 
 		index->rol.Offset = index->rol.OffsetHigh = 0;
 		ResetEvent( index->rol.hEvent );
@@ -1577,7 +1577,7 @@ int serial_read( int fd, void *vb, int size )
 	while ( size > 0 )
 	{
 		nBytes = 0;
-		//ret = ClearErrors( index, &Stat);
+		/* ret = ClearErrors( index, &Stat); */
 
 		index->rol.Offset = index->rol.OffsetHigh = 0;
 		ResetEvent( index->rol.hEvent );
@@ -2965,7 +2965,7 @@ int ioctl( int fd, int request, ... )
 				printf( "---------------overrun\n" );
 */
 				sistruct->overrun = index->sis->overrun;
-				//ErrCode &= ~CE_OVERRUN;
+				/* ErrCode &= ~CE_OVERRUN; */
 			}
 			if( sistruct->parity != index->sis->parity )
 			{
