@@ -70,6 +70,13 @@
 #if defined(__hpux__)
 #include <sys/modem.h>
 #endif /* __hpux__ */
+/* FIXME -- new file */
+#if defined(__APPLE__)
+#	include <CoreFoundation/CoreFoundation.h>
+#	include <IOKit/IOKitLib.h>
+#	include <IOKit/serial/IOSerialKeys.h>
+#	include <IOKit/IOBSD.h>
+#endif /* __APPLE__ */
 #ifdef HAVE_PWD_H
 #include	<pwd.h>
 #endif /* HAVE_PWD_H */
@@ -1167,17 +1174,158 @@ END:
 	close(fd);
 	return ret;
 }
+#if defined(__APPLE__)
+/*----------------------------------------------------------
+ createSerialIterator()
+   accept:      
+   perform:     
+   return:      
+   exceptions:  
+   comments:
+		Code courtesy of Eric Welch at Keyspan, except for the bugs
+		which are courtesy of Joseph Goldstone (joseph@lp.com)
+----------------------------------------------------------*/
+
+kern_return_t
+createSerialIterator(io_iterator_t *serialIterator)
+{
+    kern_return_t    kernResult;
+    mach_port_t        masterPort;
+    CFMutableDictionaryRef    classesToMatch;
+    if ((kernResult=IOMasterPort(NULL, &masterPort)) != KERN_SUCCESS)
+    {
+        printf("IOMasterPort returned %d\n", kernResult);
+        return kernResult;
+    }
+    if ((classesToMatch = IOServiceMatching(kIOSerialBSDServiceValue)) == NULL)
+    {
+        printf("IOServiceMatching returned NULL\n");
+        return kernResult;
+    }
+    CFDictionarySetValue(classesToMatch, CFSTR(kIOSerialBSDTypeKey), CFSTR(kIOSerialBSDRS232Type));
+    kernResult = IOServiceGetMatchingServices(masterPort, classesToMatch, serialIterator);
+    if (kernResult != KERN_SUCCESS)
+    {
+        printf("IOServiceGetMatchingServices returned %d\n", kernResult);
+    }
+    return kernResult;
+}
 
 /*----------------------------------------------------------
- isDeviceGood
+ getRegistryString()
 
-   accept:      a port name
-   perform:     see if the port is valid on this OS.
-   return:      JNI_TRUE if it exhists otherwise JNI_FALSE
+   accept:      
+   perform:     
+   return:      
+   exceptions:  
+   comments:
+		Code courtesy of Eric Welch at Keyspan, except for the bugs
+		which are courtesy of Joseph Goldstone (joseph@lp.com)
+----------------------------------------------------------*/
+char *
+getRegistryString(io_object_t sObj, char *propName)
+{
+    static char resultStr[256];
+    CFTypeRef   nameCFstring;
+    resultStr[0] = 0;
+    nameCFstring = IORegistryEntryCreateCFProperty(sObj,
+            CFStringCreateWithCString(kCFAllocatorDefault, propName, kCFStringEncodingASCII),
+                                                   kCFAllocatorDefault, 0);
+    if (nameCFstring)
+    {
+        CFStringGetCString(nameCFstring, resultStr, sizeof(resultStr), kCFStringEncodingASCII);
+        CFRelease(nameCFstring);
+    }
+    return resultStr;
+}
+
+/*----------------------------------------------------------
+ registerKnownSerialPorts()
+   accept:      
+   perform:     
+   return:      
+   exceptions:  
+   comments:
+----------------------------------------------------------*/
+int
+registerKnownSerialPorts(JNIEnv *env, jobject jobj)
+{
+    io_iterator_t    theSerialIterator;
+    io_object_t      theObject;
+    int              numPorts;
+    if (createSerialIterator(&theSerialIterator) != KERN_SUCCESS)
+    {
+        printf("createSerialIterator failed\n");
+    } else {
+        jclass cls = (*env)->GetObjectClass(env,jobj);
+        jmethodID mid = (*env)->GetMethodID(
+            env, cls, "addPortName", "(Ljava/lang/String;I;Ljavax/comm/CommDriver)Z");
+        if (mid == 0) {
+            printf("getMethodID of CommDriver.addPortName failed\n");
+        } else {
+            while (theObject = IOIteratorNext(theSerialIterator))
+            {
+                (*env)->CallVoidMethod(env, jobj, mid,
+                    NewStringUTF(getRegistryString(theObject, kIOTTYDeviceKey)));
+                numPorts++;
+                (*env)->CallVoidMethod(env, jobj, mid,
+                    NewStringUTF(getRegistryString(theObject, kIODialinDeviceKey)));
+                numPorts++;
+                (*env)->CallVoidMethod(env, jobj, mid,
+                    NewStringUTF(getRegistryString(theObject, kIOCalloutDeviceKey)));
+                numPorts++;
+            }
+        }
+    }
+    return numPorts;
+}
+#endif /* __APPLE__ */
+/*----------------------------------------------------------
+ registerKnownPorts
+
+   accept:      the type of port
+   perform:     register any ports of the desired type a priori known to this OS
+   return:      JNI_TRUE if any such ports were registered otherwise JNI_FALSE
    exceptions:  none
    comments:
 ----------------------------------------------------------*/
-JNIEXPORT jboolean  JNICALL RXTXCommDriver(isDeviceGood)(JNIEnv *env,
+JNIEXPORT jboolean JNICALL RXTXCommDriver(registerKnownPorts)(JNIEnv *env,
+    jobject jobj, jint portType)
+{
+	enum {PORT_TYPE_SERIAL = 1,
+		PORT_TYPE_PARALLEL,
+		PORT_TYPE_I2C,
+		PORT_TYPE_RS485,
+		PORT_TYPE_RAW};
+	jboolean result = JNI_FALSE;
+	switch(portType) {
+		case PORT_TYPE_SERIAL:
+#if defined(__APPLE__)
+			if (registerKnownSerialPorts(env, jobj) > 0) {
+				result = JNI_TRUE;
+			}
+#endif
+           		 break;
+		case PORT_TYPE_PARALLEL: break;
+		case PORT_TYPE_I2C:      break;
+		case PORT_TYPE_RS485:    break;
+		case PORT_TYPE_RAW:      break;
+		default: printf("unknown portType %d handed to native RXTXCommDriver.registerKnownPorts() method.\n");
+	}
+	return result;
+}
+    
+
+/*----------------------------------------------------------
+ isPortPrefixValid
+
+   accept:      a port prefix
+   perform:     see if the port prefix matches a port that is valid on this OS.
+   return:      JNI_TRUE if it exists otherwise JNI_FALSE
+   exceptions:  none
+   comments:
+----------------------------------------------------------*/
+JNIEXPORT jboolean  JNICALL RXTXCommDriver(isPortPrefixValid)(JNIEnv *env,
 	jobject jobj, jstring tty_name)
 {
 	jboolean result;

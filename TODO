@@ -103,7 +103,7 @@ ParallelPort support.  Needs some code.
 		ParallelImp.c stubs 
                       A  large fraction of the stubs are filled in now.
 		ParallelImp.h
-		LPRPort.java simular to RXTXPort.java + stubs.
+		LPRPort.java similar to RXTXPort.java + stubs.
 	Printer support is working with simiple print tests.
 	Full support for printing will be put in when 2.4 linux kernels
 	are mainstream.
@@ -132,7 +132,7 @@ RS485 Support
 	spent a large amount of time on this.  It compiles.  I need to find
 	an RS485 device to test this.
 
-	I could picture enumerating the devices on the bus simular to
+	I could picture enumerating the devices on the bus similar to
 	enumerating ports with 232 comm.  It could be possible to build
 	the packets with vendor specific bits.
 

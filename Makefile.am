@@ -40,7 +40,7 @@ javahfiles = $(patsubst $(SPATH)/%.java,%,$(wildcard $(SPATH)/*.java))
 #######################
 CLEANFILES = $(TOP)/*.class $(TOP)/$(CLASSDEST)/*.class $(TOP)/$(JARTARGET)
 
-#  compile src/SerialImp.c and simular files into libraries.
+#  compile src/SerialImp.c and similar files into libraries.
 #  LIBTOOL_FIX handles problems encountered on some OS's.  See configure.in
 #  If a LIBTOOL_FIX is added be sure to provide a trailing ';' in configure.in
 $(target_alias)/lib%.la: $(SPATH)/%Imp.@EXTENSION@ $(CLASSES)
@@ -50,7 +50,7 @@ $(target_alias)/lib%.la: $(SPATH)/%Imp.@EXTENSION@ $(CLASSES)
 	$(LIBTOOLC) ../$(SPATH)/$*Imp.@EXTENSION@ -o $(TOP)/$(DEST)/$*Imp.lo; \
 	$(LINK) -o lib$*.la -rpath $(RXTX_PATH) $(TOP)/$(DEST)/$*Imp.lo)
 
-#  compile src/RXTXPort.java and simular files into classes
+#  compile src/RXTXPort.java and similar files into classes
 #  then create the .jar file
 $(CLASSES): $(javafiles) $(TOP)/Makefile
 	$(JAVAH_FIX)
