@@ -77,7 +77,7 @@ JDKINCLUDE=$(JDKHOME)/include
 MINGJAVAFILES = $(wildcard $(SRC)/*.java)
 CFILES=$(wildcard $(SRC)/*.c) $(wildcard $(SRC)/*.cc)
 INCLUDES=$(wildcard $(SRC)/*.h)
-TARGETLIBS= Serial.dll fuser.dll
+TARGETLIBS= Serial.dll 
 DLLOBJECTS= fixup.o init.o 
 
 all:  javaxtimestamp $(TARGETLIBS)
@@ -95,21 +95,13 @@ init.o:	$(INCLUDES)
 %.o:	comm.jar $(SRC)/%.c $(INCLUDES) init.o
 	$(CC) $(CFLAGS) -c $(SRC)/$*.c -o $*.o
 
-fuser.dll:	$(CFILES) include/config.h $(DLLOBJECTS) fuserImp.o
-	$(LD) --base-file fuser.base --dll -o fuser.dll $(DLLOBJECTS) fuserImp.o $(LIBS) -e _dll_entry@12
-	echo EXPORTS >fuser.def; for i in `nm fuser.dll | grep "T _Java"|cut -b 13-`;do echo -n $$i|sed s#@.*##;echo "="$$i;done >> fuser.def
-	$(DLLTOOL) --as=$(AS) --dllname fuser.dll --def fuser.def --base-file fuser.base --output-exp fuser.exp
-	$(LD) --base-file fuser.base fuser.exp -dll -o fuser.dll $(DLLOBJECTS) fuserImp.o $(LIBS) -e _dll_entry@12
-	$(DLLTOOL) --as=$(AS) --dllname fuser.dll --def fuser.def --base-file fuser.base --output-exp fuser.exp
-	$(LD) --base-file fuser.base fuser.exp -dll -o fuser.dll $(DLLOBJECTS) fuserImp.o $(LIBS) -e _dll_entry@12
-
-Serial.dll:	$(CFILES) include/config.h $(DLLOBJECTS) SerialImp.o termios.o
-	$(LD) --base-file Serial.base --dll -o Serial.dll $(DLLOBJECTS) SerialImp.o termios.o $(LIBS) -e _dll_entry@12
+Serial.dll:	$(CFILES) include/config.h $(DLLOBJECTS) fuserImp.o SerialImp.o termios.o
+	$(LD) --base-file Serial.base --dll -o Serial.dll $(DLLOBJECTS) fuserImp.o SerialImp.o termios.o $(LIBS) -e _dll_entry@12
 	echo EXPORTS >Serial.def; for i in `nm Serial.dll | grep "T _Java"|cut -b 13-`;do echo -n $$i|sed s#@.*##;echo "="$$i;done >> Serial.def
 	$(DLLTOOL) --as=$(AS) --dllname Serial.dll --def Serial.def --base-file Serial.base --output-exp Serial.exp
-	$(LD) --base-file Serial.base Serial.exp -dll -o Serial.dll $(DLLOBJECTS) SerialImp.o termios.o $(LIBS) -e _dll_entry@12
+	$(LD) --base-file Serial.base Serial.exp -dll -o Serial.dll $(DLLOBJECTS) SerialImp.o termios.o fuserImp.o $(LIBS) -e _dll_entry@12
 	$(DLLTOOL) --as=$(AS) --dllname Serial.dll --def Serial.def --base-file Serial.base --output-exp Serial.exp
-	$(LD) --base-file Serial.base Serial.exp -dll -o Serial.dll $(DLLOBJECTS) SerialImp.o termios.o $(LIBS) -e _dll_entry@12
+	$(LD) --base-file Serial.base Serial.exp -dll -o Serial.dll $(DLLOBJECTS) SerialImp.o termios.o fuserImp.o $(LIBS) -e _dll_entry@12
 
 # This should replace the mess above if it worked.
 # nm shows no symbols in the dll produced.  The old stuff above works ok.
@@ -127,7 +119,6 @@ include/config.h:
 install: all
 	@echo copy comm.jar $(COMMINSTALL) > install.bat
 	@echo copy Serial.dll $(LIBINSTALL) >> install.bat
-	@echo copy fuser.dll $(LIBINSTALL) >> install.bat
 	./install.bat
 
 uninstall:
@@ -135,8 +126,7 @@ uninstall:
 	@echo del comm.jar	>> uninstall.bat
 	@echo cd $(LIBINSTALL)	>> uninstall.bat
 	@echo del Serial.dll	>> uninstall.bat
-	@echo del fuser.dll	>> uninstall.bat
 	./uninstall.bat
 
 clean:
-	rm -rf Serial.* fuser.* javax* *.o *.bat comm.jar include 
+	rm -rf Serial.* javax* *.o *.bat comm.jar include 
