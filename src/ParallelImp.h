@@ -60,5 +60,7 @@ int read_byte_array( int fd, unsigned char *buffer, int length, int threshold,
    int timeout );
 int get_java_var( JNIEnv *, jobject, char *, char * );
 void report(char *);
+void report_error(char *);
 void throw_java_exception( JNIEnv *, char *, char *, char * );
+void throw_java_exception_system_msg( JNIEnv *, char *, char * );
 
