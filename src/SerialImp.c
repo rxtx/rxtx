@@ -102,6 +102,7 @@
 extern int errno;
 #ifdef TRENT_IS_HERE
 #define DEBUG
+#define DEBUG_VERBOSE
 #define DEBUG_MW
 #define TRACE
 /*
@@ -3286,7 +3287,7 @@ void report_warning(char *msg)
 void report_verbose(char *msg)
 {
 #ifdef DEBUG_VERBOSE
-#ifndef DEBUG_MW
+#ifdef DEBUG_MW
 	mexErrMsgTxt( msg );
 #else
 	fprintf(stderr, msg);
