@@ -2398,7 +2398,7 @@ if test "$CC" = "gcc" || test "$CC"="egcs"; then
 		JAVAC="\$(JPATH)/bin/javac -classpath \$(CLASSPATH) -d \$(TOP)/ -O"
 		JAR="\$(JPATH)/bin/jar"
 		JAVADOC="\$(JPATH)/bin/javadoc"
-		CFLAGS=$CFLAGS" -D_BSD_SOURCE -lpthread"
+		CFLAGS=$CFLAGS" -D_BSD_SOURCE"
 		;;
 	esac
 fi
@@ -2416,6 +2416,7 @@ fi
 
  case $OS_NAME in 
 Linux)
+	LDFLAGS=-lpthread
 	check_kernel_headers
 	check_java_headers
 	CFLAGS=$CFLAGS" -D__need_timespec"
@@ -2484,6 +2485,7 @@ Linux)
 ;;
 
 *BSD)
+	LDFLAGS=-lpthread
 	RXTX_PATH="\$(prefix)/lib"
 	JHOME=$JPATH/"lib"
 	CFLAGS=$CFLAGS" -D_NO_POSIX=1 -D_NO_XOPEN4=1"
@@ -2545,6 +2547,7 @@ Irix*)
 #  FIXME
 
 UnixWare|OpenUNIX)
+	LDFLAGS=-lpthread_this_may_be_wrong__trent
 	JHOME=$JPATH/"jre/lib"
 	CFLAGS=$CFLAGS" -D_NO_POSIX=1 -D_NO_XOPEN4=1 -D__unixware__"
 	CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:\$(JPATH)/jre/lib/rt.jar:\$(JPATH)/jre/lib/ext/comm.jar"
@@ -2556,6 +2559,7 @@ UnixWare|OpenUNIX)
 ;;
 
 HP-UX)
+	LDFLAGS=-lpthread_this_may_be_wrong__trent
 	CFLAGS=$CFLAGS" -g -Aa +e -D__hpux__ -D_HPUX_SOURCE -D_NO_POSIX=1 -D_NO_XOPEN4=1"
 	RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
 	TARGETLIB="\$(target_alias)/libSerial.la"
@@ -2664,7 +2668,7 @@ Mac\ OS\ X)
 ;;
 
 Solaris*)
-	LDFLAGS=
+	LDFLAGS=-lpthread
 	TARGETLIB="\$(target_alias)/libSerial.la \
 		\$(target_alias)/libParallel.la"
 	JHOME=$JPATH/"lib"
@@ -2701,10 +2705,11 @@ AIX)
 ;;
 
 Compaq\'s\ Digital\ Unix | OSF1 )
+	LDFLAGS=-lpthread
 	TARGETLIB="\$(target_alias)/libSerial.la"
 	RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
 	JHOME=$JPATH/"lib"
-	CFLAGS=$CFLAGS" -D_NO_POSIX=1 -D_NO_XOPEN4=1 -pthread"
+	CFLAGS=$CFLAGS" -D_NO_POSIX=1 -D_NO_XOPEN4=1"
 	CLASSPATH=".:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/RXTXcomm.jar:$CLASSPATH"
 
 ;;
