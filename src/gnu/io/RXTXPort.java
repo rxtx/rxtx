@@ -35,8 +35,10 @@ final public class RXTXPort extends SerialPort
 	*/
 
 	protected final static boolean debug = false;
-	protected final static boolean debug_verbose = false;
+	protected final static boolean debug_read = false;
+	protected final static boolean debug_write = false;
 	protected final static boolean debug_events = false;
+	protected final static boolean debug_verbose = false;
 	static
 	{
 		if(debug ) 
@@ -297,7 +299,8 @@ final public class RXTXPort extends SerialPort
 	{
 		if (debug)
 			System.out.println(System.currentTimeMillis() + ": " + "RXTXPort:disableReceiveTimeout()");
-		enableReceiveTimeout(0);
+		timeout = -1;
+		NativeEnableReceiveTimeoutThreshold( timeout , threshold, InputBuffer );
 	}
 	/** 
 	*  @param time
@@ -1008,7 +1011,7 @@ final public class RXTXPort extends SerialPort
 	*/
 		public void write( int b ) throws IOException
 		{
-			if (debug_verbose)
+			if (debug_write)
 				System.out.println(System.currentTimeMillis() + ": " + "RXTXPort:SerialOutputStream:write(int)");
 			if( speed == 0 ) return;
 	/* hmm this turns out to be a very bad idea
@@ -1020,6 +1023,8 @@ final public class RXTXPort extends SerialPort
 			waitForTheNativeCodeSilly();
 			if ( fd == 0 ) throw new IOException();
 			writeByte( b, monThreadisInterrupted );
+			if (debug_write)
+				System.out.println(System.currentTimeMillis() + ": " + "Leaving RXTXPort:SerialOutputStream:write( int )");
 		}
 	/**
 	*  @param b[]
@@ -1027,7 +1032,7 @@ final public class RXTXPort extends SerialPort
 	*/
 		public void write( byte b[] ) throws IOException
 		{
-			if (debug_verbose)
+			if (debug_write)
 			{
 				System.out.println(System.currentTimeMillis() + ": " + "Entering RXTXPort:SerialOutputStream:write(" + b.length + ") "/* + new String(b)*/ );
 			}
@@ -1041,7 +1046,7 @@ final public class RXTXPort extends SerialPort
 			if ( fd == 0 ) throw new IOException();
 			waitForTheNativeCodeSilly();
 			writeArray( b, 0, b.length, monThreadisInterrupted );
-			if (debug)
+			if (debug_write)
 				System.out.println(System.currentTimeMillis() + ": " + "Leaving RXTXPort:SerialOutputStream:write(" +b.length  +")");
 		}
 	/**
@@ -1063,7 +1068,7 @@ final public class RXTXPort extends SerialPort
  
 			byte send[] = new byte[len];
 			System.arraycopy( b, off, send, 0, len );
-			if (debug_verbose)
+			if (debug_write)
 			{
 				System.out.println(System.currentTimeMillis() + ": " + "Entering RXTXPort:SerialOutputStream:write(" + send.length + " " + off + " " + len + " " +") " /*+  new String(send) */ );
 			}
@@ -1076,7 +1081,7 @@ final public class RXTXPort extends SerialPort
 	*/
 			waitForTheNativeCodeSilly();
 			writeArray( send, 0, len, monThreadisInterrupted );
-			if( debug )
+			if( debug_write )
 				System.out.println(System.currentTimeMillis() + ": " + "Leaving RXTXPort:SerialOutputStream:write(" + send.length + " " + off + " " + len + " " +") "  /*+ new String(send)*/ );
 		}
 	/**
@@ -1117,7 +1122,7 @@ final public class RXTXPort extends SerialPort
 	*/
 		public int read() throws IOException
 		{
-			if (debug_verbose)
+			if (debug_read)
 				System.out.println(System.currentTimeMillis() + ": " + "RXTXPort:SerialInputStream:read()");
 	/* hmm this turns out to be a very bad idea
 			if ( monThreadisInterrupted ) return( -1 ) ;
@@ -1131,7 +1136,7 @@ final public class RXTXPort extends SerialPort
 	*/
 			waitForTheNativeCodeSilly();
 			int result = readByte();
-			if (debug)
+			if (debug_read)
 				System.out.println(System.currentTimeMillis() + ": " +  "readByte= " + result );
 			return( result );
 		}
@@ -1143,7 +1148,7 @@ final public class RXTXPort extends SerialPort
 		public int read( byte b[] ) throws IOException
 		{
 			int result;
-			if (debug_verbose)
+			if (debug_read)
 				System.out.println(System.currentTimeMillis() + ": " + "RXTXPort:SerialInputStream:read(" + b.length + ")");
 	/* hmm this turns out to be a very bad idea
 			if ( monThreadisInterrupted == true )
@@ -1153,7 +1158,7 @@ final public class RXTXPort extends SerialPort
 	*/
 			waitForTheNativeCodeSilly();
 			result = read( b, 0, b.length);
-			if (debug)
+			if (debug_read)
 				System.out.println(System.currentTimeMillis() + ": " +  "read = " + result );
 			return( result );
 		}
@@ -1171,7 +1176,7 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 		public int read( byte b[], int off, int len )
 			throws IOException
 		{
-			if (debug_verbose)
+			if (debug_read)
 				System.out.println(System.currentTimeMillis() + ": " + "RXTXPort:SerialInputStream:read(" + b.length + " " + off + " " + len + ") " /*+ new String(b) */ );
 			int result;
 			/*
@@ -1226,7 +1231,7 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	*/
 			waitForTheNativeCodeSilly();
 			result = readArray( b, off, Minimum);
-			if (debug)
+			if (debug_read)
 				System.out.println(System.currentTimeMillis() + ": " + "RXTXPort:SerialInputStream:read(" + b.length + " " + off + " " + len + ") = " + result + " bytes containing "  /*+ new String(b) */);
 			return( result );
 		}
