@@ -1152,20 +1152,41 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(testRead)(JNIEnv *env,
 		return JNI_FALSE;
 	}
 
-	if ((fd = open(name, O_RDONLY | O_NONBLOCK)) < 0) {
+	/* CLOCAL eliminates open blocking on modem status lines */
+	if ((fd = open(name, O_RDONLY | CLOCAL)) < 0) {
 		ret = JNI_FALSE;
 		goto END;
 	}
 
 	if ( port_type == PORT_SERIAL )
 	{
+		int saved_flags;
+		struct termios saved_termios;
+
 		if (tcgetattr(fd, &ttyset) < 0) {
-			ret=JNI_FALSE;
+			ret = JNI_FALSE;
 			goto END;
 		}
+
+		/* save, restore later */
+		if ((saved_flags = fcntl(fd, F_GETFL)) < 0) {
+			ret = JNI_FALSE;
+			goto END;
+		}
+
+		memcpy(&saved_termios, &ttyset, sizeof(struct termios));
+
+		if (fcntl(fd, F_SETFL, O_NONBLOCK) < 0) {
+			ret = JNI_FALSE;
+			goto END;
+		}
+
+		cfmakeraw(&ttyset);
 		ttyset.c_cc[VMIN] = ttyset.c_cc[VTIME] = 0;
+
 		if (tcsetattr(fd, TCSANOW, &ttyset) < 0) {
-			ret=JNI_FALSE;
+			ret = JNI_FALSE;
+			tcsetattr(fd, TCSANOW, &saved_termios);
 			goto END;
 		}
 		if (read(fd, &c, 1) < 0)
@@ -1179,6 +1200,10 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(testRead)(JNIEnv *env,
 			ret = JNI_FALSE;
 #endif /* EWOULDBLOCK */
 		}
+
+		/* dont walk over unlocked open devices */
+		tcsetattr(fd, TCSANOW, &saved_termios);
+		fcntl(fd, F_SETFL, saved_flags);
 	}
 END:
 	(*env)->ReleaseStringUTFChars(env, tty_name, name);
@@ -1821,13 +1846,14 @@ void dump_termios(char *foo,struct termios *ttyset)
 {
 	int i;
 
-	fprintf(stderr,"%s %o\n",foo,ttyset->c_iflag);
-	fprintf(stderr,"%s %o\n",foo,ttyset->c_lflag);
-	fprintf(stderr,"%s %o\n",foo,ttyset->c_oflag);
-	fprintf(stderr,"%s %o\n",foo,ttyset->c_cflag);
-	for(i=0;i<NCCS;i++)
+	fprintf(stderr, "%s c_iflag=%#x\n", foo, ttyset->c_iflag);
+	fprintf(stderr, "%s c_lflag=%#x\n", foo, ttyset->c_lflag);
+	fprintf(stderr, "%s c_oflag=%#x\n", foo, ttyset->c_oflag);
+	fprintf(stderr, "%s c_cflag=%#x\n", foo, ttyset->c_cflag);
+	fprintf(stderr, "%s c_cc[]: ", foo);
+	for(i=0; i<NCCS; i++)
 	{
-		fprintf(stderr,"%s %o ",foo,ttyset->c_cc[i]);
+		fprintf(stderr,"%d=%x ", i, ttyset->c_cc[i]);
 	}
-	fprintf(stderr,"\n");
+	fprintf(stderr, "\n");
 }
