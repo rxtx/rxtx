@@ -979,6 +979,7 @@ final public class RXTXPort extends SerialPort
 		{
 			if (debug_verbose)
 				System.out.println("RXTXPort:SerialOutputStream:write(int)");
+			if( speed == 0 ) return;
 	/* hmm this turns out to be a very bad idea
 			if ( monThreadisInterrupted == true )
 			{
@@ -999,6 +1000,7 @@ final public class RXTXPort extends SerialPort
 			{
 				System.out.println("Entering RXTXPort:SerialOutputStream:write(" + b.length + ") "/* + new String(b)*/ );
 			}
+			if( speed == 0 ) return;
 	/* hmm this turns out to be a very bad idea
 			if ( monThreadisInterrupted == true )
 			{
@@ -1020,6 +1022,7 @@ final public class RXTXPort extends SerialPort
 		public void write( byte b[], int off, int len )
 			throws IOException
 		{
+			if( speed == 0 ) return;
 			if( off + len  > b.length )
 			{
 				throw new IndexOutOfBoundsException(
@@ -1051,6 +1054,7 @@ final public class RXTXPort extends SerialPort
 		{
 			if (debug)
 				System.out.println("RXTXPort:SerialOutputStream:flush() enter");
+			if( speed == 0 ) return;
 			if ( fd == 0 ) throw new IOException();
 	/* hmm this turns out to be a very bad idea
 			if ( monThreadisInterrupted == true )
