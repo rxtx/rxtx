@@ -2774,7 +2774,7 @@ int read_byte_array( JNIEnv *env,
 	fd_set rset;
 	/* TRENT */
 	int count = 0;
-
+	
 	report_time_start();
 	ENTER( "read_byte_array" );
 	sprintf(msg, "read_byte_array requests %i\n", length);
@@ -2836,6 +2836,12 @@ int read_byte_array( JNIEnv *env,
 				usleep(1000);
 			}
 		}
+	}
+
+	if( count > 19 )
+	{
+		throw_java_exception( env, IO_EXCEPTION, "read_byte_array",
+			"No data available" );
 	}
 
 	sprintf(msg, "read_byte_array returns %i\n", bytes);
@@ -3843,7 +3849,7 @@ RXTXCommDriver.nativeGetVersion
 JNIEXPORT jstring JNICALL RXTXCommDriver(nativeGetVersion) (JNIEnv *env,
 	jclass jclazz )
 {
-	return (*env)->NewStringUTF( env, "RXTX-2.1-7pre11d" );
+	return (*env)->NewStringUTF( env, "RXTX-2.1-7pre12" );
 }
 
 /*----------------------------------------------------------
@@ -5559,5 +5565,10 @@ int printj(JNIEnv *env, wchar_t *fmt, ...)
   
 	return retval;
 }
+/*
+	jclass cls = ( *env )->FindClass( env, "System.Thread" );
+	jmethodID mid = ( *env )->GetStaticMethodID( env, cls, "Sleep", "(I)V" );
+	(*env)->CallStaticVoidMethod(env, cls, mid, 1);
+*/
 #endif /* asdf */
 

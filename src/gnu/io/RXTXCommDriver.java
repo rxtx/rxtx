@@ -36,7 +36,7 @@ public class RXTXCommDriver implements CommDriver
 {
 
 	private final static boolean debug = false;
-	private final static boolean devel = true;
+	private final static boolean devel = false;
 
 	static
 	{
