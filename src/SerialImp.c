@@ -100,12 +100,12 @@
 
 extern int errno;
 #ifdef TRENT_IS_HERE
+/*
 #undef TIOCSERGETLSR
 #define DEBUG
-/*
+#define DEBUG_MW
 #define DONT_USE_OUTPUT_BUFFER_EMPTY_CODE
 #define SIGNALS
-#define DEBUG_MW
 */
 #endif /* TRENT_IS_HERE */
 #include "SerialImp.h"
@@ -798,8 +798,8 @@ int spawn_write_thread( int fd, char *buff, int length,
 	/* queue next write */
 	t->write_counter++;
 
-	sprintf(msg, "spawn_write_thread: %s %i\n", buff, length);
-	report( msg );
+	//sprintf(msg, "spawn_write_thread: %s %i\n", buff, length);
+	//report( msg );
 
 	/*----------------------------------------------*/
 	report("spawn_write_thread: create thread_write\n");
@@ -915,12 +915,16 @@ int init_thread_write( struct event_info_struct *eis )
 #ifndef TIOCSERGETLSR
 	struct tpid_info_struct *t = add_tpid( NULL);
 	sigset_t newmask, oldmask;
+	struct sigaction newaction, oldaction;
 	jfieldID jeis;
 
 	report("init_thread_write:  start\n");
 	sigemptyset(&newmask);
 	sigaddset(&newmask, SIGCHLD);
+	newaction.sa_sigaction = warn_sig_abort;
+	sigaction(SIGABRT, &newaction, &oldaction);
 	pthread_sigmask( SIG_BLOCK, &newmask, &oldmask );
+	sigprocmask( SIG_SETMASK, &newmask, &oldmask );
 /*
 	sigfillset(&newmask);
 	sigprocmask( SIG_SETMASK, &newmask, &oldmask );
@@ -972,14 +976,14 @@ JNIEXPORT void JNICALL RXTXPort(writeByte)( JNIEnv *env,
 	   other systems use the API write directly
 	*/
 	do {
-#ifdef TIOCGETLSR
+#ifdef TIOCSERGETLSR
 		result=WRITE (fd, &byte, sizeof(unsigned char));
 #else
 		//printf("writeByte %c>>\n", byte);
 		result=spawn_write_thread (fd, &byte, sizeof(unsigned char),
 						env, &jobj);
 		report("writeByte<<\n");
-#endif /* TIOCGETLSR */
+#endif /* TIOCSERGETLSR */
 	}  while (result < 0 && errno==EINTR);
 	LEAVE( "RXTXPort:writeByte" );
 	if(result >= 0)

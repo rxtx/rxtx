@@ -335,6 +335,7 @@ int translate_data_bits( JNIEnv *, data_bits *, jint );
 int translate_stop_bits( JNIEnv *, stop_bits *, jint );
 int translate_parity( JNIEnv *, parity_mode *, jint );
 #else
+int spawn_write_thread( int, char *, int, JNIEnv *, jobject *);
 int translate_speed( JNIEnv*, jint  );
 int translate_data_bits( JNIEnv *, tcflag_t *, jint );
 int translate_stop_bits( JNIEnv *, tcflag_t *, jint );
