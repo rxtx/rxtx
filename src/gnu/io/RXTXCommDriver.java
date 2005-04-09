@@ -25,6 +25,7 @@
 
 package gnu.io;
 
+import java.lang.*;
 import java.util.*;
 import java.io.*;
 import java.util.StringTokenizer;
@@ -54,7 +55,14 @@ public class RXTXCommDriver implements CommDriver
 		   the Library.
 		*/
 		String JarVersion = RXTXVersion.getVersion();
-		String LibVersion = nativeGetVersion();
+		String LibVersion;
+		try {
+		        LibVersion = RXTXVersion.nativeGetVersion();
+		} catch ( Error UnsatisfiedLinkError )
+		{
+			// for rxtx prior to 2.1.7
+			LibVersion = nativeGetVersion();
+		}
 		if ( devel )
 		{
 			System.out.println("Devel Library");
@@ -76,11 +84,12 @@ public class RXTXCommDriver implements CommDriver
 	/** Get the Serial port prefixes for the running OS */
 	private String deviceDirectory;
 	private String osName;
-	private static native String nativeGetVersion();
 	private native boolean registerKnownPorts(int PortType);
 	private native boolean isPortPrefixValid(String dev);
 	private native boolean testRead(String dev, int type);
 	private native String getDeviceDirectory();
+	// for rxtx prior to 2.1.7
+	public static native String nativeGetVersion();
 
 	private final String[] getValidPortPrefixes(String CandidatePortPrefixes[])
 	{

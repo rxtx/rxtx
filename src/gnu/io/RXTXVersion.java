@@ -36,6 +36,7 @@ public class RXTXVersion
 	private static String Version;
 
 	static {
+		System.loadLibrary( "rxtxSerial" );
 		Version = "RXTX-2.1-7pre20";
 	}
 	/**
@@ -47,4 +48,5 @@ public class RXTXVersion
 	{
 		return(Version);
 	}
+	public static native String nativeGetVersion();
 }
