@@ -2841,7 +2841,12 @@ int read_byte_array(
 	fd_set rset;
 	/* TRENT */
 	int count = 0;
+        sigset_t sigpwr_mask;
 
+	// init the sigset for blocking SIGPWR
+	sigemptyset(&sigpwr_mask);
+	sigaddset(&sigpwr_mask, SIGPWR);
+	
 	report_time_start();
 	ENTER( "read_byte_array" );
 	sprintf(msg, "read_byte_array requests %i\n", length);
@@ -2869,8 +2874,11 @@ int read_byte_array(
 		else{
 			tvP = NULL;
 		}
-
+		
+		// ignore SIGPWR during SELECT as gcj GC uses this signal
+		sigprocmask(SIG_BLOCK, &sigpwr_mask, NULL);
 		ret = SELECT(fd + 1, &rset, NULL, NULL, tvP);
+		sigprocmask(SIG_UNBLOCK, &sigpwr_mask, NULL);
 		if (ret == -1){
 			report( "read_byte_array: select returned -1\n" );
 			LEAVE( "read_byte_array" );
