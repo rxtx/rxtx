@@ -2843,9 +2843,10 @@ int read_byte_array(
 	int count = 0;
         sigset_t sigpwr_mask;
 
-	// init the sigset for blocking SIGPWR
+	// init the sigset for blocking SIGPWR + SIGXCPU
 	sigemptyset(&sigpwr_mask);
 	sigaddset(&sigpwr_mask, SIGPWR);
+	sigaddset(&sigpwr_mask, SIGXCPU);
 	
 	report_time_start();
 	ENTER( "read_byte_array" );
@@ -2875,7 +2876,7 @@ int read_byte_array(
 			tvP = NULL;
 		}
 		
-		// ignore SIGPWR during SELECT as gcj GC uses this signal
+		// ignore SIGPWR + SIGXCPU during SELECT as gcj GC uses these signals
 		sigprocmask(SIG_BLOCK, &sigpwr_mask, NULL);
 		ret = SELECT(fd + 1, &rset, NULL, NULL, tvP);
 		sigprocmask(SIG_UNBLOCK, &sigpwr_mask, NULL);
