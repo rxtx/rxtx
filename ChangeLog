@@ -4,6 +4,8 @@ rxtx-2.1 and rxtx-2.0 changes are kept in the same file.  skip to the version
 you downloaded.
 
 2.1-7pre22 Mar 25 2005
+		CNI Ignore SIGXCPU as GCJ garbage collection uses this too.
+		Mark Anderson <mark@panonet.net>
 		CNI Patch to avoid having the SIGPWR signal interrupt select()
 		Mark Anderson <mark@panonet.net>
 		CNI debug message cleanups and fd fix
