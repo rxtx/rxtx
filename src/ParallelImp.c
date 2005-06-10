@@ -31,7 +31,9 @@
 #if defined(__MWERKS__)/* dima */
 #include "LPRPort.h"
 #else /* dima */
-#include "config.h"
+#ifndef WIN32
+#	include "config.h"
+#endif
 /* work around for libc5 */
 /*#include <typedefs_md.h>*/
 #include "gnu_io_LPRPort.h"
@@ -46,7 +48,7 @@
 #	include <sys/param.h>
 #else
 #	include <errno.h>
-#	include <win32termios.h>
+#	include "win32termios.h"
 #endif
 #include <sys/types.h>
 #include <sys/stat.h>

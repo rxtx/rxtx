@@ -93,9 +93,20 @@ int serial_test( char * filename )
 	int ret;
 	hcomm = CreateFile( filename, GENERIC_READ |GENERIC_WRITE, 0, 0, OPEN_EXISTING, 0, 0 );
 	if ( hcomm == INVALID_HANDLE_VALUE )
-		ret = 0;
+	{
+		if (GetLastError() == ERROR_ACCESS_DENIED)
+		{
+			ret = 1;
+		}
+		else
+		{
+			ret = 0;
+		}
+	}
 	else
+	{
 		ret = 1;
+	}
 	CloseHandle( hcomm );
 	return(ret);
 }
@@ -1184,7 +1195,7 @@ int serial_open( const char *filename, int flags, ... )
 		sprintf( message, "open():  Invalid Port Reference for %s\n",
 			filename );
 		report( message );
-		close( index->fd );
+		serial_close( index->fd );
 		return -1;
 	}
 
@@ -1291,12 +1302,10 @@ int serial_write( int fd, char *Str, int length )
 	}
 	else
 	{
-		/* ClearErrors( index, &Stat ); */
-		/* report("Condition 3 Detected in write()\n"); */
-		YACK();
-		errno = EIO;
-		/* report( "serial_write bailing!\n" ); */
-		return(-1);
+		/* Write finished synchronously.  That is ok!
+		 * I have seen this with USB to Serial
+		 * devices like TI's.
+		 */
 	}
 end:
 	/* FlushFileBuffers( index->hComm ); */
@@ -2715,7 +2724,16 @@ int ioctl( int fd, int request, ... )
 
 	va_start( ap, request );
 	
-	ClearErrors( index, &Stat );
+	ret = ClearErrors( index, &Stat );
+	if (ret == 0)
+	{
+		set_errno( EBADFD );
+		YACK();
+		report( "ClearError Failed! ernno EBADFD" );
+		arg = va_arg( ap, int * );
+		va_end( ap );
+		return -1;		
+	}
 	switch( request )
 	{
 		case TCSBRK:
@@ -3139,6 +3157,7 @@ int  serial_select( int  n,  fd_set  *readfds,  fd_set  *writefds,
 	struct termios_list *index;
 	char message[80];
 	COMSTAT Stat;
+	int ret;
 
 	ENTER( "serial_select" );
 	if ( fd <= 0 )
@@ -3163,7 +3182,8 @@ int  serial_select( int  n,  fd_set  *readfds,  fd_set  *writefds,
 	ResetEvent( index->wol.hEvent );
 	ResetEvent( index->sol.hEvent );
 	ResetEvent( index->rol.hEvent );
-	ClearErrors( index, &Stat );
+	ret = ClearErrors( index, &Stat );
+	if (ret == 0) goto fail;
 	while ( wait == WAIT_TIMEOUT && index->sol.hEvent )
 	{
 		if( index->interrupt == 1 )
@@ -3202,7 +3222,7 @@ int  serial_select( int  n,  fd_set  *readfds,  fd_set  *writefds,
 	}
 end:
 	/*  You may want to chop this out for lower latency */
-	usleep(1000)
+	usleep(1000);
 	LEAVE( "serial_select" );
 	return( 1 );
 timeout:

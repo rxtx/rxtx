@@ -19,7 +19,9 @@
 #if defined(__MWERKS__) /* dima */
 #include "RXTXPort.h" /* dima */
 #else  /* dima */
-#include "config.h"
+#ifndef WIN32
+#	include "config.h"
+#endif
 #include "gnu_io_RXTXPort.h"
 #endif /* dima */
 #ifdef __LCC__ /* windows lcc compiler for fd_set. probably wrong */
@@ -39,7 +41,7 @@
 #include <sys/utsname.h>
 #include <pthread.h>
 #else
-#	include <win32termios.h>
+#	include "win32termios.h"
 /*  FIXME  returns 0 in all cases on win32
 #define S_ISCHR(m)	(((m)&S_IFMT) == S_IFCHR)
 */
@@ -3520,7 +3522,9 @@ int check_line_status_register( struct event_info_struct *eis )
 
 	if( ! eis->eventflags[SPE_OUTPUT_BUFFER_EMPTY] )
 	{
-		report( "check_line_status_registe OUPUT_BUFFER_EMPTY not set\n" );
+		/* This occurs constantly so remove for now
+		 * report( "check_line_status_registe OUPUT_BUFFER_EMPTY not set\n" );
+		 */
 		return 0;
 	}
 	if ( fstat( eis->fd, &fstatbuf ) )
