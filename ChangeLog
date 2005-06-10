@@ -12,6 +12,9 @@ you downloaded.
 		Mark Anderson <mark@panonet.net>
 		Dont override system properties 
 		Klaus Kierer <klaus.kierer@tiscover.com>
+		W32 build fixes and Locking fixes
+		Dave Acker <dacker@nomadio.net>
+
 2.1-7pre21 Oct 16 2004
 		dereferencing type-punned pointer will break strict-aliasing
 		rules.  Fixed.
