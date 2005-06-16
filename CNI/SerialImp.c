@@ -2878,7 +2878,9 @@ int read_byte_array(
 		
 		// ignore SIGPWR + SIGXCPU during SELECT as gcj GC uses these signals
 		sigprocmask(SIG_BLOCK, &sigpwr_mask, NULL);
-		ret = SELECT(fd + 1, &rset, NULL, NULL, tvP);
+		do {
+			ret = SELECT(fd + 1, &rset, NULL, NULL, tvP);
+		} while ( ret < 0 && errno == EINTR );
 		sigprocmask(SIG_UNBLOCK, &sigpwr_mask, NULL);
 		if (ret == -1){
 			report( "read_byte_array: select returned -1\n" );
