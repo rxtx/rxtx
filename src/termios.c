@@ -301,24 +301,15 @@ int CBR_to_B( int Baud )
 		case CBR_2400:		return( B2400 );
 		case CBR_4800:		return( B4800 );
 		case CBR_9600:		return( B9600 );
+		case CBR_14400:		return( B14400 );
 		case CBR_19200:		return( B19200 );
 		case CBR_28800:		return( B28800 );
 		case CBR_38400:		return( B38400 );
 		case CBR_57600:		return( B57600 );
 		case CBR_115200:	return( B115200 );
-		/*  14400, 128000 and 256000 are windows specific but need to
-		 *  work.
-		 *  hosed on my hardware....
-		 */
-		case CBR_14400:		return( B14400 );
 		case CBR_128000:	return( B128000 );
-		case CBR_256000:	return( B256000 );
-
-		/*  The following could be used on linux and should be able to
-		 *  work on windows if we get control of baud/divisor.
-		 */
-
 		case CBR_230400:	return( B230400 );
+		case CBR_256000:	return( B256000 );
 		case CBR_460800:	return( B460800 );
 		case CBR_500000:	return( B500000 );
 		case CBR_576000:	return( B576000 );
@@ -368,21 +359,13 @@ int B_to_CBR( int Baud )
 		case B2400:	ret = CBR_2400;		break;
 		case B4800:	ret = CBR_4800;		break;
 		case B9600:	ret = CBR_9600;		break;
+		case B14400:	ret = CBR_14400;	break;
 		case B19200:	ret = CBR_19200;	break;
 		case B38400:	ret = CBR_38400;	break;
 		case B57600:	ret = CBR_57600;	break;
 		case B115200:	ret = CBR_115200;	break;
-
-		/*  14400, 128000 and 256000 are windows specific but need to
-		 *  work.
-		 */
-		case B14400:	ret = CBR_14400;	break;
 		case B128000:	ret = CBR_128000;	break;
 		case B256000: 	ret = CBR_256000;	break;
-
-		/*  The following could be used on linux and should be able to
-		 *  work on windows if we get control of baud/divisor.
-		 */
 		case B230400:	ret = CBR_230400;	break;
 		case B460800:	ret = CBR_460800;	break;
 		case B500000:	ret = CBR_500000;	break;

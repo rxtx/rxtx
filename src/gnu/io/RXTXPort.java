@@ -2079,15 +2079,17 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	}
 
 	/**
-	*  Extension to CommAPI
+	*  Extension to CommAPI.  Set Baud Base to 38600 on Linux and W32
+	*  before using.
 	*  @param int BaudBase The clock frequency divided by 16.  Default
 	*  BaudBase is 115200.
 	*  @return boolean true on success
-	*  @throws UnsupportedCommOperationException
+	*  @throws UnsupportedCommOperationException, IOException
 	*/
 
 	public boolean setBaudBase(int BaudBase)
-		throws UnsupportedCommOperationException
+		throws UnsupportedCommOperationException,
+		IOException
 	{
 		if ( debug )
 			z.reportln(  "RXTXPort:setBaudBase()");
@@ -2097,10 +2099,11 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	/**
 	*  Extension to CommAPI
 	*  @return int BaudBase
-	*  @throws UnsupportedCommOperationException
+	*  @throws UnsupportedCommOperationException, IOException
 	*/
 
-	public int getBaudBase() throws UnsupportedCommOperationException
+	public int getBaudBase() throws UnsupportedCommOperationException,
+		IOException
 	{
 		if ( debug )
 			z.reportln(  "RXTXPort:getBaudBase()");
@@ -2108,13 +2111,14 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	}
 
 	/**
-	*  Extension to CommAPI
+	*  Extension to CommAPI.  Set Baud Base to 38600 on Linux and W32
+	*  before using.
 	*  @param int Divisor;
-	*  @throws UnsupportedCommOperationException
+	*  @throws UnsupportedCommOperationException, IOException
 	*/
 
 	public boolean setDivisor(int Divisor)
-		throws UnsupportedCommOperationException
+		throws UnsupportedCommOperationException, IOException
 	{
 		if ( debug )
 			z.reportln(  "RXTXPort:setDivisor()");
@@ -2124,10 +2128,11 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	/**
 	*  Extension to CommAPI
 	*  @returns int Divisor;
-	*  @throws UnsupportedCommOperationException
+	*  @throws UnsupportedCommOperationException, IOException
 	*/
 
-	public int getDivisor() throws UnsupportedCommOperationException
+	public int getDivisor() throws UnsupportedCommOperationException,
+		IOException
 	{
 		if ( debug )
 			z.reportln(  "RXTXPort:getDivisor()");

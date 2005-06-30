@@ -103,13 +103,17 @@ public abstract class SerialPort extends CommPort {
 	public abstract String getUARTType()
 		throws UnsupportedCommOperationException;
 	public abstract boolean setBaudBase(int BaudBase)
-		throws UnsupportedCommOperationException;
+		throws UnsupportedCommOperationException,
+		IOException;
 	public abstract int getBaudBase()
-		throws UnsupportedCommOperationException;
+		throws UnsupportedCommOperationException,
+		IOException;
 	public abstract boolean setDivisor(int Divisor)
-		throws UnsupportedCommOperationException;
+		throws UnsupportedCommOperationException,
+		IOException;
 	public abstract int getDivisor()
-		throws UnsupportedCommOperationException;
+		throws UnsupportedCommOperationException,
+		IOException;
 	public abstract boolean setLowLatency()
 		throws UnsupportedCommOperationException;
 	public abstract boolean getLowLatency()

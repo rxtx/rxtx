@@ -312,7 +312,8 @@ void termiosSetParityError( int, char );
 #define  B3500000 0010016
 #define  B4000000 0010017
 
-/* glue for unsupported linux speeds see also SerialImp.h.h */
+/* glue for unsupported linux speeds see also SerialImp.h */
+/* hosed */
 
 #define B14400		1010001
 #define B28800		1010002
