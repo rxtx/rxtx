@@ -9644,6 +9644,8 @@ check_java_headers()
 
 cat > conftest.c << EOF
 #include <features.h>
+#include <stdio.h>
+#include <stdlib.h>
 int main(int argc, char *argv)
 {
 #if defined (__GLIBC__)
@@ -9782,6 +9784,8 @@ check_kernel_headers()
 	cat > conftest.c << EOF
 
 #include <linux/version.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 int main(int argc, char *argv)
 {
@@ -9825,7 +9829,7 @@ if test "$CC" = "gcc" || test "$CC"="egcs"; then
 	Tran*)
 		find_java_native_include jni.h
 		JAVAH="\$(JPATH)/bin/kaffeh -classpath \$(CLASSPATH) -d \$(DEST) -jni"
-		JAVAC="\$(JPATH)/bin/javac -classpath \$(CLASSPATH) -d \$(TOP)/ -O"
+		JAVAC="\$(JPATH)/bin/javac -classpath \$(CLASSPATH) -d \$(TOP)/ -O -source 1.3 -target 1.3"
 		JAR="\$(JPATH)/bin/jar"
 		JAVADOC="\$(JPATH)/bin/javadoc -classpath \$(CLASSPATH)"
 		CFLAGS=$CFLAGS" -D_BSD_SOURCE"
@@ -9837,7 +9841,7 @@ if test "$CC" = "gcc" || test "$CC"="egcs"; then
 	*)
 		find_java_native_include jni_md.h
 		JAVAH="\$(JPATH)/bin/javah -classpath \$(CLASSPATH) -d \$(DEST) -jni"
-		JAVAC="\$(JPATH)/bin/javac -classpath \$(CLASSPATH) -d \$(TOP)/ -O"
+		JAVAC="\$(JPATH)/bin/javac -classpath \$(CLASSPATH) -d \$(TOP)/ -O -source 1.3 -target 1.3"
 		JAR="\$(JPATH)/bin/jar"
 		JAVADOC="\$(JPATH)/bin/javadoc"
 		CFLAGS=$CFLAGS" -D_BSD_SOURCE"
