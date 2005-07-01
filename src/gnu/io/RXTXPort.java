@@ -1666,6 +1666,8 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 		throws UnsupportedCommOperationException;
 	private native boolean nativeGetCallOutHangup()
 		throws UnsupportedCommOperationException;
+	private native boolean nativeClearCommInput()
+		throws UnsupportedCommOperationException;
 
 	/**
 	*  Extension to CommAPI
@@ -2191,6 +2193,20 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 		if ( debug )
 			z.reportln(  "RXTXPort:getCallOutHangup()");
 		return nativeGetCallOutHangup();
+	}
+
+	/**
+	*  Extension to CommAPI
+	*  returns boolean true on success
+	*  @throws UnsupportedCommOperationException
+	*/
+
+	public boolean clearCommInput()
+		throws UnsupportedCommOperationException
+	{
+		if ( debug )
+			z.reportln(  "RXTXPort:clearCommInput()");
+		return nativeClearCommInput();
 	}
 
 /*------------------------  END OF CommAPI Extensions -----------------------*/

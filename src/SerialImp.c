@@ -3414,6 +3414,23 @@ JNIEXPORT jint JNICALL RXTXPort(readArray)( JNIEnv *env,
 }
 
 /*----------------------------------------------------------
+RXTXPort.nativeClearCommInput
+
+   accept:       none
+   perform:      try to clear the input.
+   return:       true on success, false on error
+   exceptions:   none
+   comments:     This is an extension to commapi.
+----------------------------------------------------------*/
+JNIEXPORT jboolean JNICALL RXTXPort(nativeClearCommInput)( JNIEnv *env,
+	jobject jobj )
+{
+	int fd = get_java_var( env, jobj, "fd", "I" );
+	if ( tcflush( fd, TCIFLUSH ) )
+		return( JNI_FALSE );
+	return( JNI_TRUE );
+}
+/*----------------------------------------------------------
 RXTXPort.readTerminatedArray
 
    accept:       offset (offset to start storing data in the jbarray) and
