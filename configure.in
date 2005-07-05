@@ -113,6 +113,17 @@ AC_ARG_ENABLE(lockfiles,
 		CFLAGS=$CFLAGS" -DDISABLE_LOCKFILES"
 	fi
 )
+AC_ARG_ENABLE(liblock,
+	[  --enable-liblock[=x]     enable liblock [default=no]],
+	if test "x$liblock" != "xno"; then 
+		echo "Using liblock"
+		CFLAGS=$CFLAGS" -DLIBLOCKDEV"
+		LDFLAGS=$LDFLAGS" -llockdev"
+	else
+		echo $liblock
+		echo "Disabling liblock"
+	fi
+)
 
 AC_ARG_ENABLE(lockfile_server,
 	[  --enable-lockfile_server          Enable interaction with a lock file server [default=no]],
@@ -446,7 +457,7 @@ fi
 
 [ case $OS_NAME in 
 Linux)
-	LDFLAGS=-lpthread
+	LDFLAGS=$LDFLAGS" -lpthread"
 	check_kernel_headers
 	check_java_headers
 	CFLAGS=$CFLAGS" -D__need_timespec"
@@ -499,7 +510,7 @@ Linux)
 	beos*)
 		TARGETLIB="\$(target_triplet)/librxtxSerial.la"
 		EXTENSION="cpp"
-		LDFLAGS="-ldevice"
+		LDFLAGS=$LDFLAGS" -ldevice"
 		#echo ----------------------------
 		#echo $target_os
 		#echo ----------------------------
@@ -516,7 +527,7 @@ Linux)
 ;;
 
 *BSD)
-	LDFLAGS=-lc_r
+	LDFLAGS=$LDFLAGS" -lc_r"
 	JHOME=$JPATH/"lib"
 	CFLAGS=$CFLAGS" -D_NO_POSIX=1 -D_NO_XOPEN4=1"
 	TARGETLIB="\$(target_triplet)/librxtxSerial.la \
@@ -577,7 +588,7 @@ Irix*)
 #  FIXME
 
 UnixWare|OpenUNIX)
-	LDFLAGS=-lpthread_this_may_be_wrong__trent
+	LDFLAGS=$LDFLAGS" -lpthread_this_may_be_wrong__trent"
 	JHOME=$JPATH/"jre/lib"
 	CFLAGS=$CFLAGS" -D_NO_POSIX=1 -D_NO_XOPEN4=1 -D__unixware__"
 	CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:\$(JPATH)/jre/lib/rt.jar:\$(JPATH)/jre/lib/ext/comm.jar"
@@ -589,7 +600,7 @@ UnixWare|OpenUNIX)
 ;;
 
 HP-UX)
-	LDFLAGS=-lpthread_this_may_be_wrong__trent
+	LDFLAGS=$LDFLAGS" -lpthread_this_may_be_wrong__trent"
 	CFLAGS=$CFLAGS" -g -Aa +e -D__hpux__ -D_HPUX_SOURCE -D_NO_POSIX=1 -D_NO_XOPEN4=1"
 	RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
 	TARGETLIB="\$(target_triplet)/librxtxSerial.la"
@@ -643,7 +654,7 @@ BeOS)
 	CLASSPATH=".:\$(TOP):\$(TOP)/../src:\$(JPATH)/share/kaffe/Klasses.jar:\$(JPATH)/lib/RXTXcomm.jar:$CLASSPATH"
 	TARGETLIB="\$(target_triplet)/librxtxSerial.la"
 	EXTENSION="cpp"
-	LDFLAGS="-ldevice"
+	LDFLAGS=$LDFLAGS" -ldevice"
 #  sigh, from ltconfig 
 #  beos*)
 #     if $LD --help 2>&1 | egrep ': supported targets:.* elf' > /dev/null; then
@@ -694,7 +705,7 @@ Mac\ OS\ X)
 	RXTX_PATH="/usr/lib/java"
 	JHOME=$JPATH"/lib/ext"
 	CFLAGS=$CFLAGS" -bundle"
-	LDFLAGS="$LDFLAGS -module -framework JavaVM -framework IOKit -framework CoreFoundation"
+ 	LDFLAGS=$(LDFLAGS" -module -framework JavaVM -framework IOKit -framework CoreFoundation"
 	CLASSPATH=".:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/ext/RXTXcomm.jar:$CLASSPATH"
 	#  email taj@www.linux.org.uk if you know a nicer fix.  Needed anymore?
 	#  this fix was really old taj 6/05
@@ -702,7 +713,7 @@ Mac\ OS\ X)
 ;;
 
 Solaris*)
-	LDFLAGS=-lpthread
++ 	LDFLAGS=$LDFLAGS" -lpthread"
 	TARGETLIB="\$(target_triplet)/librxtxSerial.la \
 		\$(target_triplet)/librxtxParallel.la"
 	JHOME=$JPATH/"lib"
@@ -739,7 +750,7 @@ AIX)
 ;;
 
 Compaq\'s\ Digital\ Unix | OSF1 )
-	LDFLAGS=-lpthread
+	LDFLAGS=$LDFLAGS" -lpthread"
 	TARGETLIB="\$(target_triplet)/librxtxSerial.la"
 	RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
 	JHOME=$JPATH/"lib"

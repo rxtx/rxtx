@@ -104,6 +104,9 @@
 #include 	<grp.h>
 #endif /* HAVE_GRP_H */
 #include <math.h>
+#ifdef LIBLOCKDEV
+#include	<lockdev.h>
+#endif /* LIBLOCKDEV */
 
 extern int errno;
 
@@ -5094,6 +5097,69 @@ int lfs_unlock( const char *filename, int pid )
 	return 1;
 }
 #endif /* LFS */
+
+/*----------------------------------------------------------
+ lib_lock_dev_unlock
+
+   accept:      The name of the device to try to unlock
+   perform:     Remove a lock file if there is one using a
+                lock file server.
+   return:      1 on failure 0 on success
+   exceptions:  none
+   comments:    This is for use with liblockdev which comes with Linux
+		distros.  I suspect it will be problematic with embeded
+		Linux.   taj
+
+----------------------------------------------------------*/
+#ifdef LIBLOCKDEV
+int lib_lock_dev_unlock( const char *filename, int pid )
+{
+	if( dev_unlock( filename, pid ) )
+	{
+		report("fhs_unlock: Unable to remove LockFile\n");
+		return(1);
+	}
+	return(0);
+}
+#endif /* LIBLOCKDEV */
+
+/*----------------------------------------------------------
+ lib_lock_dev_lock
+
+   accept:      The name of the device to try to lock
+                termios struct
+   perform:     Create a lock file if there is not one already.
+   return:      1 on failure 0 on success
+   exceptions:  none
+   comments:    This is for use with liblockdev which comes with Linux
+		distros.  I suspect it will be problematic with embeded
+		Linux.   taj
+
+		One could load the library here rather than link it and
+		always try to use this.
+
+----------------------------------------------------------*/
+#ifdef LIBLOCKDEV
+int lib_lock_dev_lock( const char *filename, int pid )
+{
+	char message[80];
+	printf("LOCKING %s\n", filename);
+	if ( dev_testlock( filename ) )
+	{
+		report( "fhs_lock() lockstatus fail\n" );
+		return 1;
+	}
+	if ( dev_lock( filename ) )
+	{
+		sprintf( message,
+			"RXTX fhs_lock() Error: creating lock file for: %s: %s\n",
+			filename, strerror(errno) );
+		report_error( message );
+		return 1;
+	}
+	return( 0 );
+}
+#endif /* LIBLOCKDEV */
 
 /*----------------------------------------------------------
  fhs_lock

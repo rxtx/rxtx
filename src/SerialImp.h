@@ -325,8 +325,13 @@ struct timeval snow, enow, seloop, eeloop;
 #	define LOCK fhs_lock
 #	define UNLOCK fhs_unlock
 #elif defined(FHS)
+#ifdef LIBLOCKDEV
+#	define LOCK lib_lock_dev_lock
+#	define UNLOCK lib_lock_dev_unlock
+#else
 #	define LOCK fhs_lock
 #	define UNLOCK fhs_unlock
+#endif /* LIBLOCKDEV */
 #else 
 #	define LOCK system_does_not_lock
 #	define UNLOCK system_does_not_unlock
@@ -423,6 +428,8 @@ int is_device_locked( const char * );
 int check_lock_status( const char * );
 int lfs_unlock(const char *, int );
 int lfs_lock( const char *, int);
+int lib_lock_dev_unlock(const char *, int );
+int lib_lock_dev_lock( const char *, int);
 void fhs_unlock(const char *, int );
 int fhs_lock( const char *, int);
 void uucp_unlock( const char *, int );
