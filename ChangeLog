@@ -15,6 +15,7 @@ you downloaded.
 		Klaus Kierer <klaus.kierer@tiscover.com>
 		W32 build fixes and Locking fixes
 		Dave Acker <dacker@nomadio.net>
+		Mac OS X auto* build fixes
 
 2.1-7pre21 Oct 16 2004
 		dereferencing type-punned pointer will break strict-aliasing

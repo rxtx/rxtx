@@ -28,8 +28,8 @@ CLASSDIR=gnu.io
 CLASSTOP=gnu
 CLASSDEST=gnu/io
 ####################### tools
-LIBTOOLC=$(TOP)/libtool --mode=compile $(CC) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) $(VERBOSE_IOEXCEPTIONS) -c
-LIBTOOL_INST=$(TOP)/libtool --mode=install $(INSTALL_PROGRAM)
+LIBTOOLC=$(GLIBTOOL) --mode=compile $(CC) $(INCLUDES) $(CPPFLAGS) $(CFLAGS) $(VERBOSE_IOEXCEPTIONS) -c
+LIBTOOL_INST=$(GLIBTOOL) --mode=install $(INSTALL_PROGRAM)
 ####################### dirs
 SPATH = $(abs_srcdir)/src
 DEST=$(target_triplet)

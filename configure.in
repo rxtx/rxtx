@@ -70,6 +70,7 @@ AC_SUBST(LINK)
 AC_SUBST(COMPILE)
 AC_SUBST(OBJECT_EXTENSION)
 AC_SUBST(LIB_EXTENSION)
+AC_SUBST(GLIBTOOL)
 # ftsoy
 AM_MAINTAINER_MODE
 
@@ -80,7 +81,8 @@ OBJECT_EXTENSION="lo"
 LIB_EXTENSION="la"
 COMPILE="cc "
 TOP="`pwd`"
-LINK="\$(TOP)/libtool --mode=link \$(CC) \$(CFLAGS) \$(LDFLAGS) -release \$(VERSION) -o librxtx\$*.la -rpath \$(RXTX_PATH)"
+GLIBTOOL="\$(SHELL) \$(TOP)/libtool"
+LINK="\$(GLIBTOOL) --mode=link \$(CC) \$(CFLAGS) \$(LDFLAGS) -release \$(VERSION) -o librxtx\$*.la -rpath \$(RXTX_PATH)"
 
 [case "$host_os" in
 	*-gnu)
@@ -376,6 +378,14 @@ EOF
 	rm -f conftest.c
 	rm -f conftest
 }
+#fix_mac_groups()
+#{
+#this is what the Mac OS X installer does... untested
+#	sudo mkdir /var/spool/uucp
+#	sudo chmod 775 /var/spool/uucp
+#	sudo niutil -destroyval / /groups/uucp users `sudo id -p | grep 'login' | sed 's/login.//'`
+#	sudo niutil -appendprop / /groups/uucp users `sudo id -p | grep 'login' | sed 's/login.//'`
+#}
 fix_comm_jar()
 {
 	if [ test -f $1 ];then
@@ -674,8 +684,10 @@ WIN32)
 ;;
 
 Mac\ OS\ X)
+	#fix_mac_groups
 	#fix_parameters $JPATH/lib/javax.comm.properties
-	LINK="cc -bundle -framework CoreFoundation -framework IOKit -o lib\$*.jnilib "
+	GLIBTOOL="\$(SHELL) glibtool"
+	LINK="cc -bundle -framework CoreFoundation -framework IOKit -o librxtx\$*.jnilib "
 	OBJECT_EXTENSION="o"
 	LIB_EXTENSION="jnilib"
 	TARGETLIB="\$(target_triplet)/librxtxSerial.jnilib"
@@ -685,7 +697,8 @@ Mac\ OS\ X)
 	LDFLAGS="$LDFLAGS -module -framework JavaVM -framework IOKit -framework CoreFoundation"
 	CLASSPATH=".:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/ext/RXTXcomm.jar:$CLASSPATH"
 	#  email taj@www.linux.org.uk if you know a nicer fix.  Needed anymore?
-	LIBTOOL_FIX="sed s/echo\ so/echo\ jnilib/g libtool > tmp; mv tmp libtool; chmod +x libtool;"
+	#  this fix was really old taj 6/05
+	# LIBTOOL_FIX="sed s/echo\ so/echo\ jnilib/g libtool > tmp; mv tmp libtool; chmod +x libtool;"
 ;;
 
 Solaris*)
