@@ -1037,6 +1037,7 @@ Optional Features:
 			  (and sometimes confusing) to the casual installer
   --enable-PRINTER        PRINTER support (experimental) default=yes
   --disable-lockfiles     disable lock files (experimental) default=no
+  --enable-liblock=x     enable liblock default=no
   --enable-lockfile_server          Enable interaction with a lock file server default=no
   --enable-DEBUG          Print debugging info from SerialImp.c default=no
 
@@ -3096,7 +3097,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 3099 "configure"' > conftest.$ac_ext
+  echo '#line 3100 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -4566,7 +4567,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:4569:" \
+echo "$as_me:4570:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -5639,6 +5640,10 @@ fi
 
 
 
+## CAVEAT EMPTOR:
+## There is no encapsulation within the following macros, do not change
+## the running order or otherwise move them around unless you know exactly
+## what you are doing...
 
 lt_prog_compiler_no_builtin_flag=
 
@@ -5664,11 +5669,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:5667: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:5672: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:5671: \$? = $ac_status" >&5
+   echo "$as_me:5676: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -5926,11 +5931,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:5929: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:5934: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:5933: \$? = $ac_status" >&5
+   echo "$as_me:5938: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -5988,11 +5993,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:5991: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:5996: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:5995: \$? = $ac_status" >&5
+   echo "$as_me:6000: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -7374,7 +7379,7 @@ linux*)
   libsuff=
   case "$host_cpu" in
   x86_64*|s390x*|powerpc64*)
-    echo '#line 7377 "configure"' > conftest.$ac_ext
+    echo '#line 7382 "configure"' > conftest.$ac_ext
     if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -8249,7 +8254,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 8252 "configure"
+#line 8257 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -8347,7 +8352,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 8350 "configure"
+#line 8355 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10191,6 +10196,10 @@ test "$ld_shlibs_CXX" = no && can_build_shared=no
 GCC_CXX="$GXX"
 LD_CXX="$LD"
 
+## CAVEAT EMPTOR:
+## There is no encapsulation within the following macros, do not change
+## the running order or otherwise move them around unless you know exactly
+## what you are doing...
 
 cat > conftest.$ac_ext <<EOF
 class Foo
@@ -10595,11 +10604,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10598: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10607: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:10602: \$? = $ac_status" >&5
+   echo "$as_me:10611: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -10657,11 +10666,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10660: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10669: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:10664: \$? = $ac_status" >&5
+   echo "$as_me:10673: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -11172,7 +11181,7 @@ linux*)
   libsuff=
   case "$host_cpu" in
   x86_64*|s390x*|powerpc64*)
-    echo '#line 11175 "configure"' > conftest.$ac_ext
+    echo '#line 11184 "configure"' > conftest.$ac_ext
     if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -12047,7 +12056,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 12050 "configure"
+#line 12059 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12145,7 +12154,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 12148 "configure"
+#line 12157 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13030,11 +13039,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13033: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13042: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:13037: \$? = $ac_status" >&5
+   echo "$as_me:13046: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -13092,11 +13101,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13095: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13104: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:13099: \$? = $ac_status" >&5
+   echo "$as_me:13108: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -14458,7 +14467,7 @@ linux*)
   libsuff=
   case "$host_cpu" in
   x86_64*|s390x*|powerpc64*)
-    echo '#line 14461 "configure"' > conftest.$ac_ext
+    echo '#line 14470 "configure"' > conftest.$ac_ext
     if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -15210,6 +15219,10 @@ archive_cmds_need_lc_GCJ=no
 
 old_archive_cmds_GCJ=$old_archive_cmds
 
+## CAVEAT EMPTOR:
+## There is no encapsulation within the following macros, do not change
+## the running order or otherwise move them around unless you know exactly
+## what you are doing...
 
 lt_prog_compiler_no_builtin_flag_GCJ=
 
@@ -15235,11 +15248,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15238: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15251: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:15242: \$? = $ac_status" >&5
+   echo "$as_me:15255: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -15497,11 +15510,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15500: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15513: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:15504: \$? = $ac_status" >&5
+   echo "$as_me:15517: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -15559,11 +15572,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15562: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15575: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:15566: \$? = $ac_status" >&5
+   echo "$as_me:15579: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -16945,7 +16958,7 @@ linux*)
   libsuff=
   case "$host_cpu" in
   x86_64*|s390x*|powerpc64*)
-    echo '#line 16948 "configure"' > conftest.$ac_ext
+    echo '#line 16961 "configure"' > conftest.$ac_ext
     if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -17820,7 +17833,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 17823 "configure"
+#line 17836 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -17918,7 +17931,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 17921 "configure"
+#line 17934 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -21169,6 +21182,19 @@ if test "${enable_lockfiles+set}" = set; then
 	fi
 
 fi;
+# Check whether --enable-liblock or --disable-liblock was given.
+if test "${enable_liblock+set}" = set; then
+  enableval="$enable_liblock"
+  if test "x$liblock" != "xno"; then
+		echo "Using liblock"
+		CFLAGS=$CFLAGS" -DLIBLOCKDEV"
+		LDFLAGS=$LDFLAGS" -llockdev"
+	else
+		echo $liblock
+		echo "Disabling liblock"
+	fi
+
+fi;
 
 # Check whether --enable-lockfile_server or --disable-lockfile_server was given.
 if test "${enable_lockfile_server+set}" = set; then
@@ -21509,7 +21535,7 @@ fi
 
  case $OS_NAME in
 Linux)
-	LDFLAGS=-lpthread
+	LDFLAGS=$LDFLAGS" -lpthread"
 	check_kernel_headers
 	check_java_headers
 	CFLAGS=$CFLAGS" -D__need_timespec"
@@ -21562,7 +21588,7 @@ Linux)
 	beos*)
 		TARGETLIB="\$(target_triplet)/librxtxSerial.la"
 		EXTENSION="cpp"
-		LDFLAGS="-ldevice"
+		LDFLAGS=$LDFLAGS" -ldevice"
 		#echo ----------------------------
 		#echo $target_os
 		#echo ----------------------------
@@ -21579,7 +21605,7 @@ Linux)
 ;;
 
 *BSD)
-	LDFLAGS=-lc_r
+	LDFLAGS=$LDFLAGS" -lc_r"
 	JHOME=$JPATH/"lib"
 	CFLAGS=$CFLAGS" -D_NO_POSIX=1 -D_NO_XOPEN4=1"
 	TARGETLIB="\$(target_triplet)/librxtxSerial.la \
@@ -21640,7 +21666,7 @@ Irix*)
 #  FIXME
 
 UnixWare|OpenUNIX)
-	LDFLAGS=-lpthread_this_may_be_wrong__trent
+	LDFLAGS=$LDFLAGS" -lpthread_this_may_be_wrong__trent"
 	JHOME=$JPATH/"jre/lib"
 	CFLAGS=$CFLAGS" -D_NO_POSIX=1 -D_NO_XOPEN4=1 -D__unixware__"
 	CLASSPATH="-classpath .:\$(TOP):\$(TOP)/src:\$(JPATH)/jre/lib/rt.jar:\$(JPATH)/jre/lib/ext/comm.jar"
@@ -21652,7 +21678,7 @@ UnixWare|OpenUNIX)
 ;;
 
 HP-UX)
-	LDFLAGS=-lpthread_this_may_be_wrong__trent
+	LDFLAGS=$LDFLAGS" -lpthread_this_may_be_wrong__trent"
 	CFLAGS=$CFLAGS" -g -Aa +e -D__hpux__ -D_HPUX_SOURCE -D_NO_POSIX=1 -D_NO_XOPEN4=1"
 	RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
 	TARGETLIB="\$(target_triplet)/librxtxSerial.la"
@@ -21706,7 +21732,7 @@ BeOS)
 	CLASSPATH=".:\$(TOP):\$(TOP)/../src:\$(JPATH)/share/kaffe/Klasses.jar:\$(JPATH)/lib/RXTXcomm.jar:$CLASSPATH"
 	TARGETLIB="\$(target_triplet)/librxtxSerial.la"
 	EXTENSION="cpp"
-	LDFLAGS="-ldevice"
+	LDFLAGS=$LDFLAGS" -ldevice"
 #  sigh, from ltconfig
 #  beos*)
 #     if $LD --help 2>&1 | egrep ': supported targets:.* elf' > /dev/null; then
@@ -21757,7 +21783,7 @@ Mac\ OS\ X)
 	RXTX_PATH="/usr/lib/java"
 	JHOME=$JPATH"/lib/ext"
 	CFLAGS=$CFLAGS" -bundle"
-	LDFLAGS="$LDFLAGS -module -framework JavaVM -framework IOKit -framework CoreFoundation"
+ 	LDFLAGS=$(LDFLAGS" -module -framework JavaVM -framework IOKit -framework CoreFoundation"
 	CLASSPATH=".:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/ext/RXTXcomm.jar:$CLASSPATH"
 	#  email taj@www.linux.org.uk if you know a nicer fix.  Needed anymore?
 	#  this fix was really old taj 6/05
@@ -21765,7 +21791,7 @@ Mac\ OS\ X)
 ;;
 
 Solaris*)
-	LDFLAGS=-lpthread
++ 	LDFLAGS=$LDFLAGS" -lpthread"
 	TARGETLIB="\$(target_triplet)/librxtxSerial.la \
 		\$(target_triplet)/librxtxParallel.la"
 	JHOME=$JPATH/"lib"
@@ -21802,7 +21828,7 @@ AIX)
 ;;
 
 Compaq\'s\ Digital\ Unix | OSF1 )
-	LDFLAGS=-lpthread
+	LDFLAGS=$LDFLAGS" -lpthread"
 	TARGETLIB="\$(target_triplet)/librxtxSerial.la"
 	RXTX_PATH="\$(JPATH)/jre/lib/\$(OS_ARCH)"
 	JHOME=$JPATH/"lib"
