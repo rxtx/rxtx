@@ -705,7 +705,7 @@ Mac\ OS\ X)
 	RXTX_PATH="/usr/lib/java"
 	JHOME=$JPATH"/lib/ext"
 	CFLAGS=$CFLAGS" -bundle"
- 	LDFLAGS=$(LDFLAGS" -module -framework JavaVM -framework IOKit -framework CoreFoundation"
+ 	LDFLAGS=$LDFLAGS" -module -framework JavaVM -framework IOKit -framework CoreFoundation"
 	CLASSPATH=".:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/ext/RXTXcomm.jar:$CLASSPATH"
 	#  email taj@www.linux.org.uk if you know a nicer fix.  Needed anymore?
 	#  this fix was really old taj 6/05
