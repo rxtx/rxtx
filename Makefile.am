@@ -51,16 +51,19 @@ $(target_triplet)/lib%.so: $(SPATH)/%Imp.@EXTENSION@ $(CLASSES)
 #  If a LIBTOOL_FIX is added be sure to provide a trailing ';' in configure.in
 
 $(target_triplet)/librxtx%.@LIB_EXTENSION@: $(SPATH)/%Imp.c $(CLASSES) $(SPATH)/%Imp.h
-	@(							\
-	$(LIBTOOL_FIX)						\
-	cd $(DEST); 						\
-	$(LIBTOOLC) $(SPATH)/$*Imp.@EXTENSION@ -o		\
-		$(TOP)/$(DEST)/$*Imp.@OBJECT_EXTENSION@;	\
-	if [ "$*" = "rxtxSerial" ]; then 				\
-		@LINK@ $(TOP)/$(DEST)/$*Imp.@OBJECT_EXTENSION@; \
-	else							\
-		@LINK@ $(TOP)/$(DEST)/$*Imp.@OBJECT_EXTENSION@; \
-	fi;							\
+	(								\
+	$(LIBTOOL_FIX)							\
+	cd $(DEST); 							\
+	$(LIBTOOLC) $(SPATH)/$*Imp.@EXTENSION@ -o			\
+		$(TOP)/$(DEST)/$*Imp.@OBJECT_EXTENSION@;		\
+	if [ "$*" = "Serial" ]; then 					\
+		$(LIBTOOLC) $(SPATH)/fuserImp.@EXTENSION@ -o		\
+			$(TOP)/$(DEST)/fuserImp.@OBJECT_EXTENSION@;	\
+		@LINK@ $(TOP)/$(DEST)/$*Imp.@OBJECT_EXTENSION@  	\
+			$(TOP)/$(DEST)/fuserImp.@OBJECT_EXTENSION@; 	\
+	else								\
+		@LINK@ $(TOP)/$(DEST)/$*Imp.@OBJECT_EXTENSION@; 	\
+	fi;								\
 	)
 
 #  compile src/RXTXPort.java and similar files into classes
