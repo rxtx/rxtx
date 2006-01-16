@@ -793,7 +793,6 @@ final public class RXTXPort extends SerialPort
 			z.reportln( "	RXTXPort:removeEventListener() already interrupted");
 			monThread = null;
 			SPEventListener = null;
-			Runtime.getRuntime().gc();
 			return;
 		}
 		else if( monThread != null && monThread.isAlive() )
@@ -848,7 +847,6 @@ final public class RXTXPort extends SerialPort
 			z.reportln( "	RXTXPort:calling gc()");
 		monThread = null;
 		SPEventListener = null;
-		Runtime.getRuntime().gc();
 		MonitorThreadLock = false;
 		MonitorThreadAlive=false;
 		monThreadisInterrupted=true;
