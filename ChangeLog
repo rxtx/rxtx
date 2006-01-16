@@ -14,6 +14,9 @@ you downloaded.
 		System.gc() slows down close() too much.
 		Øyvind Harboe oyvind.harboe@zylin.com 
 		http://mailman.qbang.org/pipermail/rxtx/20060103/002025.html
+		Configure.java message correction
+		Gerrit Telkamp g.telkamp@domologic.de
+		http://mailman.qbang.org/pipermail/rxtx/20051230/002018.html 
 2.1-7pre22 Mar 25 2005
 		CNI retry on EINTR <mark@panonet.net>
 		CNI Ignore SIGXCPU as GCJ garbage collection uses this too.
