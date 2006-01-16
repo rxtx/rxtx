@@ -1107,7 +1107,7 @@ final public class RXTXPort extends SerialPort
 				if (debug_write)
 					z.reportln( "Leaving RXTXPort:SerialOutputStream:write( int )");
 			}
-			catch( IOException e );
+			catch( IOException e )
 			{
 				IOLocked--;
 				throw e;
