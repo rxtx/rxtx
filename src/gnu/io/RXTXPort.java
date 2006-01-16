@@ -1107,10 +1107,12 @@ final public class RXTXPort extends SerialPort
 				if (debug_write)
 					z.reportln( "Leaving RXTXPort:SerialOutputStream:write( int )");
 			}
-			finally
+			catch( IOException e );
 			{
 				IOLocked--;
+				throw e;
 			}
+			IOLocked--;
 		}
 	/**
 	*  @param b[]
@@ -1136,10 +1138,12 @@ final public class RXTXPort extends SerialPort
 				if (debug_write)
 					z.reportln( "Leaving RXTXPort:SerialOutputStream:write(" +b.length  +")");
 			}
-			finally
+			catch( IOException e )
 			{
 				IOLocked--;
+				throw e;
 			}
+			IOLocked--;
 			
 		}
 	/**
@@ -1178,10 +1182,12 @@ final public class RXTXPort extends SerialPort
 				if( debug_write )
 					z.reportln( "Leaving RXTXPort:SerialOutputStream:write(" + send.length + " " + off + " " + len + " " +") "  /*+ new String(send)*/ );
 			}
-			finally
+			catch( IOException e )
 			{
 				IOLocked--;
+				throw e;
 			}
+			IOLocked--;
 		}
 	/**
 	*/
