@@ -16,6 +16,8 @@ you downloaded.
 		http://mailman.qbang.org/pipermail/rxtx/20060103/002025.html
 		Configure.java message correction
 		User serial_close and serial_open in termios.c
+		JNI_OnLoad and JNI_OnUnload are in SerialImp.c now so remove
+		them from init.c
 		Gerrit Telkamp g.telkamp@domologic.de
 		http://mailman.qbang.org/pipermail/rxtx/20051230/002018.html 
 2.1-7pre22 Mar 25 2005
