@@ -8,6 +8,9 @@ you downloaded.
 		Blue Tooth Support
 		Pau ideiglenes1@freemail.hu
 		http://mailman.qbang.org/pipermail/rxtx/20060108/002053.html
+		%s/\`which java\`/\\\`which java\\\`/g in configure.in
+		Takeshi "Ken" Hamasaki hama@cyberonix.co.jp
+		http://mailman.qbang.org/pipermail/rxtx/20060105/002039.html
 2.1-7pre22 Mar 25 2005
 		CNI retry on EINTR <mark@panonet.net>
 		CNI Ignore SIGXCPU as GCJ garbage collection uses this too.
