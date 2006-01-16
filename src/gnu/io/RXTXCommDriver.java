@@ -1,7 +1,7 @@
 /*-------------------------------------------------------------------------
 |   A wrapper to convert RXTX into Linux Java Comm
 |   Copyright 1998 Kevin Hester, kevinh@acm.org
-|   Copyright 2000-2002 Trent Jarvi, taj@www.linux.org.uk
+|   Copyright 2000-2006 Trent Jarvi, taj@www.linux.org.uk
 |
 |   This library is free software; you can redistribute it and/or
 |   modify it under the terms of the GNU Library General Public
@@ -534,6 +534,7 @@ public class RXTXCommDriver implements CommDriver
 						"comx",      // linux COMMX synchronous serial card
 						"holter",    // custom card for heart monitoring
 						"modem",     // linux symbolic link to modem.
+						"rfcomm",       // bluetooth serial device
 						"ttyircomm", // linux IrCommdevices (IrDA serial emu)
 						"ttycosa0c", // linux COSA/SRP synchronous serial card
 						"ttycosa1c", // linux COSA/SRP synchronous serial card

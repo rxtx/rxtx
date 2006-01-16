@@ -1,8 +1,13 @@
-This is ChangeLog Tue Oct 12 10:01:16 BST 2004
+This is ChangeLog
+Sun Jan 15 07:15:13 MST 2006
 
 rxtx-2.1 and rxtx-2.0 changes are kept in the same file.  skip to the version
 you downloaded.
 
+2.1-8 Mar 25 2005
+		Blue Tooth Support
+		Pau ideiglenes1@freemail.hu
+		http://mailman.qbang.org/pipermail/rxtx/20060108/002053.html
 2.1-7pre22 Mar 25 2005
 		CNI retry on EINTR <mark@panonet.net>
 		CNI Ignore SIGXCPU as GCJ garbage collection uses this too.
