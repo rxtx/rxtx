@@ -12,7 +12,7 @@ extern void report_warning( char * );
 extern void report_error( char * );
 /*-------------------------------------------------------------------------
 |   rxtx is a native interface to serial ports in java.
-|   Copyright 1997-2004 by Trent Jarvi taj@www.linux.org.uk.
+|   Copyright 1997-2006 by Trent Jarvi taj@www.linux.org.uk.
 |   Copyright 1998-2002 by Wayne roberts wroberts1@home.com
 |
 |   This library is free software; you can redistribute it and/or
@@ -603,7 +603,7 @@ int serial_close( int fd )
 	struct termios_list *index;
 	/* char message[80]; */
 
-	ENTER( "close" );
+	ENTER( "serial_close" );
 	if( !first_tl || !first_tl->hComm )
 	{
 		report( "gotit!" );
@@ -612,7 +612,7 @@ int serial_close( int fd )
 	index = find_port( fd );
 	if ( !index )
 	{
-		LEAVE( "close" );
+		LEAVE( "serial_close" );
 		return -1;
 	}
 
@@ -629,7 +629,7 @@ int serial_close( int fd )
 	}
 	else
 	{
-		sprintf( message, "close():  Invalid Port Reference for %s\n",
+		sprintf( message, "serial_ close():  Invalid Port Reference for %s\n",
 			index->filename );
 		report( message );
 	}
@@ -665,7 +665,7 @@ int serial_close( int fd )
 		*/
 		free( index );
 	}
-	LEAVE( "close" );
+	LEAVE( "serial_close" );
 	return 0;
 }
 
@@ -860,7 +860,7 @@ int open_port( struct termios_list *port )
 		YACK();
 		set_errno( EINVAL );
 /*
-		printf( "open failed %s\n", port->filename );
+		printf( "serial_open failed %s\n", port->filename );
 */
 		return -1;
 	}
@@ -1167,7 +1167,7 @@ int serial_open( const char *filename, int flags, ... )
 	index = add_port( filename );
 	if( !index )
 	{
-		report( "open !index\n" );
+		report( "serial_open !index\n" );
 		return( -1 );
 	}
 	
@@ -1175,7 +1175,7 @@ int serial_open( const char *filename, int flags, ... )
 	index->tx_happened = 0;
 	if ( open_port( index ) )
 	{
-		sprintf( message, "open():  Invalid Port Reference for %s\n",
+		sprintf( message, "serial_open():  Invalid Port Reference for %s\n",
 			filename );
 		report( message );
 		serial_close( index->fd );
@@ -1185,7 +1185,7 @@ int serial_open( const char *filename, int flags, ... )
 	if( check_port_capabilities( index ) )
 	{
 		report( "check_port_capabilites!" );
-		close( index->fd );
+		serial_close( index->fd );
 		return -1;
 	}
 
