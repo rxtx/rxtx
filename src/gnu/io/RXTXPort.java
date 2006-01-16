@@ -1,6 +1,6 @@
 /*-------------------------------------------------------------------------
 |   rxtx is a native interface to serial ports in java.
-|   Copyright 1997-2004 by Trent Jarvi taj@www.linux.org.uk.
+|   Copyright 1997-2006 by Trent Jarvi taj@www.linux.org.uk.
 |
 |   This library is free software; you can redistribute it and/or
 |   modify it under the terms of the GNU Library General Public
@@ -1059,11 +1059,7 @@ final public class RXTXPort extends SerialPort
 		if (debug)
 			z.reportln( "RXTXPort:close( " + this.name + " ) calling super.close"); 
 		super.close();
-		if (debug)
-			z.reportln( "RXTXPort:close( " + this.name + " ) calling System.gc"); 
-
 		fd = 0;
-		Runtime.getRuntime().gc();
 		closeLock = false;
 		if (debug)
 			z.reportln( "RXTXPort:close( " + this.name + " ) leaving"); 
