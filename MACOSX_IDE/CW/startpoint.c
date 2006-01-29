@@ -1,1 +1,0 @@
-void workaroundjnientrypoint();void workaroundjnientrypoint(){}
