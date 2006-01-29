@@ -1216,10 +1216,12 @@ final public class RXTXPort extends SerialPort
 				if (debug)
 					z.reportln( "RXTXPort:SerialOutputStream:flush() leave");
 			}
-			finally
+			catch( IOException e )
 			{
 				IOLocked--;
+				throw e;
 			}
+			IOLocked--;
 		}
 	}
 
