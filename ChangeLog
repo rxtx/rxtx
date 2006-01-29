@@ -11,6 +11,9 @@ you downloaded.
 		catch exceptions on flush() so close() works.
 		Adam Walsh <adam@grummen.net>
 		http://mailman.qbang.org/pipermail/rxtx/20060118/002131.html
+		more close() performance fixes
+		Øyvind Harboe <oyvind.harboe@zylin.com> 
+		http://mailman.qbang.org/pipermail/rxtx/20060119/002135.html
 
 		Blue Tooth Support
 		cleanup writeByte so close works, send the original exceptions
