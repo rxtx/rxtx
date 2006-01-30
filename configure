@@ -19329,7 +19329,7 @@ fi
 
 # Define the identity of the package.
  PACKAGE=Serial
- VERSION=2.1-7pre20
+ VERSION=2.1-7
 
 
 cat >>confdefs.h <<_ACEOF
@@ -21242,9 +21242,9 @@ public class conftest
 EOF
 CLASSPATH=.:$CLASSPATH
 if test x$JAVA_HOME = x; then
-	javac -classpath .:$CLASSPATH:`which java`../lib/RXTXcomm.jar conftest.java
+	javac -classpath .:$CLASSPATH: conftest.java
 else
-	$JAVA_HOME/bin/javac -classpath .:$CLASSPATH:`which java`../lib/RXTXcomm.jar conftest.java
+	$JAVA_HOME/bin/javac -classpath .:$CLASSPATH: conftest.java
 fi
 }
 
@@ -21252,9 +21252,9 @@ run_conftest()
 {
 	echo $ECHO_N checking $1   " " 1>&6
 	if test x$JPATH = x; then
-		VAR=`java -classpath .:$CLASSPATH:\`which java\`../lib/RXTXcomm.jar conftest $1`
+		VAR=`java -classpath .:$CLASSPATH: conftest $1`
 	else
-		VAR=`$JPATH/bin/java -classpath .:$CLASSPATH:\`which java\`../lib/RXTXcomm.jar conftest $1`
+		VAR=`$JPATH/bin/java -classpath .:$CLASSPATH: conftest $1`
 	fi
 	echo $VAR  1>&6
 	echo $VAR
