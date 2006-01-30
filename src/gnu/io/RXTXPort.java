@@ -752,7 +752,6 @@ final public class RXTXPort extends SerialPort
 	*/
 
 	boolean MonitorThreadLock = true;
-	boolean MonitorThreadCloseLock = true;
 
 	public void addEventListener(
 		SerialPortEventListener lsnr ) throws TooManyListenersException
@@ -805,22 +804,10 @@ final public class RXTXPort extends SerialPort
 			   They will call back to see if its their thread
 			   using isInterrupted().
 			*/
-			MonitorThreadCloseLock = true;
 			if (debug)
 				z.reportln( "	RXTXPort:calling interruptEventLoop");
 			interruptEventLoop( );
-			if (debug)
-				z.reportln("	RXTXPort:waiting on closelock");
-			while( MonitorThreadCloseLock )
-			{
-				if (debug)
-					z.reportln("	.");
-				try {
-					Thread.sleep(100);
-				} catch( Exception e ) {}
-			}
-			if (debug)
-				z.reportln("	RXTXPort:set closelock");
+			
 			if (debug)
 				z.reportln( "	RXTXPort:calling monThread.join()");
 			try {
@@ -1586,7 +1573,6 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 				z.reportln( "RXTXPort:MontitorThread:run()"); 
 			monThreadisInterrupted=false;
 			eventLoop();
-			MonitorThreadCloseLock = false;
 			if (debug)
 				z.reportln( "eventLoop() returned"); 
 		}
