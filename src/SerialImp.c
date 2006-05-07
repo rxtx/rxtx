@@ -5908,7 +5908,7 @@ JNI_OnLoad
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *java_vm, void *reserved)
 {
 	javaVM = java_vm;
-	printf("Experimental:  JNI_OnLoad called.\n");
+	report("JNI_OnLoad called.\n");
 	return JNI_VERSION_1_2;  /* JNI API used */
 }
 
