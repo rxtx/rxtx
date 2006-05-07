@@ -4,6 +4,10 @@ Sun Jan 15 07:15:13 MST 2006
 rxtx-2.1 and rxtx-2.0 changes are kept in the same file.  skip to the version
 you downloaded.
 
+2.1-8 ???
+		Do not remove and ignore interrupts.  Joachim Buechse <joachim@buechse.de>
+		http://bugzilla.qbang.org/show_bug.cgi?id=45
+
 2.1-7 Jan 29 2006
 		Mac OS X x86/universal binaries/install fixes
 		Dmitry Markman <dmarkman@mac.com>

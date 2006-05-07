@@ -331,7 +331,10 @@ public class CommPortIdentifier extends Object /* extends Vector? */
 				{
 					wait(i);
 				}
-				catch ( InterruptedException e ) { }
+				catch ( InterruptedException e )
+				{
+					Thread.currentThread().interrupt();
+				}
 			}
 		}
 		if (Available == false)
