@@ -38,6 +38,7 @@ public class RXTXCommDriver implements CommDriver
 
 	private final static boolean debug = false;
 	private final static boolean devel = true;
+	private final static boolean noVersionOutput = "true".equals( System.getProperty( "gnu.io.rxtx.NoVersionOutput" ) );
 
 	static
 	{
@@ -65,10 +66,13 @@ public class RXTXCommDriver implements CommDriver
 		}
 		if ( devel )
 		{
-			System.out.println("Stable Library");
-			System.out.println("=========================================");
-			System.out.println("Native lib Version = " + LibVersion );
-			System.out.println("Java lib Version   = " + JarVersion );
+			if ( ! noVersionOutput )
+			{
+				System.out.println("Stable Library");
+				System.out.println("=========================================");
+				System.out.println("Native lib Version = " + LibVersion );
+				System.out.println("Java lib Version   = " + JarVersion );
+			}
 		}
 
 		if ( ! JarVersion.equals( LibVersion ) )
