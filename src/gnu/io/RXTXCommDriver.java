@@ -355,6 +355,7 @@ public class RXTXCommDriver implements CommDriver
 	private boolean registerSpecifiedPorts(int PortType)
 	{
 		String val = null;
+		Properties origp = System.getProperties();//save system properties
 
 		try
 		    {
@@ -395,10 +396,13 @@ public class RXTXCommDriver implements CommDriver
 				System.out.println("unknown port type "+PortType+" passed to RXTXCommDriver.registerSpecifiedPorts()");
 		}
 
+		System.setProperties(origp); //recall saved properties
 		if (val != null) {
 			addSpecifiedPorts(val, PortType);
 			return true;
-		} else return false;
+		} else {
+			return false;
+		}
 	}
 
    /*
