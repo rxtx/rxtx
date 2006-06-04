@@ -1212,6 +1212,10 @@ void *drain_loop( void *arg )
 	for(i=0;;i++)
 	{
 		report_verbose("drain_loop:  looping\n");
+		if( eis->eventloop_interrupted )
+		{
+			goto end;
+		}
 #if defined(__sun__)
 	/* FIXME: No time to test on all OS's for production */
 		if (usleep(5000)) {
@@ -1256,7 +1260,7 @@ void *drain_loop( void *arg )
 		}
 		else
 		{
-			report("drain_loop:  received EINTR\n");
+			report("drain_loop:  received EINTR in tcdrain\n");
 		}
 	}
 end:
@@ -4786,6 +4790,20 @@ JNIEXPORT void JNICALL RXTXPort(interruptEventLoop)(JNIEnv *env,
 #if !defined(TIOCSERGETLSR) && !defined(WIN32)
 	/* make sure that the drainloop unblocks from tcdrain */
 	pthread_kill(index->drain_tid, SIGABRT);
+	/* TODO use wait/join/SIGCHLD/?? instead of sleep? */
+	usleep(50 * 1000);
+	/*
+	Under normal conditions, SIGABRT will unblock tcdrain. However
+	a non-responding USB device combined with an unclean driver
+	may still block. This is very ugly because it may block the call
+	to close indefinetly.
+	*/
+	if (index->closing != 1) {
+		/* good bye tcdrain, and thanks for all the fish */
+		report("interruptEventLoop: canceling blocked drain thread\n");
+		pthread_cancel(index->drain_tid);
+		index->closing = 1;
+	}
 #endif
 	report("interruptEventLoop: interrupted\n");
 }
