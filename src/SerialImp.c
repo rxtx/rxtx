@@ -656,6 +656,24 @@ JNIEXPORT jint JNICALL RXTXPort(open)(
 		fd=OPEN (filename, O_RDWR | O_NOCTTY | O_NONBLOCK );
 	}  while (fd < 0 && errno==EINTR);
 
+#ifdef OPEN_EXCL
+       // Note that open() follows POSIX semantics: multiple open() calls to 
+       // the same file will succeed unless the TIOCEXCL ioctl is issued.
+       // This will prevent additional opens except by root-owned processes.
+       // See tty(4) ("man 4 tty") and ioctl(2) ("man 2 ioctl") for details.
+ 
+       if (fd >= 0 && (ioctl(fd, TIOCEXCL) == -1))
+       {
+               sprintf( message, "open: exclusive access denied for %s\n",
+                       filename );
+               report( message );
+               report_error( message );
+
+               close(fd);
+               goto fail;
+       }
+#endif /* OPEN_EXCL */
+
 	if( configure_port( fd ) ) goto fail;
 	(*env)->ReleaseStringUTFChars( env, jstr, filename );
 	sprintf( message, "open: fd returned is %i\n", fd );
