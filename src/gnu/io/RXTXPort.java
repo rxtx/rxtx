@@ -811,27 +811,22 @@ final public class RXTXPort extends SerialPort
 			if (debug)
 				z.reportln( "	RXTXPort:calling monThread.join()");
 			try {
-				monThread.join(1000);
-			} catch (Exception ex) {
-				/* yikes */
-				ex.printStackTrace();
-			}
-			if (debug)
-				z.reportln( "	RXTXPort:waiting on isAlive()");
-			while( monThread.isAlive() )
-			{
-				if ( debug )
-					z.reportln( "	MonThread is still alive!");
-				try {
-					monThread.join(1000);
-					Thread.sleep( 1000 );
-				} catch( Exception e ){} 
-				//monThread.stop();
+
+				// wait a reasonable moment for the death of the monitor thread
+				monThread.join(3000);
+			} catch (InterruptedException ex) {
+				// somebody called interrupt() on us (ie wants us to abort)
+				// we dont propagate InterruptedExceptions so lets re-set the flag 
+				Thread.currentThread().interrupt();
+				return;
+ 			}
+				
+			if ( debug && monThread.isAlive() )
+				z.reportln( "	MonThread is still alive!");
+
 			}
 			
 		}
-		if (debug)
-			z.reportln( "	RXTXPort:calling gc()");
 		monThread = null;
 		SPEventListener = null;
 		MonitorThreadLock = false;
@@ -1011,20 +1006,32 @@ final public class RXTXPort extends SerialPort
 	/**
 	*/
 	boolean closeLock = false;
-	public synchronized void close()
+	public void close()
 	{
-		if (debug)
-			z.reportln( "RXTXPort:close( " + this.name + " )"); 
-		if( closeLock ) return;
-		closeLock = true;
-		while( IOLocked > 0 )
-		{
-			if( debug )
-				z.reportln("IO is locked " + IOLocked);
-			try {
-				Thread.sleep(500);
-			} catch( Exception e ) {}
+		synchronized (this) {
+			if (debug)
+				z.reportln( "RXTXPort:close( " + this.name + " )"); 
+
+			while( IOLocked > 0 )
+			{
+				if( debug )
+					z.reportln("IO is locked " + IOLocked);
+				try {
+					this.wait(500);
+				} catch( InterruptedException ie ) {
+					// somebody called interrupt() on us
+					// we obbey and return without without closing the socket
+					Thread.currentThread().interrupt();
+					return;
+				}
+			}
+
+			// we set the closeLock after the above check because we might
+			// have returned without proceeding
+			if( closeLock ) return;
+			closeLock = true;
 		}
+
 		if ( fd <= 0 )
 		{
 			z.reportln(  "RXTXPort:close detected bad File Descriptor" );

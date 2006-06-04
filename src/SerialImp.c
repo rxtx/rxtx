@@ -714,7 +714,11 @@ JNIEXPORT void JNICALL RXTXPort(nativeClose)( JNIEnv *env,
 	ENTER( "RXTXPort:nativeClose" );
 	if (fd > 0)
 	{
-		do {
+		report("nativeClose: discarding remaining datai (tcflush)\n");
+		/* discard any incoming+outgoing data not yet read/sent */
+		tcflush(fd, TCIOFLUSH);
+ 		do {
+			report("nativeClose:  calling close\n");
 			result=CLOSE (fd);
 		}  while ( result < 0 && errno == EINTR );
 		UNLOCK( filename, pid );
@@ -1196,9 +1200,13 @@ void *drain_loop( void *arg )
 		report_verbose("drain_loop:  looping\n");
 #if defined(__sun__)
 	/* FIXME: No time to test on all OS's for production */
-		usleep(5000);
+		if (usleep(5000)) {
+			report("drain_loop:  received EINTR");
+		}
 #else
-		usleep(1000000);
+		if (usleep(1000000)) {
+			report("drain_loop:  received EINTR");
+		}
 #endif /* __sun__ */
 		/*
 		system_wait();
@@ -1227,10 +1235,14 @@ void *drain_loop( void *arg )
 				report_verbose("drain_loop:  writing not set\n");
 			}
 		}
-		else
+		else if (errno != EINTR)
 		{
 			report("drain_loop:  tcdrain bad fd\n");
 			goto end;
+		}
+		else
+		{
+			report("drain_loop:  received EINTR\n");
 		}
 	}
 end:
@@ -1274,9 +1286,9 @@ void finalize_threads( struct event_info_struct *eis )
 #if !defined(TIOCSERGETLSR) && !defined( WIN32 )
 static void warn_sig_abort( int signo )
 {
+	/*
 	char msg[80];
 	sprintf( msg, "RXTX Recieved Signal %i\n", signo );
-	/*
 	report_error( msg );
 	*/
 }
@@ -1290,6 +1302,9 @@ init_threads( )
    return:      none
    exceptions:  none
    comments:	
+   this function is called from the event_loop or in other words
+   from the monitor thread. On systems !WIN32 and without TIOCSERGETLSR
+   it will create a new thread looping a call to tcdrain.
 ----------------------------------------------------------*/
 int init_threads( struct event_info_struct *eis )
 {
@@ -1301,15 +1316,19 @@ int init_threads( struct event_info_struct *eis )
 
 	report_time_start( );
 	report("init_threads:  start\n");
+	/* ignore child thread status changes */
 	sigemptyset(&newmask);
 	sigaddset(&newmask, SIGCHLD);
+
+	/* install our own signal hander */
 	newaction.sa_handler = warn_sig_abort;
 	sigemptyset( &newaction.sa_mask );
 #ifdef SA_INTERRUPT
 	newaction.sa_flags = SA_INTERRUPT;
 #endif /* SA_INTERRUPT */
 #ifdef SA_RESTART
-	newaction.sa_flags = SA_RESTART;
+	/* JOE: do not demand restart! we are handling EINTR */
+/*	newaction.sa_flags = SA_RESTART;*/
 #endif /* SA_RESTART */
 
 	sigaction(SIGABRT, &newaction, &oldaction);
@@ -1333,6 +1352,7 @@ int init_threads( struct event_info_struct *eis )
 	report("init_threads: creating drain_loop\n");
 	pthread_create( &tid, NULL, drain_loop, (void *) eis );
 	pthread_detach( tid );
+	eis->drain_tid = tid;
 #endif /* TIOCSERGETLSR */
 	report("init_threads: get eis\n");
 	jeis  = (*eis->env)->GetFieldID( eis->env, eis->jclazz, "eis", "J" );
@@ -4749,6 +4769,10 @@ JNIEXPORT void JNICALL RXTXPort(interruptEventLoop)(JNIEnv *env,
 #ifdef WIN32
 	termios_interrupt_event_loop( index->fd, 1 );
 #endif /* WIN32 */
+#if !defined(TIOCSERGETLSR) && !defined(WIN32)
+	/* make sure that the drainloop unblocks from tcdrain */
+	pthread_kill(index->drain_tid, SIGABRT);
+#endif
 	report("interruptEventLoop: interrupted\n");
 }
 
