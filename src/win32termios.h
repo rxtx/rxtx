@@ -279,7 +279,7 @@ void termiosSetParityError( int, char );
 #define XTABS	01000000 /* Hmm.. Linux/i386 considers this part of TABDLY.. */
 
 /* c_cflag bit meaning */
-# define CBAUD	0010017
+#define  CBAUD  0030017
 #define  B0	0000000		/* hang up */
 #define  B50	0000001
 #define  B75	0000002
@@ -312,13 +312,16 @@ void termiosSetParityError( int, char );
 #define  B3500000 0010016
 #define  B4000000 0010017
 
-/* glue for unsupported linux speeds see also SerialImp.h */
-/* hosed */
+/*
+	glue for unsupported linux speeds see also SerialImp.h 
+	custom baud rates around 8192-9000 will not work because
+	of these.
+*/
 
-#define B14400		1010001
-#define B28800		1010002
-#define B128000		1010003
-#define B256000		1010004
+#define B14400		0020001
+#define B28800		0020002
+#define B128000		0020003
+#define B256000		0020004
 
 #define EXTA B19200
 #define EXTB B38400
@@ -356,8 +359,10 @@ void termiosSetParityError( int, char );
 
 /* glue for unsupported windows speeds */
 
-#define CBR_230400	230400
 #define CBR_28800	28800
+#define CBR_128000	128000
+#define CBR_230400	230400
+#define CBR_256000	256000
 #define CBR_460800	460800
 #define CBR_500000	500000
 #define CBR_576000	576000

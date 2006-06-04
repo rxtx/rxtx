@@ -323,8 +323,8 @@ int CBR_to_B( int Baud )
 		case CBR_3500000:	return( B3500000 );
 		case CBR_4000000:	return( B4000000 );
 		default:
-			set_errno(EINVAL );
-			return -1;
+			/* assume custom baudrate */
+			return( Baud );
 	}
 }
 
@@ -361,12 +361,13 @@ int B_to_CBR( int Baud )
 		case B9600:	ret = CBR_9600;		break;
 		case B14400:	ret = CBR_14400;	break;
 		case B19200:	ret = CBR_19200;	break;
+		case B28800:	ret = CBR_28800;	break;
 		case B38400:	ret = CBR_38400;	break;
 		case B57600:	ret = CBR_57600;	break;
 		case B115200:	ret = CBR_115200;	break;
 		case B128000:	ret = CBR_128000;	break;
-		case B256000: 	ret = CBR_256000;	break;
 		case B230400:	ret = CBR_230400;	break;
+		case B256000: 	ret = CBR_256000;	break;
 		case B460800:	ret = CBR_460800;	break;
 		case B500000:	ret = CBR_500000;	break;
 		case B576000:	ret = CBR_576000;	break;
@@ -381,10 +382,8 @@ int B_to_CBR( int Baud )
 		case B4000000:	ret = CBR_4000000;	break;
 	
 		default:
-			fprintf( stderr, "B_to_CBR: invalid baudrate: %#o\n",
-				Baud );
-			set_errno( EINVAL );
-			return -1;
+			/* assume custom baudrate */
+			return Baud;
 	}
 	LEAVE( "B_to_CBR" );
 	return ret;
@@ -708,12 +707,9 @@ BOOL init_serial_struct( struct serial_struct *sstruct )
 	ENTER( "init_serial_struct" );
 
 	/*
-	FIXME
-
-	This needs to use inb() to read the actual baud_base
-	and divisor from the UART registers.  Question is how
-	far do we take this?
-
+	use of custom_divisor and baud_base requires access to
+	kernel space.  The kernel does try its best if you just
+	toss a baud rate at it though.
 	*/
 
 	sstruct->custom_divisor = 0;
@@ -1678,16 +1674,17 @@ int cfsetospeed( struct termios *s_termios, speed_t speed )
 {
 	char message[80];
 	ENTER( "cfsetospeed" );
+	/* clear baudrate */
+	s_termios->c_cflag &= ~CBAUD;
 	if ( speed & ~CBAUD )
 	{
 		sprintf( message, "cfsetospeed: not speed: %#o\n", speed );
 		report( message );
-		return 0;
+		/* continue assuming its a custom baudrate */
+		s_termios->c_cflag |= B38400;  /* use 38400 during custom */
+		s_termios->c_cflag |= CBAUDEX; /* use CBAUDEX for custom */
 	}
-	s_termios->c_ispeed = s_termios->c_ospeed = speed;
-	/* clear baudrate */
-	s_termios->c_cflag &= ~CBAUD;
-	if( speed )
+	else if( speed )
 	{
 		s_termios->c_cflag |= speed;
 	}
@@ -1696,6 +1693,7 @@ int cfsetospeed( struct termios *s_termios, speed_t speed )
 		/* PC blows up with speed 0 handled in Java */
 		s_termios->c_cflag |= B9600;
 	}
+	s_termios->c_ispeed = s_termios->c_ospeed = speed;
 	LEAVE( "cfsetospeed" );
 	return 1;
 }
@@ -1767,25 +1765,6 @@ speed_t cfgetispeed( struct termios *s_termios )
 }
 
 /*----------------------------------------------------------
-serial_struct_to_DCB()
-
-   accept:      
-   perform:     
-   return:      
-   exceptions:  
-   win32api:     None
-   comments:    
-----------------------------------------------------------*/
-int serial_struct_to_DCB( struct serial_struct *sstruct, DCB *dcb )
-{
-	/* 5 Baud rate fix
-	sstruct.baud_base
-	sstruct.custom_divisor = ( sstruct.baud_base/cspeed );
-	*/
-	return(0);
-}
-
-/*----------------------------------------------------------
 termios_to_DCB()
 
    accept:      
@@ -1798,7 +1777,8 @@ termios_to_DCB()
 int termios_to_DCB( struct termios *s_termios, DCB *dcb )
 {
 	ENTER( "termios_to_DCB" );
-	s_termios->c_ispeed = s_termios->c_ospeed = s_termios->c_cflag & CBAUD;
+	if ( !(s_termios->c_cflag & CBAUDEX) )
+		s_termios->c_ispeed = s_termios->c_ospeed = s_termios->c_cflag & CBAUD;
 	dcb->BaudRate        = B_to_CBR( s_termios->c_ispeed );
 	dcb->ByteSize = termios_to_bytesize( s_termios->c_cflag );
 
@@ -2863,11 +2843,6 @@ int ioctl( int fd, int request, ... )
 			GetCommState( index->hComm, dcb );
 
 			index->sstruct = va_arg( ap, struct serial_struct * );
-			if ( serial_struct_to_DCB( index->sstruct, dcb ) < 0 )
-			{
-				va_end( ap );
-				return -1;
-			}
 
 			report( "TIOCSSERIAL\n" );
 			free(dcb);
