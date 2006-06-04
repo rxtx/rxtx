@@ -822,6 +822,7 @@ final public class RXTXPort extends SerialPort
  			}
 				
 			if ( debug && monThread.isAlive() )
+			{
 				z.reportln( "	MonThread is still alive!");
 
 			}
