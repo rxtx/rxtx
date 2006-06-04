@@ -202,6 +202,14 @@ public class CommPortIdentifier extends Object /* extends Vector? */
 		if(debug) System.out.println("CommPortIdentifier:getPortIdentifier(" + s +")");
 		CommPortIdentifier index = CommPortIndex;
 
+		/* This may slow things down but if you pass the string for the port after
+		   a device is plugged in, you can find it now.
+
+		   http://bugzilla.qbang.org/show_bug.cgi?id=48
+		*/
+
+		getPortIdentifiers();
+
 		synchronized (Sync) 
 		{
 			while (index != null) 
