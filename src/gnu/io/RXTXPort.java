@@ -303,7 +303,7 @@ final public class RXTXPort extends SerialPort
 			z.reportln( "RXTXPort:disableReceiveFramming() called and returning (noop)");
 	}
 	/** 
-	*  @returns true if framing is enabled
+	*  @return true if framing is enabled
 	*/
 	public boolean isReceiveFramingEnabled()
 	{
@@ -517,7 +517,7 @@ final public class RXTXPort extends SerialPort
 	*  Line status methods
 	*/
 	/**
-	*  @returns true if DTR is set
+	*  @return true if DTR is set
 	*/
 	public native boolean isDTR();
 	/** 
@@ -1846,8 +1846,8 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	*
 	*  find the fd and return RTS without using a Java open() call
 	*
-	*  @param String port
-	*  @return boolean true if asserted
+	*  @param port
+	*  @return true if asserted
 	*  @throws UnsupportedCommOperationException;
 	*
 	*/
@@ -1866,8 +1866,8 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	*
 	*  find the fd and return CD without using a Java open() call
 	*
-	*  @param String port
-	*  @return boolean true if asserted
+	*  @param port
+	*  @return true if asserted
 	*  @throws UnsupportedCommOperationException;
 	*
 	*/
@@ -1886,8 +1886,8 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	*
 	*  find the fd and return CTS without using a Java open() call
 	*
-	*  @param String port
-	*  @return boolean true if asserted
+	*  @param port
+	*  @return true if asserted
 	*  @throws UnsupportedCommOperationException;
 	*
 	*/
@@ -1906,8 +1906,8 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	*
 	*  find the fd and return DSR without using a Java open() call
 	*
-	*  @param String port
-	*  @return boolean true if asserted
+	*  @param port
+	*  @return true if asserted
 	*  @throws UnsupportedCommOperationException;
 	*
 	*/
@@ -1926,8 +1926,8 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	*
 	*  find the fd and return DTR without using a Java open() call
 	*
-	*  @param String port
-	*  @return boolean true if asserted
+	*  @param port
+	*  @return true if asserted
 	*  @throws UnsupportedCommOperationException;
 	*
 	*/
@@ -1946,8 +1946,8 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	*
 	*  find the fd and return RI without using a Java open() call
 	*
-	*  @param String port
-	*  @return boolean true if asserted
+	*  @param port
+	*  @return true if asserted
 	*  @throws UnsupportedCommOperationException;
 	*
 	*/
@@ -2078,9 +2078,9 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	/**
 	*  Extension to CommAPI.  Set Baud Base to 38600 on Linux and W32
 	*  before using.
-	*  @param int BaudBase The clock frequency divided by 16.  Default
+	*  @param BaudBase The clock frequency divided by 16.  Default
 	*  BaudBase is 115200.
-	*  @return boolean true on success
+	*  @return true on success
 	*  @throws UnsupportedCommOperationException, IOException
 	*/
 
@@ -2095,7 +2095,7 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 
 	/**
 	*  Extension to CommAPI
-	*  @return int BaudBase
+	*  @return BaudBase
 	*  @throws UnsupportedCommOperationException, IOException
 	*/
 
@@ -2110,7 +2110,7 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 	/**
 	*  Extension to CommAPI.  Set Baud Base to 38600 on Linux and W32
 	*  before using.
-	*  @param int Divisor;
+	*  @param Divisor
 	*  @throws UnsupportedCommOperationException, IOException
 	*/
 
@@ -2124,7 +2124,7 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 
 	/**
 	*  Extension to CommAPI
-	*  @returns int Divisor;
+	*  @return Divisor;
 	*  @throws UnsupportedCommOperationException, IOException
 	*/
 

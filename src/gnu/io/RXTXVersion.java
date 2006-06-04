@@ -42,7 +42,7 @@ public class RXTXVersion
 	/**
 	*  static method to return the current version of RXTX
 	*  unique to RXTX.
-	*  @returns a string representing the version  "RXTX-1.4-9"
+	*  @return a string representing the version  "RXTX-1.4-9"
 	*/
 	public static String getVersion()
 	{

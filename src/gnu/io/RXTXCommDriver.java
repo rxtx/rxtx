@@ -792,7 +792,7 @@ public class RXTXCommDriver implements CommDriver
 	/**
 	*  @param PortName The name of the port the OS recognizes
 	*  @param PortType CommPortIdentifier.PORT_SERIAL or PORT_PARALLEL
-	*  @returns CommPort
+	*  @return CommPort
 	*  getCommPort() will be called by CommPortIdentifier from its
 	*  openPort() method. PortName is a string that was registered earlier
 	*  using the CommPortIdentifier.addPortName() method. getCommPort()
