@@ -24,3 +24,4 @@ config.sub
 configure
 ltconfig
 ltmain.sh
+.DS_Store
