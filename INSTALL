@@ -34,7 +34,7 @@ If you would like to use javax.comm, use rxtx 1.4 with Sun's CommAPI.
 
 A note on Mac OS X:
 
-	Go to the MacOSX file for install instructions. 
+	Go to the README.OSX file for install instructions. 
 
 1.  INSTALL INSTRUCTIONS IN OTHER LANGUAGES
 
@@ -580,8 +580,7 @@ Redhat users.  Note that Redhat changed group uucp to group lock with Redhat
 
 Mandrake users.  Note that /var/lock needs to be group uucp for this to work.
 
-Mac OS X users.  Note that you may need to create the lock directory with group uucp ownership.  There is a script in contrib called fixperm.sh to help with
-this on Mac OS X.
+Mac OS X users:  Starting at version 2.1.8 rxtx no longer uses lockfiles on OSX.
 
 RXTX uses lock files by default.  configure --disable-lockfiles to generate
 rxtx libraries without lock files.  Its strongly recommended that you do
