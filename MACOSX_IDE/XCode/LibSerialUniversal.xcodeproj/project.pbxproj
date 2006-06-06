@@ -445,7 +445,6 @@
 				F5712CDC01667A1F01000107 /* JavaArchive */,
 				F5712CDD01667A1F01000107 /* Frameworks */,
 				F5712CF8016688EE01000107 /* ShellScript */,
-				6600AB84016F897600A80101 /* ShellScript */,
 			);
 			dependencies = (
 			);
@@ -632,15 +631,6 @@
 /* End PBXRezBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		6600AB84016F897600A80101 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/tcsh;
-			shellScript = "cp build/Development/RXTXcomm.jar ../ForPackageMaker/Install/Library/Java/Extensions";
-		};
 		F5712CF8016688EE01000107 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
