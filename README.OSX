@@ -28,19 +28,24 @@ The safe way of using RXTX on OS X:
 
 Make sure that you have no (older) version of RXTX installed in
   /Library/Java/Extensions
+  /System/Library/Java/Extensions
+  /usr/lib/java
 
-Put  libSerial.jnilib  in the directory of the application (the JavaVM will find 
-it there). Include RXTXComm.jar in the java classpath or include the classes from
-RXTXComm.jar directly in the application jar. (Some applications already include
-the RXTX classes in their application jar, in which case only the file
-libSerial.jnilib is required).
+Put  
+  libSerial.jnilib
+in the directory of the application (the JavaVM will find it there). Add
+  RXTXComm.jar
+to the application classpath or include the classes in the application jar.
+(Some applications already include the RXTX classes in their application jar,
+in which case only the file libSerial.jnilib is required).
+
 
 
 ----
 History
 ----
 
-Up to version 2.1.7 RXTX used lockfiles on MacOSX. The creation of lockfiles
+Up to version 2.0.7/2.1.7 RXTX used lockfiles on MacOSX. The creation of lockfiles
 required special permissions for the user executing an application based on RXTX.
 To simplify the setup RXTX came with an installer modifying group permissions
 and installing RXTX in the global location /Library/Java/Extensions. However
