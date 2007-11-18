@@ -159,7 +159,7 @@ public class RXTXCommDriver implements CommDriver
 		for(int j=0;j<CandidatePortPrefixes.length;j++){
 			if(isPortPrefixValid(CandidatePortPrefixes[j])) {
 				ValidPortPrefixes[i++]=
-					new String(CandidatePortPrefixes[j]);
+					CandidatePortPrefixes[j];
 			}
 		}
 		String[] returnArray=new String[i];
@@ -192,7 +192,7 @@ public class RXTXCommDriver implements CommDriver
 	}
 
 	/** handle solaris/sunos /dev/cua/a convention */
-	private void checkSolaris(String PortName, int PortType)
+		private void checkSolaris(String PortName, int PortType)
 	{
 		char p[] =  { 91 };
 		for( p[0] =97 ;p[0] < 123; p[0]++ )
@@ -206,8 +206,20 @@ public class RXTXCommDriver implements CommDriver
 				);
 			}
 		}
+		/** check for 0-9 in case we have them (Solaris USB) */
+		for( p[0] =48 ;p[0] <= 57; p[0]++ )
+		{
+			if (testRead(PortName.concat(new String(p)),PortType))
+			{
+				CommPortIdentifier.addPortName(
+						PortName.concat(new String(p)),
+						PortType,
+						this
+				);
+			}
+		}
 	}
-	private void registerValidPorts(
+        private void registerValidPorts(
 		String CandidateDeviceNames[],
 		String ValidPortPrefixes[],
 		int PortType
@@ -275,14 +287,11 @@ public class RXTXCommDriver implements CommDriver
 					String PortName;
 					if(osName.toLowerCase().indexOf("windows") == -1 )
 					{
-						PortName =
-						new String(deviceDirectory +
-							C );
+						PortName = deviceDirectory + C;
 					}
 					else
 					{
-						PortName =
-						new String( C );
+						PortName = C;
 					}
 					if (debug)
 					{
@@ -466,11 +475,11 @@ public class RXTXCommDriver implements CommDriver
 			String[] temp = new String[259];
 			for( int i = 1; i <= 256; i++ )
 			{
-				temp[i - 1] = new String( "COM" + i );
+				temp[i - 1] = "COM" + i;
 			}
 			for( int i = 1; i <= 3; i++ )
 			{
-				temp[i + 255] = new String( "LPT" + i );
+				temp[i + 255] = "LPT" + i;
 			}
 			CandidateDeviceNames=temp;
 			}
@@ -516,12 +525,12 @@ public class RXTXCommDriver implements CommDriver
 				File dev = null;
 
 				dev = new File( "/dev/term" );
-				if( dev.list().length > 0 );
-					term[l++] = new String( "term/" );
+				if( dev.list().length > 0 )
+					term[l++] ="term/";
 	/*
 				dev = new File( "/dev/cua0" );
-				if( dev.list().length > 0 );
-					term[l++] = new String( "cua/" );
+				if( dev.list().length > 0 )
+					term[l++] = "cua/";
 	*/
 				String[] temp = new String[l];
 				for(l--;l >= 0;l--)

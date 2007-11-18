@@ -15,8 +15,54 @@ you downloaded.
 
 		Clean up CommPort Ownership code, avoid possible deadlocks,
 		fix lost commport ownership events.
-		http://bugzilla.qbang.org/show_bug.cgi?id=83
                 Martin Oberhuber <martin.oberhuber@windriver.com> 
+		http://bugzilla.qbang.org/show_bug.cgi?id=83
+
+		rxtx does not compile against JDK-1.6
+		Neboj¿a <nebojsa@anja.ig3.net>
+		http://bugzilla.qbang.org/show_bug.cgi?id=84
+
+		configure script failed at line UTS_RELEASE
+		megov <megov@mail.ru>
+		http://bugzilla.qbang.org/show_bug.cgi?id=80
+
+		code cleanup patch (extra ';' creates bug for if statements
+		+ new String() calls removed)
+		Xavier Le Vourch <xavier@brittanysoftware.com>
+		http://bugzilla.qbang.org/show_bug.cgi?id=77
+
+		Wont compile on linux ppc with glibc 2.5 - no sys/io.h
+		Brian Johnson <site-rxtx.org@sherbang.com>
+		http://bugzilla.qbang.org/show_bug.cgi?id=72
+
+		rxtx overwrites System properties
+		Andrew Gillett <asgillett@gmail.com>
+		Nektarios K. Papadopoulos <npapadop@inaccessnetworks.com>
+		Neboj¿a <nebojsa@anja.ig3.net>
+		http://bugzilla.qbang.org/show_bug.cgi?id=64
+
+		Solaris ACM port support
+		Dave Cleal <dc@cleal.com>
+		http://bugzilla.qbang.org/show_bug.cgi?id=59
+
+		Setting of non-standard baud rate fails.
+		Andrew Prunicki <aprunicki@yahoo.com>
+		http://bugzilla.qbang.org/show_bug.cgi?id=58
+
+		RXTX uses lockfiles on MacOS X (instead of ioctl TIOCEXCL)
+		Joachim Buechse <joachim@buechse.de>
+		http://bugzilla.qbang.org/show_bug.cgi?id=50
+
+		JavaDoc fixes
+		Joachim Buechse <joachim@buechse.de>
+		http://bugzilla.qbang.org/show_bug.cgi?id=49
+
+		need to review:
+
+		http://bugzilla.qbang.org/show_bug.cgi?id=53
+		http://bugzilla.qbang.org/show_bug.cgi?id=46
+		http://bugzilla.qbang.org/show_bug.cgi?id=41
+		
 
 2.1-7 Jan 29 2006
 		Mac OS X x86/universal binaries/install fixes

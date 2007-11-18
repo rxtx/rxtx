@@ -72,19 +72,19 @@ class Configure extends Frame
 	private void saveSpecifiedPorts()
 	{
 		String filename;
-		String javaHome= new String(System.getProperty( "java.home" ) );
+		String javaHome= System.getProperty( "java.home" );
 		String pathSep = System.getProperty( "path.separator", ":" );
 		String fileSep = System.getProperty( "file.separator", "/" );
 		String lineSep = System.getProperty( "line.separator" );
 		String output;
 
 		if( PortType == PORT_SERIAL )
-			filename = new String( javaHome +
+			filename = javaHome +
 				fileSep + "lib" + fileSep +
-				"gnu.io.rxtx.SerialPorts" );
+				"gnu.io.rxtx.SerialPorts";
 		else if ( PortType == PORT_PARALLEL )
-			filename = new String( javaHome +
-				"gnu.io.rxtx.ParallelPorts" );
+			filename = javaHome +
+				"gnu.io.rxtx.ParallelPorts";
 		else
 		{
 			System.out.println( "Bad Port Type!" );
@@ -99,8 +99,8 @@ class Configure extends Frame
 			{
 				if( cb[i].getState() )
 				{
-					output = new String( cb[i].getLabel() +
-						pathSep );
+					output = cb[i].getLabel() +
+						pathSep;
 					out.write( output.getBytes() );
 				}
 			}
@@ -214,6 +214,6 @@ class Configure extends Frame
 	{
 		new Configure();
 	}
-	String EnumMessage = new String( "gnu.io.rxtx.properties has not been detected.\n\nThere is no consistant means of detecting ports on this operating System.  It is necessary to indicate which ports are valid on this system before proper port enumeration can happen.  Please check the ports that are valid on this system and select Save");
+	String EnumMessage = "gnu.io.rxtx.properties has not been detected.\n\nThere is no consistant means of detecting ports on this operating System.  It is necessary to indicate which ports are valid on this system before proper port enumeration can happen.  Please check the ports that are valid on this system and select Save";
 }
 

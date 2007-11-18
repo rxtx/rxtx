@@ -100,7 +100,9 @@
 #	include <linux/version.h>
 #endif
 #ifndef __APPLE__  /* dima */
+#ifndef PPC
 #include <sys/io.h>
+#endif /* PPC */
 #endif /* dima */
 
 extern int errno;

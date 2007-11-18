@@ -888,7 +888,11 @@ int set_port_params( JNIEnv *env, int fd, int cspeed, int dataBits,
 		*/
 
 #if defined(TIOCGSERIAL)
-		ioctl( fd, TIOCGSERIAL, &sstruct );
+		if ( ioctl( fd, TIOCGSERIAL, &sstruct ) < 0 )
+		{
+			report( "set_port_params: Cannot Get Serial Port Settings\n" );
+			return(1);
+		}
 		sstruct.custom_divisor = ( sstruct.baud_base/cspeed );
 		cspeed = B38400;
 #endif /* TIOCGSERIAL */

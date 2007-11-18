@@ -203,7 +203,7 @@ public class Zystem
 	{
 		try {
 			RandomAccessFile w =
-				new RandomAccessFile( target, "rw" );;
+				new RandomAccessFile( target, "rw" );
 			w.seek( w.length() );
 			w.writeBytes( s );
 			w.close();
