@@ -58,6 +58,7 @@
 package  gnu.io;
 
 import  java.io.FileDescriptor;
+import java.util.HashMap;
 import  java.util.Vector;
 import  java.util.Enumeration;
 
@@ -239,22 +240,25 @@ public class CommPortIdentifier extends Object /* extends Vector? */
 	static public CommPortIdentifier getPortIdentifier(String s) throws NoSuchPortException 
 	{ 
 		if(debug) System.out.println("CommPortIdentifier:getPortIdentifier(" + s +")");
-		CommPortIdentifier index = CommPortIndex;
-
-		/* This may slow things down but if you pass the string for the port after
-		   a device is plugged in, you can find it now.
-
-		   http://bugzilla.qbang.org/show_bug.cgi?id=48
-		*/
-
-		getPortIdentifiers();
+		CommPortIdentifier index;
 
 		synchronized (Sync) 
 		{
-			while (index != null) 
-			{
-				if (index.PortName.equals(s)) break;
+		 	index = CommPortIndex;
+			while (index != null && !index.PortName.equals(s)) { 
 				index = index.next;
+			}
+			if (index == null) {
+				/* This may slow things down but if you pass the string for the port after
+				   a device is plugged in, you can find it now.
+
+				   http://bugzilla.qbang.org/show_bug.cgi?id=48
+				*/
+				getPortIdentifiers();
+			 	index = CommPortIndex;
+				while (index != null && !index.PortName.equals(s)) { 
+					index = index.next;
+				}
 			}
 		}
 		if (index != null) return index;
@@ -277,9 +281,10 @@ public class CommPortIdentifier extends Object /* extends Vector? */
 		throws NoSuchPortException 	
 	{ 
 		if(debug) System.out.println("CommPortIdentifier:getPortIdentifier(CommPort)");
-		CommPortIdentifier c = CommPortIndex;
+		CommPortIdentifier c;
 		synchronized( Sync )
 		{
+			c = CommPortIndex;
 			while ( c != null && c.commport != p )
 				c = c.next;
 		}
@@ -301,15 +306,52 @@ public class CommPortIdentifier extends Object /* extends Vector? */
 	static public Enumeration getPortIdentifiers() 
 	{ 
 		if(debug) System.out.println("static CommPortIdentifier:getPortIdentifiers()");
-		CommPortIndex = null;
-		try 
-		{
-			CommDriver RXTXDriver = (CommDriver) Class.forName("gnu.io.RXTXCommDriver").newInstance();
-			RXTXDriver.initialize();
-		} 
-		catch (Throwable e) 
-		{
-			System.err.println(e + " thrown while loading " + "gnu.io.RXTXCommDriver");
+		//Do not allow anybody get any ports while we are re-initializing
+		//because the CommPortIndex points to invalid instances during that time
+		synchronized(Sync) {
+			//Remember old ports in order to restore them for ownership events later
+			HashMap oldPorts = new HashMap();
+			CommPortIdentifier p = CommPortIndex;
+			while(p!=null) {
+				oldPorts.put(p.PortName, p);
+				p = p.next;
+			}
+			CommPortIndex = null;
+			try 
+			{
+				//Initialize RXTX: This leads to detecting all ports
+				//and writing them into our CommPortIndex through our method
+				//{@link #addPortName(java.lang.String, int, gnu.io.CommDriver)}
+				//This works while lock on Sync is held
+				CommDriver RXTXDriver = (CommDriver) Class.forName("gnu.io.RXTXCommDriver").newInstance();
+				RXTXDriver.initialize();
+				//Restore old CommPortIdentifier objects where possible, 
+				//in order to support proper ownership event handling.
+				//Clients might still have references to old identifiers!
+				CommPortIdentifier curPort = CommPortIndex;
+				CommPortIdentifier prevPort = null;
+				while(curPort!=null) {
+					CommPortIdentifier matchingOldPort = (CommPortIdentifier)oldPorts.get(curPort.PortName);
+					if(matchingOldPort!=null && matchingOldPort.PortType == curPort.PortType) {
+						//replace new port by old one
+						matchingOldPort.RXTXDriver = curPort.RXTXDriver;
+						matchingOldPort.next = curPort.next;
+						if(prevPort==null) {
+							CommPortIndex = matchingOldPort;
+						} else {
+							prevPort.next = matchingOldPort;
+						}
+						prevPort = matchingOldPort;
+					} else {
+						prevPort = curPort;
+					}
+					curPort = curPort.next;
+				}
+			} 
+			catch (Throwable e) 
+			{
+				System.err.println(e + " thrown while loading " + "gnu.io.RXTXCommDriver");
+			}
 		}
 		return new CommPortEnumerator();
 	}
@@ -356,53 +398,82 @@ public class CommPortIdentifier extends Object /* extends Vector? */
 
 /*------------------------------------------------------------------------------
 	open()
-	accept:      application makeing the call and milliseconds to block
+	accept:      application making the call and milliseconds to block
                      during open.
 	perform:     open the port if possible
-	return:      CommPort if successfull
+	return:      CommPort if successful
 	exceptions:  PortInUseException if in use.
 	comments:
 ------------------------------------------------------------------------------*/
 	private boolean HideOwnerEvents;
 
-	public synchronized CommPort open(String TheOwner, int i) 
+	public CommPort open(String TheOwner, int i) 
 		throws gnu.io.PortInUseException 
 	{ 
 		if(debug) System.out.println("CommPortIdentifier:open("+TheOwner + ", " +i+")");
-		if (Available == false)
+		boolean isAvailable;
+		synchronized(this) {
+			isAvailable = this.Available;
+			if (isAvailable) {
+			    //assume ownership inside the synchronized block
+			    this.Available = false;
+			    this.Owner = TheOwner;
+			}
+		}
+		if (!isAvailable)
 		{
-			synchronized (Sync)
-			{
-				fireOwnershipEvent(CommPortOwnershipListener.PORT_OWNERSHIP_REQUESTED);
-				try
-				{
-					wait(i);
+			long waitTimeEnd = System.currentTimeMillis() + i;
+			//fire the ownership event outside the synchronized block
+			fireOwnershipEvent(CommPortOwnershipListener.PORT_OWNERSHIP_REQUESTED);
+			long waitTimeCurr;
+			synchronized(this) {
+				while(!Available && (waitTimeCurr=System.currentTimeMillis()) < waitTimeEnd) {
+					try
+					{
+						wait(waitTimeEnd - waitTimeCurr);
+					}
+					catch ( InterruptedException e )
+					{
+						Thread.currentThread().interrupt();
+						break;
+					}
 				}
-				catch ( InterruptedException e )
-				{
-					Thread.currentThread().interrupt();
+				isAvailable = this.Available;
+				if (isAvailable) {
+					//assume ownership inside the synchronized block
+					this.Available = false;
+					this.Owner = TheOwner;
 				}
 			}
 		}
-		if (Available == false)
+		if (!isAvailable)
 		{
 			throw new gnu.io.PortInUseException(getCurrentOwner());
 		}
-		if(commport == null)
-		{
-			commport = RXTXDriver.getCommPort(PortName,PortType);
-		}
-		if(commport != null)
-		{
-			Owner = TheOwner;
-			Available=false;
-			fireOwnershipEvent(CommPortOwnershipListener.PORT_OWNED);
-			return commport;
-		}
-		else
-		{
-			throw new gnu.io.PortInUseException(
-					native_psmisc_report_owner(PortName));
+		//At this point, the CommPortIdentifier is owned by us.
+		try {
+			if(commport == null)
+			{
+				commport = RXTXDriver.getCommPort(PortName,PortType);
+			}
+			if(commport != null)
+			{
+				fireOwnershipEvent(CommPortOwnershipListener.PORT_OWNED);
+				return commport;
+			}
+			else
+			{
+				throw new gnu.io.PortInUseException(
+						native_psmisc_report_owner(PortName));
+			}
+		} finally {
+			if(commport == null) {
+				//something went wrong reserving the commport -> unown the port
+				synchronized(this) {
+					this.Available = true;
+					this.Owner = null;
+				}
+			}
 		}
 	}
 /*------------------------------------------------------------------------------
@@ -429,14 +500,16 @@ public class CommPortIdentifier extends Object /* extends Vector? */
 	exceptions:   None
 	comments:     None
 ------------------------------------------------------------------------------*/
-	synchronized void internalClosePort() 
+	void internalClosePort() 
 	{
-		if(debug) System.out.println("CommPortIdentifier:internalClosePort()");
-		Owner = null;
-		Available = true;
-		commport = null;
-		/*  this tosses null pointer?? */
-		notifyAll();
+		synchronized(this) {
+			if(debug) System.out.println("CommPortIdentifier:internalClosePort()");
+			Owner = null;
+			Available = true;
+			commport = null;
+			/*  this tosses null pointer?? */
+			notifyAll();
+		}
 		fireOwnershipEvent(CommPortOwnershipListener.PORT_UNOWNED);
 	}
 /*------------------------------------------------------------------------------
