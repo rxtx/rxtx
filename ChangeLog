@@ -1,10 +1,14 @@
 This is ChangeLog
-Sun Nov 18 09:08:05 MST 2007
+Tue Dec 25 18:28:19 MST 2007
 
 rxtx-2.1 and rxtx-2.0 changes are kept in the same file.  skip to the version
 you downloaded.
 
 2.1-8 ???
+		Enable universal library builds for Mac OS X
+		Andre-John Mas ajmas@sympatico.ca 
+		http://mailman.qbang.org/pipermail/rxtx/2007-December/1793319.html
+
 		Do not remove and ignore interrupts.
 		Joachim Buechse <joachim@buechse.de>
 		http://bugzilla.qbang.org/show_bug.cgi?id=45

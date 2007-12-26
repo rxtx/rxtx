@@ -153,7 +153,7 @@ AC_ARG_ENABLE(lockfiles,
 	fi
 )
 AC_ARG_ENABLE(liblock,
-	[  --enable-liblock[=x]     enable liblock [default=no]],
+ 	[  --enable-liblock[=x]      enable liblock [default=no]],
 	if test "x$liblock" != "xno"; then 
 		echo "Using liblock"
 		CFLAGS=$CFLAGS" -DLIBLOCKDEV"
@@ -165,7 +165,7 @@ AC_ARG_ENABLE(liblock,
 )
 
 AC_ARG_ENABLE(lockfile_server,
-	[  --enable-lockfile_server          Enable interaction with a lock file server [default=no]],
+ 	[  --enable-lockfile_server   Enable interaction with a lock file server [default=no]],
 	if test x$enable_lockfile_server = xyes; then 
 		CFLAGS=$CFLAGS" -DLFS"
 	fi
@@ -176,6 +176,14 @@ AC_ARG_ENABLE(DEBUG,
 		CFLAGS=$CFLAGS" -DDEBUG"
 	fi
 )
+AC_ARG_ENABLE(universallib,
+	[  --disable-universallib Disable building of universal libraries (MacOS X) [default=no]],
+	if test x$universallib = xyes; then
+		echo "Disabling universal lib"
+	fi
+)
+AC_PATH_PROG(XCODE_SELECT,xcode-select,no)
+
 find_java_native_include()
 {
 JAVANATINC="-I\$(JAVAINCLUDEDIR)/`cd $JAVAINCLUDEDIR; find . -name $1|sed s#$1##|head -n1`"
@@ -737,8 +745,29 @@ WIN32)
 Mac\ OS\ X)
 	#fix_mac_groups
 	#fix_parameters $JPATH/lib/javax.comm.properties
+	if test $XCODE_SELECT = no; then
+		SDKPATH="/Developer"
+	else
+		SDKPATH=`$XCODE_SELECT -print-path`
+	fi
+	SDK="$SDKPATH/SDKs/MacOSX10.4u.sdk"
+	if test "x$enable_universallib" != xno; then
+		if test -d "/Developer/SDKs/MacOSX10.4u.sdk"; then
+			echo "library os.arch... universal (i386 ppc)"
+			CFLAGS="$CFLAGS -O -g -mmacosx-version-min=10.4 -isysroot $SDK -arch i386 -arch ppc -arch x86_64"
+			LDFLAGS="$LDFLAGS -arch i386 -arch ppc -arch x86_64"
+		else
+			echo "Warning: no universal SDK, will not build universal"
+			echo "library os.arch... "${OS_ARCH}
+		fi
+	else
+		echo "User disabled building of universal library"
+		echo "library os.arch... "${OS_ARCH}
+	fi
+
 	GLIBTOOL="\$(SHELL) glibtool"
-	LINK="cc -bundle -framework CoreFoundation -framework IOKit -o librxtx\$*.jnilib "
+	LINK="cc $LDFLAGS -bundle -framework CoreFoundation -framework IOKit
+-o librxtx\$*.jnilib "
 	OBJECT_EXTENSION="o"
 	LIB_EXTENSION="jnilib"
 	TARGETLIB="\$(target_triplet)/librxtxSerial.jnilib"
