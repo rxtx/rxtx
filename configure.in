@@ -752,8 +752,8 @@ Mac\ OS\ X)
 	if test "x$enable_universallib" != xno; then
 		if test -d "/Developer/SDKs/MacOSX10.4u.sdk"; then
 			echo "library os.arch... universal (i386 ppc)"
-			CFLAGS="$CFLAGS -O -g -mmacosx-version-min=10.4 -isysroot $SDK -arch i386 -arch ppc -arch x86_64"
-			LDFLAGS="$LDFLAGS -arch i386 -arch ppc -arch x86_64"
+			CFLAGS="$CFLAGS -O -g -mmacosx-version-min=10.4 -isysroot $SDK -arch i386 -arch ppc"
+			LDFLAGS="$LDFLAGS -isysroot $SDK -arch i386 -arch ppc "
 		else
 			echo "Warning: no universal SDK, will not build universal"
 			echo "library os.arch... "${OS_ARCH}
