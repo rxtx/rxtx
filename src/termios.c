@@ -14,7 +14,7 @@ extern void report_error( char * );
 |   RXTX License v 2.1 - LGPL v 2.1 + Linking Over Controlled Interface.
 |   RXTX is a native interface to serial ports in java.
 |   Copyright 1998-2002 by Wayne roberts wroberts1@home.com
-|   Copyright 1997-2007 by Trent Jarvi tjarvi@qbang.org and others who
+|   Copyright 1997-2008 by Trent Jarvi tjarvi@qbang.org and others who
 |   actually wrote it.  See individual source files for more information.
 |
 |   A copy of the LGPL v 2.1 may be found at
@@ -1084,26 +1084,29 @@ struct termios_list *add_port( const char *filename )
 	if ( !first_tl )
 	{
 		port->prev = NULL;
+		port->next = NULL;
 		first_tl = port;
 	}
 	else
 	{
-		while ( index->next )
+		while ( ( index->fd < port->fd ) && index->next )
 			index = index->next;
-		if ( port == first_tl )
+		if ( index->fd > port->fd )
 		{
-			port->prev = NULL;
-			port->next = first_tl;
-			first_tl->prev = port;
-			first_tl = port;
+			/* inserting previously closed fd */
+			port->prev = index->prev; 
+			port->next=index;
+			index->prev->next = port;
+			index->prev = port;
 		}
 		else
 		{
+			/* adding to end of list */
 			port->prev = index;
+			port->next = NULL;
 			index->next = port;
 		}
 	}
-	port->next = NULL;
 	LEAVE( "add_port" );
 	return port;
 
@@ -1390,10 +1393,6 @@ int serial_read( int fd, void *vb, int size )
 			report( "vmin=0\n" );
 #endif /* DEBUG_VERBOSE */
 			ret = ClearErrors( index, &stat);
-/*
-			usleep(1000);
-			usleep(50);
-*/
 			/* we should use -1 instead of 0 for disabled timeout */
 			now = GetTickCount();
 			if ( index->ttyset->c_cc[VTIME] &&
@@ -1451,9 +1450,6 @@ int serial_read( int fd, void *vb, int size )
 					nBytes = 0;
 					break;
 				case ERROR_MORE_DATA:
-/*
-					usleep(1000);
-*/
 					report( "ERROR_MORE_DATA\n" );
 					break;
 				case ERROR_IO_PENDING:
@@ -1488,24 +1484,15 @@ int serial_read( int fd, void *vb, int size )
 					}
 					sprintf(message, "end nBytes=%ld] ", nBytes);
 					report( message );
-/*
-					usleep(1000);
-*/
 					report( "ERROR_IO_PENDING\n" );
 					break;
 				default:
-/*
-					usleep(1000);
-*/
 					YACK();
 					return -1;
 			}
 		}
 		else
 		{
-/*
-			usleep(1000);
-*/
 			ClearErrors( index, &stat);
 			return( total );
 		}
@@ -1562,10 +1549,6 @@ int serial_read( int fd, void *vb, int size )
 			report( "vmin=0\n" );
 #endif /* DEBUG_VERBOSE */
 			ret = ClearErrors( index, &Stat);
-/*
-			usleep(1000);
-			usleep(50);
-*/
 			/* we should use -1 instead of 0 for disabled timeout */
 			now = GetTickCount();
 			if ( index->ttyset->c_cc[VTIME] &&
@@ -1625,9 +1608,6 @@ int serial_read( int fd, void *vb, int size )
 					nBytes = 0;
 					break;
 				case ERROR_MORE_DATA:
-/*
-					usleep(1000);
-*/
 					report( "ERROR_MORE_DATA\n" );
 					break;
 				case ERROR_IO_PENDING:
@@ -1664,15 +1644,9 @@ int serial_read( int fd, void *vb, int size )
 					}
 					sprintf(message, "end nBytes=%ld] ", nBytes);
 					report( message );
-/*
-					usleep(1000);
-*/
 					report( "ERROR_IO_PENDING\n" );
 					break;
 				default:
-/*
-					usleep(1000);
-*/
 					YACK();
 					errno = EIO;
 					printf("6\n");
@@ -1681,9 +1655,6 @@ int serial_read( int fd, void *vb, int size )
 		}
 		else
 		{
-/*
-			usleep(1000);
-*/
 			ClearErrors( index, &Stat);
 			printf("7\n");
 			return( total );
@@ -3323,9 +3294,6 @@ int  serial_select( int  n,  fd_set  *readfds,  fd_set  *writefds,
 		}
 	}
 end:
-/*
-	usleep(1000);
-*/
 	LEAVE( "serial_select" );
 	return( 1 );
 #ifdef asdf

@@ -1,7 +1,7 @@
 /*-------------------------------------------------------------------------
 |   RXTX License v 2.1 - LGPL v 2.1 + Linking Over Controlled Interface.
 |   RXTX is a native interface to serial ports in java.
-|   Copyright 1997-2007 by Trent Jarvi tjarvi@qbang.org and others who
+|   Copyright 1997-2008 by Trent Jarvi tjarvi@qbang.org and others who
 |   actually wrote it.  See individual source files for more information.
 |
 |   A copy of the LGPL v 2.1 may be found at
@@ -68,6 +68,7 @@
 #endif /* __LCC__ */
 #include <time.h>
 #include <stdio.h>
+#include <sys/filio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -771,7 +772,7 @@ JNIEXPORT void JNICALL RXTXPort(nativeClose)( JNIEnv *env,
 	ENTER( "RXTXPort:nativeClose" );
 	if (fd > 0)
 	{
-		report("nativeClose: discarding remaining datai (tcflush)\n");
+		report("nativeClose: discarding remaining data (tcflush)\n");
 		/* discard any incoming+outgoing data not yet read/sent */
 		tcflush(fd, TCIOFLUSH);
  		do {
@@ -3076,7 +3077,9 @@ int read_byte_array( JNIEnv *env,
 		}
 		/* FIXME HERE Trent */
 #ifndef WIN32
-		ret = SELECT( fd + 1, &rset, NULL, NULL, tvP );
+		do {
+			ret = SELECT( fd + 1, &rset, NULL, NULL, tvP );
+		} while (ret < 0 && errno==EINTR);
 #else
 		ret = 1;
 #endif /* WIN32 */
@@ -3287,8 +3290,7 @@ JNIEXPORT void JNICALL RXTXPort(NativeEnableReceiveTimeoutThreshold)(
 
 	ENTER( "RXTXPort:NativeEnableRecieveTimeoutThreshold" );
 	if( tcgetattr( fd, &ttyset ) < 0 ) goto fail;
-	/* TESTING ttyset.c_cc[ VMIN ] = threshold; */
-	ttyset.c_cc[ VMIN ] = 0;
+	ttyset.c_cc[ VMIN ] = threshold; 
 	ttyset.c_cc[ VTIME ] = timeout/100;
 	if( tcsetattr( fd, TCSANOW, &ttyset ) < 0 ) goto fail;
 
@@ -4197,8 +4199,10 @@ JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 			}
 #ifndef WIN32
 			/* report( "." ); */
-			eis.ret = SELECT( eis.fd + 1, &eis.rfds, NULL, NULL,
+			do {
+				eis.ret = SELECT( eis.fd + 1, &eis.rfds, NULL, NULL,
 					&eis.tv_sleep );
+			} while (ret < 0 && errno==EINTR);
 #else
 			/*
 			    termios.c:serial_select is instable for some
@@ -4504,7 +4508,7 @@ createSerialIterator(io_iterator_t *serialIterator)
     kern_return_t    kernResult;
     mach_port_t        masterPort;
     CFMutableDictionaryRef    classesToMatch;
-    if ((kernResult=IOMasterPort(NULL, &masterPort)) != KERN_SUCCESS)
+    if ((kernResult=IOMasterPort( (int) NULL, &masterPort ) ) != KERN_SUCCESS)
     {
 	printf( "IOMasterPort returned %d\n", kernResult);
 	return kernResult;
@@ -4565,9 +4569,13 @@ registerKnownSerialPorts(JNIEnv *env, jobject jobj, jint portType) /* dima */
     io_iterator_t    theSerialIterator;
     io_object_t      theObject;
     int              numPorts = 0;/* dima it should initiated */
-    if (createSerialIterator(&theSerialIterator) != KERN_SUCCESS)
+
+    if (( createSerialIterator( &theSerialIterator ) != KERN_SUCCESS) ||
+        ( ! IOIteratorIsValid( theSerialIterator)))
     {
-        printf( "createSerialIterator failed\n" );
+	/*  This also happens when no drivers are installed */
+        report( "createSerialIterator failed\n" );
+	return(0);
     } else {
 	jclass cls; /* dima */
 	jmethodID mid; /* dima */

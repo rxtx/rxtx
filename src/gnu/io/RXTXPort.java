@@ -1,7 +1,7 @@
 /*-------------------------------------------------------------------------
 |   RXTX License v 2.1 - LGPL v 2.1 + Linking Over Controlled Interface.
 |   RXTX is a native interface to serial ports in java.
-|   Copyright 1997-2007 by Trent Jarvi tjarvi@qbang.org and others who
+|   Copyright 1997-2008 by Trent Jarvi tjarvi@qbang.org and others who
 |   actually wrote it.  See individual source files for more information.
 |
 |   A copy of the LGPL v 2.1 may be found at
@@ -140,6 +140,7 @@ final public class RXTXPort extends SerialPort
 
 	/* dont close the file while accessing the fd */
 	int IOLocked = 0;
+	Object IOLockedMutex = new Object();
 
 	/** File descriptor */
 	private int fd = 0;
@@ -1128,25 +1129,23 @@ final public class RXTXPort extends SerialPort
 			{
 				return;
 			}
-			IOLocked++;
-			waitForTheNativeCodeSilly();
-			if ( fd == 0 )
-			{
-				IOLocked--;
-				throw new IOException();
+			synchronized (IOLockedMutex) {
+				IOLocked++;
 			}
-			try
-			{
+			try {
+				waitForTheNativeCodeSilly();
+				if ( fd == 0 )
+				{
+					throw new IOException();
+				}
 				writeByte( b, monThreadisInterrupted );
 				if (debug_write)
 					z.reportln( "Leaving RXTXPort:SerialOutputStream:write( int )");
+			} finally {
+				synchronized (IOLockedMutex) {
+					IOLocked--;
+				}
 			}
-			catch( IOException e )
-			{
-				IOLocked--;
-				throw e;
-			}
-			IOLocked--;
 		}
 	/**
 	*  @param b[]
@@ -1164,20 +1163,19 @@ final public class RXTXPort extends SerialPort
 				return;
 			}
 			if ( fd == 0 ) throw new IOException();
-			IOLocked++;
-			waitForTheNativeCodeSilly();
-			try
-			{
+			synchronized (IOLockedMutex) {
+				IOLocked++;
+			}
+			try {
+				waitForTheNativeCodeSilly();
 				writeArray( b, 0, b.length, monThreadisInterrupted );
 				if (debug_write)
 					z.reportln( "Leaving RXTXPort:SerialOutputStream:write(" +b.length  +")");
+			} finally {
+				synchronized(IOLockedMutex) {
+					IOLocked--;
+				}
 			}
-			catch( IOException e )
-			{
-				IOLocked--;
-				throw e;
-			}
-			IOLocked--;
 			
 		}
 	/**
@@ -1208,20 +1206,20 @@ final public class RXTXPort extends SerialPort
 			{
 				return;
 			}
-			IOLocked++;
-			waitForTheNativeCodeSilly();
+			synchronized (IOLockedMutex) {
+				IOLocked++;
+			}
 			try
 			{
+				waitForTheNativeCodeSilly();
 				writeArray( send, 0, len, monThreadisInterrupted );
 				if( debug_write )
 					z.reportln( "Leaving RXTXPort:SerialOutputStream:write(" + send.length + " " + off + " " + len + " " +") "  /*+ new String(send)*/ );
+			} finally {
+				synchronized (IOLockedMutex) {
+					IOLocked--;
+				}
 			}
-			catch( IOException e )
-			{
-				IOLocked--;
-				throw e;
-			}
-			IOLocked--;
 		}
 	/**
 	*/
@@ -1237,25 +1235,27 @@ final public class RXTXPort extends SerialPort
 				z.reportln( "RXTXPort:SerialOutputStream:flush() Leaving Interrupted");
 				return;
 			}
-			IOLocked++;
-			waitForTheNativeCodeSilly();
-			/* 
-			   this is probably good on all OS's but for now
-			   just sendEvent from java on Sol
-			*/
+			synchronized(IOLockedMutex) {
+				IOLocked++;
+			}
 			try
 			{
+				waitForTheNativeCodeSilly();
+				/* 
+				   this is probably good on all OS's but for now
+				   just sendEvent from java on Sol
+				*/
 				if ( nativeDrain( monThreadisInterrupted ) )
 					sendEvent( SerialPortEvent.OUTPUT_BUFFER_EMPTY, true );
 				if (debug)
 					z.reportln( "RXTXPort:SerialOutputStream:flush() leave");
 			}
-			catch( IOException e )
+			finally
 			{
-				IOLocked--;
-				throw e;
+				synchronized (IOLockedMutex) {
+					IOLocked--;
+				}
 			}
-			IOLocked--;
 		}
 	}
 
@@ -1286,14 +1286,15 @@ final public class RXTXPort extends SerialPort
 			{
 				z.reportln( "+++++++++ read() monThreadisInterrupted" );
 			}
-			IOLocked++;
-			if (debug_read_results)
-				z.reportln(  "RXTXPort:SerialInputStream:read() L" );
-			waitForTheNativeCodeSilly();
-			if (debug_read_results)
-				z.reportln(  "RXTXPort:SerialInputStream:read() N" );
-			try
-			{
+			synchronized (IOLockedMutex) {
+				IOLocked++;
+			}
+			try {
+				if (debug_read_results)
+					z.reportln(  "RXTXPort:SerialInputStream:read() L" );
+				waitForTheNativeCodeSilly();
+				if (debug_read_results)
+					z.reportln(  "RXTXPort:SerialInputStream:read() N" );
 				int result = readByte();
 				if (debug_read_results)
 					//z.reportln(  "RXTXPort:SerialInputStream:read() returns byte = " + result );
@@ -1302,7 +1303,9 @@ final public class RXTXPort extends SerialPort
 			}				
 			finally
 			{
-				IOLocked--;
+				synchronized (IOLockedMutex) {
+					IOLocked--;
+				}
 			}
 		}
 	/**
@@ -1327,10 +1330,12 @@ final public class RXTXPort extends SerialPort
 			{
 				return(0);
 			}
-			IOLocked++;
-			waitForTheNativeCodeSilly();
+			synchronized (IOLockedMutex) {
+				IOLocked++;
+			}
 			try
 			{
+				waitForTheNativeCodeSilly();
 				result = read( b, 0, b.length);
 				if (debug_read_results)
 					z.reportln(  "RXTXPort:SerialInputStream:read() returned " + result + " bytes" );
@@ -1338,7 +1343,9 @@ final public class RXTXPort extends SerialPort
 			}
 			finally
 			{
-				IOLocked--;
+				synchronized (IOLockedMutex) {
+					IOLocked--;
+				}
 			}
 		}
 /*
@@ -1438,10 +1445,12 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 					z.reportln( "RXTXPort:SerialInputStream:read() Interrupted");
 				return(0);
 			}
-			IOLocked++;
-			waitForTheNativeCodeSilly();
+			synchronized (IOLockedMutex) {
+				IOLocked++;
+			}
 			try
 			{
+				waitForTheNativeCodeSilly();
 				result = readArray( b, off, Minimum);
 				if (debug_read_results)
 					z.reportln( "RXTXPort:SerialInputStream:read(" + b.length + " " + off + " " + len + ") returned " + result + " bytes"  /*+ new String(b) */);
@@ -1449,7 +1458,9 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 			}
 			finally
 			{
-				IOLocked--;
+				synchronized (IOLockedMutex) {
+					IOLocked--;
+				}
 			}
 		}
 
@@ -1547,10 +1558,12 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 					z.reportln( "RXTXPort:SerialInputStream:read() Interrupted");
 				return(0);
 			}
-			IOLocked++;
-			waitForTheNativeCodeSilly();
+			synchronized (IOLockedMutex) {
+				IOLocked++;
+			}
 			try
 			{
+				waitForTheNativeCodeSilly();
 				result = readTerminatedArray( b, off, Minimum, t );
 				if (debug_read_results)
 					z.reportln( "RXTXPort:SerialInputStream:read(" + b.length + " " + off + " " + len + ") returned " + result + " bytes"  /*+ new String(b) */);
@@ -1558,7 +1571,9 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 			}
 			finally
 			{
-				IOLocked--;
+				synchronized (IOLockedMutex) {
+					IOLocked--;
+				}
 			}
 		}
 	/**
@@ -1573,7 +1588,9 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 			}
 			if ( debug_verbose )
 				z.reportln( "RXTXPort:available() called" );
-			IOLocked++;
+			synchronized (IOLockedMutex) {
+				IOLocked++;
+			}
 			try
 			{
 				int r = nativeavailable();
@@ -1584,7 +1601,9 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 			}
 			finally
 			{
-				IOLocked--;
+				synchronized (IOLockedMutex) {
+					IOLocked--;
+				}
 			}
 		}
 	}

@@ -1,10 +1,28 @@
 This is ChangeLog
-Tue Dec 25 18:28:19 MST 2007
+Thu Nov 13 18:35:29 EST 2008
 
 rxtx-2.1 and rxtx-2.0 changes are kept in the same file.  skip to the version
 you downloaded.
 
 2.1-8 ???
+		threshold fix
+		Alexandre Rusev <cyberflex@mail.ru>
+		http://bugzilla.qbang.org/show_bug.cgi?id=85
+
+                RXTX close deadlocks in REXTXPort.finalize
+		Joachim Buechse <joachim@buechse.de>
+		http://bugzilla.qbang.org/show_bug.cgi?id=53
+
+		Add ACM serial devices to all known ports.
+		Duncan Pierce <duncan.pierce@syntropy.co.uk>
+		http://bugzilla.qbang.org/show_bug.cgi?id=51
+
+		Concurrency fixes for SMP/multicore systems
+		U. George <netbeans@gatworks.com>
+		http://bugzilla.qbang.org/show_bug.cgi?id=100
+
+		Fixes for MAC systems with no drivers installed.
+
 		Enable universal library builds for Mac OS X
 		Andre-John Mas ajmas@sympatico.ca 
 		http://mailman.qbang.org/pipermail/rxtx/2007-December/1793319.html

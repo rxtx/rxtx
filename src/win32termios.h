@@ -1,7 +1,7 @@
 /*-------------------------------------------------------------------------
 |   RXTX License v 2.1 - LGPL v 2.1 + Linking Over Controlled Interface.
 |   RXTX is a native interface to serial ports in java.
-|   Copyright 1997-2007 by Trent Jarvi tjarvi@qbang.org and others who
+|   Copyright 1997-2008 by Trent Jarvi tjarvi@qbang.org and others who
 |   actually wrote it.  See individual source files for more information.
 |
 |   A copy of the LGPL v 2.1 may be found at
@@ -84,6 +84,7 @@
 	sprintf( message, "Error 0x%x at %s(%d): %s\n", errorCode, __FILE__, __LINE__, allocTextBuf); \
 	report_error( message ); \
 	LocalFree(allocTextBuf); \
+	Sleep(1); \
 }
 
 typedef unsigned char   cc_t;
