@@ -1814,8 +1814,17 @@ int termios_to_DCB( struct termios *s_termios, DCB *dcb )
 		dcb->Parity = NOPARITY;
 	}	
 
-	if ( s_termios->c_cflag & CSTOPB ) dcb->StopBits = TWOSTOPBITS;
-		else dcb->StopBits = ONESTOPBIT;
+	if ( s_termios->c_cflag & CSTOPB )
+	{
+		if (dcb->ByteSize == 5) 
+		{
+			dcb->StopBits = ONE5STOPBITS;	
+		} else dcb->StopBits = TWOSTOPBITS;
+	}
+	else
+	{
+		dcb->StopBits = ONESTOPBIT;
+	}
 
 	if ( s_termios->c_cflag & HARDWARE_FLOW_CONTROL )
 	{
@@ -2075,12 +2084,14 @@ int tcgetattr( int fd, struct termios *s_termios )
 	if ( myDCB.StopBits == TWOSTOPBITS )
 	{
 		s_termios->c_cflag |= CSTOPB;	
-	}
-	if ( myDCB.StopBits == ONESTOPBIT )
+	} else if ( myDCB.StopBits == ONE5STOPBITS 
+	{
+		s_termios->c_cflag |= CSTOPB;	
+		s_termios->c_cflag |= CS5;
+	} else if ( myDCB.StopBits == ONESTOPBIT )
 	{
 		s_termios->c_cflag &= ~CSTOPB;	
 	}
-
 
 	/* PARENB enable parity bit */
 	s_termios->c_cflag &= ~( PARENB | PARODD | CMSPAR );

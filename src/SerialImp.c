@@ -590,7 +590,14 @@ void set_java_vars( JNIEnv *env, jobject jobj, int fd )
 	}
         switch( ttyset.c_cflag&(CSTOPB) ) {
                 case 0: stop_bits = STOPBITS_1; break;
-                case CSTOPB:  stop_bits = STOPBITS_2; break;
+                case CSTOPB:  
+			if ( ttyset.c_cflag & databits == JDATABITS_5) {
+				stop_bits = STOPBITS_1_5;
+			}
+			else {
+				stop_bits = STOPBITS_2;
+			}
+			break;
         }
 /*
 dima writes:
@@ -1128,6 +1135,7 @@ int translate_stop_bits( JNIEnv *env, tcflag_t *cflag, jint stopBits )
 			return 0;
 		/*  ok.. lets try putting it in and see if anyone notices */
 		case STOPBITS_1_5:
+			(*cflag) |= CSTOPB;
 			if ( translate_data_bits( env, cflag, JDATABITS_5 ) )
 				return( 1 );
 			return 0;
@@ -2847,9 +2855,17 @@ JNIEXPORT jint JNICALL RXTXPort(nativeStaticGetStopBits)( JNIEnv *env, jobject j
 		return(-1);
 	}
 	switch( ttyset.c_cflag&(CSTOPB) ) {
-		case 0: return STOPBITS_1;
-		case CSTOPB:  return STOPBITS_2;
-		default:  return  STOPBITS_1_5;
+		case 0:
+			return STOPBITS_1;
+		case CSTOPB:
+			if( ttyset.c_cflags & CS5 ) {
+				return STOPBITS_1_5;
+			}
+			else {
+				return STOPBITS_2;
+			}
+		default:
+			return  -1;
 	}
 }
 

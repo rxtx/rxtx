@@ -22,6 +22,7 @@ you downloaded.
 		http://bugzilla.qbang.org/show_bug.cgi?id=100
 
 		Fixes for MAC systems with no drivers installed.
+		1.5 stop bit fix
 
 		Enable universal library builds for Mac OS X
 		Andre-John Mas ajmas@sympatico.ca 
