@@ -591,7 +591,7 @@ void set_java_vars( JNIEnv *env, jobject jobj, int fd )
         switch( ttyset.c_cflag&(CSTOPB) ) {
                 case 0: stop_bits = STOPBITS_1; break;
                 case CSTOPB:  
-			if ( ttyset.c_cflag & databits == JDATABITS_5) {
+			if ( ttyset.c_cflag & CSIZE ==  CS5 ) {
 				stop_bits = STOPBITS_1_5;
 			}
 			else {
