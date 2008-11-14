@@ -68,7 +68,6 @@
 #endif /* __LCC__ */
 #include <time.h>
 #include <stdio.h>
-#include <sys/filio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -697,10 +696,12 @@ JNIEXPORT jint JNICALL RXTXPort(open)(
 	}  while (fd < 0 && errno==EINTR);
 
 #ifdef OPEN_EXCL
-       // Note that open() follows POSIX semantics: multiple open() calls to 
-       // the same file will succeed unless the TIOCEXCL ioctl is issued.
-       // This will prevent additional opens except by root-owned processes.
-       // See tty(4) ("man 4 tty") and ioctl(2) ("man 2 ioctl") for details.
+       /*
+       Note that open() follows POSIX semantics: multiple open() calls to 
+       the same file will succeed unless the TIOCEXCL ioctl is issued.
+       This will prevent additional opens except by root-owned processes.
+       See tty(4) ("man 4 tty") and ioctl(2) ("man 2 ioctl") for details.
+       */
  
        if (fd >= 0 && (ioctl(fd, TIOCEXCL) == -1))
        {
@@ -4202,7 +4203,7 @@ JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 			do {
 				eis.ret = SELECT( eis.fd + 1, &eis.rfds, NULL, NULL,
 					&eis.tv_sleep );
-			} while (ret < 0 && errno==EINTR);
+			} while (eis.ret < 0 && errno==EINTR);
 #else
 			/*
 			    termios.c:serial_select is instable for some

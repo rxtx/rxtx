@@ -83,7 +83,7 @@ typedef struct file_dsc {
     struct file_dsc *named,*next;
 } FILE_DSC;
 
-static SPACE_DSC name_spaces[] = { };
+static SPACE_DSC *name_spaces;
 static FILE_DSC *files = NULL;
 static FILE_DSC *last_named = NULL;
 static int all = 0,found_item = 0;
@@ -235,7 +235,7 @@ extern void show_user(const char tstring[],char *rs)
 		  returnstring[keeper+1]= '\0';
 	      }
 	      else { 
-		  sprintf(temp,"\\%03o", (int) scan);
+			  sprintf(temp,"\\%03zo", (size_t) scan);
 		  strcat(returnstring,temp);
 	      }
 	 }

@@ -576,7 +576,7 @@ public class RXTXCommDriver implements CommDriver
 						String[] Temp = {
 						"ttyS", // linux Serial Ports
 						"ttySA", // for the IPAQs
-						"ttyUSB" // for USB frobs
+						"ttyUSB", // for USB frobs
 						"rfcomm",       // bluetooth serial device
 						"ttyircomm", // linux IrCommdevices (IrDA serial emu)
 						};
