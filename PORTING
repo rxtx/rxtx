@@ -17,7 +17,7 @@ values for the Makefile.  Look towards the bottom of configure.in and just
 copy *bsd or HP-UX.  Modify to your liking.
 
 Edit configure.in, run autoconf, run configure, run make.  repeat. An endless 
-loop analagous to shampoo instructions.
+loop analogous to shampoo instructions.
 
 SerialImp.c and ParallelImp.c may require system specific includes and possibly
 a small amount of #ifdef's in the code.  Lock file information will need to
@@ -26,7 +26,7 @@ be added to SerialImp.h
 SerialImp.h will need defines for the location of lock files and the lock file
 type if they are used.  See BSD or Linux as examples.
 
-Common problems include the following varibles in the Makefile
+Common problems include the following variables in the Makefile
 
       JAVAINCLUDE
       JAVANATINC
@@ -82,7 +82,7 @@ CLASSPATH=".:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/jre/lib/ext
 
 That should be enough to get Makefile with autoconf/automake/configure.
 the autogen.sh script can be used to bring the version of scripts you have
-into the top rxtx directory.  Helpfull if you cant get the same versions
+into the top rxtx directory.  Helpful if you can't get the same versions
 used.  hmm I need to update the INSTALL info here.
 
         libtool  1.3.5

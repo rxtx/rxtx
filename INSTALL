@@ -1,7 +1,7 @@
 /*-------------------------------------------------------------------------
 |   RXTX License v 2.1 - LGPL v 2.1 + Linking Over Controlled Interface.
 |   RXTX is a native interface to serial ports in java.
-|   Copyright 1997-2007 by Trent Jarvi tjarvi@qbang.org and others who
+|   Copyright 1997-2008 by Trent Jarvi tjarvi@qbang.org and others who
 |   actually wrote it.  See individual source files for more information.
 |
 |   A copy of the LGPL v 2.1 may be found at
@@ -55,12 +55,12 @@
 |   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 |   All trademarks belong to their respective owners.
 --------------------------------------------------------------------------*/
-This is the INSTALL file for RXTX.  Thu Jul  7 19:46:26 EDT 2005
+This is the INSTALL file for RXTX.  Thu Nov 27 18:32:26 CET 2008
 
 If, while following the instructions, you find this file unclear or incorrect 
 please make a note and email the details to taj@www.linux.org.uk.
 
-A note about rxtx 2.1:
+A note about rxtx 2.1 and later:
 
 rxtx 2.1 replaces the entire CommAPI.  Every effort is made to conform to
 CommAPI but out of respect for our friends at Sun the package name of 2.1 has
@@ -250,18 +250,34 @@ A.  Japanese
 
 		----------------- mingw32 tools in DOS -----------------------
 
-		Install mingw32  http://www.mingw.org
 		Install a jdk    http://java.sun.com/j2se
+		Install mingw32  http://www.mingw.org
 		Make sure the ming32\bin and jdk\bin directories are in your
-		path.
-		In the rxtx top directory to the following:
-		mkdir build
-		copy Makefile.mingw32 build\Makefile
-		cd build
+		path. Run a DOS command prompt (not MSYS!) in the rxtx top 
+		directory to the following:
+		
+		mkdir build-mingw
+		copy Makefile.mingw32 build-mingw\Makefile
+		cd build-mingw
 		edit the Makefile and make sure the directories are correct.
 		execute the following:
-			make
-			make install
+			mingw32-make SHELL=cmd
+			mingw32-make SHELL=cmd install
+		
+		-------------- MS Visual Studio in Windows -------------------
+
+		Install a jdk    http://java.sun.com/j2se
+		Install Visual Studio (Express edition will do)
+		Open a Visual Studio command prompt (with env.vars set)
+		In the rxtx top directory to the following:
+		
+		mkdir build-msvc
+		copy Makefile.msvc build-msvc\Makefile
+		cd build-msvc
+		edit the Makefile and make sure the directories are correct.
+		execute the following:
+			nmake
+			nmake install
 		
 		----------------- lcc tools in DOS ---------------------------
 
@@ -283,7 +299,8 @@ A.  Japanese
 		#undef HAVE_TERMIOS_H
 		#undef HAVE_SYS_TIME_H
 
-		if you know how to create the above in a dos Makefile send in			the changes.
+		if you know how to create the above in a dos Makefile send in
+		the changes.
 
 		the following commands should then work fine on the command
 		line.

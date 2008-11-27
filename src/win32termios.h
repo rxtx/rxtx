@@ -27,7 +27,7 @@
 |   any confusion about linking to RXTX.   We want to allow in part what
 |   section 5, paragraph 2 of the LGPL does not permit in the special
 |   case of linking over a controlled interface.  The intent is to add a
-|   Java Specification Request or standards body defined interface in the 
+|   Java Specification Request or standards body defined interface in the
 |   future as another exception but one is not currently available.
 |
 |   http://www.fsf.org/licenses/gpl-faq.html#LinkingOverControlledInterface
@@ -169,7 +169,7 @@ int serial_select(int, struct fd_set *, struct fd_set *, struct fd_set *, struct
 void termios_interrupt_event_loop( int , int );
 void termios_setflags( int , int[] );
 struct termios_list *find_port( int );
-void usleep(unsigned long usec);
+/* void usleep(unsigned long usec); */
 int fcntl(int fd, int command, ...);
 const char *get_dos_port(const char *);
 void set_errno(int);
@@ -349,7 +349,7 @@ void termiosSetParityError( int, char );
 #define  B4000000 0010017
 
 /*
-	glue for unsupported linux speeds see also SerialImp.h 
+	glue for unsupported linux speeds see also SerialImp.h
 	custom baud rates around 8192-9000 will not work because
 	of these.
 */

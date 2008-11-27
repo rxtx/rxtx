@@ -27,7 +27,7 @@
 |   any confusion about linking to RXTX.   We want to allow in part what
 |   section 5, paragraph 2 of the LGPL does not permit in the special
 |   case of linking over a controlled interface.  The intent is to add a
-|   Java Specification Request or standards body defined interface in the 
+|   Java Specification Request or standards body defined interface in the
 |   future as another exception but one is not currently available.
 |
 |   http://www.fsf.org/licenses/gpl-faq.html#LinkingOverControlledInterface
@@ -78,10 +78,10 @@
 #include "gnu_io_LPRPort.h"
 #endif /* dima */
 #include <time.h>
-#include <unistd.h>
 #include <stdio.h>
 #include <string.h>
 #ifndef WIN32
+#	include <unistd.h>
 #	include <sys/ioctl.h>
 #	include <sys/errno.h>
 #	include <sys/param.h>
@@ -91,7 +91,6 @@
 #endif
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/time.h>
 #include <stdlib.h>
 
 #ifdef HAVE_TERMIOS_H
@@ -106,6 +105,9 @@
 #ifdef HAVE_SYS_SIGNAL_H
 #   include <sys/signal.h>
 #endif
+#ifdef HAVE_SYS_TIME_H
+#   include <sys/time.h>
+#endif /* HAVE_SYS_TIME_H */
 #if defined(__linux__)
 #	include <linux/lp.h>
 #endif
@@ -232,7 +234,7 @@ JNIEXPORT jboolean JNICALL LPRPort(isPaperOut)(JNIEnv *env,
 	ioctl(fd, LPGETSTATUS,&status);
 	return( status & LP_NOPA ? JNI_TRUE : JNI_FALSE );
 #elif defined (WIN32)
-	return getWin32ParallelStatus( fd, PARALLEL_PAPER_EMPTY); 
+	return getWin32ParallelStatus( fd, PARALLEL_PAPER_EMPTY);
 #else
 /*  FIXME??  */
 	printf("ParallelImp.c LPGETSTATUS not defined\n");
@@ -255,7 +257,7 @@ JNIEXPORT jboolean JNICALL LPRPort(isPrinterBusy)(JNIEnv *env,
 #if defined (__linux__)
 	ioctl(fd, LPGETSTATUS, &status);
 #elif defined (WIN32)
-	return getWin32ParallelStatus( fd, PARALLEL_BUSY); 
+	return getWin32ParallelStatus( fd, PARALLEL_BUSY);
 #else
 /*  FIXME??  */
 	printf("ParallelImp.c LPGETSTATUS not defined\n");
@@ -285,11 +287,11 @@ JNIEXPORT jboolean JNICALL LPRPort(isPrinterError)(JNIEnv *env,
 	ioctl(fd, LPGETSTATUS, &status);
 	return( status & LP_ERR ? JNI_TRUE : JNI_FALSE );
 #elif defined (WIN32)
-	return getWin32ParallelStatus( fd, PARALLEL_PAPER_EMPTY | 
+	return getWin32ParallelStatus( fd, PARALLEL_PAPER_EMPTY |
 									   PARALLEL_OFF_LINE |
 									   PARALLEL_POWER_OFF |
 									   PARALLEL_NOT_CONNECTED |
-									   PARALLEL_BUSY); 
+									   PARALLEL_BUSY);
 #else
 /*  FIXME??  */
 	printf("ParallelImp.c LPGETSTATUS not defined\n");
@@ -313,7 +315,7 @@ JNIEXPORT jboolean JNICALL LPRPort(isPrinterSelected)(JNIEnv *env,
 	ioctl(fd, LPGETSTATUS, &status);
 	return( status & LP_SELEC ? JNI_TRUE : JNI_FALSE );
 #elif defined (WIN32)
-	return getWin32ParallelStatus( fd, PARALLEL_SELECTED); 
+	return getWin32ParallelStatus( fd, PARALLEL_SELECTED);
 #else
 /*  FIXME??  */
 	printf("ParallelImp.c LPGETSTATUS not defined\n");
@@ -759,7 +761,7 @@ JNIEXPORT void JNICALL LPRPort(eventLoop)( JNIEnv *env,
 	{
 		FD_SET( fd, &rfds );
 		/* Check every 1 second, or on receive data */
-		sleep.tv_sec = 1;	
+		sleep.tv_sec = 1;
 		sleep.tv_usec = 0;
 		do {
 			ret = select( fd + 1, &rfds, NULL, NULL, &sleep );
@@ -927,7 +929,7 @@ void report_error(char *msg)
 /*----------------------------------------------------------
  report
 
-   accept:      string to send to stderr     
+   accept:      string to send to stderr
    perform:     if DEBUG is defined send the string to stderr.
    return:      none
    exceptions:  none
@@ -943,8 +945,8 @@ void report(char *msg)
 /*----------------------------------------------------------
  is_interrupted
 
-   accept:      
-   perform:     see if the port is being closed. 
+   accept:
+   perform:     see if the port is being closed.
    return:      a positive value if the port is being closed.
    exceptions:  none
    comments:
@@ -979,7 +981,7 @@ jboolean is_interrupted(JNIEnv *env, jobject jobj)
 /*----------------------------------------------------------
  send_event
 
-   accept:      The event type and the event state     
+   accept:      The event type and the event state
    perform:     if state is > 0 send a JNI_TRUE event otherwise send JNI_FALSE
    return:      a positive value if the port is being closed.
    exceptions:  none
@@ -996,7 +998,7 @@ int send_event(JNIEnv *env, jobject jobj, jint type, int flag)
 
 	(*env)->ExceptionClear(env);
 
-	result = (*env)->CallBooleanMethod( env, jobj, foo, type, 
+	result = (*env)->CallBooleanMethod( env, jobj, foo, type,
 		flag > 0 ? JNI_TRUE : JNI_FALSE );
 
 #ifdef DEBUG

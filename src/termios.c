@@ -40,7 +40,7 @@ extern void report_error( char * );
 |   any confusion about linking to RXTX.   We want to allow in part what
 |   section 5, paragraph 2 of the LGPL does not permit in the special
 |   case of linking over a controlled interface.  The intent is to add a
-|   Java Specification Request or standards body defined interface in the 
+|   Java Specification Request or standards body defined interface in the
 |   future as another exception but one is not currently available.
 |
 |   http://www.fsf.org/licenses/gpl-faq.html#LinkingOverControlledInterface
@@ -116,10 +116,10 @@ struct termios_list *first_tl = NULL;
 /*----------------------------------------------------------
 serial_test
 
-   accept: filename to test     
-   perform:     
+   accept: filename to test
+   perform:
    return:      1 on success 0 on failure
-   exceptions:  
+   exceptions:
    win32api:    CreateFile CloseHandle
    comments:    if the file opens it should be ok.
 ----------------------------------------------------------*/
@@ -191,7 +191,7 @@ get_fd()
    accept:      filename
    perform:     find the file descriptor associated with the filename
    return:      fd
-   exceptions:  
+   exceptions:
    win32api:    None
    comments:    This is not currently called by anything
 ----------------------------------------------------------*/
@@ -248,9 +248,9 @@ char *get_filename( int fd )
 dump_termios_list()
 
    accept:      string to print out.
-   perform:     
-   return:      
-   exceptions:  
+   perform:
+   return:
+   exceptions:
    win32api:    None
    comments:    used only for debugging eg serial_close()
 ----------------------------------------------------------*/
@@ -277,12 +277,12 @@ void dump_termios_list( char *foo )
 /*----------------------------------------------------------
 set_errno()
 
-   accept:      
-   perform:     
-   return:      
-   exceptions:  
+   accept:
+   perform:
+   return:
+   exceptions:
    win32api:    None
-   comments:   FIXME   
+   comments:   FIXME
 ----------------------------------------------------------*/
 
 void set_errno( int error )
@@ -293,12 +293,12 @@ void set_errno( int error )
 /*----------------------------------------------------------
 usleep()
 
-   accept:      
-   perform:     
-   return:      
-   exceptions:  
+   accept:
+   perform:
+   return:
+   exceptions:
    win32api:    Sleep()
-   comments:    
+   comments:
 ----------------------------------------------------------*/
 
 void usleep( unsigned long usec )
@@ -309,12 +309,12 @@ void usleep( unsigned long usec )
 /*----------------------------------------------------------
 CBR_toB()
 
-   accept:      
-   perform:     
-   return:      
-   exceptions:  
+   accept:
+   perform:
+   return:
+   exceptions:
    win32api:     None
-   comments:    
+   comments:
 ----------------------------------------------------------*/
 
 int CBR_to_B( int Baud )
@@ -367,10 +367,10 @@ int CBR_to_B( int Baud )
 /*----------------------------------------------------------
 B_to_CBR()
 
-   accept:      
-   perform:     
-   return:      
-   exceptions:  
+   accept:
+   perform:
+   return:
+   exceptions:
    win32api:
    comments:      None
 ----------------------------------------------------------*/
@@ -416,7 +416,7 @@ int B_to_CBR( int Baud )
 		case B3000000:	ret = CBR_3000000;	break;
 		case B3500000:	ret = CBR_3500000;	break;
 		case B4000000:	ret = CBR_4000000;	break;
-	
+
 		default:
 			/* assume custom baudrate */
 			return Baud;
@@ -428,12 +428,12 @@ int B_to_CBR( int Baud )
 /*----------------------------------------------------------
 bytesize_to_termios()
 
-   accept:      
-   perform:     
-   return:      
-   exceptions:  
+   accept:
+   perform:
+   return:
+   exceptions:
    win32api:      None
-   comments:    
+   comments:
 ----------------------------------------------------------*/
 
 int bytesize_to_termios( int ByteSize )
@@ -452,12 +452,12 @@ int bytesize_to_termios( int ByteSize )
 /*----------------------------------------------------------
 termios_to_bytesize()
 
-   accept:      
-   perform:     
-   return:      
-   exceptions:  
+   accept:
+   perform:
+   return:
+   exceptions:
    win32api:     None
-   comments:    
+   comments:
 ----------------------------------------------------------*/
 
 int termios_to_bytesize( int cflag )
@@ -476,12 +476,12 @@ int termios_to_bytesize( int cflag )
 /*----------------------------------------------------------
 get_dos_port()
 
-   accept:      
-   perform:     
-   return:      
-   exceptions:  
+   accept:
+   perform:
+   return:
+   exceptions:
    win32api:     None
-   comments:    
+   comments:
 ----------------------------------------------------------*/
 
 const char *get_dos_port( char const *name )
@@ -498,12 +498,12 @@ const char *get_dos_port( char const *name )
 /*----------------------------------------------------------
 ClearErrors()
 
-   accept:       
+   accept:
    perform:      keep track of errors for the eventLoop() (SerialImp.c)
    return:       the return value of ClearCommError()
-   exceptions:  
+   exceptions:
    win32api:     ClearCommError()
-   comments:    
+   comments:
 ----------------------------------------------------------*/
 
 int ClearErrors( struct termios_list *index, COMSTAT *Stat )
@@ -568,12 +568,12 @@ int ClearErrors( struct termios_list *index, COMSTAT *Stat )
 /*----------------------------------------------------------
 FillDCB()
 
-   accept:      
-   perform:     
-   return:      
-   exceptions:  
+   accept:
+   perform:
+   return:
+   exceptions:
    win32api:     GetCommState(),  SetCommState(), SetCommTimeouts()
-   comments:    
+   comments:
 ----------------------------------------------------------*/
 
 BOOL FillDCB( DCB *dcb, unsigned long *hCommPort, COMMTIMEOUTS Timeout )
@@ -604,7 +604,7 @@ BOOL FillDCB( DCB *dcb, unsigned long *hCommPort, COMMTIMEOUTS Timeout )
 	dcb->XoffLim         = 0;
 	dcb->fParity = TRUE;
 	if ( EV_BREAK|EV_CTS|EV_DSR|EV_ERR|EV_RING|( EV_RLSD & EV_RXFLAG ) )
-		dcb->EvtChar = '\n'; 
+		dcb->EvtChar = '\n';
 	else dcb->EvtChar = '\0';
 	if ( !SetCommState( hCommPort, dcb ) )
 	{
@@ -625,12 +625,12 @@ BOOL FillDCB( DCB *dcb, unsigned long *hCommPort, COMMTIMEOUTS Timeout )
 /*----------------------------------------------------------
 serial_close()
 
-   accept:      
-   perform:     
-   return:      
-   exceptions:  
+   accept:
+   perform:
+   return:
+   exceptions:
    win32api:      SetCommMask(), CloseHandle()
-   comments:    
+   comments:
 ----------------------------------------------------------*/
 
 int serial_close( int fd )
@@ -707,12 +707,12 @@ int serial_close( int fd )
 /*----------------------------------------------------------
 cfmakeraw()
 
-   accept:      
-   perform:     
-   return:      
-   exceptions:  
+   accept:
+   perform:
+   return:
+   exceptions:
    win32api:     None
-   comments:    
+   comments:
 ----------------------------------------------------------*/
 
 void cfmakeraw( struct termios *s_termios )
@@ -730,12 +730,12 @@ void cfmakeraw( struct termios *s_termios )
 /*----------------------------------------------------------
 init_termios()
 
-   accept:      
-   perform:     
-   return:      
-   exceptions:  
+   accept:
+   perform:
+   return:
+   exceptions:
    win32api:
-   comments:    
+   comments:
 ----------------------------------------------------------*/
 
 BOOL init_serial_struct( struct serial_struct *sstruct )
@@ -788,12 +788,12 @@ BOOL init_serial_struct( struct serial_struct *sstruct )
 /*----------------------------------------------------------
 init_termios()
 
-   accept:      
-   perform:     
-   return:      
-   exceptions:  
+   accept:
+   perform:
+   return:
+   exceptions:
    win32api:
-   comments:    
+   comments:
 ----------------------------------------------------------*/
 
 BOOL init_termios(struct termios *ttyset )
@@ -816,7 +816,7 @@ BOOL init_termios(struct termios *ttyset )
 	ttyset->c_cc[VEOL] = '\r';	/* 11: */
 	ttyset->c_cc[VREPRINT] = 0x12;	/* 12: C-r */
 /*
-	ttyset->c_cc[VDISCARD] = 0x;	   13: IEXTEN only 
+	ttyset->c_cc[VDISCARD] = 0x;	   13: IEXTEN only
 */
 	ttyset->c_cc[VWERASE] = 0x17;	/* 14: C-w */
 	ttyset->c_cc[VLNEXT] = 0x16;	/* 15: C-w */
@@ -829,18 +829,18 @@ BOOL init_termios(struct termios *ttyset )
 /*----------------------------------------------------------
 port_opened()
 
-   accept:      
-   perform:     
-   return:      
-   exceptions:  
+   accept:
+   perform:
+   return:
+   exceptions:
    win32api:     None
-   comments:    
+   comments:
 ----------------------------------------------------------*/
 
 int port_opened( const char *filename )
 {
 	struct termios_list *index = first_tl;
-	
+
 	ENTER( "port_opened" );
 	if ( ! index )
 		return 0;
@@ -859,12 +859,12 @@ int port_opened( const char *filename )
 /*----------------------------------------------------------
 open_port()
 
-   accept:      
-   perform:     
-   return:      
-   exceptions:  
+   accept:
+   perform:
+   return:
+   exceptions:
    win32api:   CreateFile(), SetupComm(), CreateEvent()
-   comments:    
+   comments:
 	FILE_FLAG_OVERLAPPED allows one to break out the select()
 	so RXTXPort.close() does not hang.
 
@@ -917,7 +917,7 @@ int open_port( struct termios_list *port )
 
 	port->sol.hEvent = CreateEvent( NULL, TRUE, FALSE, NULL );
 
-	if ( !port->sol.hEvent )	
+	if ( !port->sol.hEvent )
 	{
 		YACK();
 		report( "Could not create select overlapped\n" );
@@ -925,7 +925,7 @@ int open_port( struct termios_list *port )
 	}
 	port->wol.hEvent = CreateEvent( NULL, TRUE, FALSE, NULL );
 
-	if ( !port->wol.hEvent )	
+	if ( !port->wol.hEvent )
 	{
 		YACK();
 		report( "Could not create write overlapped\n" );
@@ -948,7 +948,7 @@ termios_list()
 		 NULL if no matches are found.
    exceptions:   None
    win32api:     None
-   comments:    
+   comments:
 ----------------------------------------------------------*/
 
 struct termios_list *find_port( int fd )
@@ -982,12 +982,12 @@ fail:
 /*----------------------------------------------------------
 get_free_fd()
 
-   accept:      
-   perform:     
-   return:      
-   exceptions:  
+   accept:
+   perform:
+   return:
+   exceptions:
    win32api:       None
-   comments:    
+   comments:
 ----------------------------------------------------------*/
 
 int get_free_fd()
@@ -1010,7 +1010,7 @@ int get_free_fd()
 		first_tl = index;
 		return ( 1 );
 	}
-	
+
 	last = index->fd;
 
 	while( index->next )
@@ -1019,7 +1019,7 @@ int get_free_fd()
 		if ( next !=  last + 1 )
 		{
 			return( last + 1 );
-			
+
 		}
 		index = index->next;
 		last = next;
@@ -1031,12 +1031,12 @@ int get_free_fd()
 /*----------------------------------------------------------
 add_port()
 
-   accept:      
-   perform:     
-   return:      
-   exceptions:  
+   accept:
+   perform:
+   return:
+   exceptions:
    win32api:      None
-   comments:    
+   comments:
 ----------------------------------------------------------*/
 
 struct termios_list *add_port( const char *filename )
@@ -1080,7 +1080,7 @@ struct termios_list *add_port( const char *filename )
 
 	port->fd = get_free_fd();
 
-	
+
 	if ( !first_tl )
 	{
 		port->prev = NULL;
@@ -1094,7 +1094,7 @@ struct termios_list *add_port( const char *filename )
 		if ( index->fd > port->fd )
 		{
 			/* inserting previously closed fd */
-			port->prev = index->prev; 
+			port->prev = index->prev;
 			port->next=index;
 			index->prev->next = port;
 			index->prev = port;
@@ -1126,12 +1126,12 @@ fail:
 /*----------------------------------------------------------
 check_port_capabilities()
 
-   accept:      
-   perform:     
-   return:      
-   exceptions:  
+   accept:
+   perform:
+   return:
+   exceptions:
    win32api:      GetCommProperties(), GetCommState()
-   comments:    
+   comments:
 ----------------------------------------------------------*/
 
 int check_port_capabilities( struct termios_list *index )
@@ -1180,12 +1180,12 @@ int check_port_capabilities( struct termios_list *index )
 /*----------------------------------------------------------
 serial_open()
 
-   accept:      
-   perform:     
-   return:      
-   exceptions:  
+   accept:
+   perform:
+   return:
+   exceptions:
    win32api:    None
-   comments:    
+   comments:
 ----------------------------------------------------------*/
 
 int serial_open( const char *filename, int flags, ... )
@@ -1205,7 +1205,7 @@ int serial_open( const char *filename, int flags, ... )
 		report( "serial_open !index\n" );
 		return( -1 );
 	}
-	
+
 	index->interrupt = 0;
 	index->tx_happened = 0;
 	if ( open_port( index ) )
@@ -1253,14 +1253,14 @@ int serial_open( const char *filename, int flags, ... )
 /*----------------------------------------------------------
 serial_write()
 
-   accept:      
-   perform:     
-   return:      
-   exceptions:  
+   accept:
+   perform:
+   return:
+   exceptions:
    win32api:     WriteFile(), GetLastError(),
                  WaitForSingleObject(),  GetOverlappedResult(),
                  FlushFileBuffers(), Sleep()
-   comments:    
+   comments:
 ----------------------------------------------------------*/
 
 int serial_write( int fd, char *Str, int length )
@@ -1286,9 +1286,9 @@ int serial_write( int fd, char *Str, int length )
 /*
 	index->event_flag &= ~EV_TXEMPTY;
 	SetCommMask( index->hComm, index->event_flag );
-	index->tx_happened = 1; 
+	index->tx_happened = 1;
 */
-	index->wol.Offset = index->wol.OffsetHigh = 0; 
+	index->wol.Offset = index->wol.OffsetHigh = 0;
 	ResetEvent( index->wol.hEvent );
 	if ( !WriteFile( index->hComm, Str, length, &nBytes, &index->wol ) )
 	{
@@ -1332,7 +1332,7 @@ end:
 	SetCommMask( index->hComm, index->event_flag );
 	/* ClearErrors( index, &Stat ); */
 	index->event_flag = old_flag;
-	index->tx_happened = 1; 
+	index->tx_happened = 1;
 	LEAVE( "serial_write" );
 	return nBytes;
 }
@@ -1340,14 +1340,14 @@ end:
 /*----------------------------------------------------------
 serial_read()
 
-   accept:      
-   perform:     
-   return:      
-   exceptions:  
+   accept:
+   perform:
+   return:
+   exceptions:
    win32api:      ReadFile(), GetLastError(), WaitForSingleObject()
                   GetOverLappedResult()
    comments:    If setting errno make sure not to use EWOULDBLOCK
-                In that case use EAGAIN.  See SerialImp.c:testRead() 
+                In that case use EAGAIN.  See SerialImp.c:testRead()
 ----------------------------------------------------------*/
 
 int serial_read( int fd, void *vb, int size )
@@ -1355,13 +1355,13 @@ int serial_read( int fd, void *vb, int size )
 	long start, now;
 	unsigned long nBytes = 0, total = 0, error;
 	/* unsigned long waiting = 0; */
-	int err, vmin; 
+	int err, vmin;
 	struct termios_list *index;
 	char message[80];
 	COMSTAT stat;
 	clock_t c;
 	unsigned char *dest = vb;
-	
+
 	start = GetTickCount();
 	ENTER( "serial_read" );
 
@@ -1431,7 +1431,7 @@ int serial_read( int fd, void *vb, int size )
 		index->rol.Offset = index->rol.OffsetHigh = 0;
 		ResetEvent( index->rol.hEvent );
 
-		err = ReadFile( index->hComm, dest + total, size, &nBytes, &index->rol ); 
+		err = ReadFile( index->hComm, dest + total, size, &nBytes, &index->rol );
 #ifdef DEBUG_VERBOSE
 	/* warning Roy Rogers! */
 		sprintf(message, " ========== ReadFile = %i %s\n",
@@ -1440,7 +1440,7 @@ int serial_read( int fd, void *vb, int size )
 #endif /* DEBUG_VERBOSE */
 		size -= nBytes;
 		total += nBytes;
-		
+
 		if ( !err )
 		{
 			switch ( GetLastError() )
@@ -1507,13 +1507,13 @@ int serial_read( int fd, void *vb, int size )
 	long start, now;
 	unsigned long nBytes = 0, total = 0, error;
 	/* unsigned long waiting = 0; */
-	int err, vmin; 
+	int err, vmin;
 	struct termios_list *index;
 	char message[80];
 	COMSTAT Stat;
 	clock_t c;
 	unsigned char *dest = vb;
-	
+
 	start = GetTickCount();
 	ENTER( "serial_read" );
 
@@ -1589,7 +1589,7 @@ int serial_read( int fd, void *vb, int size )
 		index->rol.Offset = index->rol.OffsetHigh = 0;
 		ResetEvent( index->rol.hEvent );
 
-		err = ReadFile( index->hComm, dest + total, size, &nBytes, &index->rol ); 
+		err = ReadFile( index->hComm, dest + total, size, &nBytes, &index->rol );
 #ifdef DEBUG_VERBOSE
 	/* warning Roy Rogers! */
 		sprintf(message, " ========== ReadFile = %i %s\n",
@@ -1598,7 +1598,7 @@ int serial_read( int fd, void *vb, int size )
 #endif /* DEBUG_VERBOSE */
 		size -= nBytes;
 		total += nBytes;
-		
+
 		if ( !err )
 		{
 			switch ( GetLastError() )
@@ -1669,12 +1669,12 @@ int serial_read( int fd, void *vb, int size )
 /*----------------------------------------------------------
 cfsetospeed()
 
-   accept:      
-   perform:     
-   return:      
-   exceptions:  
+   accept:
+   perform:
+   return:
+   exceptions:
    win32api:     None
-   comments:    
+   comments:
 ----------------------------------------------------------*/
 
 int cfsetospeed( struct termios *s_termios, speed_t speed )
@@ -1695,7 +1695,7 @@ int cfsetospeed( struct termios *s_termios, speed_t speed )
 	{
 		s_termios->c_cflag |= speed;
 	}
-	else 
+	else
 	{
 		/* PC blows up with speed 0 handled in Java */
 		s_termios->c_cflag |= B9600;
@@ -1708,12 +1708,12 @@ int cfsetospeed( struct termios *s_termios, speed_t speed )
 /*----------------------------------------------------------
 cfsetispeed()
 
-   accept:      
-   perform:     
-   return:      
-   exceptions:  
+   accept:
+   perform:
+   return:
+   exceptions:
    win32api:     None
-   comments:    
+   comments:
 ----------------------------------------------------------*/
 
 int cfsetispeed( struct termios *s_termios, speed_t speed )
@@ -1724,12 +1724,12 @@ int cfsetispeed( struct termios *s_termios, speed_t speed )
 /*----------------------------------------------------------
 cfsetspeed()
 
-   accept:      
-   perform:     
-   return:      
-   exceptions:  
+   accept:
+   perform:
+   return:
+   exceptions:
    win32api:     None
-   comments:    
+   comments:
 ----------------------------------------------------------*/
 
 int cfsetspeed( struct termios *s_termios, speed_t speed )
@@ -1740,12 +1740,12 @@ int cfsetspeed( struct termios *s_termios, speed_t speed )
 /*----------------------------------------------------------
 cfgetospeed()
 
-   accept:      
-   perform:     
-   return:      
-   exceptions:  
+   accept:
+   perform:
+   return:
+   exceptions:
    win32api:     None
-   comments:    
+   comments:
 ----------------------------------------------------------*/
 
 speed_t cfgetospeed( struct termios *s_termios )
@@ -1757,12 +1757,12 @@ speed_t cfgetospeed( struct termios *s_termios )
 /*----------------------------------------------------------
 cfgetispeed()
 
-   accept:      
-   perform:     
-   return:      
-   exceptions:  
+   accept:
+   perform:
+   return:
+   exceptions:
    win32api:     None
-   comments:    
+   comments:
 ----------------------------------------------------------*/
 
 speed_t cfgetispeed( struct termios *s_termios )
@@ -1774,12 +1774,12 @@ speed_t cfgetispeed( struct termios *s_termios )
 /*----------------------------------------------------------
 termios_to_DCB()
 
-   accept:      
-   perform:     
-   return:      
-   exceptions:  
+   accept:
+   perform:
+   return:
+   exceptions:
    win32api:     None
-   comments:    
+   comments:
 ----------------------------------------------------------*/
 int termios_to_DCB( struct termios *s_termios, DCB *dcb )
 {
@@ -1791,7 +1791,7 @@ int termios_to_DCB( struct termios *s_termios, DCB *dcb )
 
 	if ( s_termios->c_cflag & PARENB )
 	{
-		if ( s_termios->c_cflag & PARODD 
+		if ( s_termios->c_cflag & PARODD
 			&& s_termios->c_cflag & CMSPAR )
 		{
 			dcb->Parity = MARKPARITY;
@@ -1812,13 +1812,13 @@ int termios_to_DCB( struct termios *s_termios, DCB *dcb )
 	else
 	{
 		dcb->Parity = NOPARITY;
-	}	
+	}
 
 	if ( s_termios->c_cflag & CSTOPB )
 	{
-		if (dcb->ByteSize == 5) 
+		if (dcb->ByteSize == 5)
 		{
-			dcb->StopBits = ONE5STOPBITS;	
+			dcb->StopBits = ONE5STOPBITS;
 		} else dcb->StopBits = TWOSTOPBITS;
 	}
 	else
@@ -1844,12 +1844,12 @@ int termios_to_DCB( struct termios *s_termios, DCB *dcb )
 /*----------------------------------------------------------
 DCB_to_serial_struct()
 
-   accept:      
-   perform:     
-   return:      
-   exceptions:  
+   accept:
+   perform:
+   return:
+   exceptions:
    win32api:     None
-   comments:    
+   comments:
 ----------------------------------------------------------*/
 int DCB_to_serial_struct( DCB *dcb, struct serial_struct *sstruct  )
 {
@@ -1858,12 +1858,12 @@ int DCB_to_serial_struct( DCB *dcb, struct serial_struct *sstruct  )
 /*----------------------------------------------------------
 DCB_to_termios()
 
-   accept:      
-   perform:     
-   return:      
-   exceptions:  
+   accept:
+   perform:
+   return:
+   exceptions:
    win32api:     None
-   comments:    
+   comments:
 ----------------------------------------------------------*/
 void DCB_to_termios( DCB *dcb, struct termios *s_termios )
 {
@@ -1877,12 +1877,12 @@ void DCB_to_termios( DCB *dcb, struct termios *s_termios )
 /*----------------------------------------------------------
 show_DCB()
 
-   accept:      
-   perform:     
-   return:      
-   exceptions:  
+   accept:
+   perform:
+   return:
+   exceptions:
    win32api:     None
-   comments:    
+   comments:
 ----------------------------------------------------------*/
 void show_DCB( myDCB )
 {
@@ -1999,12 +1999,12 @@ void show_DCB( myDCB )
 /*----------------------------------------------------------
 tcgetattr()
 
-   accept:      
-   perform:     
-   return:      
-   exceptions:  
+   accept:
+   perform:
+   return:
+   exceptions:
    win32api:    GetCommState(), GetCommTimeouts()
-   comments:    
+   comments:
 ----------------------------------------------------------*/
 
 int tcgetattr( int fd, struct termios *s_termios )
@@ -2083,14 +2083,14 @@ int tcgetattr( int fd, struct termios *s_termios )
 	/* CSTOPB two stop bits ( otherwise one) */
 	if ( myDCB.StopBits == TWOSTOPBITS )
 	{
-		s_termios->c_cflag |= CSTOPB;	
-	} else if ( myDCB.StopBits == ONE5STOPBITS 
+		s_termios->c_cflag |= CSTOPB;
+	} else if ( myDCB.StopBits == ONE5STOPBITS )
 	{
-		s_termios->c_cflag |= CSTOPB;	
+		s_termios->c_cflag |= CSTOPB;
 		s_termios->c_cflag |= CS5;
 	} else if ( myDCB.StopBits == ONESTOPBIT )
 	{
-		s_termios->c_cflag &= ~CSTOPB;	
+		s_termios->c_cflag &= ~CSTOPB;
 	}
 
 	/* PARENB enable parity bit */
@@ -2219,13 +2219,13 @@ int tcgetattr( int fd, struct termios *s_termios )
 /*----------------------------------------------------------
 tcsetattr()
 
-   accept:      
-   perform:     
-   return:      
-   exceptions:  
+   accept:
+   perform:
+   return:
+   exceptions:
    win32api:     GetCommState(), GetCommTimeouts(), SetCommState(),
                  SetCommTimeouts()
-   comments:    
+   comments:
 ----------------------------------------------------------*/
 int tcsetattr( int fd, int when, struct termios *s_termios )
 {
@@ -2287,8 +2287,8 @@ int tcsetattr( int fd, int when, struct termios *s_termios )
 */
 	/* not in win95?
 	   Some years later...
-	   eww..  FIXME This is used for changing the Parity 
-	   error character 
+	   eww..  FIXME This is used for changing the Parity
+	   error character
 
 	   I think this code is hosed.  See VEOF below
 
@@ -2405,12 +2405,12 @@ int tcsetattr( int fd, int when, struct termios *s_termios )
 /*----------------------------------------------------------
 tcsendbreak()
 
-   accept:      
-   perform:     
-   return:      
-   exceptions:  
+   accept:
+   perform:
+   return:
+   exceptions:
    win32api:     None
-   comments:    
+   comments:
 		break for duration*0.25 seconds or
 		0.25 seconds if duration = 0.
 ----------------------------------------------------------*/
@@ -2450,7 +2450,7 @@ tcdrain()
    return:       0 on success, -1 otherwise
    exceptions:   None
    win32api:     FlushFileBuffers
-   comments:    
+   comments:
 ----------------------------------------------------------*/
 
 int tcdrain ( int fd )
@@ -2471,7 +2471,7 @@ int tcdrain ( int fd )
 /*
 	index->event_flag &= ~EV_TXEMPTY;
 	SetCommMask( index->hComm, index->event_flag );
-	index->tx_happened = 1; 
+	index->tx_happened = 1;
 */
 	if ( !FlushFileBuffers( index->hComm ) )
 	{
@@ -2488,7 +2488,7 @@ int tcdrain ( int fd )
 		report( message );
 		if( GetLastError() == 0 )
 		{
-			set_errno( 0 ); 
+			set_errno( 0 );
 			return(0);
 		}
 		set_errno( EAGAIN );
@@ -2506,7 +2506,7 @@ int tcdrain ( int fd )
 	SetCommMask( index->hComm, index->event_flag );
 	index->event_flag = old_flag;
 /*
-	index->tx_happened = 1; 
+	index->tx_happened = 1;
 */
 	return 0;
 }
@@ -2514,7 +2514,7 @@ int tcdrain ( int fd )
 /*----------------------------------------------------------
 tcflush()
 
-   accept:       file descriptor, queue_selector 
+   accept:       file descriptor, queue_selector
    perform:      discard data not transmitted or read
 		 TCIFLUSH:  flush data not read
 		 TCOFLUSH:  flush data not transmitted
@@ -2522,7 +2522,7 @@ tcflush()
    return:       0 on success, -1 on error
    exceptions:   none
    win32api:     PurgeComm
-   comments:    
+   comments:
 ----------------------------------------------------------*/
 
 int tcflush( int fd, int queue_selector )
@@ -2541,7 +2541,7 @@ int tcflush( int fd, int queue_selector )
 /*
 	index->event_flag &= ~EV_TXEMPTY;
 	SetCommMask( index->hComm, index->event_flag );
-	index->tx_happened = 1; 
+	index->tx_happened = 1;
 */
 	ENTER( "tcflush" );
 	if ( !index )
@@ -2550,7 +2550,7 @@ int tcflush( int fd, int queue_selector )
 		return -1;
 	}
 
-	index->tx_happened = 1; 
+	index->tx_happened = 1;
 	switch( queue_selector )
 	{
 		case TCIFLUSH:
@@ -2586,7 +2586,7 @@ int tcflush( int fd, int queue_selector )
 	index->event_flag |= EV_TXEMPTY;
 	SetCommMask( index->hComm, index->event_flag );
 	index->event_flag = old_flag;
-	index->tx_happened = 1; 
+	index->tx_happened = 1;
 	LEAVE( "tcflush" );
 	return( 0 );
 
@@ -2606,12 +2606,12 @@ fail:
 /*----------------------------------------------------------
 tcflow()
 
-   accept:      
-   perform:     
-   return:      
-   exceptions:  
+   accept:
+   perform:
+   return:
+   exceptions:
    win32api:     None
-   comments:   FIXME 
+   comments:   FIXME
 ----------------------------------------------------------*/
 
 int tcflow( int fd, int action )
@@ -2635,11 +2635,11 @@ int tcflow( int fd, int action )
 /*----------------------------------------------------------
 fstat()
 
-   accept:      
-   perform:     
-   return:      
-   exceptions:  
-   win32api:    
+   accept:
+   perform:
+   return:
+   exceptions:
+   win32api:
    comments:  this is just to keep the eventLoop happy.
 ----------------------------------------------------------*/
 
@@ -2650,10 +2650,10 @@ int fstat( int fd, ... )
 /*----------------------------------------------------------
 ioctl()
 
-   accept:      
-   perform:     
-   return:      
-   exceptions:  
+   accept:
+   perform:
+   return:
+   exceptions:
    win32api:     GetCommError(), GetCommModemStatus, EscapeCommFunction()
    comments:  FIXME
 	the DCB struct is:
@@ -2704,7 +2704,7 @@ int ioctl( int fd, int request, ... )
 	}
 
 	va_start( ap, request );
-	
+
 	ret = ClearErrors( index, &Stat );
 	if (ret == 0)
 	{
@@ -2713,7 +2713,7 @@ int ioctl( int fd, int request, ... )
 		report( "ClearError Failed! ernno EBADFD" );
 		arg = va_arg( ap, int * );
 		va_end( ap );
-		return -1;		
+		return -1;
 	}
 	switch( request )
 	{
@@ -2792,7 +2792,7 @@ int ioctl( int fd, int request, ... )
 			{
 				index->MSR &= ~TIOCM_DTR;
 			}
-			if ( EscapeCommFunction( index->hComm, 
+			if ( EscapeCommFunction( index->hComm,
 				( *arg & TIOCM_DTR ) ? SETDTR :
 				CLRDTR ) )
 				report( "EscapeCommFunction: True\n" );
@@ -3031,10 +3031,10 @@ int ioctl( int fd, int request, ... )
 /*----------------------------------------------------------
 fcntl()
 
-   accept:      
-   perform:     
-   return:      
-   exceptions:  
+   accept:
+   perform:
+   return:
+   exceptions:
    win32api:    None
    comments:    FIXME
 ----------------------------------------------------------*/
@@ -3087,12 +3087,12 @@ int fcntl( int fd, int command, ... )
 /*----------------------------------------------------------
 termios_interrupt_event_loop()
 
-   accept:      
-   perform:     
+   accept:
+   perform:
    return:	let Serial_select break out so the thread can die
-   exceptions:  
-   win32api:    
-   comments:    
+   exceptions:
+   win32api:
+   comments:
 ----------------------------------------------------------*/
 void termios_interrupt_event_loop( int fd, int flag )
 {
@@ -3107,7 +3107,7 @@ void termios_interrupt_event_loop( int fd, int flag )
 	 TRENT SetCommMask( index->hComm, index->event_flag );
 	usleep(2000);
 	tcdrain( index->fd );
-	SetEvent( index->sol.hEvent ); 
+	SetEvent( index->sol.hEvent );
 */
 	index->interrupt = flag;
 	return;
@@ -3116,12 +3116,12 @@ void termios_interrupt_event_loop( int fd, int flag )
 /*----------------------------------------------------------
 Serial_select()
 
-   accept:      
-   perform:     
+   accept:
+   perform:
    return:      number of fd's changed on success or -1 on error.
-   exceptions:  
-   win32api:    SetCommMask(), GetCommEvent(), WaitSingleObject() 
-   comments:    
+   exceptions:
+   win32api:    SetCommMask(), GetCommEvent(), WaitSingleObject()
+   comments:
 ----------------------------------------------------------*/
 #ifndef __LCC__
 int  serial_select( int  n,  fd_set  *readfds,  fd_set  *writefds,
@@ -3148,7 +3148,7 @@ int  serial_select( int  n,  fd_set  *readfds,  fd_set  *writefds,
 		/* still setting up the port? hold off for a Sec so
 		   things can fire up
 
-		   this does happen.  loops ~twice on a 350 Mzh with 
+		   this does happen.  loops ~twice on a 350 Mzh with
 		   usleep(1000000)
 		*/
 		usleep(10000);
@@ -3193,7 +3193,7 @@ int  serial_select( int  n,  fd_set  *readfds,  fd_set  *writefds,
 			case WAIT_ABANDONED:
 			default:
 				goto fail;
-			
+
 		}
 	}
 end:
@@ -3243,7 +3243,7 @@ int  serial_select( int  n,  fd_set  *readfds,  fd_set  *writefds,
 		usleep(1000);
 		return -1;
 	}
-	
+
 	while ( wait == WAIT_TIMEOUT && index->sol.hEvent )
 	{
 		if( index->interrupt == 1 )
@@ -3301,7 +3301,7 @@ int  serial_select( int  n,  fd_set  *readfds,  fd_set  *writefds,
 			case WAIT_TIMEOUT:
 			default:
 				return(1); /* WaitFor error */
-			
+
 		}
 	}
 end:
@@ -3317,7 +3317,7 @@ fail:
 	LEAVE( "serial_select" );
 	return( 1 );
 #endif /* asdf */
-	
+
 }
 #endif /* asdf */
 #endif /* __LCC__ */
