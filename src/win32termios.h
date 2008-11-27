@@ -169,7 +169,7 @@ int serial_select(int, struct fd_set *, struct fd_set *, struct fd_set *, struct
 void termios_interrupt_event_loop( int , int );
 void termios_setflags( int , int[] );
 struct termios_list *find_port( int );
-/* void usleep(unsigned long usec); */
+void usleep(unsigned long usec);
 int fcntl(int fd, int command, ...);
 const char *get_dos_port(const char *);
 void set_errno(int);

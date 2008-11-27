@@ -154,13 +154,13 @@ fixup.o: $(SRC)/fixup.c
 #ZystemImp.o:  config.h
 #	$(CC) $(CFLAGS_CYGWIN) -c $(SRC)/ZystemImp.c -o ZystemImp.o
 
-SerialImp.o: $(SRC)/SerialImp.c $(SRC)/SerialImp.h config.h gnu_io_RXTXPort.h
+SerialImp.o: $(SRC)/SerialImp.c $(SRC)/SerialImp.h $(SRC)/win32termios.h config.h gnu_io_RXTXPort.h
 	$(CC) $(CFLAGS) -c $(SRC)/SerialImp.c -o SerialImp.o
 
 fuserImp.o: $(SRC)/fuserImp.c config.h gnu_io_CommPortIdentifier.h
 	$(CC) $(CFLAGS) -c $(SRC)/fuserImp.c -o fuserImp.o
 
-termios.o: $(SRC)/termios.c
+termios.o: $(SRC)/termios.c $(SRC)/win32termios.h config.h
 	$(CC) $(CFLAGS) -c $(SRC)/$*.c -o termios.o
 
 ParallelImp.o: $(SRC)/ParallelImp.c $(SRC)/ParallelImp.h $(SRC)/win32termios.h config.h gnu_io_LPRPort.h
@@ -214,4 +214,5 @@ uninstall:
 
 clean:
 	-rmdir /s /q gnu
+	-rmdir /s /q testcp
 	-del /Q *.o RXTXcomm.jar rxtxSerial.dll rxtxParallel.dll config.h gnu_io_*.h

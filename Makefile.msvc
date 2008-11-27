@@ -83,15 +83,15 @@ init.obj: config.h
 fixup.obj: config.h
 	$(CC) $(CFLAGS) -c $(SRC)\fixup.c
 
-fuserImp.obj: config.h gnu_io_CommPortIdentifier.h
-	$(CC) $(CFLAGS) -c $(SRC)/fuserImp.c
+fuserImp.obj: $(SRC)\fuserImp.c config.h gnu_io_CommPortIdentifier.h
+	$(CC) $(CFLAGS) -c $(SRC)\fuserImp.c
 
-termios.obj:
-	$(CC) $(CFLAGS) -c $(SRC)/termios.c
-SerialImp.obj:  config.h gnu_io_RXTXPort.h
+termios.obj: $(SRC)\termios.c $(SRC)\win32termios.h config.h
+	$(CC) $(CFLAGS) -c $(SRC)\termios.c
+SerialImp.obj:  $(SRC)\SerialImp.c $(SRC)\SerialImp.h $(SRC)\win32termios.h config.h gnu_io_RXTXPort.h
 	$(CC) $(CFLAGS) -c $(SRC)\SerialImp.c
 
-ParallelImp.obj:  config.h gnu_io_LPRPort.h
+ParallelImp.obj: $(SRC)\ParallelImp.c $(SRC)\ParallelImp.h $(SRC)\win32termios.h config.h gnu_io_LPRPort.h
 	$(CC) $(CFLAGS) -c $(SRC)\ParallelImp.c
 
 rxtxSerial.dll: $(OBJS)
