@@ -45,7 +45,7 @@
 JAVA_HOME = D:\Apps\Java\j2sdk1.4.2_17
 COMMINSTALL="$(JAVA_HOME)\jre\lib\ext"
 LIBINSTALL="$(JAVA_HOME)\jre\bin"
-JUNIT_JAR=D:\WS\RSE.new\ws\org.junit\junit.jar
+JUNIT_JAR=D:\Apps\junit3.8.2\junit.jar
 
 JAVAC = $(JAVA_HOME)\bin\javac -source 1.2 -target 1.2
 JAR = $(JAVA_HOME)\bin\jar
