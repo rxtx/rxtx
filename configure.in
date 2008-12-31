@@ -1,7 +1,7 @@
 ###########################################################################
 #   RXTX License v 2.1 - LGPL v 2.1 + Linking Over Controlled Interface.
 #   RXTX is a native interface to serial ports in java.
-#   Copyright 1997-2007 by Trent Jarvi tjarvi@qbang.org and others who
+#   Copyright 1997-2008 by Trent Jarvi tjarvi@qbang.org and others who
 #   actually wrote it.  See individual source files for more information.
 #
 #   A copy of the LGPL v 2.1 may be found at
@@ -64,7 +64,7 @@ AC_PROG_CC
 AC_DISABLE_STATIC
 AM_PROG_LIBTOOL
 # end of SCO fixes
-AM_INIT_AUTOMAKE(Serial,2.1-7)
+AM_INIT_AUTOMAKE(Serial,2.2pre1)
 AC_CHECK_HEADERS(fcntl.h)
 AC_CHECK_HEADERS(sys/fcntl.h)
 AC_CHECK_HEADERS(sys/file.h)
@@ -750,13 +750,19 @@ Mac\ OS\ X)
 	fi
 	SDK="$SDKPATH/SDKs/MacOSX10.4u.sdk"
 	if test "x$enable_universallib" != xno; then
-		if test -d "/Developer/SDKs/MacOSX10.4u.sdk"; then
+		if test -d "/Developer/SDKs/MacOSX10.5.sdk"; then
+			echo "library os.arch... universal (i386 x86_64 ppc)"
+			SDK="$SDKPATH/SDKs/MacOSX10.5.sdk"
+			CFLAGS="$CFLAGS -O -g -mmacosx-version-min=10.5 -isysroot $SDK -arch i386 -arch x86_64 -arch ppc"
+			LDFLAGS="$LDFLAGS -isysroot $SDK -arch i386 -arch x86_64 -arch ppc "
+		else	if test -d "/Developer/SDKs/MacOSX10.4u.sdk"; then
 			echo "library os.arch... universal (i386 ppc)"
 			CFLAGS="$CFLAGS -O -g -mmacosx-version-min=10.4 -isysroot $SDK -arch i386 -arch ppc"
 			LDFLAGS="$LDFLAGS -isysroot $SDK -arch i386 -arch ppc "
-		else
+			else
 			echo "Warning: no universal SDK, will not build universal"
 			echo "library os.arch... "${OS_ARCH}
+			fi
 		fi
 	else
 		echo "User disabled building of universal library"
