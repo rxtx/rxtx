@@ -5,6 +5,10 @@ rxtx-2.1 and rxtx-2.0 changes are kept in the same file.  skip to the version
 you downloaded.
 
 2.1-8 ???
+		disable dcb.fDtrControl to avoid unexpected behavior.
+		Beat Arnet <beat.arnet@gmail.com>
+		http://bugzilla.qbang.org/show_bug.cgi?id=104
+
 		threshold fix
 		Alexandre Rusev <cyberflex@mail.ru>
 		http://bugzilla.qbang.org/show_bug.cgi?id=85

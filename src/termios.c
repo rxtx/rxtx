@@ -14,7 +14,7 @@ extern void report_error( char * );
 |   RXTX License v 2.1 - LGPL v 2.1 + Linking Over Controlled Interface.
 |   RXTX is a native interface to serial ports in java.
 |   Copyright 1998-2002 by Wayne roberts wroberts1@home.com
-|   Copyright 1997-2008 by Trent Jarvi tjarvi@qbang.org and others who
+|   Copyright 1997-2009 by Trent Jarvi tjarvi@qbang.org and others who
 |   actually wrote it.  See individual source files for more information.
 |
 |   A copy of the LGPL v 2.1 may be found at
@@ -2321,7 +2321,7 @@ int tcsetattr( int fd, int when, struct termios *s_termios )
 	/* FIXME: IMAXBEL: if input buffer full, send bell */
 
 	/* no DTR control in termios? */
-	dcb.fDtrControl     = DTR_CONTROL_ENABLE;
+	dcb.fDtrControl     =  DTR_CONTROL_DISABLE;
 	/* no DSR control in termios? */
 	dcb.fOutxDsrFlow    = FALSE;
 	/* DONT ignore rx bytes when DSR is OFF */
