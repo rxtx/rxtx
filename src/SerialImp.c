@@ -1,7 +1,7 @@
 /*-------------------------------------------------------------------------
 |   RXTX License v 2.1 - LGPL v 2.1 + Linking Over Controlled Interface.
 |   RXTX is a native interface to serial ports in java.
-|   Copyright 1997-2008 by Trent Jarvi tjarvi@qbang.org and others who
+|   Copyright 1997-2009 by Trent Jarvi tjarvi@qbang.org and others who
 |   actually wrote it.  See individual source files for more information.
 |
 |   A copy of the LGPL v 2.1 may be found at
@@ -1446,7 +1446,7 @@ int init_threads( struct event_info_struct *eis )
 	report("init_threads: get eis\n");
 	jeis  = (*eis->env)->GetFieldID( eis->env, eis->jclazz, "eis", "J" );
 	report("init_threads: set eis\n");
-	(*eis->env)->SetIntField(eis->env, *eis->jobj, jeis, ( size_t ) eis );
+	(*eis->env)->SetLongField(eis->env, *eis->jobj, jeis, ( size_t ) eis );
 	report("init_threads:  stop\n");
 	report_time_end( );
 	return( 1 );
@@ -1639,7 +1639,7 @@ JNIEXPORT jboolean JNICALL RXTXPort(nativeDrain)( JNIEnv *env,
 	jobject jobj, jboolean interrupted )
 {
 	int fd = get_java_var( env, jobj,"fd","I" );
-	struct event_info_struct *eis = ( struct event_info_struct * ) get_java_var( env, jobj, "eis", "J" );
+	struct event_info_struct *eis = ( struct event_info_struct * ) get_java_var_long( env, jobj, "eis", "J" );
 	int result, count=0;
 
 	char message[80];
@@ -3056,7 +3056,7 @@ int read_byte_array( JNIEnv *env,
 	/* TRENT */
 	int flag, count = 0;
 	struct event_info_struct *eis = ( struct event_info_struct * )
-		get_java_var( env, *jobj,"eis","J" );
+		get_java_var_long( env, *jobj,"eis","J" );
 
 	report_time_start();
 	flag = eis->eventflags[SPE_DATA_AVAILABLE];
@@ -4271,7 +4271,7 @@ RXTXVersion.nativeGetVersion
 JNIEXPORT jstring JNICALL RXTXVersion(nativeGetVersion) (JNIEnv *env,
 	jclass jclazz )
 {
-	return (*env)->NewStringUTF( env, "RXTX-2.2" );
+	return (*env)->NewStringUTF( env, "RXTX-2.2pre2" );
 }
 
 /*----------------------------------------------------------
@@ -5015,9 +5015,13 @@ get_java_var
    exceptions:  none
    comments:
 ----------------------------------------------------------*/
-size_t get_java_var( JNIEnv *env, jobject jobj, char *id, char *type )
+size_t get_java_var( JNIEnv *env, jobject jobj, char *id, char *type ) {
+  return (size_t) get_java_var_long( env, jobj, id, type );
+}
+
+long get_java_var_long( JNIEnv *env, jobject jobj, char *id, char *type )
 {
-	int result = 0;
+	long result = 0;
 	jclass jclazz = (*env)->GetObjectClass( env, jobj );
 	jfieldID jfd = (*env)->GetFieldID( env, jclazz, id, type );
 
@@ -5031,7 +5035,11 @@ size_t get_java_var( JNIEnv *env, jobject jobj, char *id, char *type )
 		LEAVE( "get_java_var" );
 		return result;
 	}
-	result = (int)( (*env)->GetIntField( env, jobj, jfd ) );
+	if ( !strcmp( type, "J" ) ) {
+	  result = (long)( (*env)->GetLongField( env, jobj, jfd ) );
+	} else {
+	  result = (size_t) ( (*env)->GetIntField( env, jobj, jfd ) );
+	}
 /* ct7 & gel * Added DeleteLocalRef */
 	(*env)->DeleteLocalRef( env, jclazz );
 	if(!strncmp( "fd",id,2) && result == 0)
