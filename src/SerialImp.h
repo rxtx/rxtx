@@ -1,7 +1,7 @@
 /*-------------------------------------------------------------------------
 |   RXTX License v 2.1 - LGPL v 2.1 + Linking Over Controlled Interface.
 |   RXTX is a native interface to serial ports in java.
-|   Copyright 1997-2007 by Trent Jarvi tjarvi@qbang.org and others who
+|   Copyright 1997-2009 by Trent Jarvi tjarvi@qbang.org and others who
 |   actually wrote it.  See individual source files for more information.
 |
 |   A copy of the LGPL v 2.1 may be found at
@@ -462,6 +462,7 @@ int translate_parity( JNIEnv *, tcflag_t *, jint );
 void system_wait();
 void finalize_event_info_struct( struct event_info_struct * );
 int read_byte_array( JNIEnv *, jobject *, int, unsigned char *, int, int );
+long get_java_var_long( JNIEnv *, jobject, char *, char * );
 size_t get_java_var( JNIEnv *, jobject, char *, char * );
 jboolean is_interrupted( struct event_info_struct * );
 int send_event(struct event_info_struct *, jint, int );

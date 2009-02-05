@@ -1,10 +1,25 @@
 This is ChangeLog
-Thu Nov 13 18:35:29 EST 2008
+Wed Feb  4 17:32:37 EST 2009
 
 rxtx-2.1 and rxtx-2.0 changes are kept in the same file.  skip to the version
 you downloaded.
 
-2.1-8 ???
+2.2 ???
+		Solaris static libgcc link configure fix.
+
+		64 bit JNI Fixes  <dan.sandberg.lists@gmail.com>
+		Dan Sandberg
+		http://mailman.qbang.org/pipermail/rxtx/2007-June/3676251.html
+
+	 	Maintain DTR=false during setSerialPortParams	
+		Beat Arnet <beat.arnet@gmail.com>
+		http://mailman.qbang.org/pipermail/rxtx/2009-January/3682508.html
+		http://bugzilla.qbang.org/show_bug.cgi?id=104
+		
+		Avoid debug sprintf overflows on win32.
+		http://mailman.qbang.org/pipermail/rxtx/2009-January/3682496.html
+		Luis Pires <lpdev@ruabrasil.org>
+
 		disable dcb.fDtrControl to avoid unexpected behavior.
 		Beat Arnet <beat.arnet@gmail.com>
 		http://bugzilla.qbang.org/show_bug.cgi?id=104
