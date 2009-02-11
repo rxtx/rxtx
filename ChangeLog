@@ -5,6 +5,10 @@ rxtx-2.1 and rxtx-2.0 changes are kept in the same file.  skip to the version
 you downloaded.
 
 2.2 ???
+		Let people know which port is in use on windows.
+		WriteFile fix for Parallel ports on windows.
+		Johnny Luong <johnny.luong@trustcommerce.com>
+
 		Solaris static libgcc link configure fix.
 
 		64 bit JNI Fixes  <dan.sandberg.lists@gmail.com>

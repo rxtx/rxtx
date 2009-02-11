@@ -1,7 +1,7 @@
 /*-------------------------------------------------------------------------
 |   RXTX License v 2.1 - LGPL v 2.1 + Linking Over Controlled Interface.
 |   RXTX is a native interface to serial ports in java.
-|   Copyright 1997-2007 by Trent Jarvi tjarvi@qbang.org and others who
+|   Copyright 1997-2009 by Trent Jarvi tjarvi@qbang.org and others who
 |   actually wrote it.  See individual source files for more information.
 |
 |   A copy of the LGPL v 2.1 may be found at
@@ -442,8 +442,8 @@ JNIEXPORT void JNICALL LPRPort(writeByte)( JNIEnv *env,
 	int fd = get_java_var( env, jobj,"fd","I" );
 
 #ifdef WIN32
-	DWORD countWritten; /* Fixme, should be a loop until all is written */
-	if( WriteFile( (HANDLE)fd, &byte, sizeof( unsigned char ), &countWritten, NULL ) < 0 ) return;
+	DWORD countWritten = 0; /* Fixme, should be a loop until all is written */
+	if( WriteFile( (HANDLE)fd, &byte, sizeof( unsigned char ), &countWritten, NULL ) != 0 && countWritten == sizeof( unsigned char ) ) return;
 #else
 	if( write( fd, &byte, sizeof( unsigned char ) ) >= 0 ) return;
 #endif
