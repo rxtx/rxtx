@@ -1,10 +1,13 @@
 This is ChangeLog
-Wed Feb  4 17:32:37 EST 2009
+Wed Mar 18 23:29:11 EDT 2009
+
 
 rxtx-2.1 and rxtx-2.0 changes are kept in the same file.  skip to the version
 you downloaded.
 
 2.2 ???
+		Fix for SIGSEGV at SerialImp.c Solaris/mac/*bsd
+		ilkka@myller.com 
 		Let people know which port is in use on windows.
 		WriteFile fix for Parallel ports on windows.
 		Johnny Luong <johnny.luong@trustcommerce.com>
