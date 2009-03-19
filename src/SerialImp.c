@@ -1336,7 +1336,7 @@ void *drain_loop( void *arg )
 	}
 end:
 	report("------------------ drain_loop exiting ---------------------\n");
-	eis->closing = 1;
+	eis->drain_loop_running = 0;
 	pthread_exit( NULL );
 	return( NULL );
 }
@@ -1442,6 +1442,7 @@ int init_threads( struct event_info_struct *eis )
 	pthread_create( &tid, NULL, drain_loop, (void *) eis );
 	pthread_detach( tid );
 	eis->drain_tid = tid;
+	eis->drain_loop_running = 1;
 #endif /* TIOCSERGETLSR */
 	report("init_threads: get eis\n");
 	jeis  = (*eis->env)->GetFieldID( eis->env, eis->jclazz, "eis", "J" );
@@ -4884,12 +4885,13 @@ JNIEXPORT void JNICALL RXTXPort(interruptEventLoop)(JNIEnv *env,
 	may still block. This is very ugly because it may block the call
 	to close indefinetly.
 	*/
-	if (index->closing != 1) {
+	if (index->drain_loop_running != 0) {
 		/* good bye tcdrain, and thanks for all the fish */
 		report("interruptEventLoop: canceling blocked drain thread\n");
 		pthread_cancel(index->drain_tid);
-		index->closing = 1;
+		index->drain_loop_running = 0;
 	}
+	index->closing = 1;
 #endif
 	report("interruptEventLoop: interrupted\n");
 }
