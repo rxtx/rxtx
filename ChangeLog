@@ -1,13 +1,21 @@
 This is ChangeLog
-Wed Mar 18 23:29:11 EDT 2009
+Mon Apr  6 20:17:04 EDT 2009
 
 
 rxtx-2.1 and rxtx-2.0 changes are kept in the same file.  skip to the version
 you downloaded.
 
 2.2 ???
+		YACK() debug overflow fix for windows
+		Steffen DETTMER <Steffen.DETTMER@ingenico.com>
+
+		multiport fix for windows.
+		Ilkka Myller <ilkka@myller.com>
+		http://mailman.qbang.org/pipermail/rxtx/2009-February/3989441.html
+
 		Fix for SIGSEGV at SerialImp.c Solaris/mac/*bsd
 		ilkka@myller.com 
+
 		Let people know which port is in use on windows.
 		WriteFile fix for Parallel ports on windows.
 		Johnny Luong <johnny.luong@trustcommerce.com>
