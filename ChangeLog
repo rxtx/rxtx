@@ -6,6 +6,8 @@ rxtx-2.1 and rxtx-2.0 changes are kept in the same file.  skip to the version
 you downloaded.
 
 2.2 ???
+		test log info for Ilkka
+
 		YACK() debug overflow fix for windows
 		Steffen DETTMER <Steffen.DETTMER@ingenico.com>
 
