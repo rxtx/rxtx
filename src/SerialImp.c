@@ -4526,7 +4526,7 @@ createSerialIterator(io_iterator_t *serialIterator)
     kern_return_t    kernResult;
     mach_port_t        masterPort;
     CFMutableDictionaryRef    classesToMatch;
-    if ((kernResult=IOMasterPort( (int) NULL, &masterPort ) ) != KERN_SUCCESS)
+    if ((kernResult=IOMasterPort( MACH_PORT_NULL, &masterPort ) ) != KERN_SUCCESS)
     {
 	printf( "IOMasterPort returned %d\n", kernResult);
 	return kernResult;
@@ -4607,7 +4607,7 @@ registerKnownSerialPorts(JNIEnv *env, jobject jobj, jint portType) /* dima */
         if (mid == 0) {
             printf( "getMethodID of CommDriver.addPortName failed\n" );
         } else {
-            while (theObject = IOIteratorNext(theSerialIterator))
+            while ( (theObject = IOIteratorNext(theSerialIterator)) )
             {
  /* begin dima */
             	jstring	tempJstring;
@@ -5098,7 +5098,7 @@ void throw_java_exception( JNIEnv *env, char *exc, char *foo, char *msg )
 void report_warning(char *msg)
 {
 #ifndef DEBUG_MW
-	fprintf(stderr, msg);
+	fprintf(stderr, "%s", msg);
 #else
 	mexWarnMsgTxt( (const char *) msg );
 #endif /* DEBUG_MW */
@@ -5119,7 +5119,7 @@ void report_verbose(char *msg)
 #ifdef DEBUG_MW
 	mexErrMsgTxt( msg );
 #else
-	fprintf(stderr, msg);
+	fprintf(stderr, "%s", msg);
 #endif /* DEBUG_MW */
 #endif /* DEBUG_VERBOSE */
 }
@@ -5135,7 +5135,7 @@ void report_verbose(char *msg)
 void report_error(char *msg)
 {
 #ifndef DEBUG_MW
-	fprintf(stderr, msg);
+	fprintf(stderr, "%s", msg);
 #else
 	mexWarnMsgTxt( msg );
 #endif /* DEBUG_MW */
@@ -5154,7 +5154,7 @@ void report(char *msg)
 {
 #ifdef DEBUG
 #	ifndef DEBUG_MW
-		fprintf(stderr, msg);
+		fprintf(stderr, "%s", msg);
 #	else
 		mexPrintf( msg );
 #	endif /* DEBUG_MW */
