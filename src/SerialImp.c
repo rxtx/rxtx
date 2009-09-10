@@ -279,10 +279,10 @@ JNIEXPORT void JNICALL RXTXPort(Initialize)(
 	jclass jclazz
 	)
 {
-#if defined DEBUG && defined(__linux__)
+#if defined(DEBUG) && defined(__linux__) && defined(UTS_RELEASE)
 	struct utsname name;
 	char message[80];
-#endif /* DEBUG && __linux__ */
+#endif /* DEBUG && __linux__ && UTS_RELEASE */
 	/* This bit of code checks to see if there is a signal handler installed
 	   for SIGIO, and installs SIG_IGN if there is not.  This is necessary
 	   for the native threads jdk, but we don't want to do it with green
@@ -318,7 +318,7 @@ JNIEXPORT void JNICALL RXTXPort(Initialize)(
 #if DEBUG_TIMING
 	gettimeofday(&seloop, NULL);
 #endif /* DEBUG_TIMING */
-#if defined(DEBUG) && defined(__linux__)
+#if defined(DEBUG) && defined(__linux__) && defined(UTS_RELEASE)
 	/* Lets let people who upgraded kernels know they may have problems */
 	if (uname (&name) == -1)
 	{
@@ -334,7 +334,7 @@ JNIEXPORT void JNICALL RXTXPort(Initialize)(
 		getchar();
 	}
 	LEAVE( "RXTXPort:Initialize" );
-#endif /* DEBUG && __linux__ */
+#endif /* DEBUG && __linux__ && UTS_RELEASE */
 }
 
 /*----------------------------------------------------------

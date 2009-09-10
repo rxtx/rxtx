@@ -1,7 +1,7 @@
 /*-------------------------------------------------------------------------
 |   RXTX License v 2.1 - LGPL v 2.1 + Linking Over Controlled Interface.
 |   RXTX is a native interface to serial ports in java.
-|   Copyright 1997-2007 by Trent Jarvi tjarvi@qbang.org and others who
+|   Copyright 1997-2009 by Trent Jarvi tjarvi@qbang.org and others who
 |   actually wrote it.  See individual source files for more information.
 |
 |   A copy of the LGPL v 2.1 may be found at
@@ -113,7 +113,9 @@ JNIEXPORT void JNICALL Java_gnu_io_I2CPort_Initialize(
 	)
 {
 #ifndef WIN32
+#if defined(DEBUG) && defined(__linux__) && defined(UTS_RELEASE) 
 	struct utsname name;
+#endif /* DEBUG && __linux__ && UTS_RELEASE */
 	/* This bit of code checks to see if there is a signal handler installed
 	   for SIGIO, and installs SIG_IGN if there is not.  This is necessary
 	   for the native threads jdk, but we don't want to do it with green
@@ -125,7 +127,7 @@ JNIEXPORT void JNICALL Java_gnu_io_I2CPort_Initialize(
 	sigaction( SIGIO, NULL, &handler );
 	if( !handler.sa_handler ) signal( SIGIO, SIG_IGN );
 #endif /* !__FreeBSD__ */
-#if defined(__linux__) 
+#if defined(DEBUG) && defined(__linux__) && defined(UTS_RELEASE) 
 	/* Lets let people who upgraded kernels know they may have problems */
 	if (uname (&name) == -1)
 	{
@@ -137,7 +139,7 @@ JNIEXPORT void JNICALL Java_gnu_io_I2CPort_Initialize(
 		fprintf(stderr, "\n\n\nRXTX WARNING:  This library was compiled to run with OS release %s and you are currently running OS release %s.  In some cases this can be a problem.  Try recompiling RXTX if you notice strange behavior.  If you just compiled RXTX make sure /usr/include/linux is a symbolic link to the include files that came with the kernel source and not an older copy.\n\n\npress enter to continue\n",UTS_RELEASE,name.release);
 		getchar();
 	}
-#endif /* __linux__ */
+#endif /* DEBUG && __linux__ && UTS_RELEASE */
 #endif /* WIN32 */
 }
 

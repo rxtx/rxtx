@@ -1,11 +1,15 @@
 This is ChangeLog
-Wed Sep  9 10:08:33 UTC 2009
+Thu Sep 10 12:33:22 UTC 2009
 
 
 rxtx-2.1 and rxtx-2.0 changes are kept in the same file.  skip to the version
 you downloaded.
 
 2.2 ???
+		Fix build on Linux systems without UTS_RELEASE (linux/utsrelease.h)
+		Ilkka Myller <ilkka@myller.com>
+		http://mailman.qbang.org/pipermail/rxtx/2009-September/4816749.html
+	
 		Apple Xcode 3.x project
 		Ilkka Myller <ilkka@myller.com>
 		http://mailman.qbang.org/pipermail/rxtx/2009-September/4811084.html

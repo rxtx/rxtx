@@ -1,7 +1,7 @@
 /*-------------------------------------------------------------------------
 |   RXTX License v 2.1 - LGPL v 2.1 + Linking Over Controlled Interface.
 |   RXTX is a native interface to serial ports in java.
-|   Copyright 1997-2007 by Trent Jarvi tjarvi@qbang.org and others who
+|   Copyright 1997-2009 by Trent Jarvi tjarvi@qbang.org and others who
 |   actually wrote it.  See individual source files for more information.
 |
 |   A copy of the LGPL v 2.1 may be found at
@@ -126,7 +126,7 @@ JNIEXPORT void JNICALL RXTXPort(Initialize)(
 
 #ifndef WIN32
 #ifndef __BEOS__
-#ifdef DEBUG
+#if defined(DEBUG) && defined (UTS_RELEASE)
 	struct utsname name;
 #endif
 	/* This bit of code checks to see if there is a signal handler installed
@@ -140,7 +140,7 @@ JNIEXPORT void JNICALL RXTXPort(Initialize)(
 	sigaction( SIGIO, NULL, &handler );
 	if( !handler.sa_handler ) signal( SIGIO, SIG_IGN );
 #endif /* !__FreeBSD__ */
-#ifdef DEBUG
+#if defined(DEBUG) && defined (UTS_RELEASE)
 	/* Lets let people who upgraded kernels know they may have problems */
 	if (uname (&name) == -1)
 	{
