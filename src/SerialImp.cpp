@@ -1842,7 +1842,7 @@ void report(char *msg)
 
 
 #ifdef DEBUG
-	fprintf(stderr, msg);
+	fprintf(stderr, "%s", msg);
 #endif
 }
 

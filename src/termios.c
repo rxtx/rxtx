@@ -1,11 +1,6 @@
 #ifdef TRENT_IS_HERE
 #define TRACE
 #define DEBUG
-#define DEBUG_MW
-#ifdef DEBUG_MW
-	extern void mexWarMsgTxt( const char * );
-	extern void mexPrintf( const char *, ... );
-#endif /* DEBUG_MW */
 #endif /* TRENT_IS_HERE */
 extern void report( char * );
 extern void report_warning( char * );

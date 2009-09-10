@@ -1,11 +1,16 @@
 This is ChangeLog
-Thu Sep 10 12:33:22 UTC 2009
+Thu Sep 10 15:10:33 UTC 2009
 
 
 rxtx-2.1 and rxtx-2.0 changes are kept in the same file.  skip to the version
 you downloaded.
 
 2.2 ???
+		Removed unused MathWorks MATLAB timing debug (DEBUG_MW) 
+		Fixed DEBUG_TIMING
+		Ilkka Myller <ilkka@myller.com>
+		http://mailman.qbang.org/pipermail/rxtx/2009-September/4822414.html
+		
 		Fix build on Linux systems without UTS_RELEASE (linux/utsrelease.h)
 		Ilkka Myller <ilkka@myller.com>
 		http://mailman.qbang.org/pipermail/rxtx/2009-September/4816749.html

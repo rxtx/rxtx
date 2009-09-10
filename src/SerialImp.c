@@ -188,41 +188,6 @@ int cfmakeraw ( struct termios *term )
 }
 #endif /* __sun__  || __hpux__ */
 
-#ifdef DEBUG_TIMING
-struct timeval snow, enow, seloop, eeloop;
-#define report_time_eventLoop( ) { \
-	if ( seloop.tv_sec == eeloop.tv_sec && seloop.tv_usec == eeloop.tv_usec ) \
-	{ \
-		gettimeofday(&eeloop, NULL); \
-		seloop.tv_sec = eeloop.tv_sec; \
-		seloop.tv_usec = eeloop.tv_usec; \
-		printf("%8i sec : %8i usec\n", eeloop.tv_sec - seloop.tv_sec, eeloop.tv_usec - seloop.tv_usec); \
-	} \
-}
-#define report_time( ) \
-{ \
-	struct timeval now; \
-	gettimeofday(&now, NULL); \
-	mexPrintf("%8s : %5i : %8i sec : %8i usec\n", __TIME__, __LINE__, now.tv_sec, now.tv_usec); \
-}
-#define report_time_start( ) \
-{ \
-	gettimeofday(&snow, NULL); \
-	mexPrintf("%8s : %5i : %8i sec : %8i usec", __TIME__, __LINE__, snow.tv_sec, snow.tv_usec); \
-}
-#define report_time_end( ) \
-{ \
-	gettimeofday(&enow, NULL); \
-	mexPrintf("%8i sec : %8i usec\n", enow.tv_sec - snow.tv_sec, enow.tv_sec - snow.tv_sec?snow.tv_usec-enow.tv_usec:enow.tv_usec - snow.tv_usec); \
-}
-#else
-#define report_time_eventLoop( ){};
-#define report_time( ) {}
-#define report_time_start( ) {}
-#define report_time_end( ) {}
-#endif /* DEBUG_TIMING */
-
-
 struct event_info_struct *master_index = NULL;
 
 
@@ -309,11 +274,7 @@ JNIEXPORT void JNICALL RXTXPort(Initialize)(
 	ENTER( "RXTXPort:Initialize" );
 #ifdef PRERELEASE
 	/*  this is just for avoiding confusion while testing new libraries */
-#ifdef DEBUG_MW
-	mexPrintf("RXTX Prerelease for testing  Tue Feb 19 18:00:27 EST 2002\n");
-#else
 	printf("RXTX Prerelease for testing  Thu Feb 21 19:31:38\n");
-#endif /* DEBUG_MW */
 #endif /* PRERELEASE */
 #if DEBUG_TIMING
 	gettimeofday(&seloop, NULL);
@@ -856,7 +817,6 @@ int set_port_params( JNIEnv *env, int fd, int cspeed, int dataBits,
 		/* hang up the modem aka drop DTR  */
 		/* Unix should handle this */
 		/*
-		mexPrintf("dropping DTR\n");
 		printf("dropping DTR\n");
 		*/
 		ioctl( fd, TIOCMGET, &result );
@@ -1485,7 +1445,6 @@ JNIEXPORT void JNICALL RXTXPort(writeByte)( JNIEnv *env,
 	}  while (result < 0 && errno==EINTR);
 	if( result < 0 )
 	{
-		/* mexPrintf("GOT IT!!!\n"); */
 		goto fail;
 	}
 /*
@@ -1579,7 +1538,6 @@ JNIEXPORT void JNICALL RXTXPort(writeArray)( JNIEnv *env,
 	}  while ( ( total < count ) && (result < 0 && errno==EINTR ) );
 	if( result < 0 )
 	{
-		/* mexPrintf("GOT IT!!!\n"); */
 		goto fail;
 	}
 /*
@@ -5097,11 +5055,7 @@ void throw_java_exception( JNIEnv *env, char *exc, char *foo, char *msg )
 ----------------------------------------------------------*/
 void report_warning(char *msg)
 {
-#ifndef DEBUG_MW
 	fprintf(stderr, "%s", msg);
-#else
-	mexWarnMsgTxt( (const char *) msg );
-#endif /* DEBUG_MW */
 }
 
 /*----------------------------------------------------------
@@ -5116,11 +5070,7 @@ void report_warning(char *msg)
 void report_verbose(char *msg)
 {
 #ifdef DEBUG_VERBOSE
-#ifdef DEBUG_MW
-	mexErrMsgTxt( msg );
-#else
 	fprintf(stderr, "%s", msg);
-#endif /* DEBUG_MW */
 #endif /* DEBUG_VERBOSE */
 }
 /*----------------------------------------------------------
@@ -5134,11 +5084,7 @@ void report_verbose(char *msg)
 ----------------------------------------------------------*/
 void report_error(char *msg)
 {
-#ifndef DEBUG_MW
 	fprintf(stderr, "%s", msg);
-#else
-	mexWarnMsgTxt( msg );
-#endif /* DEBUG_MW */
 }
 
 /*----------------------------------------------------------
@@ -5153,11 +5099,7 @@ void report_error(char *msg)
 void report(char *msg)
 {
 #ifdef DEBUG
-#	ifndef DEBUG_MW
-		fprintf(stderr, "%s", msg);
-#	else
-		mexPrintf( msg );
-#	endif /* DEBUG_MW */
+	fprintf(stderr, "%s", msg);
 #endif /* DEBUG */
 }
 
@@ -6007,7 +5949,7 @@ void dump_termios(char *foo,struct termios *ttyset)
 	{
 		fprintf(stderr,"%d=%x ", i, ttyset->c_cc[i]);
 	}
-	fprintf(stderr,"\n" );
+	fprintf(stderr, "\n" );
 #endif /* DEBUG */
 }
 
