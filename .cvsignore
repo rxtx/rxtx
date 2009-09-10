@@ -25,3 +25,7 @@ configure
 ltconfig
 ltmain.sh
 .DS_Store
+autom4te.cache
+stamp-h1
+i386-apple-darwin10.0.0
+RXTXcomm.jar
