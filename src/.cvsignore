@@ -5,3 +5,4 @@ init.cc
 typedefs_md.h.diff
 Serial.def
 termios.c
+.DS_Store
