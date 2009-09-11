@@ -5306,7 +5306,7 @@ int fhs_lock( const char *filename, int pid )
 	if( fd < 0 )
 	{
 		sprintf( message,
-			"RXTX fhs_lock() Error: creating lock file: %s: %s\n",
+			"RXTX fhs_lock() Error: opening lock file: %s: %s\n",
 			file, strerror(errno) );
 		report_error( message );
 		return 1;
@@ -5314,7 +5314,15 @@ int fhs_lock( const char *filename, int pid )
 	sprintf( lockinfo, "%10d\n",(int) getpid() );
 	sprintf( message, "fhs_lock: creating lockfile: %s\n", lockinfo );
 	report( message );
-	write( fd, lockinfo, 11 );
+	if( ( write( fd, lockinfo, 11 ) ) < 0 )
+	{
+		sprintf( message,
+				"RXTX fhs_lock() Error: writing lock file: %s: %s\n",
+				file, strerror(errno) );
+		report_error( message );
+		close( fd );
+		return 1;
+	}
 	close( fd );
 	return 0;
 }
@@ -5407,12 +5415,20 @@ int uucp_lock( const char *filename, int pid )
 	if( fd < 0 )
 	{
 		sprintf( message,
-			"RXTX uucp_lock() Error: creating lock file: %s\n",
-			lockfilename );
+			"RXTX uucp_lock() Error: opening lock file: %s: %s\n",
+			lockfilename, strerror(errno) );		
 		report_error( message );
 		return 1;
 	}
-	write( fd, lockinfo,11 );
+	if( ( write( fd, lockinfo, 11 ) ) < 0 )
+	{
+		sprintf( message,
+			"RXTX uucp_lock() Error: writing lock file: %s: %s\n",
+			lockfilename, strerror(errno) );		
+		report_error( message );
+		close( fd );
+		return 1;
+	}
 	close( fd );
 	return 0;
 }
@@ -5871,7 +5887,23 @@ int is_device_locked( const char *port_filename )
 
 		/* check if its a stale lock */
 		fd=open( file, O_RDONLY );
-		read( fd, pid_buffer, 11 );
+		if( fd < 0 )
+		{
+			sprintf( message,
+					"RXTX is_device_locked() Error: opening lock file: %s: %s\n",
+					file, strerror(errno) );
+			report_warning( message );
+			return 1;
+		}
+		if ( ( read( fd, pid_buffer, 11 ) ) < 0 ) 
+		{
+			sprintf( message,
+					"RXTX is_device_locked() Error: reading lock file: %s: %s\n",
+					file, strerror(errno) );
+			report_warning( message );
+			close( fd );
+			return 1;
+		}
 		/* FIXME null terminiate pid_buffer? need to check in Solaris */
 		close( fd );
 		sscanf( pid_buffer, "%d", &pid );

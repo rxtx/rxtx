@@ -1,11 +1,15 @@
 This is ChangeLog
-Thu Sep 10 15:10:33 UTC 2009
+Thu Sep 10 19:09:15 UTC 2009
 
 
 rxtx-2.1 and rxtx-2.0 changes are kept in the same file.  skip to the version
 you downloaded.
 
 2.2 ???
+		Implemented return value to checking to file I/O calls
+		Ilkka Myller <ilkka@myller.com>
+		http://mailman.qbang.org/pipermail/rxtx/2009-September/4822416.html
+		
 		Removed unused MathWorks MATLAB timing debug (DEBUG_MW) 
 		Fixed DEBUG_TIMING
 		Ilkka Myller <ilkka@myller.com>
