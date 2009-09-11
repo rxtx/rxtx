@@ -276,9 +276,10 @@ JNIEXPORT void JNICALL RXTXPort(Initialize)(
 	/*  this is just for avoiding confusion while testing new libraries */
 	printf("RXTX Prerelease for testing  Thu Feb 21 19:31:38\n");
 #endif /* PRERELEASE */
-#if DEBUG_TIMING
+#if defined(DEBUG_TIMING) && ! defined(WIN32)
+	/* WIN32 does not have gettimeofday() */
 	gettimeofday(&seloop, NULL);
-#endif /* DEBUG_TIMING */
+#endif /* DEBUG_TIMING && ! WIN32 */
 #if defined(DEBUG) && defined(__linux__) && defined(UTS_RELEASE)
 	/* Lets let people who upgraded kernels know they may have problems */
 	if (uname (&name) == -1)

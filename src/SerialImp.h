@@ -287,8 +287,9 @@ Trent
 #	define WRITE write
 #	define READ read
 #	define SELECT select
+#endif /* WIN32 */
 
-#ifdef DEBUG_TIMING
+#if defined(DEBUG_TIMING) && ! defined(WIN32) /* WIN32 does not have gettimeofday() */
 struct timeval snow, enow, seloop, eeloop;
 #ifdef __APPLE__
 #define report_time_eventLoop( ) { \
@@ -343,12 +344,12 @@ gettimeofday(&enow, NULL); \
 printf("%8li sec : %8li usec\n", enow.tv_sec - snow.tv_sec, enow.tv_sec - snow.tv_sec?snow.tv_usec-enow.tv_usec:enow.tv_usec - snow.tv_usec); \
 }
 #endif  /* __APPLE__ */
-#else /* ! DEBUG_TIMING */
+#else /* ! DEBUG_TIMING || WIN32 */
 #define report_time_eventLoop( ){};
 #define report_time( ) {}
 #define report_time_start( ) {}
 #define report_time_end( ) {}
-#endif /* DEBUG_TIMING */
+#endif /* DEBUG_TIMING && ! WIN32 */
 
 /* #define TRACE */
 #ifdef TRACE
@@ -358,8 +359,6 @@ printf("%8li sec : %8li usec\n", enow.tv_sec - snow.tv_sec, enow.tv_sec - snow.t
 #define ENTER(x)
 #define LEAVE(x)
 #endif /* TRACE */
-
-#endif /* WIN32 */
 
 /* allow people to override the directories */
 /* #define USER_LOCK_DIRECTORY "/home/tjarvi/1.5/build" */
