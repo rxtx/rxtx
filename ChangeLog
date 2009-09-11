@@ -1,11 +1,15 @@
 This is ChangeLog
-Thu Sep 10 19:09:15 UTC 2009
+Fri Sep 11 10:09:30 UTC 2009
 
 
 rxtx-2.1 and rxtx-2.0 changes are kept in the same file.  skip to the version
 you downloaded.
 
 2.2 ???
+		Windows build improvements (MinGW32, MSVC and LCC)
+		Ilkka Myller <ilkka@myller.com>
+		http://mailman.qbang.org/pipermail/rxtx/2009-September/4822418.html
+		
 		Implemented return value to checking to file I/O calls
 		Ilkka Myller <ilkka@myller.com>
 		http://mailman.qbang.org/pipermail/rxtx/2009-September/4822416.html

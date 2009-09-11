@@ -3468,7 +3468,11 @@ JNIEXPORT jint JNICALL RXTXPort(readArray)( JNIEnv *env,
 	ENTER( "readArray" );
 	report_time_start( );
 */
+#ifdef __LCC__
+	if( (size_t) length > SSIZE_MAX ) {
+#else
 	if( (size_t) length > SSIZE_MAX || (size_t) length < 0 ) {
+#endif /* __LCC__ */
 		report( "RXTXPort:readArray length > SSIZE_MAX" );
 		LEAVE( "RXTXPort:readArray" );
 		throw_java_exception( env, ARRAY_INDEX_OUT_OF_BOUNDS,
@@ -3541,7 +3545,11 @@ JNIEXPORT jint JNICALL RXTXPort(readTerminatedArray)( JNIEnv *env,
 	ENTER( "readArray" );
 	report_time_start( );
 */
+#ifdef __LCC__
+	if( (size_t) length > SSIZE_MAX ) {
+#else
 	if( (size_t) length > SSIZE_MAX || (size_t) length < 0 ) {
+#endif /* __LCC__ */
 		report( "RXTXPort:readArray length > SSIZE_MAX" );
 		LEAVE( "RXTXPort:readArray" );
 		throw_java_exception( env, ARRAY_INDEX_OUT_OF_BOUNDS,
@@ -3858,6 +3866,7 @@ int port_has_changed_fionread( struct event_info_struct *eis )
 
 	rc = ioctl( eis->fd, FIONREAD, &change );
 	sprintf( message, "port_has_changed_fionread: change is %i ret is %i\n", change, eis->ret );
+	report_verbose( message );
 #if defined(__unixware__) || defined(__sun__)
 	/*
 	   On SCO OpenServer FIONREAD always fails for serial devices,
@@ -3868,9 +3877,7 @@ int port_has_changed_fionread( struct event_info_struct *eis )
 	if( (rc != -1 && change) || (rc == -1 && eis->ret > 0) )
 		return( 1 );
 #else
-	sprintf( message, "port_has_changed_fionread: change is %i\n", change );
-	report_verbose( message );
-	if( change )
+	if( rc != -1 && change )
 		return( 1 );
 #endif /* __unixware__  || __sun__ */
 	return( 0 );
@@ -3932,7 +3939,7 @@ system_wait
    exceptions:  none
    comments:
 ----------------------------------------------------------*/
-void system_wait()
+void system_wait(void)
 {
 #if defined (__sun__ )
 	struct timespec retspec, tspec;
@@ -3980,9 +3987,9 @@ int driver_has_tiocgicount( struct event_info_struct * eis )
 	}
 	else
 		return(1);
-#endif /*  TIOCGICOUNT */
+#else
 	return(0);
-
+#endif  /*  TIOCGICOUNT */
 }
 
 /*----------------------------------------------------------
@@ -4253,15 +4260,17 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(testRead)(
 	jint port_type
 )
 {
+	const char *name = (*env)->GetStringUTFChars(env, tty_name, 0);
+	int ret = JNI_TRUE;
+#ifndef WIN32
 	struct termios ttyset;
 	char c;
+	int fd;
+	int pid = -1;
+#endif
 #ifdef TRENT_IS_HERE_DEBUGGING_ENUMERATION
 	char message[80];
 #endif /* TRENT_IS_HERE_DEBUGGING_ENUMERATION */
-	int fd;
-	const char *name = (*env)->GetStringUTFChars(env, tty_name, 0);
-	int ret = JNI_TRUE;
-	int pid = -1;
 	/* We opened the file in this thread, use this pid to unlock */
 #ifndef WIN32
 	pid = getpid();
@@ -4290,7 +4299,7 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(testRead)(
 	ret = serial_test((char *) full_windows_name );
 	(*env)->ReleaseStringUTFChars( env, tty_name, name );
 	return(ret);
-#endif /* WIN32 */
+#else /* ! WIN32 */
 
 	/*
 		LOCK is one of three functions defined in SerialImp.h
@@ -4465,6 +4474,7 @@ END:
 	CLOSE( fd );
 	LEAVE( "RXTXPort:testRead" );
 	return ret;
+#endif /* ! WIN32 */
 }
 
 #if defined(__APPLE__)
@@ -6135,4 +6145,3 @@ int printj(JNIEnv *env, wchar_t *fmt, ...)
 	(*env)->CallStaticVoidMethod(env, cls, mid, 1);
 */
 #endif /* asdf */
-

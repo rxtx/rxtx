@@ -181,7 +181,11 @@ JNIEXPORT jboolean JNICALL LPRPort(setLPRMode)(JNIEnv *env,
 
 #if defined (WIN32)
 
+#if ! defined(_MSC_VER)
+/* CTL_CODE is already defined in winioctl.h with MSVC - not redefining over platform SDK headers.
+   MSVC does not need this */
 #define CTL_CODE( DeviceType, Function, Method, Access ) (((DeviceType) << 16) | ((Access) << 14) | ((Function) << 2) | (Method))
+#endif /* MSVC */
 
 #define FILE_DEVICE_PARALLEL_PORT       0x00000016
 #define METHOD_BUFFERED                 0
@@ -253,7 +257,9 @@ JNIEXPORT jboolean JNICALL LPRPort(isPrinterBusy)(JNIEnv *env,
 	jobject jobj)
 {
 	int fd = get_java_var( env, jobj,"fd","I" );
+#if defined(__FreeBSD__) || defined(__linux__)
 	int status;
+#endif
 #if defined (__linux__)
 	ioctl(fd, LPGETSTATUS, &status);
 #elif defined (WIN32)

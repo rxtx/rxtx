@@ -985,7 +985,7 @@ get_free_fd()
    comments:
 ----------------------------------------------------------*/
 
-int get_free_fd()
+int get_free_fd(void)
 {
 	int next, last;
 	struct termios_list *index = first_tl;
@@ -1892,7 +1892,7 @@ show_DCB()
    win32api:     None
    comments:
 ----------------------------------------------------------*/
-void show_DCB( myDCB )
+void show_DCB( DCB myDCB )
 {
 
 #ifdef DEBUG_HOSED
@@ -2651,10 +2651,13 @@ fstat()
    comments:  this is just to keep the eventLoop happy.
 ----------------------------------------------------------*/
 
+#if ! defined( __LCC__ )
 int fstat( int fd, ... )
 {
 	return( 0 );
 }
+#endif
+
 /*----------------------------------------------------------
 ioctl()
 
@@ -2685,7 +2688,7 @@ int ioctl( int fd, int request, ... )
 {
 	unsigned long dwStatus = 0;
 	va_list ap;
-	int *arg, ret, result, old_flag;
+	int *arg, ret, old_flag;
 	char message[80];
 
 #ifdef TIOCGSERIAL
@@ -2815,12 +2818,10 @@ int ioctl( int fd, int request, ... )
 			if ( *arg & TIOCM_RTS )
 			{
 				index->MSR |= TIOCM_RTS;
-				result &= SETRTS;
 			}
 			else
 			{
 				index->MSR &= ~TIOCM_RTS;
-				result &= CLRRTS;
 			}
 			if( EscapeCommFunction( index->hComm,
 				( *arg & TIOCM_RTS ) ? SETRTS : CLRRTS ) )

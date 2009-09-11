@@ -472,7 +472,9 @@ find a way to get/set buad_base and divisor directly.
 
 /* ioctl errors */
 #define ENOIOCTLCMD	515
-#define EBADFD		 77
+#if ! defined( __LCC__ )
+	#define EBADFD		 77
+#endif
 /* modem lines */
 #define TIOCM_LE    0x001
 #define TIOCM_DTR   0x002
