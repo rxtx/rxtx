@@ -9,14 +9,9 @@ extern "C" {
 #endif
 #undef gnu_io_RXTXCommDriver_debug
 #define gnu_io_RXTXCommDriver_debug 0L
-/*
- * Class:     gnu_io_RXTXCommDriver
- * Method:    nativeGetVersion
- * Signature: ()Ljava/lang/String;
- */
-JNIEXPORT jstring JNICALL Java_gnu_io_RXTXCommDriver_nativeGetVersion
-  (JNIEnv *, jclass);
-
+#undef gnu_io_RXTXCommDriver_devel
+#define gnu_io_RXTXCommDriver_devel 0L
+/* Inaccessible static: noVersionOutput */
 /*
  * Class:     gnu_io_RXTXCommDriver
  * Method:    registerKnownPorts
@@ -48,6 +43,14 @@ JNIEXPORT jboolean JNICALL Java_gnu_io_RXTXCommDriver_testRead
  */
 JNIEXPORT jstring JNICALL Java_gnu_io_RXTXCommDriver_getDeviceDirectory
   (JNIEnv *, jobject);
+
+/*
+ * Class:     gnu_io_RXTXCommDriver
+ * Method:    nativeGetVersion
+ * Signature: ()Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_gnu_io_RXTXCommDriver_nativeGetVersion
+  (JNIEnv *, jclass);
 
 #ifdef __cplusplus
 }

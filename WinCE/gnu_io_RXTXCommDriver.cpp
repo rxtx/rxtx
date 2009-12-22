@@ -2,7 +2,7 @@
 |   RXTX License v 2.1 - LGPL v 2.1 + Linking Over Controlled Interface.
 |   RXTX is a native interface to serial ports in java.
 |   Copyright 2002-2004 Michal Hobot MichalHobot@netscape.net
-|   Copyright 1997-2007 by Trent Jarvi tjarvi@qbang.org and others who
+|   Copyright 1997-2009 by Trent Jarvi tjarvi@qbang.org and others who
 |   actually wrote it.  See individual source files for more information.
 |
 |   A copy of the LGPL v 2.1 may be found at
@@ -59,6 +59,29 @@
 #include "StdAfx.h"
 #include "rxtxHelpers.h"
 
+extern "C" {
+  /* Instead of these declarations, we could just include the auto-generated
+     gnu_io_CommPortIdentifier.h and gnu_io_RXTXVersion.h. */
+  JNIEXPORT jstring JNICALL Java_gnu_io_CommPortIdentifier_native_1psmisc_1report_1owner(
+    JNIEnv *, jobject, jstring);
+  JNIEXPORT jstring JNICALL Java_gnu_io_RXTXVersion_nativeGetVersion(
+    JNIEnv *, jclass);
+}
+
+/*
+native_psmisc_report_owner
+
+ * Class:     CommPortIdentifier
+ * Method:    native_psmisc_report_owner
+ * Signature: ()Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL
+Java_gnu_io_CommPortIdentifier_native_1psmisc_1report_1owner(JNIEnv *env,
+  jobject obj, jstring arg)
+{
+  return env->NewStringUTF("Unknown Application");
+}
+
 /*
 nativeGetVersion
 
@@ -69,13 +92,15 @@ nativeGetVersion
    comments:    This is used to avoid mixing versions of the .jar and
 		native library.
 		First introduced in rxtx-1.5-9
- * Class:     gnu_io_RXTXCommDriver
+                Moved from RXTXCommDriver to RXTXVersion in rxtx-2.1-7
+ * Class:     RXTXVersion
  * Method:    nativeGetVersion
  * Signature: ()Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_gnu_io_RXTXCommDriver_nativeGetVersion(JNIEnv *env, jclass cls)
+JNIEXPORT jstring JNICALL Java_gnu_io_RXTXVersion_nativeGetVersion(
+  JNIEnv *env, jclass cls)
 {
-  return env->NewStringUTF("RXTX-2.0-1");
+  return env->NewStringUTF("RXTX-2.2pre2");
 }
 
 /*
@@ -166,11 +191,10 @@ JNIEXPORT jboolean JNICALL Java_gnu_io_RXTXCommDriver_isPortPrefixValid(JNIEnv *
 JNIEXPORT jboolean JNICALL Java_gnu_io_RXTXCommDriver_testRead(JNIEnv *env, jobject jobj, jstring dev, jint type)
 {
 	jboolean retVal;
-  DWORD dwError;
 
   if ( type == PORT_SERIAL )
   {
-    const WCHAR *wszDev = env->GetStringChars(dev, NULL); 
+    const WCHAR *wszDev = (const WCHAR *)env->GetStringChars(dev, NULL); 
     HANDLE hPort = CreateFileW(wszDev,       // Pointer to the name of the port
                                GENERIC_READ | GENERIC_WRITE,
                                              // Access (read-write) mode
@@ -185,16 +209,16 @@ JNIEXPORT jboolean JNICALL Java_gnu_io_RXTXCommDriver_testRead(JNIEnv *env, jobj
     { // Could not open the port.
       IF_DEBUG
       (
-        ;//printj(env, TEXT("!!! RXTXCommDriver.testRead(%s, %ld): cannot open port\n"), wszDev, type);
+        printj(env,
+         L"!!! RXTXCommDriver.testRead(%s): cannot open port, error %ld\n",
+         wszDev, GetLastError());
         //MessageBox(NULL, TEXT("RXTXCommDriver.testRead(): cannot open port"), wszDev /*TEXT("Error")*/, MB_OK | MB_SETFOREGROUND);
       )
-      dwError = GetLastError();
       retVal = JNI_FALSE;
     }
     else
     { // Port open OK - let's close it and return TRUE
-      if (!CloseHandle(hPort))
-        dwError = GetLastError();
+      (void)CloseHandle(hPort);
       IF_DEBUG
       (
         ;//printj(env, TEXT("--- RXTXCommDriver.testRead(%s, %ld): port open OK\n"), wszDev, type);
@@ -202,7 +226,7 @@ JNIEXPORT jboolean JNICALL Java_gnu_io_RXTXCommDriver_testRead(JNIEnv *env, jobj
       )
       retVal = JNI_TRUE;
     }
-    env->ReleaseStringChars(dev, wszDev);
+    env->ReleaseStringChars(dev, (const jchar*)wszDev);
   }
   else
     retVal = JNI_FALSE;

@@ -1,8 +1,8 @@
+/*-------------------------------------------------------------------------
 |   RXTX License v 2.1 - LGPL v 2.1 + Linking Over Controlled Interface.
 |   RXTX is a native interface to serial ports in java.
 |   Copyright 1997-2007 by Trent Jarvi tjarvi@qbang.org and others who
-|   Copyright 2002-2004 Michal Hobot MichalHobot@netscape.net
-/*-------------------------------------------------------------------------
+|   Copyright 2002-2009 Michal Hobot MichalHobot@netscape.net
 |   actually wrote it.  See individual source files for more information.
 |
 |   A copy of the LGPL v 2.1 may be found at
@@ -70,11 +70,12 @@ get_java_int_var
    exceptions:  none
    comments:
 ----------------------------------------------------------*/
-long get_java_int_var( JNIEnv *env, jobject jobj, char *id)
+long get_java_var_long( JNIEnv *env, jobject jobj, const char *id,
+                       const char *type )
 {
 	long result = 0;
 	jclass jclazz = env->GetObjectClass(jobj);
-	jfieldID jfd = env->GetFieldID(jclazz, id, "I");
+	jfieldID jfd = env->GetFieldID(jclazz, id, type);
 
 	if( !jfd ) {
     IF_DEBUG
@@ -92,36 +93,6 @@ long get_java_int_var( JNIEnv *env, jobject jobj, char *id)
 
 
 /*----------------------------------------------------------
-get_java_boolean_var
-
-   accept:      env (keyhole to java)
-                jobj (java RXTXPort object)
-   return:      the jboolean field from the java object, converted to bool
-   exceptions:  none
-   comments:
-----------------------------------------------------------*/
-bool get_java_boolean_var( JNIEnv *env, jobject jobj, char *id)
-{
-	bool result = FALSE;
-	jclass jclazz = env->GetObjectClass(jobj);
-	jfieldID jfd = env->GetFieldID(jclazz, id, "Z");
-
-	if( !jfd ) {
-    IF_DEBUG
-    (
-		  env->ExceptionDescribe();
-    )
-		env->ExceptionClear();
-		env->DeleteLocalRef(jclazz);
-		return result;
-	}
-	result = (env->GetBooleanField(jobj, jfd)) != JNI_FALSE;
-	env->DeleteLocalRef(jclazz);
-	return result;
-}
-
-
-/*----------------------------------------------------------
 get_java_boolean_var2
 
    accept:      env (keyhole to java)
@@ -131,7 +102,8 @@ get_java_boolean_var2
    exceptions:  none
    comments:    can be faster for fetching many variables one by one
 ----------------------------------------------------------*/
-bool get_java_boolean_var2(JNIEnv *env, jobject jobj, jclass jclazz, char *id)
+/* bool get_java_boolean_var2(JNIEnv *env, jobject jobj, jclass jclazz,
+                           const char *id)
 {
 	bool result = FALSE;
 	jfieldID jfd = env->GetFieldID(jclazz, id, "Z");
@@ -147,7 +119,7 @@ bool get_java_boolean_var2(JNIEnv *env, jobject jobj, jclass jclazz, char *id)
 	}
 	result = (env->GetBooleanField(jobj, jfd)) != JNI_FALSE;
 	return result;
-}
+} */
 
 
 /*----------------------------------------------------------
@@ -162,7 +134,7 @@ throw_java_exception
    exceptions:  haha!
    comments:
 ----------------------------------------------------------*/
-void throw_java_exception(JNIEnv *env, const char *exc, const char *foo, const char *msg)
+/* void throw_java_exception(JNIEnv *env, const char *exc, const char *foo, const char *msg)
 {
 	char buf[250];
 	jclass clazz = env->FindClass(exc);
@@ -177,7 +149,7 @@ void throw_java_exception(JNIEnv *env, const char *exc, const char *foo, const c
 	_snprintf(buf, 60, "%s: %s in %s", exc, msg, foo);
 	env->ThrowNew(clazz, buf);
 	env->DeleteLocalRef(clazz);
-}
+} */
 
 // Unicode version:
 void throw_java_exceptionW(JNIEnv *env, const char *exc, const wchar_t *foo, const wchar_t *msg)
@@ -220,7 +192,7 @@ get_fd
 ----------------------------------------------------------*/
 HANDLE get_fd(JNIEnv *env, jobject jobj)
 {
-  HANDLE fd = (HANDLE)get_java_int_var(env, jobj, "fd");
+  HANDLE fd = (HANDLE)get_java_var_long(env, jobj, "fd", "I");
   return fd!=0?fd:INVALID_HANDLE_VALUE;
 }
 
@@ -236,10 +208,11 @@ get_eis
 ----------------------------------------------------------*/
 EventInfoStruct *get_eis(JNIEnv *env, jobject jobj)
 {
-  return (EventInfoStruct *)get_java_int_var(env, jobj, "eis");
+  return (EventInfoStruct *)get_java_var_long(env, jobj, "eis", "J");
 }
 
 
+#if defined(DEBUG)
 /*----------------------------------------------------------
 printj
 
@@ -248,10 +221,11 @@ printj
    exceptions:  none
    comments:    prints data using System.out.print()
 ----------------------------------------------------------*/
-int printj(JNIEnv *env, wchar_t *fmt, ...)
+int printj(JNIEnv *env, const wchar_t *fmt, ...)
 {
   wchar_t buf[1024];
   int retval;
+  int len;
   jstring jsBuf;
   jclass clsSystem, clsOut;
   jfieldID jfid;
@@ -260,9 +234,18 @@ int printj(JNIEnv *env, wchar_t *fmt, ...)
 
   va_list ap;
   va_start(ap, fmt);
-  retval = _vsnwprintf(buf, 1024, fmt, ap);
+  retval = _vsnwprintf(buf, sizeof(buf) / sizeof(wchar_t), fmt, ap);
   va_end(ap);
-  buf[1023] = '\0';
+  buf[sizeof(buf) / sizeof(wchar_t) - 2] = 0;
+  
+  /* Replace trailing '\n' with "\r\n". */
+  len = wcslen(buf);
+  if (len > 0 && buf[len - 1] == L'\n')
+  {
+    buf[len - 1] = L'\r';
+    buf[len] = L'\n';
+    buf[len + 1] = 0;
+  }
   
   if((clsSystem = env->FindClass("java/lang/System")) == NULL)
   {
@@ -300,7 +283,7 @@ int printj(JNIEnv *env, wchar_t *fmt, ...)
     return -1;
   }
   
-	jsBuf = env->NewString(buf, wcslen(buf));
+	jsBuf = env->NewString((const jchar*)buf, wcslen(buf));
 
   env->CallVoidMethod(objOut, midPrint, jsBuf);
 
@@ -310,7 +293,7 @@ int printj(JNIEnv *env, wchar_t *fmt, ...)
   
   return retval;
 }
-
+#endif /* DEBUG */
 
 
 /*----------------------------------------------------------
@@ -352,7 +335,10 @@ DWORD __stdcall CommEventThread(LPVOID lpEventInfo)
       dwErr = GetLastError();
       if(dwErr == ERROR_INVALID_PARAMETER) 
       { // Mask is empty - let's wait for a moment and continue
-        MessageBeep(MB_ICONQUESTION);
+        IF_DEBUG
+        (
+          MessageBeep(MB_ICONQUESTION);
+        )
         Sleep(200);
         continue;
       }
@@ -378,7 +364,7 @@ DWORD __stdcall CommEventThread(LPVOID lpEventInfo)
 
     IF_DEBUG
     (
-      MessageBeep(MB_ICONEXCLAMATION);
+      ;//MessageBeep(MB_ICONEXCLAMATION);
       //MessageBoxW(NULL, L"--- RXTXPort.CommEventThread() - CommEvent", L"CommEventThread", MB_OK | MB_ICONEXCLAMATION | MB_SETFOREGROUND);
     )
     
@@ -418,7 +404,7 @@ DWORD __stdcall CommEventThread(LPVOID lpEventInfo)
 
     // Wait for receiving and clearing event
     while(EventInfo->event != 0)
-      Sleep(0);
+      Sleep(1);
 
   } while(TRUE);
 }
@@ -481,7 +467,7 @@ InitialiseEventInfoStruct
 int InitialiseEventInfoStruct(HANDLE hPort, EventInfoStruct **EventInfoPtr)
 {
   DWORD dwErr;
-  WCHAR wsEventName[MAX_PATH];
+  //WCHAR wsEventName[MAX_PATH];
   
   (*EventInfoPtr) = (EventInfoStruct *)malloc(sizeof(EventInfoStruct));
   if(*EventInfoPtr == NULL)
@@ -489,8 +475,8 @@ int InitialiseEventInfoStruct(HANDLE hPort, EventInfoStruct **EventInfoPtr)
 
   memset(*EventInfoPtr, 0, sizeof(EventInfoStruct));
   (*EventInfoPtr)->fd = hPort;
-  wsprintfW(wsEventName, L"rxtxPort.SerEvt%lx", hPort);
-  (*EventInfoPtr)->eventHandle = CreateEventW(NULL, FALSE, FALSE, wsEventName);
+  //wsprintfW(wsEventName, L"rxtxPort.SerEvt%lx", hPort);
+  (*EventInfoPtr)->eventHandle = CreateEventW(NULL, FALSE, FALSE, NULL);
   dwErr = GetLastError();
   if((*EventInfoPtr)->eventHandle == NULL || dwErr == ERROR_ALREADY_EXISTS)
   {
@@ -506,7 +492,11 @@ int InitialiseEventInfoStruct(HANDLE hPort, EventInfoStruct **EventInfoPtr)
   }
 
   // Set initial event flags: It should be not empty, but unused here and relatively rare event
+#ifdef EV_POWER
   (*EventInfoPtr)->ef = EV_POWER; //In WinNT you can use EV_EVENT2 instead
+#else
+  (*EventInfoPtr)->ef = EV_EVENT2;
+#endif
   return 0;
 }
 

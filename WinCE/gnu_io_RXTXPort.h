@@ -7,6 +7,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#undef gnu_io_RXTXPort_debug
+#define gnu_io_RXTXPort_debug 0L
 #undef gnu_io_RXTXPort_DATABITS_5
 #define gnu_io_RXTXPort_DATABITS_5 5L
 #undef gnu_io_RXTXPort_DATABITS_6
@@ -15,12 +17,6 @@ extern "C" {
 #define gnu_io_RXTXPort_DATABITS_7 7L
 #undef gnu_io_RXTXPort_DATABITS_8
 #define gnu_io_RXTXPort_DATABITS_8 8L
-#undef gnu_io_RXTXPort_STOPBITS_1
-#define gnu_io_RXTXPort_STOPBITS_1 1L
-#undef gnu_io_RXTXPort_STOPBITS_2
-#define gnu_io_RXTXPort_STOPBITS_2 2L
-#undef gnu_io_RXTXPort_STOPBITS_1_5
-#define gnu_io_RXTXPort_STOPBITS_1_5 3L
 #undef gnu_io_RXTXPort_PARITY_NONE
 #define gnu_io_RXTXPort_PARITY_NONE 0L
 #undef gnu_io_RXTXPort_PARITY_ODD
@@ -31,6 +27,12 @@ extern "C" {
 #define gnu_io_RXTXPort_PARITY_MARK 3L
 #undef gnu_io_RXTXPort_PARITY_SPACE
 #define gnu_io_RXTXPort_PARITY_SPACE 4L
+#undef gnu_io_RXTXPort_STOPBITS_1
+#define gnu_io_RXTXPort_STOPBITS_1 1L
+#undef gnu_io_RXTXPort_STOPBITS_2
+#define gnu_io_RXTXPort_STOPBITS_2 2L
+#undef gnu_io_RXTXPort_STOPBITS_1_5
+#define gnu_io_RXTXPort_STOPBITS_1_5 3L
 #undef gnu_io_RXTXPort_FLOWCONTROL_NONE
 #define gnu_io_RXTXPort_FLOWCONTROL_NONE 0L
 #undef gnu_io_RXTXPort_FLOWCONTROL_RTSCTS_IN
@@ -43,10 +45,17 @@ extern "C" {
 #define gnu_io_RXTXPort_FLOWCONTROL_XONXOFF_OUT 8L
 #undef gnu_io_RXTXPort_debug
 #define gnu_io_RXTXPort_debug 0L
-#undef gnu_io_RXTXPort_debug_verbose
-#define gnu_io_RXTXPort_debug_verbose 0L
+#undef gnu_io_RXTXPort_debug_read
+#define gnu_io_RXTXPort_debug_read 0L
+#undef gnu_io_RXTXPort_debug_read_results
+#define gnu_io_RXTXPort_debug_read_results 0L
+#undef gnu_io_RXTXPort_debug_write
+#define gnu_io_RXTXPort_debug_write 0L
 #undef gnu_io_RXTXPort_debug_events
 #define gnu_io_RXTXPort_debug_events 0L
+#undef gnu_io_RXTXPort_debug_verbose
+#define gnu_io_RXTXPort_debug_verbose 0L
+/* Inaccessible static: z */
 /* Inaccessible static: dsrFlag */
 /*
  * Class:     gnu_io_RXTXPort
@@ -66,10 +75,26 @@ JNIEXPORT jint JNICALL Java_gnu_io_RXTXPort_open
 
 /*
  * Class:     gnu_io_RXTXPort
- * Method:    nativeSetSerialPortParams
- * Signature: (IIII)V
+ * Method:    nativeGetParity
+ * Signature: (I)I
  */
-JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_nativeSetSerialPortParams
+JNIEXPORT jint JNICALL Java_gnu_io_RXTXPort_nativeGetParity
+  (JNIEnv *, jobject, jint);
+
+/*
+ * Class:     gnu_io_RXTXPort
+ * Method:    nativeGetFlowControlMode
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_gnu_io_RXTXPort_nativeGetFlowControlMode
+  (JNIEnv *, jobject, jint);
+
+/*
+ * Class:     gnu_io_RXTXPort
+ * Method:    nativeSetSerialPortParams
+ * Signature: (IIII)Z
+ */
+JNIEXPORT jboolean JNICALL Java_gnu_io_RXTXPort_nativeSetSerialPortParams
   (JNIEnv *, jobject, jint, jint, jint, jint);
 
 /*
@@ -231,6 +256,14 @@ JNIEXPORT jint JNICALL Java_gnu_io_RXTXPort_readByte
  */
 JNIEXPORT jint JNICALL Java_gnu_io_RXTXPort_readArray
   (JNIEnv *, jobject, jbyteArray, jint, jint);
+
+/*
+ * Class:     gnu_io_RXTXPort
+ * Method:    readTerminatedArray
+ * Signature: ([BII[B)I
+ */
+JNIEXPORT jint JNICALL Java_gnu_io_RXTXPort_readTerminatedArray
+  (JNIEnv *, jobject, jbyteArray, jint, jint, jbyteArray);
 
 /*
  * Class:     gnu_io_RXTXPort
@@ -486,6 +519,14 @@ JNIEXPORT jboolean JNICALL Java_gnu_io_RXTXPort_nativeSetCallOutHangup
  * Signature: ()Z
  */
 JNIEXPORT jboolean JNICALL Java_gnu_io_RXTXPort_nativeGetCallOutHangup
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     gnu_io_RXTXPort
+ * Method:    nativeClearCommInput
+ * Signature: ()Z
+ */
+JNIEXPORT jboolean JNICALL Java_gnu_io_RXTXPort_nativeClearCommInput
   (JNIEnv *, jobject);
 
 #ifdef __cplusplus

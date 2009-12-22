@@ -2,7 +2,7 @@
 |   RXTX License v 2.1 - LGPL v 2.1 + Linking Over Controlled Interface.
 |   RXTX is a native interface to serial ports in java.
 |   Copyright 2002-2004 Michal Hobot MichalHobot@netscape.net
-|   Copyright 1997-2007 by Trent Jarvi tjarvi@qbang.org and others who
+|   Copyright 1997-2009 by Trent Jarvi tjarvi@qbang.org and others who
 |   actually wrote it.  See individual source files for more information.
 |
 |   A copy of the LGPL v 2.1 may be found at
@@ -61,19 +61,22 @@
 
 #include "StdAfx.h"
 
-BOOL APIENTRY DllMain( HANDLE hModule,
+// Commented out since no action is performed in it.
+/* BOOL APIENTRY DllMain( HANDLE hModule,
                        DWORD  ul_reason_for_call,
                        LPVOID lpReserved
            )
 {
     switch (ul_reason_for_call)
-  {
+    {
     case DLL_PROCESS_ATTACH:
+      DisableThreadLibraryCalls(hModule);
+      break;
     case DLL_THREAD_ATTACH:
     case DLL_THREAD_DETACH:
     case DLL_PROCESS_DETACH:
       break;
     }
     return TRUE;
-}
+} */
 

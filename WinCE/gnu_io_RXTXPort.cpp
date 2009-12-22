@@ -2,7 +2,7 @@
 |   RXTX License v 2.1 - LGPL v 2.1 + Linking Over Controlled Interface.
 |   RXTX is a native interface to serial ports in java.
 |   Copyright 2002-2004 Michal Hobot MichalHobot@netscape.net
-|   Copyright 1997-2007 by Trent Jarvi tjarvi@qbang.org and others who
+|   Copyright 1997-2009 by Trent Jarvi tjarvi@qbang.org and others who
 |   actually wrote it.  See individual source files for more information.
 |
 |   A copy of the LGPL v 2.1 may be found at
@@ -97,7 +97,7 @@ JNIEXPORT jint JNICALL Java_gnu_io_RXTXPort_open(JNIEnv *env, jobject jobj, jstr
   EventInfoStruct *EventInfo;
   DWORD dwErr;
 
-  LPCWSTR wszName = env->GetStringChars(name, NULL);
+  LPCWSTR wszName = (LPCWSTR)env->GetStringChars(name, NULL);
   HANDLE hPort = CreateFileW(wszName,      // Pointer to the name of the port
                              GENERIC_READ | GENERIC_WRITE,// Access (read-write) mode
                              0,            // Share mode
@@ -112,7 +112,7 @@ JNIEXPORT jint JNICALL Java_gnu_io_RXTXPort_open(JNIEnv *env, jobject jobj, jstr
     throw_java_exceptionW(env, PORT_IN_USE_EXCEPTION, L"open - CreateFile", lpMsgBuf );
     // Free the buffers.
     ReleaseErrorMsg(lpMsgBuf);
-    env->ReleaseStringChars(name, wszName);
+    env->ReleaseStringChars(name, (const jchar*)wszName);
     return (jint)INVALID_HANDLE_VALUE;
   }
 
@@ -141,7 +141,7 @@ JNIEXPORT jint JNICALL Java_gnu_io_RXTXPort_open(JNIEnv *env, jobject jobj, jstr
     throw_java_exceptionW(env, PORT_IN_USE_EXCEPTION, L"open - SetCommState", lpMsgBuf);
     // Free the buffers.
     ReleaseErrorMsg(lpMsgBuf);
-    env->ReleaseStringChars(name, wszName);
+    env->ReleaseStringChars(name, (const jchar*)wszName);
     return (jint)INVALID_HANDLE_VALUE;
   }
 
@@ -164,7 +164,7 @@ JNIEXPORT jint JNICALL Java_gnu_io_RXTXPort_open(JNIEnv *env, jobject jobj, jstr
     throw_java_exceptionW(env, PORT_IN_USE_EXCEPTION, L"open - SetCommTimeouts", lpMsgBuf);
     // Free the buffers.
     ReleaseErrorMsg(lpMsgBuf);
-    env->ReleaseStringChars(name, wszName);
+    env->ReleaseStringChars(name, (const jchar*)wszName);
     return (jint)INVALID_HANDLE_VALUE;
   }
 
@@ -172,18 +172,18 @@ JNIEXPORT jint JNICALL Java_gnu_io_RXTXPort_open(JNIEnv *env, jobject jobj, jstr
   EscapeCommFunction(hPort, SETRTS);
 
 
-  if(dwErr = InitialiseEventInfoStruct(hPort, &EventInfo))
+  if((dwErr = InitialiseEventInfoStruct(hPort, &EventInfo)) != 0)
   { // Unable to set up EventInfo structure for event processing
     CreateErrorMsg(dwErr, lpMsgBuf);
     throw_java_exceptionW(env, IO_EXCEPTION, L"open - InitialiseEventInfoStruct", lpMsgBuf);
     // Free the buffers.
     ReleaseErrorMsg(lpMsgBuf);
-    env->ReleaseStringChars(name, wszName);
+    env->ReleaseStringChars(name, (const jchar*)wszName);
     return (jint)INVALID_HANDLE_VALUE;
   }
 
   jclass cls = env->GetObjectClass(jobj);
-  jfieldID jfEis = env->GetFieldID(cls, "eis", "I");
+  jfieldID jfEis = env->GetFieldID(cls, "eis", "J");
 	if( !jfEis ) {
     IF_DEBUG
     (
@@ -191,12 +191,12 @@ JNIEXPORT jint JNICALL Java_gnu_io_RXTXPort_open(JNIEnv *env, jobject jobj, jstr
     )
 		env->ExceptionClear();
     // Free the buffers.
-    env->ReleaseStringChars(name, wszName);
+    env->ReleaseStringChars(name, (const jchar*)wszName);
 		return (jint)INVALID_HANDLE_VALUE;
 	}
 	env->SetIntField(jobj, jfEis, (jint)EventInfo);
 
-  env->ReleaseStringChars(name, wszName);
+  env->ReleaseStringChars(name, (const jchar*)wszName);
   // Returning HANDLE (which is a pointer) as file descriptor... Anyway, 32 bits are 32 bits
   return (jint)hPort;
 }
@@ -207,13 +207,15 @@ JNIEXPORT jint JNICALL Java_gnu_io_RXTXPort_open(JNIEnv *env, jobject jobj, jstr
 
    accept:     speed, data bits, stop bits, parity
    perform:    set the serial port parameters
-   return:     void
+   return:     true on error
    exceptions: UnsupportedCommOperationException
  * Class:     gnu_io_RXTXPort
  * Method:    nativeSetSerialPortParams
  * Signature: (IIII)V
  */
-JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_nativeSetSerialPortParams(JNIEnv *env, jobject jobj, jint speed, jint dataBits, jint stopBits, jint parity)
+JNIEXPORT jboolean JNICALL Java_gnu_io_RXTXPort_nativeSetSerialPortParams(
+  JNIEnv *env, jobject jobj, jint speed, jint dataBits, jint stopBits,
+  jint parity)
 {
   DCB PortDCB;
   LPCWSTR lpMsgBuf;
@@ -233,7 +235,7 @@ JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_nativeSetSerialPortParams(JNIEnv *en
     throw_java_exceptionW(env, UNSUPPORTED_COMM_OPERATION, L"nativeSetSerialPortParams - GetCommState", lpMsgBuf);
     // Free the buffers.
     ReleaseErrorMsg(lpMsgBuf);
-    return;
+    return JNI_TRUE;
   }
 
   // Change the DCB structure settings.
@@ -266,9 +268,9 @@ JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_nativeSetSerialPortParams(JNIEnv *en
     throw_java_exceptionW(env, UNSUPPORTED_COMM_OPERATION, L"nativeSetSerialPortParams - SetCommState", lpMsgBuf);
     // Free the buffers.
     ReleaseErrorMsg(lpMsgBuf);
-    return;
+    return JNI_TRUE;
   }
-
+  return JNI_FALSE;
 }
 
 /*
@@ -457,7 +459,7 @@ JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_NativeEnableReceiveTimeoutThreshold(
   |enabled |m bytes|enabled |x ms |    n bytes      | block for x ms or until min(m,n) bytes are available
   --------------------------------------------------------------------------------------------------------
 
-  Enabling the Timeout OR Threshold with a value a zero is a special case.
+  Enabling the Timeout OR Threshold with a value of zero is a special case.
   This causes the underlying driver to poll for incoming data instead being event driven.
   Otherwise, the behaviour is identical to having both the Timeout and Threshold disabled.
   */
@@ -519,7 +521,7 @@ JNIEXPORT jboolean JNICALL Java_gnu_io_RXTXPort_isDTR(JNIEnv *env, jobject jobj)
   // Get the default port setting information.
   if(!GetCommState(hPort, &PortDCB))
   {
-    GetLastError();
+    //GetLastError();
     return JNI_FALSE;
   }
 
@@ -555,7 +557,7 @@ JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_setDTR(JNIEnv *env, jobject jobj, jb
   // Get the default port setting information.
   if(!GetCommState (hPort, &PortDCB))
   { //Unable to get configuration of the serial port
-    GetLastError();
+    //GetLastError();
     return;
   }
 
@@ -568,7 +570,7 @@ JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_setDTR(JNIEnv *env, jobject jobj, jb
   // Configure the port according to the specifications of the DCB structure.
   if (!SetCommState (hPort, &PortDCB))
   { //Unable to configure the serial port
-    GetLastError();
+    //GetLastError();
     return;
   }
 }
@@ -623,7 +625,7 @@ JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_setDSR(JNIEnv *env, jobject jobj, jb
   // Get the default port setting information.
   if(!GetCommState (hPort, &PortDCB))
   { //Unable to get configuration of the serial port
-    GetLastError();
+    //GetLastError();
     return;
   }
 
@@ -637,7 +639,7 @@ JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_setDSR(JNIEnv *env, jobject jobj, jb
   // structure.
   if (!SetCommState (hPort, &PortDCB))
   { //Unable to configure the serial port
-    GetLastError();
+    //GetLastError();
     return;
   }
 }
@@ -762,7 +764,7 @@ JNIEXPORT jboolean JNICALL Java_gnu_io_RXTXPort_isRTS(JNIEnv *env, jobject jobj)
   PortDCB.DCBlength = sizeof(DCB);
   if(!GetCommState (hPort, &PortDCB))
   { //Unable to get configuration of the serial port
-    GetLastError();
+    //GetLastError();
     return JNI_FALSE;
   }
 
@@ -774,8 +776,12 @@ JNIEXPORT jboolean JNICALL Java_gnu_io_RXTXPort_isRTS(JNIEnv *env, jobject jobj)
 
   if(PortDCB.fRtsControl == RTS_CONTROL_HANDSHAKE)
   {
-    //MessageBox(NULL, L"Undefined condition: isRTS() but control is RTS_CONTROL_HANDSHAKE\r\nReturning FALSE", L"Warning", MB_OK | MB_ICONWARNING | MB_SETFOREGROUND);
-    printj(env, L"Undefined condition: isRTS() but control is RTS_CONTROL_HANDSHAKE. Returning FALSE\n");
+    IF_DEBUG
+    (
+      //MessageBox(NULL, L"Undefined condition: isRTS() but control is RTS_CONTROL_HANDSHAKE\r\nReturning FALSE", L"Warning", MB_OK | MB_ICONWARNING | MB_SETFOREGROUND);
+      printj(env,
+        L"Undefined condition: isRTS() but control is RTS_CONTROL_HANDSHAKE. Returning FALSE\n");
+    )
     return JNI_FALSE;
   }
 
@@ -902,7 +908,7 @@ JNIEXPORT jboolean JNICALL Java_gnu_io_RXTXPort_nativeDrain(JNIEnv *env, jobject
 {
   //COMSTAT Stat;
   //DWORD dwErrors;
-  HANDLE hPort = get_fd(env, jobj);
+  //HANDLE hPort = get_fd(env, jobj);
 
   IF_DEBUG
   (
@@ -954,7 +960,7 @@ JNIEXPORT jint JNICALL Java_gnu_io_RXTXPort_nativeavailable(JNIEnv *env, jobject
 
   IF_DEBUG
   (
-    printj(env, L"--- RXTXPort.nativeavailable() called");
+    printj(env, L"--- RXTXPort.nativeavailable() called\n");
   )
 
   if(!ClearCommError(hPort, &dwErrors, &Stat))
@@ -1033,14 +1039,18 @@ JNIEXPORT jint JNICALL Java_gnu_io_RXTXPort_readArray(JNIEnv *env, jobject jobj,
   }
 
   jbyte *body = env->GetByteArrayElements(b, NULL);
-  threshold = get_java_int_var(env, jobj, "threshold");
-
+  threshold = get_java_var_long(env, jobj, "threshold", "I");
+  
+  if (threshold > len)
+    threshold = len;
   do
   {
-    if (!ReadFile(hPort, (unsigned char *)(body+off), len, &dwNumBytesRead, NULL))
+    if (!ReadFile(hPort, body + off + dwTotalRead, len - dwTotalRead,
+        &dwNumBytesRead, NULL))
     { // ReadFile failed. Report error.
       CreateErrorMsg(GetLastError(), lpMsgBuf);
-      throw_java_exceptionW(env, IO_EXCEPTION, L"readArray - WriteFile", lpMsgBuf );
+      throw_java_exceptionW(env, IO_EXCEPTION, L"readArray - ReadFile",
+                            lpMsgBuf);
       // Free the buffers.
       ReleaseErrorMsg(lpMsgBuf);
       env->ReleaseByteArrayElements(b, body, JNI_ABORT);
@@ -1048,10 +1058,52 @@ JNIEXPORT jint JNICALL Java_gnu_io_RXTXPort_readArray(JNIEnv *env, jobject jobj,
     }
 
     dwTotalRead += dwNumBytesRead;
-  } while(dwNumBytesRead > 0 && threshold != 0 && dwTotalRead <= (DWORD)len && dwTotalRead < (DWORD)threshold);
+  } while (dwNumBytesRead > 0 && (jint)dwTotalRead < threshold);
 
   env->ReleaseByteArrayElements(b, body, 0);
   return dwTotalRead;
+}
+
+/*
+nativeClearCommInput
+
+   accept:       none
+   perform:      try to clear the input.
+   return:       true on success, false on error
+   exceptions:   none
+   comments:     This is an extension to commapi.
+*/
+JNIEXPORT jboolean JNICALL Java_gnu_io_RXTXPort_nativeClearCommInput(
+  JNIEnv *env, jobject jobj)
+{
+  throw_java_exceptionW(env, UNSUPPORTED_COMM_OPERATION,
+    L"nativeClearCommInput", L"Operation not implemented");
+  return( JNI_FALSE );
+}
+
+/*
+readTerminatedArray
+
+   accept:       offset (offset to start storing data in the jbarray) and
+                 Length (bytes to read).  Terminator - 2 bytes that we
+		 dont read past
+   perform:      read bytes from the port into a byte array
+   return:       bytes read on success
+                 0 on read timeout
+   exceptions:   IOException
+   comments:     throws ArrayIndexOutOfBoundsException if asked to
+                 read more than SSIZE_MAX bytes
+		 timeout is not properly handled
+
+		 This is an extension to commapi.
+*/
+JNIEXPORT jint JNICALL Java_gnu_io_RXTXPort_readTerminatedArray(JNIEnv *env,
+  jobject jobj, jbyteArray jbarray, jint offset, jint length,
+  jbyteArray jterminator)
+{
+  throw_java_exceptionW(env, UNSUPPORTED_COMM_OPERATION,
+    L"readTerminatedArray", L"Operation not implemented");
+  return 0;
 }
 
 /*
@@ -1068,12 +1120,12 @@ eventLoop
  */
 JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_eventLoop(JNIEnv *env, jobject jobj)
 {
-  jfieldID jfMonitorThreadCloseLock, jfMonitorThreadLock, jfMonThreadisInterrupted;
+  jfieldID jfMonitorThreadLock, jfMonThreadisInterrupted;
   jmethodID jmSendEvent;
   HANDLE hCommEventThread;
   DWORD dwThreadID, dwWaitResult, dwEvent;
   int RetVal;
-  HANDLE hPort = get_fd(env, jobj);
+  //HANDLE hPort = get_fd(env, jobj);
   EventInfoStruct *EventInfo = get_eis(env, jobj);
 
   IF_DEBUG
@@ -1086,7 +1138,6 @@ JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_eventLoop(JNIEnv *env, jobject jobj)
   // Get pointers to some Java variables and methods:
   if( !(jfMonitorThreadLock = env->GetFieldID(cls, "MonitorThreadLock", "Z")) ||
       !(jfMonThreadisInterrupted = env->GetFieldID(cls, "monThreadisInterrupted", "Z")) ||
-      !(jfMonitorThreadCloseLock = env->GetFieldID(cls, "MonitorThreadCloseLock", "Z")) ||
       !(jmSendEvent = env->GetMethodID(cls, "sendEvent", "(IZ)Z"))
     )
   {
@@ -1101,10 +1152,13 @@ JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_eventLoop(JNIEnv *env, jobject jobj)
   hCommEventThread = CreateThread(NULL, 0, CommEventThread, (LPVOID)EventInfo, 0, &dwThreadID);
   if(hCommEventThread == NULL)
   {
-    LPCWSTR lpMsgBuf;
-    CreateErrorMsg(GetLastError(), lpMsgBuf);
-    printj(env, L"!!! eventLoop - CreateThread() error: %s\n", lpMsgBuf);
-    ReleaseErrorMsg(lpMsgBuf);
+    IF_DEBUG
+    (
+      LPCWSTR lpMsgBuf;
+      CreateErrorMsg(GetLastError(), lpMsgBuf);
+      printj(env, L"!!! eventLoop - CreateThread() error: %s\n", lpMsgBuf);
+      ReleaseErrorMsg(lpMsgBuf);
+    )
     return;
   }
 
@@ -1120,8 +1174,6 @@ JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_eventLoop(JNIEnv *env, jobject jobj)
       )
 
       CloseHandle(EventInfo->eventHandle);
-
-	    env->SetBooleanField(jobj, jfMonitorThreadCloseLock, JNI_FALSE);
       return;
     }
 
@@ -1145,7 +1197,6 @@ JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_eventLoop(JNIEnv *env, jobject jobj)
         ReleaseErrorMsg(lpMsgBuf);
       )
       CloseHandle(EventInfo->eventHandle);
-	  env->SetBooleanField(jobj, jfMonitorThreadCloseLock, JNI_FALSE);
       return;
     }
 
@@ -1155,14 +1206,13 @@ JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_eventLoop(JNIEnv *env, jobject jobj)
       // Clearing event - event thread will continue
       EventInfo->event = 0;
       // Send events to Java
-      if(RetVal = SendEvents(env, jobj, dwEvent, EventInfo, jmSendEvent))
+      if((RetVal = SendEvents(env, jobj, dwEvent, EventInfo, jmSendEvent)) != 0)
       {
         IF_DEBUG
         (
           printj(env, L"!!! eventLoop - SendEvents() result: %d\n", RetVal);
         )
         CloseHandle(EventInfo->eventHandle);
-  	    env->SetBooleanField(jobj, jfMonitorThreadCloseLock, JNI_FALSE);
         return;
       }
     }
@@ -1170,8 +1220,8 @@ JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_eventLoop(JNIEnv *env, jobject jobj)
     {
       IF_DEBUG
       (
-        //printj(env, L"--- eventLoop() looping\n");
-        MessageBeep(MB_OK);
+        ;//printj(env, L"--- eventLoop() looping (wait event timeout)\n");
+        //MessageBeep(MB_OK);
       )
     }
   } while(TRUE);
@@ -1193,11 +1243,16 @@ interruptEventLoop
 JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_interruptEventLoop(JNIEnv *env, jobject jobj)
 {
   jfieldID jfid;
-  HANDLE hPort = get_fd(env, jobj);
-
+  //HANDLE hPort = get_fd(env, jobj);
   jclass cls = env->GetObjectClass(jobj);
+
+  IF_DEBUG
+  (
+    printj(env, L"--- interrupt eventLoop()\n");
+  )
+  
   jfid = env->GetFieldID(cls, "monThreadisInterrupted", "Z");
-	env->SetBooleanField(jobj, jfid, JNI_TRUE);
+  env->SetBooleanField(jobj, jfid, JNI_TRUE);
 }
 
 
@@ -1215,7 +1270,7 @@ JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_interruptEventLoop(JNIEnv *env, jobj
  */
 JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_nativeSetEventFlag(JNIEnv *env, jobject jobj, jint fd, jint event, jboolean flag)
 {
-  DWORD dwErr, NewFlag;
+  DWORD NewFlag;
   EventInfoStruct *EventInfo = get_eis(env, jobj);
   HANDLE hPort = (HANDLE)fd;
 
@@ -1260,6 +1315,10 @@ JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_nativeSetEventFlag(JNIEnv *env, jobj
       NewFlag = EV_BREAK;
     break;
 
+    default:
+      /* Shouldn't happen. */
+      /* Return here to prevent warning about uninitialized NewFlag. */
+      return;
   }
 
   if(flag == JNI_TRUE)
@@ -1269,9 +1328,9 @@ JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_nativeSetEventFlag(JNIEnv *env, jobj
 
   if(!SetCommMask(hPort, EventInfo->ef))
   {
-    dwErr = GetLastError();
     IF_DEBUG
     (
+      DWORD dwErr = GetLastError();
       LPCWSTR lpMsgBuf;
       CreateErrorMsg(dwErr, lpMsgBuf);
       printj(env, L"!!! nativeSetEventFlag - SetCommMask() error: %ld %s\n", dwErr, lpMsgBuf );
@@ -1299,17 +1358,13 @@ JNIEXPORT void JNICALL Java_gnu_io_RXTXPort_nativeClose(JNIEnv *env, jobject job
 
   IF_DEBUG
   (
-    LPCWSTR wszName = env->GetStringChars(name, NULL);
+    LPCWSTR wszName = (LPCWSTR)env->GetStringChars(name, NULL);
     printj(env, L"--- RXTXPort.nativeClose(%s) called\n", wszName);
-    env->ReleaseStringChars(name, wszName);
+    env->ReleaseStringChars(name, (const jchar*)wszName);
   )
 
-  if (!CloseHandle(hPort))
-  {
-    GetLastError();
-    return;
-  }
-
+  (void)CloseHandle(hPort);
+  //GetLastError();
 }
 
 /*

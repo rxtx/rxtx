@@ -6,6 +6,47 @@ rxtx-2.1 and rxtx-2.0 changes are kept in the same file.  skip to the version
 you downloaded.
 
 2.2 ???
+		regenerated gnu_io_RXTXPort.h and gnu_io_RXTXCommDriver.h;
+		changed version string returned nativeGetVersion();
+		moved nativeGetVersion() to RXTXVersion;
+		added native_psmisc_report_owner() (same as for Win32);
+		removed unnecessary GetLastError() calls;
+		added explicit WCHAR-to-jchar casts (and vice versa) where the
+		compiler complains (same for LPWSTR and for "const" qualifier);
+		adjusted some debugging messages (to also print returned error
+		code);
+		wrapped remaining printed error messages (and MessageBeep) into
+		IF_DEBUG();
+		made printj() defined only if DEBUG;
+		replaced trailing "\n" with "\r\n" in printj();
+		replaced "I" type char with "J" one for "eis" field;
+		replaced get_java_int_var() with get_java_var_long();
+		changed nativeSetSerialPortParams() returned type to jboolean;
+		added nativeClearCommInput() and readTerminatedArray()
+		stubs (these should be implemented in future);
+		removed "MonitorThreadCloseLock" field usage in eventLoop();
+		commented out unused throw_java_exception(),
+		get_java_boolean_var2() and removed get_java_boolean_var();
+		replaced Sleep(0) call with Sleep(1) one in CommEventThread() (
+		to make yielding a bit "more reliable" among threads with
+		different priorities);
+		replaced named event with an unnamed one in
+		InitialiseEventInfoStruct() (see the note below);
+		added new JAVAXCOMM_FRONTEND macro for convenience (if defined
+		then PortInUseException and UnsupportedCommOperationException
+		are used "javax.comm" package (old behavior) else from
+		"gnu.io." one (default));
+		commented out DllMain() definition (since it does no action,
+		only consumes resources);
+		updated Readme.
+		WinCE compilation fixes an updates
+		readArray() simplified loop/fix pointer 
+		Ivan Maidanski <ivmai@mail.ru>
+		http://mailman.qbang.org/pipermail/rxtx/2009-November/5411487.html
+		http://mailman.qbang.org/pipermail/rxtx/2009-November/5411492.html
+		http://mailman.qbang.org/pipermail/rxtx/2009-November/5411490.html
+		http://mailman.qbang.org/pipermail/rxtx/2009-November/5411496.html
+
 		Windows build improvements (MinGW32, MSVC and LCC)
 		Ilkka Myller <ilkka@myller.com>
 		http://mailman.qbang.org/pipermail/rxtx/2009-September/4822418.html

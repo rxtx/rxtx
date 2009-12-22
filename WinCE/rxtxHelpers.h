@@ -2,7 +2,7 @@
 |   RXTX License v 2.1 - LGPL v 2.1 + Linking Over Controlled Interface.
 |   RXTX is a native interface to serial ports in java.
 |   Copyright 2002-2004 Michal Hobot MichalHobot@netscape.net
-|   Copyright 1997-2007 by Trent Jarvi tjarvi@qbang.org and others who
+|   Copyright 1997-2009 by Trent Jarvi tjarvi@qbang.org and others who
 |   actually wrote it.  See individual source files for more information.
 |
 |   A copy of the LGPL v 2.1 may be found at
@@ -59,7 +59,7 @@
 #if !defined(Included_RXTXHELPERS_H)
 #define Included_RXTXSERIAL_H
 
-/* javax.comm.SerialPortEvent constants */
+/* SerialPortEvent constants */
 #define SPE_DATA_AVAILABLE       1
 #define SPE_OUTPUT_BUFFER_EMPTY  2
 #define SPE_CTS                  3
@@ -78,14 +78,14 @@
 #define PORT_RAW		  5
 
 #define CreateErrorMsg(dwError, lpMsgBuf)          \
-          FormatMessage(                           \
+          FormatMessageW(                          \
                   FORMAT_MESSAGE_ALLOCATE_BUFFER | \
                   FORMAT_MESSAGE_FROM_SYSTEM |     \
                   FORMAT_MESSAGE_IGNORE_INSERTS,   \
                   NULL,                            \
                   dwError,                         \
                   0,                               \
-                  (LPTSTR) & (lpMsgBuf),           \
+                  (LPWSTR) & (lpMsgBuf),           \
                   0,                               \
                   NULL                             \
                  ),                                \
@@ -100,12 +100,16 @@
 #endif
 
 /* java exception class names */
-#define UNSUPPORTED_COMM_OPERATION "javax/comm/UnsupportedCommOperationException"
 #define ARRAY_INDEX_OUT_OF_BOUNDS "java/lang/ArrayIndexOutOfBoundsException"
-#define OUT_OF_MEMORY "java/lang/OutOfMemoryError"
 #define IO_EXCEPTION "java/io/IOException"
-#define PORT_IN_USE_EXCEPTION "javax/comm/PortInUseException"
 
+#ifdef JAVAXCOMM_FRONTEND
+#define UNSUPPORTED_COMM_OPERATION "javax/comm/UnsupportedCommOperationException"
+#define PORT_IN_USE_EXCEPTION "javax/comm/PortInUseException"
+#else
+#define UNSUPPORTED_COMM_OPERATION "gnu/io/UnsupportedCommOperationException"
+#define PORT_IN_USE_EXCEPTION "gnu/io/PortInUseException"
+#endif
 
 typedef struct
 {
@@ -122,14 +126,13 @@ typedef struct
 } EventInfoStruct;
 
 
-long get_java_int_var(JNIEnv *, jobject, char *);
-bool get_java_boolean_var(JNIEnv *, jobject, char *);
-bool get_java_boolean_var2(JNIEnv *, jobject, jclass, char *);
-void throw_java_exception(JNIEnv *, const char *, const char *, const char *);
+long get_java_var_long( JNIEnv *, jobject, const char *, const char * );
+//bool get_java_boolean_var2(JNIEnv *, jobject, jclass, const char *);
+//void throw_java_exception(JNIEnv *, const char *, const char *, const char *);
 void throw_java_exceptionW(JNIEnv *, const char *, const wchar_t *, const wchar_t *);
 HANDLE get_fd(JNIEnv *, jobject);
 EventInfoStruct *get_eis(JNIEnv *, jobject);
-int printj(JNIEnv *, wchar_t *, ...);
+int printj(JNIEnv *, const wchar_t *, ...);
 DWORD __stdcall CommEventThread(LPVOID);
 //void setEventFlags(JNIEnv *env, jobject jobj, bool ef[]);
 int InitialiseEventInfoStruct(HANDLE, EventInfoStruct **);
