@@ -71,7 +71,7 @@ final class LPRPort extends ParallelPort
 {
 
 	static {
-		System.loadLibrary( "rxtxParallel" );
+		RXTXVersion.loadLibrary( "rxtxParallel" );
 		Initialize();
 	}
 
@@ -276,6 +276,7 @@ final class LPRPort extends ParallelPort
 			throw new TooManyListenersException();
 		PPEventListener = lsnr;
 		monThread = new MonitorThread();
+		monThread.setDaemon(true);
 		monThread.start();
 	}
 

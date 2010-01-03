@@ -347,6 +347,7 @@ final class RS485  extends  RS485Port {
 		if( SPEventListener != null ) throw new TooManyListenersException();
 		SPEventListener = lsnr;
 		monThread = new MonitorThread();
+		monThread.setDaemon(true);
 		monThread.start(); 
 	}
 	/** Remove the RS485 port event listener */

@@ -81,7 +81,7 @@ public class RXTXCommDriver implements CommDriver
 	static
 	{
 		if(debug ) System.out.println("RXTXCommDriver {}");
-		System.loadLibrary( "rxtxSerial" );
+		RXTXVersion.loadLibrary( "rxtxSerial" );
 
 		/*
 		   Perform a crude check to make sure people don't mix

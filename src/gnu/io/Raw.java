@@ -348,6 +348,7 @@ final class Raw  extends  RawPort {
 		if( SPEventListener != null ) throw new TooManyListenersException();
 		SPEventListener = lsnr;
 		monThread = new MonitorThread();
+		monThread.setDaemon(true);
 		monThread.start(); 
 	}
 	/** Remove the Raw port event listener */

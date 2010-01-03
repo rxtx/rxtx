@@ -6,6 +6,14 @@ rxtx-2.1 and rxtx-2.0 changes are kept in the same file.  skip to the version
 you downloaded.
 
 2.2 ???
+		Deamon Monitor thread.
+		http://mailman.qbang.org/pipermail/rxtx/2009-November/5481981.html
+		Ivan Maidanski <ivmai@mail.ru>
+
+		64 bit/ 32 bit fallback of loadlibrary
+		Nathan A. Sweet <nate@n4te.com>
+
+		http://mailman.qbang.org/pipermail/rxtx/2009-November/5482004.html
 		regenerated gnu_io_RXTXPort.h and gnu_io_RXTXCommDriver.h;
 		changed version string returned nativeGetVersion();
 		moved nativeGetVersion() to RXTXVersion;

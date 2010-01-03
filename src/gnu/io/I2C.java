@@ -350,6 +350,7 @@ final class I2C  extends  I2CPort {
 		if( SPEventListener != null ) throw new TooManyListenersException();
 		SPEventListener = lsnr;
 		monThread = new MonitorThread();
+		monThread.setDaemon(true);
 		monThread.start(); 
 	}
 	/** Remove the I2C port event listener */

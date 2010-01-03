@@ -75,8 +75,8 @@ public class RXTXVersion
 	private static String Version;
 
 	static {
-		System.loadLibrary( "rxtxSerial" );
-		Version = "RXTX-2.2pre2";
+		RXTXVersion.loadLibrary( "rxtxSerial" );
+		Version = "RXTX-2.2";
 	}
 	/**
 	*  static method to return the current version of RXTX
@@ -88,4 +88,29 @@ public class RXTXVersion
 		return(Version);
 	}
 	public static native String nativeGetVersion();
+
+ 	static void loadLibrary (String baseName) {
+		if (System.getProperty("sun.arch.data.model", "").equals("64")) {
+			try {
+				System.loadLibrary(baseName + "64");
+			} catch (UnsatisfiedLinkError ex64) {
+				try {
+					System.loadLibrary(baseName);
+				} catch (UnsatisfiedLinkError ignored) {
+					throw ex64;
+				}
+			}
+		} else {
+			try {
+				System.loadLibrary(baseName);
+			} catch (UnsatisfiedLinkError ex32) {
+				try {
+					System.loadLibrary(baseName + "64");
+				} catch (UnsatisfiedLinkError ignored) {
+					throw ex32;
+				}
+			}
+		}
+	}
+
 }
