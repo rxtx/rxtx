@@ -6,6 +6,11 @@ rxtx-2.1 and rxtx-2.0 changes are kept in the same file.  skip to the version
 you downloaded.
 
 2.2 ???
+
+		Fixed the gnu.io.rxtx.properties code that didn't work. 
+		Fixed unsafe code in the registerSpecifiedPorts method. 
+		Adrian Crum <adrian.crum@yahoo.com>
+
 		Deamon Monitor thread.
 		http://mailman.qbang.org/pipermail/rxtx/2009-November/5481981.html
 		Ivan Maidanski <ivmai@mail.ru>
