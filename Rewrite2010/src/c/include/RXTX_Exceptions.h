@@ -76,7 +76,7 @@ class JavaRuntimeException: public exception {};
 class IOException: public exception
 {
 public:
-	// Returns the java.io.IOException Java class
+    // Returns the java.io.IOException Java class
     jclass getJavaClass(JNIEnv *env);
 };
 
@@ -86,7 +86,7 @@ public:
 class IllegalArgumentException: public exception
 {
 public:
-	// Returns the java.lang.IllegalArgumentException Java class
+    // Returns the java.lang.IllegalArgumentException Java class
     jclass getJavaClass(JNIEnv *env);
 };
 
@@ -96,7 +96,7 @@ public:
 class IllegalStateException: public exception
 {
 public:
-	// Returns the java.lang.IllegalStateException Java class
+    // Returns the java.lang.IllegalStateException Java class
     jclass getJavaClass(JNIEnv *env);
 };
 
@@ -106,7 +106,7 @@ public:
 class NoSuchPortException: public exception
 {
 public:
-	// Returns the gnu.io.NoSuchPortException Java class
+    // Returns the gnu.io.NoSuchPortException Java class
     jclass getJavaClass(JNIEnv *env);
 };
 
@@ -116,7 +116,7 @@ public:
 class UnsupportedCommOperationException: public exception
 {
 public:
-	// Returns the gnu.io.UnsupportedCommOperationException Java class
+    // Returns the gnu.io.UnsupportedCommOperationException Java class
     jclass getJavaClass(JNIEnv *env);
 };
 

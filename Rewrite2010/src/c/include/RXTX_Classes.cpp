@@ -101,32 +101,32 @@ const int PortInfo::getType() const
 
 jclass PortInfo::getJavaClass(JNIEnv *env)
 {
-	jclass portInfoClass = env->FindClass("gnu/io/PortInfo");
-	if (portInfoClass == NULL)
-		throw JavaRuntimeException();
+    jclass portInfoClass = env->FindClass("gnu/io/PortInfo");
+    if (portInfoClass == NULL)
+        throw JavaRuntimeException();
     return portInfoClass;
 }
 
 jmethodID PortInfo::getJavaConstructor(JNIEnv *env)
 {
-	jmethodID portInfoConstructor = env->GetMethodID(getJavaClass(env), "<init>", "(Ljava/lang/String;I)V");
-	if (portInfoConstructor == NULL)
-		throw JavaRuntimeException();
+    jmethodID portInfoConstructor = env->GetMethodID(getJavaClass(env), "<init>", "(Ljava/lang/String;I)V");
+    if (portInfoConstructor == NULL)
+        throw JavaRuntimeException();
     return portInfoConstructor;
 }
 
 const int PortInfo::getType(const char* portName)
 {
-	PortInfoList portInfoList;
-	portInfoList.getValidPorts();
-	const std::list<PortInfo*> *portInfos = portInfoList.getList();
-	for (std::list<PortInfo*>::const_iterator i = portInfos->begin(); i != portInfos->end(); i++)
-	{
-		PortInfo *portInfo = *i;
-		if (strcmp(portName, portInfo->getName()) == 0)
-			return portInfo->getType();
-	}
-	throw NoSuchPortException();
+    PortInfoList portInfoList;
+    portInfoList.getValidPorts();
+    const std::list<PortInfo*> *portInfos = portInfoList.getList();
+    for (std::list<PortInfo*>::const_iterator i = portInfos->begin(); i != portInfos->end(); i++)
+    {
+        PortInfo *portInfo = *i;
+        if (strcmp(portName, portInfo->getName()) == 0)
+            return portInfo->getType();
+    }
+    throw NoSuchPortException();
 }
 
 // ------------------------------------------------------------------------- //
@@ -135,12 +135,12 @@ const int PortInfo::getType(const char* portName)
 
 PortInfoList::~PortInfoList()
 {
-	while (!portInfos.empty())
-	{
-		PortInfo* portInfo = *portInfos.begin();
-		portInfos.pop_front();
-		delete portInfo;
-	}
+    while (!portInfos.empty())
+    {
+        PortInfo* portInfo = *portInfos.begin();
+        portInfos.pop_front();
+        delete portInfo;
+    }
 }
 
 void PortInfoList::addPortInfo(const char* portName, int portType)
@@ -155,7 +155,7 @@ const int PortInfoList::size() const
 
 const std::list<PortInfo*>* PortInfoList::getList()
 {
-	return &portInfos;
+    return &portInfos;
 }
 
 // ------------------------------------------------------------------------- //
@@ -164,63 +164,63 @@ const std::list<PortInfo*>* PortInfoList::getList()
 
 PortEntry::~PortEntry()
 {
-	delete port;
+    delete port;
 }
 
 PortManager::~PortManager()
 {
-	while (!ports.empty())
-	{
-		PortEntry* entry = *ports.begin();
-		ports.pop_front();
-		delete entry;
-	}
+    while (!ports.empty())
+    {
+        PortEntry* entry = *ports.begin();
+        ports.pop_front();
+        delete entry;
+    }
 }
 
 const int PortManager::openPort(const char* portName, int portType)
 {
-	for (std::list<PortEntry*>::iterator i = ports.begin(); i != ports.end(); i++)
-	{
-		PortEntry *entry = *i;
-		if (strcmp(entry->port->getName(), portName) == 0 && entry->port->getType() == portType)
+    for (std::list<PortEntry*>::iterator i = ports.begin(); i != ports.end(); i++)
+    {
+        PortEntry *entry = *i;
+        if (strcmp(entry->port->getName(), portName) == 0 && entry->port->getType() == portType)
         {
             closePort(entry->portHandle);
             break;
         }
-	}
+    }
     // Enforce opaque port handle by making it a random number
-	srand(time(NULL));
-	int portHandle = rand();
-	CommPort* port = getPort(portHandle);
-	while (port != NULL)
-	{
-		portHandle = rand();
-		port = getPort(portHandle);
-	}
+    srand(time(NULL));
+    int portHandle = rand();
+    CommPort* port = getPort(portHandle);
+    while (port != NULL)
+    {
+        portHandle = rand();
+        port = getPort(portHandle);
+    }
     port = CommPortFactory::getInstance(portName, portType);
-	ports.push_back(new PortEntry(portHandle, port));
+    ports.push_back(new PortEntry(portHandle, port));
     return portHandle;
 }
 
 CommPort* PortManager::getPort(int portHandle) const
 {
-	// TODO: Not thread-safe. List contents can change
-	// during iteration.
-	for (std::list<PortEntry*>::const_iterator i = ports.begin(); i != ports.end(); i++)
-	{
-		PortEntry *entry = *i;
-		if (entry->portHandle == portHandle)
-			return entry->port;
-	}
-	return NULL;
+    // TODO: Not thread-safe. List contents can change
+    // during iteration.
+    for (std::list<PortEntry*>::const_iterator i = ports.begin(); i != ports.end(); i++)
+    {
+        PortEntry *entry = *i;
+        if (entry->portHandle == portHandle)
+            return entry->port;
+    }
+    return NULL;
 }
 
 void PortManager::closePort(int portHandle)
 {
-	for (std::list<PortEntry*>::iterator i = ports.begin(); i != ports.end(); i++)
-	{
-		PortEntry *entry = *i;
-		if (entry->portHandle == portHandle)
+    for (std::list<PortEntry*>::iterator i = ports.begin(); i != ports.end(); i++)
+    {
+        PortEntry *entry = *i;
+        if (entry->portHandle == portHandle)
         {
             exception* caught = NULL;
             try
@@ -232,13 +232,13 @@ void PortManager::closePort(int portHandle)
                 caught = &e;
                 entry->port->abort();
             }
-			ports.erase(i);
+            ports.erase(i);
             delete entry;
             if (caught != NULL)
                 throw *caught;
             break;
         }
-	}
+    }
 }
 
 PortManager& PortManager::getInstance()

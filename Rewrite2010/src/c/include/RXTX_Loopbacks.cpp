@@ -452,25 +452,25 @@ void SerialLoopback::sendBreak(int duration)
 
 void SerialLoopback::setDTR(bool state)
 {
-	dtr = state;
+    dtr = state;
 }
 
 void SerialLoopback::setFlowControlMode(int flowControlMode)
 {
-	this->flowControlMode = flowControlMode;
+    this->flowControlMode = flowControlMode;
 }
 
 void SerialLoopback::setRTS(bool state)
 {
-	rts = state;
+    rts = state;
 }
 
 void SerialLoopback::setSerialPortParams(int baudRate, int dataBits, int stopBits, int parity)
 {
-	this->baudRate = baudRate;
-	this->dataBits = dataBits;
-	this->stopBits = stopBits;
-	this->parity = parity;
+    this->baudRate = baudRate;
+    this->dataBits = dataBits;
+    this->stopBits = stopBits;
+    this->parity = parity;
 }
 
 #endif

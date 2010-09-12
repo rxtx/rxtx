@@ -77,10 +77,10 @@ directives that accommodate compiler differences are allowed.
 
 #define BEGIN_NATIVE_FUNC_GET_PORT \
     try { \
-		PortManager& portManager = PortManager::getInstance(); \
-		CommPort* port = portManager.getPort((int) portHandle); \
-		if (port == NULL) \
-			throw IllegalArgumentException(); \
+        PortManager& portManager = PortManager::getInstance(); \
+        CommPort* port = portManager.getPort((int) portHandle); \
+        if (port == NULL) \
+            throw IllegalArgumentException(); \
 
 #define END_NATIVE_FUNC_HANDLE_EXCEPTIONS \
     } \
@@ -92,19 +92,19 @@ directives that accommodate compiler differences are allowed.
     { \
         jclass exceptionClass = iae.getJavaClass(env); \
         if (exceptionClass != NULL) \
-		    env->ThrowNew(exceptionClass, "Invalid argument"); \
+            env->ThrowNew(exceptionClass, "Invalid argument"); \
     } \
     catch (IllegalStateException &ise) \
     { \
         jclass exceptionClass = ise.getJavaClass(env); \
         if (exceptionClass != NULL) \
-		    env->ThrowNew(exceptionClass, "Illegal state"); \
+            env->ThrowNew(exceptionClass, "Illegal state"); \
     } \
     catch (IOException &ioe) \
     { \
         jclass exceptionClass = ioe.getJavaClass(env); \
         if (exceptionClass != NULL) \
-		    env->ThrowNew(exceptionClass, "I/O error occurred"); \
+            env->ThrowNew(exceptionClass, "I/O error occurred"); \
     } \
     catch (...) \
     { \
@@ -116,7 +116,7 @@ directives that accommodate compiler differences are allowed.
     { \
         jclass exceptionClass = nspe.getJavaClass(env); \
         if (exceptionClass != NULL) \
-		    env->ThrowNew(exceptionClass, "No such port"); \
+            env->ThrowNew(exceptionClass, "No such port"); \
 
 #define HANDLE_UCO_EXCEPTION \
     } \
@@ -124,7 +124,7 @@ directives that accommodate compiler differences are allowed.
     { \
         jclass exceptionClass = ucoe.getJavaClass(env); \
         if (exceptionClass != NULL) \
-		    env->ThrowNew(exceptionClass, "Unsupported comm operation"); \
+            env->ThrowNew(exceptionClass, "Unsupported comm operation"); \
 
 #define TEST_AND_CAST_TO_SERIAL_PORT \
         if (port->getType() != RXTX_PORT_SERIAL) \
@@ -144,13 +144,13 @@ directives that accommodate compiler differences are allowed.
 */
 JNIEXPORT void JNICALL Java_gnu_io_Dispatcher_abort(JNIEnv *env, jobject thisObj, jint portHandle)
 {
-	try {
-		PortManager& portManager = PortManager::getInstance();
+    try {
+        PortManager& portManager = PortManager::getInstance();
         portManager.closePort((int) portHandle);
     }
     catch (...)
     {
-		// Catch everything and do nothing on abort
+        // Catch everything and do nothing on abort
     }
 }
 
@@ -161,8 +161,8 @@ JNIEXPORT void JNICALL Java_gnu_io_Dispatcher_abort(JNIEnv *env, jobject thisObj
 */
 JNIEXPORT void JNICALL Java_gnu_io_Dispatcher_close(JNIEnv *env, jobject thisObj, jint portHandle)
 {
-	BEGIN_NATIVE_FUNCTION
-		PortManager& portManager = PortManager::getInstance();
+    BEGIN_NATIVE_FUNCTION
+        PortManager& portManager = PortManager::getInstance();
         portManager.closePort((int) portHandle);
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
 }
@@ -177,7 +177,7 @@ JNIEXPORT jint JNICALL Java_gnu_io_Dispatcher_getBaudRate(JNIEnv *env, jobject t
 {
     BEGIN_NATIVE_FUNC_GET_PORT
     TEST_AND_CAST_TO_SERIAL_PORT
-   		return (jint) serialPort->getBaudRate();
+           return (jint) serialPort->getBaudRate();
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
     return NULL;
 }
@@ -192,7 +192,7 @@ JNIEXPORT jint JNICALL Java_gnu_io_Dispatcher_getDataBits(JNIEnv *env, jobject t
 {
     BEGIN_NATIVE_FUNC_GET_PORT
     TEST_AND_CAST_TO_SERIAL_PORT
-   		return (jint) serialPort->getDataBits();
+           return (jint) serialPort->getDataBits();
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
     return NULL;
 }
@@ -207,7 +207,7 @@ JNIEXPORT jint JNICALL Java_gnu_io_Dispatcher_getFlowControlMode(JNIEnv *env, jo
 {
     BEGIN_NATIVE_FUNC_GET_PORT
     TEST_AND_CAST_TO_SERIAL_PORT
-   		return (jint) serialPort->getFlowControlMode();
+           return (jint) serialPort->getFlowControlMode();
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
     return NULL;
 }
@@ -221,7 +221,7 @@ JNIEXPORT jint JNICALL Java_gnu_io_Dispatcher_getFlowControlMode(JNIEnv *env, jo
 JNIEXPORT jint JNICALL Java_gnu_io_Dispatcher_getInputBufferSize(JNIEnv *env, jobject thisObj, jint portHandle)
 {
     BEGIN_NATIVE_FUNC_GET_PORT
-   		return (jint) port->getInputBufferSize();
+           return (jint) port->getInputBufferSize();
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
     return NULL;
 }
@@ -236,7 +236,7 @@ JNIEXPORT jint JNICALL Java_gnu_io_Dispatcher_getMode(JNIEnv *env, jobject thisO
 {
     BEGIN_NATIVE_FUNC_GET_PORT
     TEST_AND_CAST_TO_PARALLEL_PORT
-   		return (jint) parallelPort->getMode();
+           return (jint) parallelPort->getMode();
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
     return NULL;
 }
@@ -251,7 +251,7 @@ JNIEXPORT jint JNICALL Java_gnu_io_Dispatcher_getOutputBufferFree(JNIEnv *env, j
 {
     BEGIN_NATIVE_FUNC_GET_PORT
     TEST_AND_CAST_TO_PARALLEL_PORT
-   		return (jint) parallelPort->getOutputBufferFree();
+           return (jint) parallelPort->getOutputBufferFree();
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
     return NULL;
 }
@@ -265,7 +265,7 @@ JNIEXPORT jint JNICALL Java_gnu_io_Dispatcher_getOutputBufferFree(JNIEnv *env, j
 JNIEXPORT jint JNICALL Java_gnu_io_Dispatcher_getOutputBufferSize(JNIEnv *env, jobject thisObj, jint portHandle)
 {
     BEGIN_NATIVE_FUNC_GET_PORT
-   		return (jint) port->getOutputBufferSize();
+           return (jint) port->getOutputBufferSize();
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
     return NULL;
 }
@@ -280,7 +280,7 @@ JNIEXPORT jint JNICALL Java_gnu_io_Dispatcher_getParity(JNIEnv *env, jobject thi
 {
     BEGIN_NATIVE_FUNC_GET_PORT
     TEST_AND_CAST_TO_SERIAL_PORT
-   		return (jint) serialPort->getParity();
+           return (jint) serialPort->getParity();
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
     return NULL;
 }
@@ -292,18 +292,18 @@ JNIEXPORT jint JNICALL Java_gnu_io_Dispatcher_getParity(JNIEnv *env, jobject thi
 */
 JNIEXPORT jint JNICALL Java_gnu_io_Dispatcher_getPortType(JNIEnv *env, jobject thisObj, jstring jPortName)
 {
-	const char *portName = NULL;
-	int portType = NULL;
+    const char *portName = NULL;
+    int portType = NULL;
     BEGIN_NATIVE_FUNCTION
-		portName = env->GetStringUTFChars(jPortName, NULL);
-		if (portName == NULL)
-			throw JavaRuntimeException();
-		portType = PortInfo::getType(portName);
+        portName = env->GetStringUTFChars(jPortName, NULL);
+        if (portName == NULL)
+            throw JavaRuntimeException();
+        portType = PortInfo::getType(portName);
     HANDLE_NSP_EXCEPTION
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
-	if (portName != NULL)
-		env->ReleaseStringUTFChars(jPortName, portName);
-	return (jint) portType;
+    if (portName != NULL)
+        env->ReleaseStringUTFChars(jPortName, portName);
+    return (jint) portType;
 }
 
 /*
@@ -316,7 +316,7 @@ JNIEXPORT jint JNICALL Java_gnu_io_Dispatcher_getStopBits(JNIEnv *env, jobject t
 {
     BEGIN_NATIVE_FUNC_GET_PORT
     TEST_AND_CAST_TO_SERIAL_PORT
-   		return (jint) serialPort->getStopBits();
+           return (jint) serialPort->getStopBits();
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
     return NULL;
 }
@@ -348,23 +348,23 @@ JNIEXPORT jobject JNICALL Java_gnu_io_Dispatcher_getValidPortInfos(JNIEnv *env, 
         portInfoList.addPortInfo("PARALLEL_PASS", RXTX_PORT_PARALLEL);
         portInfoList.addPortInfo("SERIAL_PASS", RXTX_PORT_SERIAL);
 #endif
-		jclass portInfoClass = PortInfo::getJavaClass(env);
-		jmethodID portInfoConst = PortInfo::getJavaConstructor(env);
-		// TODO: Convert this to an iterator class
-		const std::list<PortInfo*> *portInfos = portInfoList.getList();
-		for (std::list<PortInfo*>::const_iterator i = portInfos->begin(); i != portInfos->end(); i++)
-		{
-			PortInfo *portInfo = *i;
-			TO_JSTRING(jPortName, portInfo->getName())
-			jint jPortType = portInfo->getType();
+        jclass portInfoClass = PortInfo::getJavaClass(env);
+        jmethodID portInfoConst = PortInfo::getJavaConstructor(env);
+        // TODO: Convert this to an iterator class
+        const std::list<PortInfo*> *portInfos = portInfoList.getList();
+        for (std::list<PortInfo*>::const_iterator i = portInfos->begin(); i != portInfos->end(); i++)
+        {
+            PortInfo *portInfo = *i;
+            TO_JSTRING(jPortName, portInfo->getName())
+            jint jPortType = portInfo->getType();
             jobject jPortInfo = NULL;
             jPortInfo = env->NewObject(portInfoClass, portInfoConst, jPortName, jPortType);
             if (jPortInfo == NULL)
-				throw JavaRuntimeException();
-			jboolean result = env->CallBooleanMethod(listObject, addMethod, jPortInfo);
-			if (result == NULL)
-				throw JavaRuntimeException();
-		}
+                throw JavaRuntimeException();
+            jboolean result = env->CallBooleanMethod(listObject, addMethod, jPortInfo);
+            if (result == NULL)
+                throw JavaRuntimeException();
+        }
         return listObject;
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
     return NULL;
@@ -380,7 +380,7 @@ JNIEXPORT jboolean JNICALL Java_gnu_io_Dispatcher_isBI(JNIEnv *env, jobject this
 {
     BEGIN_NATIVE_FUNC_GET_PORT
     TEST_AND_CAST_TO_SERIAL_PORT
-	return serialPort->isBI() ? JNI_TRUE : JNI_FALSE;
+    return serialPort->isBI() ? JNI_TRUE : JNI_FALSE;
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
     return NULL;
 }
@@ -395,7 +395,7 @@ JNIEXPORT jboolean JNICALL Java_gnu_io_Dispatcher_isCD(JNIEnv *env, jobject this
 {
     BEGIN_NATIVE_FUNC_GET_PORT
     TEST_AND_CAST_TO_SERIAL_PORT
-   		return serialPort->isCD() ? JNI_TRUE : JNI_FALSE;
+           return serialPort->isCD() ? JNI_TRUE : JNI_FALSE;
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
     return NULL;
 }
@@ -410,7 +410,7 @@ JNIEXPORT jboolean JNICALL Java_gnu_io_Dispatcher_isCTS(JNIEnv *env, jobject thi
 {
     BEGIN_NATIVE_FUNC_GET_PORT
     TEST_AND_CAST_TO_SERIAL_PORT
-   		return serialPort->isCTS() ? JNI_TRUE : JNI_FALSE;
+           return serialPort->isCTS() ? JNI_TRUE : JNI_FALSE;
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
     return NULL;
 }
@@ -425,7 +425,7 @@ JNIEXPORT jboolean JNICALL Java_gnu_io_Dispatcher_isDataAvailable(JNIEnv *env, j
 {
     BEGIN_NATIVE_FUNC_GET_PORT
     TEST_AND_CAST_TO_SERIAL_PORT
-   		return serialPort->isDataAvailable() ? JNI_TRUE : JNI_FALSE;
+           return serialPort->isDataAvailable() ? JNI_TRUE : JNI_FALSE;
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
     return NULL;
 }
@@ -440,7 +440,7 @@ JNIEXPORT jboolean JNICALL Java_gnu_io_Dispatcher_isDSR(JNIEnv *env, jobject thi
 {
     BEGIN_NATIVE_FUNC_GET_PORT
     TEST_AND_CAST_TO_SERIAL_PORT
-   		return serialPort->isDSR() ? JNI_TRUE : JNI_FALSE;
+           return serialPort->isDSR() ? JNI_TRUE : JNI_FALSE;
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
     return NULL;
 }
@@ -455,7 +455,7 @@ JNIEXPORT jboolean JNICALL Java_gnu_io_Dispatcher_isDTR(JNIEnv *env, jobject thi
 {
     BEGIN_NATIVE_FUNC_GET_PORT
     TEST_AND_CAST_TO_SERIAL_PORT
-   		return serialPort->isDTR() ? JNI_TRUE : JNI_FALSE;
+           return serialPort->isDTR() ? JNI_TRUE : JNI_FALSE;
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
     return NULL;
 }
@@ -470,7 +470,7 @@ JNIEXPORT jboolean JNICALL Java_gnu_io_Dispatcher_isFramingError(JNIEnv *env, jo
 {
     BEGIN_NATIVE_FUNC_GET_PORT
     TEST_AND_CAST_TO_SERIAL_PORT
-   		return serialPort->isFramingError() ? JNI_TRUE : JNI_FALSE;
+           return serialPort->isFramingError() ? JNI_TRUE : JNI_FALSE;
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
     return NULL;
 }
@@ -485,7 +485,7 @@ JNIEXPORT jboolean JNICALL Java_gnu_io_Dispatcher_isOutputBufferEmpty(JNIEnv *en
 {
     BEGIN_NATIVE_FUNC_GET_PORT
     TEST_AND_CAST_TO_PARALLEL_PORT
-   		return parallelPort->isOutputBufferEmpty() ? JNI_TRUE : JNI_FALSE;
+           return parallelPort->isOutputBufferEmpty() ? JNI_TRUE : JNI_FALSE;
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
     return NULL;
 }
@@ -500,7 +500,7 @@ JNIEXPORT jboolean JNICALL Java_gnu_io_Dispatcher_isOverrunError(JNIEnv *env, jo
 {
     BEGIN_NATIVE_FUNC_GET_PORT
     TEST_AND_CAST_TO_SERIAL_PORT
-   		return serialPort->isOverrunError() ? JNI_TRUE : JNI_FALSE;
+           return serialPort->isOverrunError() ? JNI_TRUE : JNI_FALSE;
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
     return NULL;
 }
@@ -515,7 +515,7 @@ JNIEXPORT jboolean JNICALL Java_gnu_io_Dispatcher_isPaperOut(JNIEnv *env, jobjec
 {
     BEGIN_NATIVE_FUNC_GET_PORT
     TEST_AND_CAST_TO_PARALLEL_PORT
-   		return parallelPort->isPaperOut() ? JNI_TRUE : JNI_FALSE;
+           return parallelPort->isPaperOut() ? JNI_TRUE : JNI_FALSE;
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
     return NULL;
 }
@@ -530,7 +530,7 @@ JNIEXPORT jboolean JNICALL Java_gnu_io_Dispatcher_isParityError(JNIEnv *env, job
 {
     BEGIN_NATIVE_FUNC_GET_PORT
     TEST_AND_CAST_TO_SERIAL_PORT
-   		return serialPort->isParityError() ? JNI_TRUE : JNI_FALSE;
+           return serialPort->isParityError() ? JNI_TRUE : JNI_FALSE;
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
     return NULL;
 }
@@ -544,7 +544,7 @@ JNIEXPORT jboolean JNICALL Java_gnu_io_Dispatcher_isParityError(JNIEnv *env, job
 JNIEXPORT jboolean JNICALL Java_gnu_io_Dispatcher_isPortReadable(JNIEnv *env, jobject thisObj, jint portHandle)
 {
     BEGIN_NATIVE_FUNC_GET_PORT
-   		return port->isPortReadable() ? JNI_TRUE : JNI_FALSE;
+           return port->isPortReadable() ? JNI_TRUE : JNI_FALSE;
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
     return NULL;
 }
@@ -558,7 +558,7 @@ JNIEXPORT jboolean JNICALL Java_gnu_io_Dispatcher_isPortReadable(JNIEnv *env, jo
 JNIEXPORT jboolean JNICALL Java_gnu_io_Dispatcher_isPortWritable(JNIEnv *env, jobject thisObj, jint portHandle)
 {
     BEGIN_NATIVE_FUNC_GET_PORT
-   		return port->isPortWritable() ? JNI_TRUE : JNI_FALSE;
+           return port->isPortWritable() ? JNI_TRUE : JNI_FALSE;
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
     return NULL;
 }
@@ -573,7 +573,7 @@ JNIEXPORT jboolean JNICALL Java_gnu_io_Dispatcher_isPrinterBusy(JNIEnv *env, job
 {
     BEGIN_NATIVE_FUNC_GET_PORT
     TEST_AND_CAST_TO_PARALLEL_PORT
-   		return parallelPort->isPrinterBusy() ? JNI_TRUE : JNI_FALSE;
+           return parallelPort->isPrinterBusy() ? JNI_TRUE : JNI_FALSE;
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
     return NULL;
 }
@@ -588,7 +588,7 @@ JNIEXPORT jboolean JNICALL Java_gnu_io_Dispatcher_isPrinterError(JNIEnv *env, jo
 {
     BEGIN_NATIVE_FUNC_GET_PORT
     TEST_AND_CAST_TO_PARALLEL_PORT
-   		return parallelPort->isPrinterError() ? JNI_TRUE : JNI_FALSE;
+           return parallelPort->isPrinterError() ? JNI_TRUE : JNI_FALSE;
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
     return NULL;
 }
@@ -603,7 +603,7 @@ JNIEXPORT jboolean JNICALL Java_gnu_io_Dispatcher_isPrinterSelected(JNIEnv *env,
 {
     BEGIN_NATIVE_FUNC_GET_PORT
     TEST_AND_CAST_TO_PARALLEL_PORT
-   		return parallelPort->isPrinterSelected() ? JNI_TRUE : JNI_FALSE;
+           return parallelPort->isPrinterSelected() ? JNI_TRUE : JNI_FALSE;
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
     return NULL;
 }
@@ -618,7 +618,7 @@ JNIEXPORT jboolean JNICALL Java_gnu_io_Dispatcher_isPrinterTimedOut(JNIEnv *env,
 {
     BEGIN_NATIVE_FUNC_GET_PORT
     TEST_AND_CAST_TO_PARALLEL_PORT
-   		return parallelPort->isPrinterTimedOut() ? JNI_TRUE : JNI_FALSE;
+           return parallelPort->isPrinterTimedOut() ? JNI_TRUE : JNI_FALSE;
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
     return NULL;
 }
@@ -633,7 +633,7 @@ JNIEXPORT jboolean JNICALL Java_gnu_io_Dispatcher_isRI(JNIEnv *env, jobject this
 {
     BEGIN_NATIVE_FUNC_GET_PORT
     TEST_AND_CAST_TO_SERIAL_PORT
-   		return serialPort->isRI() ? JNI_TRUE : JNI_FALSE;
+           return serialPort->isRI() ? JNI_TRUE : JNI_FALSE;
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
     return NULL;
 }
@@ -648,7 +648,7 @@ JNIEXPORT jboolean JNICALL Java_gnu_io_Dispatcher_isRTS(JNIEnv *env, jobject thi
 {
     BEGIN_NATIVE_FUNC_GET_PORT
     TEST_AND_CAST_TO_SERIAL_PORT
-   		return serialPort->isRTS() ? JNI_TRUE : JNI_FALSE;
+           return serialPort->isRTS() ? JNI_TRUE : JNI_FALSE;
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
     return NULL;
 }
@@ -668,8 +668,8 @@ JNIEXPORT jint JNICALL Java_gnu_io_Dispatcher_open(JNIEnv *env, jobject thisObj,
         portName = env->GetStringUTFChars(jPortName, NULL);
         if (portName != NULL) {
             PortManager& portManager = PortManager::getInstance();
-		    result = portManager.openPort(portName, (int) portType);
-		}
+            result = portManager.openPort(portName, (int) portType);
+        }
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
     if (portName != NULL)
         env->ReleaseStringUTFChars(jPortName, portName);
@@ -711,7 +711,7 @@ JNIEXPORT void JNICALL Java_gnu_io_Dispatcher_restart(JNIEnv *env, jobject thisO
 {
     BEGIN_NATIVE_FUNC_GET_PORT
     TEST_AND_CAST_TO_PARALLEL_PORT
-   		parallelPort->restart();
+           parallelPort->restart();
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
 }
 
@@ -725,7 +725,7 @@ JNIEXPORT void JNICALL Java_gnu_io_Dispatcher_sendBreak(JNIEnv *env, jobject thi
 {
     BEGIN_NATIVE_FUNC_GET_PORT
     TEST_AND_CAST_TO_SERIAL_PORT
-   		serialPort->sendBreak((int) duration);
+           serialPort->sendBreak((int) duration);
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
 }
 
@@ -740,7 +740,7 @@ JNIEXPORT void JNICALL Java_gnu_io_Dispatcher_setDTR(JNIEnv *env, jobject thisOb
 {
     BEGIN_NATIVE_FUNC_GET_PORT
     TEST_AND_CAST_TO_SERIAL_PORT
-   		serialPort->setDTR(enable == JNI_TRUE);
+           serialPort->setDTR(enable == JNI_TRUE);
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
 }
 
@@ -754,9 +754,9 @@ JNIEXPORT void JNICALL Java_gnu_io_Dispatcher_setFlowControlMode(JNIEnv *env, jo
 {
     BEGIN_NATIVE_FUNC_GET_PORT
     TEST_AND_CAST_TO_SERIAL_PORT
-	    if (flowControlMode < RXTX_SERIAL_FLOWCONTROL_NONE || flowControlMode > RXTX_SERIAL_FLOWCONTROL_XONXOFF_OUT)
-			throw IllegalArgumentException();
-   		serialPort->setFlowControlMode((int) flowControlMode);
+        if (flowControlMode < RXTX_SERIAL_FLOWCONTROL_NONE || flowControlMode > RXTX_SERIAL_FLOWCONTROL_XONXOFF_OUT)
+            throw IllegalArgumentException();
+           serialPort->setFlowControlMode((int) flowControlMode);
     HANDLE_UCO_EXCEPTION
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
 }
@@ -770,9 +770,9 @@ JNIEXPORT void JNICALL Java_gnu_io_Dispatcher_setFlowControlMode(JNIEnv *env, jo
 JNIEXPORT void JNICALL Java_gnu_io_Dispatcher_setInputBufferSize(JNIEnv *env, jobject thisObj, jint portHandle, jint size)
 {
     BEGIN_NATIVE_FUNC_GET_PORT
-	    if (size < 0)
-			throw IllegalArgumentException();
-   		port->setInputBufferSize((int) size);
+        if (size < 0)
+            throw IllegalArgumentException();
+           port->setInputBufferSize((int) size);
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
 }
 
@@ -788,7 +788,7 @@ JNIEXPORT jint JNICALL Java_gnu_io_Dispatcher_setMode(JNIEnv *env, jobject thisO
     TEST_AND_CAST_TO_PARALLEL_PORT
         if (mode < RXTX_PARALLEL_MODE_ANY || mode > RXTX_PARALLEL_MODE_NIBBLE)
             throw IllegalArgumentException();
-   		return (jint) parallelPort->setMode((int) mode);
+           return (jint) parallelPort->setMode((int) mode);
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
     return NULL;
 }
@@ -802,9 +802,9 @@ JNIEXPORT jint JNICALL Java_gnu_io_Dispatcher_setMode(JNIEnv *env, jobject thisO
 JNIEXPORT void JNICALL Java_gnu_io_Dispatcher_setOutputBufferSize(JNIEnv *env, jobject thisObj, jint portHandle, jint size)
 {
     BEGIN_NATIVE_FUNC_GET_PORT
-	    if (size < 0)
-			throw IllegalArgumentException();
-   		port->setOutputBufferSize((int) size);
+        if (size < 0)
+            throw IllegalArgumentException();
+           port->setOutputBufferSize((int) size);
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
 }
 
@@ -818,7 +818,7 @@ JNIEXPORT void JNICALL Java_gnu_io_Dispatcher_setRTS(JNIEnv *env, jobject thisOb
 {
     BEGIN_NATIVE_FUNC_GET_PORT
     TEST_AND_CAST_TO_SERIAL_PORT
-   		serialPort->setRTS(rts == JNI_TRUE);
+           serialPort->setRTS(rts == JNI_TRUE);
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
 }
 
@@ -832,14 +832,14 @@ JNIEXPORT void JNICALL Java_gnu_io_Dispatcher_setSerialPortParams(JNIEnv *env, j
 {
     BEGIN_NATIVE_FUNC_GET_PORT
     TEST_AND_CAST_TO_SERIAL_PORT
-	if (dataBits < RXTX_SERIAL_DATABITS_5 ||
-		dataBits > RXTX_SERIAL_DATABITS_8 ||
-		stopBits < RXTX_SERIAL_STOPBITS_1 ||
-		stopBits > RXTX_SERIAL_STOPBITS_1_5 ||
-		parity < RXTX_SERIAL_PARITY_NONE ||
-		parity > RXTX_SERIAL_PARITY_SPACE)
-		throw IllegalArgumentException();
-   		serialPort->setSerialPortParams((int) baudRate, (int) dataBits, (int) stopBits, (int) parity);
+    if (dataBits < RXTX_SERIAL_DATABITS_5 ||
+        dataBits > RXTX_SERIAL_DATABITS_8 ||
+        stopBits < RXTX_SERIAL_STOPBITS_1 ||
+        stopBits > RXTX_SERIAL_STOPBITS_1_5 ||
+        parity < RXTX_SERIAL_PARITY_NONE ||
+        parity > RXTX_SERIAL_PARITY_SPACE)
+        throw IllegalArgumentException();
+           serialPort->setSerialPortParams((int) baudRate, (int) dataBits, (int) stopBits, (int) parity);
     HANDLE_UCO_EXCEPTION
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
 }
@@ -854,7 +854,7 @@ JNIEXPORT void JNICALL Java_gnu_io_Dispatcher_suspend(JNIEnv *env, jobject thisO
 {
     BEGIN_NATIVE_FUNC_GET_PORT
     TEST_AND_CAST_TO_PARALLEL_PORT
-   		parallelPort->suspend();
+           parallelPort->suspend();
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
 }
 
@@ -867,7 +867,7 @@ JNIEXPORT jstring JNICALL Java_gnu_io_Dispatcher_version(JNIEnv *env, jobject th
 {
     try
     {
-		TO_JSTRING(jString, RXTX_NATIVE_VERSION)
+        TO_JSTRING(jString, RXTX_NATIVE_VERSION)
         return jString;
     }
     catch (...) {}
@@ -889,7 +889,7 @@ JNIEXPORT jint JNICALL Java_gnu_io_Dispatcher_writeBytes(JNIEnv *env, jobject th
         writeBuff = new jbyte[length]; // Will be deleted by port->writeBytes(...)
         env->GetByteArrayRegion(byteArray, offset, length, writeBuff);
         int result = port->writeBytes(new Buffer((char*) writeBuff, length));
-		return (jint) result;
+        return (jint) result;
     END_NATIVE_FUNC_HANDLE_EXCEPTIONS
     if (writeBuff != NULL)
         delete writeBuff;

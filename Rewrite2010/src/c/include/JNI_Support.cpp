@@ -80,8 +80,8 @@ char* buildSourceFileString(const char *fileName, int lineNumber)
     int len = strlen(fileName) + 12;
     char *str = new char[len];
     memset(str, 0, len);
-	sprintf(str, "%s(%d)", fileName, lineNumber);
-	return str;
+    sprintf(str, "%s(%d)", fileName, lineNumber);
+    return str;
 }
 
 /**
@@ -99,19 +99,19 @@ jclass logClass = NULL;
 jmethodID logMethod;
 void log(JNIEnv *env, const char *message,  const char *source, int lineNumber)
 {
-	if (logClass == NULL)
-	{
-		logClass = env->FindClass("gnu/io/Log");
-		if (logClass == NULL)
-			throw JavaRuntimeException();
-		logMethod = env->GetStaticMethodID(logClass, "log", "(Ljava/lang/String;Ljava/lang/String;)V");
-		if (logMethod == NULL)
-			throw JavaRuntimeException();
-	}
+    if (logClass == NULL)
+    {
+        logClass = env->FindClass("gnu/io/Log");
+        if (logClass == NULL)
+            throw JavaRuntimeException();
+        logMethod = env->GetStaticMethodID(logClass, "log", "(Ljava/lang/String;Ljava/lang/String;)V");
+        if (logMethod == NULL)
+            throw JavaRuntimeException();
+    }
     char* srcFileStr = buildSourceFileString(source, lineNumber);
-	TO_JSTRING(jMessage, message)
-	TO_JSTRING(jSrcFileStr, srcFileStr)
-	delete srcFileStr;
+    TO_JSTRING(jMessage, message)
+    TO_JSTRING(jSrcFileStr, srcFileStr)
+    delete srcFileStr;
     env->CallStaticVoidMethod(logClass, logMethod, jMessage, jSrcFileStr);
 }
 

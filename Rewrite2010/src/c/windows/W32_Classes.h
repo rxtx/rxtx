@@ -79,7 +79,7 @@ public:
     const int getOutputBufferFree() const;
     const int getOutputBufferSize() const;
     const int getType() const;
-	void initializePort();
+    void initializePort();
     const bool isPaperOut() const;
     const bool isPortReadable() const;
     const bool isPortWritable() const;
@@ -96,16 +96,16 @@ public:
     void suspend();
     const int writeBytes(Buffer*);
 protected:
-	inline void checkStatus() const;
-	void restoreSettings();
-	DWORD getPortFlags() const;
+    inline void checkStatus() const;
+    void restoreSettings();
+    DWORD getPortFlags() const;
     // ----- Data ----- //
     HANDLE hComm;
-	bool closed;
-	bool initialized;
+    bool closed;
+    bool initialized;
     int inputBufferSize;
     int outputBufferSize;
-	int mode;
+    int mode;
     int portType;
     char *portName;
 };
@@ -130,7 +130,7 @@ public:
     const int getParity() const;
     const int getType() const;
     const int getStopBits() const;
-	void initializePort();
+    void initializePort();
     const bool isBI() const;
     const bool isCD() const;
     const bool isCTS() const;
@@ -154,19 +154,19 @@ public:
     void setSerialPortParams(int baudRate, int dataBits, int stopBits, int parity);
     const int writeBytes(Buffer*);
 protected:
-	inline void checkStatus() const;
-	void restoreSettings();
-	static void resetDcbFlowControl(LPDCB dcb);
-	static DWORD xlateBaudRate(int baudRate);
-	static BYTE xlateParity(int parity);
-	static BYTE xlateStopBits(int stopBits);
+    inline void checkStatus() const;
+    void restoreSettings();
+    static void resetDcbFlowControl(LPDCB dcb);
+    static DWORD xlateBaudRate(int baudRate);
+    static BYTE xlateParity(int parity);
+    static BYTE xlateStopBits(int stopBits);
     // ----- Data ----- //
     HANDLE hComm;
-	LPDCB originalDCB;
-	LPCOMMTIMEOUTS originalTimeouts;
-	LPCOMMPROP commProperties;
-	bool closed;
-	bool initialized;
+    LPDCB originalDCB;
+    LPCOMMTIMEOUTS originalTimeouts;
+    LPCOMMPROP commProperties;
+    bool closed;
+    bool initialized;
     int inputBufferSize;
     int outputBufferSize;
     int baudRate;

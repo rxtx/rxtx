@@ -85,18 +85,18 @@ CommPort* CommPortFactory::getInstance(const char *portName, int portType)
     if (strcmp("SERIAL_PASS", portName) == 0)
         return new SerialLoopback(portName);
 #endif
-	// Do not open overlapped. Let the Java application
-	// handle multi-threaded I/O.
-	HANDLE hComm = CreateFile( portName,
-		GENERIC_READ | GENERIC_WRITE,
-		0,
-		0,
-		OPEN_EXISTING,
-		0,
-		0
-	);
-	if (hComm == INVALID_HANDLE_VALUE)
-	{
+    // Do not open overlapped. Let the Java application
+    // handle multi-threaded I/O.
+    HANDLE hComm = CreateFile( portName,
+        GENERIC_READ | GENERIC_WRITE,
+        0,
+        0,
+        OPEN_EXISTING,
+        0,
+        0
+    );
+    if (hComm == INVALID_HANDLE_VALUE)
+    {
         LPVOID lpMsgBuf;
         FormatMessage( 
             FORMAT_MESSAGE_ALLOCATE_BUFFER | 
@@ -112,35 +112,35 @@ CommPort* CommPortFactory::getInstance(const char *portName, int portType)
         printf("%s\n", lpMsgBuf);
         delete lpMsgBuf;
         throw IOException();
-	}
+    }
     if (portType == RXTX_PORT_PARALLEL)
-	{
-		ParallelPortImpl* port = new ParallelPortImpl(portName, hComm);
-		try
-		{
-			port->initializePort();
-		}
-		catch (exception &e)
-		{
-			delete port;
-			throw e;
-		}
-		return port;
-	}
+    {
+        ParallelPortImpl* port = new ParallelPortImpl(portName, hComm);
+        try
+        {
+            port->initializePort();
+        }
+        catch (exception &e)
+        {
+            delete port;
+            throw e;
+        }
+        return port;
+    }
     if (portType == RXTX_PORT_SERIAL)
-	{
-		SerialPortImpl* port = new SerialPortImpl(portName, hComm);
-		try
-		{
-			port->initializePort();
-		}
-		catch (exception &e)
-		{
-			delete port;
-			throw e;
-		}
-		return port;
-	}
+    {
+        SerialPortImpl* port = new SerialPortImpl(portName, hComm);
+        try
+        {
+            port->initializePort();
+        }
+        catch (exception &e)
+        {
+            delete port;
+            throw e;
+        }
+        return port;
+    }
     throw IllegalArgumentException();
 }
 
@@ -160,7 +160,7 @@ void getPortsFromRegistry(PortInfoList* portInfoList, int portType, const char* 
     DWORD maxValueNameChars, maxValueDataBytes;
     if (RegQueryInfoKey(hKey, NULL, NULL, NULL, NULL, NULL, NULL, NULL, &maxValueNameChars, &maxValueDataBytes, NULL, NULL) == ERROR_SUCCESS)
     {
-		maxValueNameChars++;
+        maxValueNameChars++;
         maxValueDataBytes++;
         TCHAR* valueName = new TCHAR[maxValueNameChars];
         BYTE* valueData = new BYTE[maxValueDataBytes];
@@ -173,15 +173,15 @@ void getPortsFromRegistry(PortInfoList* portInfoList, int portType, const char* 
         {
             if (dataType == REG_SZ)
             {
-				TCHAR* portName = reinterpret_cast<TCHAR*>(valueData);
-				TCHAR* deviceStrPtr = strrchr(portName, '\\');
-				if (deviceStrPtr != NULL)
-					portName = deviceStrPtr + 1;
+                TCHAR* portName = reinterpret_cast<TCHAR*>(valueData);
+                TCHAR* deviceStrPtr = strrchr(portName, '\\');
+                if (deviceStrPtr != NULL)
+                    portName = deviceStrPtr + 1;
                 portInfoList->addPortInfo(portName, portType);
             }
             currentValueNameSize = maxValueNameChars;
             currentDataSize = maxValueDataBytes;
-			valueData[0] = 0;
+            valueData[0] = 0;
             index++;
         }
         delete valueName;

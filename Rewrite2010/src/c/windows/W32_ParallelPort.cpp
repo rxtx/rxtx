@@ -128,7 +128,7 @@ ParallelPortImpl::ParallelPortImpl(const char *portName, HANDLE hComm) :
     initialized(false),
     inputBufferSize(RXTX_INITIAL_BUFFER_SIZE),
     outputBufferSize(RXTX_INITIAL_BUFFER_SIZE),
-	mode(RXTX_PARALLEL_MODE_ANY),
+    mode(RXTX_PARALLEL_MODE_ANY),
     portType(RXTX_PORT_PARALLEL)
 {
     int length = strlen(portName) + 1;
@@ -233,65 +233,65 @@ void ParallelPortImpl::setOutputBufferSize(int size)
 const int ParallelPortImpl::getMode() const
 {
     checkStatus();
-	return 0;
+    return 0;
 }
 
 const int ParallelPortImpl::getOutputBufferFree() const
 {
     checkStatus();
-	return 0;
+    return 0;
 }
 
 const bool ParallelPortImpl::isPaperOut() const
 {
     checkStatus();
-	return getPortFlags() & PARALLEL_PAPER_EMPTY != 0;
+    return getPortFlags() & PARALLEL_PAPER_EMPTY != 0;
 }
 
 const bool ParallelPortImpl::isPrinterBusy() const
 {
     checkStatus();
-	return getPortFlags() & PARALLEL_BUSY != 0;
+    return getPortFlags() & PARALLEL_BUSY != 0;
 }
 
 const bool ParallelPortImpl::isPrinterError() const
 {
     checkStatus();
-	return getPortFlags() & (PARALLEL_PAPER_EMPTY |
-		PARALLEL_OFF_LINE |
-		PARALLEL_POWER_OFF |
-		PARALLEL_NOT_CONNECTED |
-		PARALLEL_BUSY) != 0;
+    return getPortFlags() & (PARALLEL_PAPER_EMPTY |
+        PARALLEL_OFF_LINE |
+        PARALLEL_POWER_OFF |
+        PARALLEL_NOT_CONNECTED |
+        PARALLEL_BUSY) != 0;
 }
 
 const bool ParallelPortImpl::isPrinterSelected() const
 {
     checkStatus();
-	return getPortFlags() & PARALLEL_SELECTED != 0;
+    return getPortFlags() & PARALLEL_SELECTED != 0;
 }
 
 const bool ParallelPortImpl::isPrinterTimedOut() const
 {
     checkStatus();
-	return false;
+    return false;
 }
 
 void ParallelPortImpl::restart()
 {
     checkStatus();
-	// Not implemented
+    // Not implemented
 }
 
 int ParallelPortImpl::setMode(int mode)
 {
     checkStatus();
-	return 0;
+    return 0;
 }
 
 void ParallelPortImpl::suspend()
 {
     checkStatus();
-	// Not implemented
+    // Not implemented
 }
 
 // ------------------------------------------------------------------------- //
@@ -320,45 +320,45 @@ inline void ParallelPortImpl::checkStatus() const
 
 DWORD ParallelPortImpl::getPortFlags() const
 {
-	DWORD outBuffer;
-	DWORD bytesReturned;
-	if (!DeviceIoControl(hComm, IOCTL_PAR_QUERY_INFORMATION, NULL, 0,
-		&outBuffer, sizeof outBuffer, &bytesReturned, NULL))
-		throw IOException();
-	return outBuffer;
+    DWORD outBuffer;
+    DWORD bytesReturned;
+    if (!DeviceIoControl(hComm, IOCTL_PAR_QUERY_INFORMATION, NULL, 0,
+        &outBuffer, sizeof outBuffer, &bytesReturned, NULL))
+        throw IOException();
+    return outBuffer;
 }
 
 void ParallelPortImpl::initializePort()
 {
-	// Not implemented
+    // Not implemented
     initialized = true;
 }
 
 Buffer* ParallelPortImpl::readBytes(int length)
 {
     checkStatus();
-	char *charArray = new char[length];
-	DWORD bytesRead;
-	if (!ReadFile(hComm, charArray, length, &bytesRead, NULL))
+    char *charArray = new char[length];
+    DWORD bytesRead;
+    if (!ReadFile(hComm, charArray, length, &bytesRead, NULL))
         throw IOException();
-	return new Buffer(charArray, bytesRead);
+    return new Buffer(charArray, bytesRead);
 }
 
 void ParallelPortImpl::restoreSettings()
 {
-	// Not implemented
+    // Not implemented
 }
 
 const int ParallelPortImpl::writeBytes(Buffer *buffer)
 {
     checkStatus();
-	DWORD bytesWritten;
-	if (!WriteFile(hComm, buffer->data, buffer->size, &bytesWritten, NULL))
-	{
-		delete buffer;
+    DWORD bytesWritten;
+    if (!WriteFile(hComm, buffer->data, buffer->size, &bytesWritten, NULL))
+    {
+        delete buffer;
         throw IOException();
-	}
-	delete buffer;
+    }
+    delete buffer;
     return bytesWritten;
 }
 

@@ -323,7 +323,7 @@ const bool SerialPortImpl::isDSR() const
 const bool SerialPortImpl::isDTR() const
 {
     checkStatus();
-	// Not sure about this
+    // Not sure about this
     DCB dcb = {0};
     if (!GetCommState(hComm, &dcb))
         throw IOException();
@@ -342,7 +342,7 @@ const bool SerialPortImpl::isRI() const
 const bool SerialPortImpl::isRTS() const
 {
     checkStatus();
-	// Not sure about this
+    // Not sure about this
     DCB dcb = {0};
     if (!GetCommState(hComm, &dcb))
         throw IOException();
@@ -360,8 +360,8 @@ void SerialPortImpl::sendBreak(int duration)
 void SerialPortImpl::setDTR(bool state)
 {
     checkStatus();
-	if (flowControlMode == RXTX_SERIAL_FLOWCONTROL_NONE)
-		throw IllegalStateException();
+    if (flowControlMode == RXTX_SERIAL_FLOWCONTROL_NONE)
+        throw IllegalStateException();
     if (!EscapeCommFunction(hComm, state ? SETDTR : CLRDTR))
         throw IOException();
 }
@@ -372,45 +372,45 @@ void SerialPortImpl::setFlowControlMode(int flowControl)
     DCB dcb = {0};
     if (!GetCommState(hComm, &dcb))
         throw IOException();
-	resetDcbFlowControl(&dcb);
-	if (flowControl == RXTX_SERIAL_FLOWCONTROL_NONE)
-	{
-		if (!SetCommState(hComm, &dcb))
-			throw IOException();
+    resetDcbFlowControl(&dcb);
+    if (flowControl == RXTX_SERIAL_FLOWCONTROL_NONE)
+    {
+        if (!SetCommState(hComm, &dcb))
+            throw IOException();
         flowControlMode = flowControl;
-		return;
-	}
-	if (flowControl & RXTX_SERIAL_FLOWCONTROL_RTSCTS_IN != 0 ||
-		flowControl & RXTX_SERIAL_FLOWCONTROL_RTSCTS_OUT != 0)
-	{
-		// W32 does not have separate CTS/RTS in/out settings
-		dcb.fOutxCtsFlow = TRUE;
-		dcb.fRtsControl = RTS_CONTROL_HANDSHAKE;
-		if (!SetCommState(hComm, &dcb))
-			throw IOException();
-		flowControlMode = RXTX_SERIAL_FLOWCONTROL_RTSCTS_IN & RXTX_SERIAL_FLOWCONTROL_RTSCTS_OUT;
-		return;
-	}
-	if (flowControl & RXTX_SERIAL_FLOWCONTROL_XONXOFF_IN != 0 ||
-		flowControl & RXTX_SERIAL_FLOWCONTROL_XONXOFF_OUT != 0)
-	{
-		if (flowControl & RXTX_SERIAL_FLOWCONTROL_XONXOFF_IN != 0)
-			dcb.fInX = TRUE;
-		if (flowControl & RXTX_SERIAL_FLOWCONTROL_XONXOFF_OUT != 0)
-			dcb.fOutX = TRUE;
-		if (!SetCommState(hComm, &dcb))
-			throw IOException();
+        return;
+    }
+    if (flowControl & RXTX_SERIAL_FLOWCONTROL_RTSCTS_IN != 0 ||
+        flowControl & RXTX_SERIAL_FLOWCONTROL_RTSCTS_OUT != 0)
+    {
+        // W32 does not have separate CTS/RTS in/out settings
+        dcb.fOutxCtsFlow = TRUE;
+        dcb.fRtsControl = RTS_CONTROL_HANDSHAKE;
+        if (!SetCommState(hComm, &dcb))
+            throw IOException();
+        flowControlMode = RXTX_SERIAL_FLOWCONTROL_RTSCTS_IN & RXTX_SERIAL_FLOWCONTROL_RTSCTS_OUT;
+        return;
+    }
+    if (flowControl & RXTX_SERIAL_FLOWCONTROL_XONXOFF_IN != 0 ||
+        flowControl & RXTX_SERIAL_FLOWCONTROL_XONXOFF_OUT != 0)
+    {
+        if (flowControl & RXTX_SERIAL_FLOWCONTROL_XONXOFF_IN != 0)
+            dcb.fInX = TRUE;
+        if (flowControl & RXTX_SERIAL_FLOWCONTROL_XONXOFF_OUT != 0)
+            dcb.fOutX = TRUE;
+        if (!SetCommState(hComm, &dcb))
+            throw IOException();
         flowControlMode = flowControl;
-		return;
-	}
-	throw IllegalArgumentException();
+        return;
+    }
+    throw IllegalArgumentException();
 }
 
 void SerialPortImpl::setRTS(bool state)
 {
     checkStatus();
-	if (flowControlMode == RXTX_SERIAL_FLOWCONTROL_NONE)
-		throw IllegalStateException();
+    if (flowControlMode == RXTX_SERIAL_FLOWCONTROL_NONE)
+        throw IllegalStateException();
     if (!EscapeCommFunction(hComm, state ? SETRTS : CLRRTS))
         throw IOException();
 }
@@ -426,10 +426,10 @@ void SerialPortImpl::setSerialPortParams(int baudRate, int dataBits, int stopBit
     dcb.BaudRate = xlateBaudRate(baudRate);
     dcb.ByteSize = dataBits;
     dcb.Parity = xlateParity(parity);
-	if (parity == RXTX_SERIAL_PARITY_NONE)
-		dcb.fParity = FALSE;
-	else
-		dcb.fParity = TRUE;
+    if (parity == RXTX_SERIAL_PARITY_NONE)
+        dcb.fParity = FALSE;
+    else
+        dcb.fParity = TRUE;
     dcb.StopBits = xlateStopBits(stopBits);
     if (!SetCommState(hComm, &dcb))
         throw IOException();
@@ -501,21 +501,21 @@ void SerialPortImpl::initializePort()
 Buffer* SerialPortImpl::readBytes(int length)
 {
     checkStatus();
-	char *charArray = new char[length];
-	DWORD bytesRead;
-	if (!ReadFile(hComm, charArray, length, &bytesRead, NULL))
+    char *charArray = new char[length];
+    DWORD bytesRead;
+    if (!ReadFile(hComm, charArray, length, &bytesRead, NULL))
         throw IOException();
-	return new Buffer(charArray, bytesRead);
+    return new Buffer(charArray, bytesRead);
 }
 
 void SerialPortImpl::resetDcbFlowControl(LPDCB dcb)
 {
-	dcb->fOutxCtsFlow = FALSE;
-	dcb->fOutxDsrFlow = FALSE;
-	dcb->fDtrControl = DTR_CONTROL_DISABLE;
-	dcb->fOutX = FALSE;
-	dcb->fInX = FALSE;
-	dcb->fRtsControl = RTS_CONTROL_DISABLE;
+    dcb->fOutxCtsFlow = FALSE;
+    dcb->fOutxDsrFlow = FALSE;
+    dcb->fDtrControl = DTR_CONTROL_DISABLE;
+    dcb->fOutX = FALSE;
+    dcb->fInX = FALSE;
+    dcb->fRtsControl = RTS_CONTROL_DISABLE;
 }
 
 void SerialPortImpl::restoreSettings()
@@ -533,13 +533,13 @@ void SerialPortImpl::restoreSettings()
 const int SerialPortImpl::writeBytes(Buffer *buffer)
 {
     checkStatus();
-	DWORD bytesWritten;
-	if (!WriteFile(hComm, buffer->data, buffer->size, &bytesWritten, NULL))
-	{
-		delete buffer;
+    DWORD bytesWritten;
+    if (!WriteFile(hComm, buffer->data, buffer->size, &bytesWritten, NULL))
+    {
+        delete buffer;
         throw IOException();
-	}
-	delete buffer;
+    }
+    delete buffer;
     return bytesWritten;
 }
 

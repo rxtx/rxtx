@@ -86,19 +86,19 @@ public:
     PortInfo(const char* portName, int portType);
     virtual ~PortInfo();
 
-	// Returns the port name
+    // Returns the port name
     const char* getName() const;
 
-	// Returns the port type
+    // Returns the port type
     const int getType() const;
 
-	// Returns the gnu.io.PortInfo Java class
+    // Returns the gnu.io.PortInfo Java class
     static jclass getJavaClass(JNIEnv *env);
 
-	// Returns the gnu.io.PortInfo Java class constructor
+    // Returns the gnu.io.PortInfo Java class constructor
     static jmethodID getJavaConstructor(JNIEnv *env);
 
-	// Returns the port type for the supplied port name
+    // Returns the port type for the supplied port name
     static const int getType(const char *portName);
 private:
     char *name;
@@ -114,40 +114,40 @@ class CommPort
 public:
     virtual ~CommPort() {}
 
-	// Closes the port, absorbing all errors and exceptions
+    // Closes the port, absorbing all errors and exceptions
     virtual void abort() = 0;
 
-	// Closes the port
+    // Closes the port
     virtual void close() = 0;
 
-	// Returns the current input buffer size
+    // Returns the current input buffer size
     virtual const int getInputBufferSize() const = 0;
 
-	// Returns the port name
+    // Returns the port name
     virtual const char * getName() const = 0;
 
-	// Returns the current output buffer size
+    // Returns the current output buffer size
     virtual const int getOutputBufferSize() const = 0;
 
-	// Returns the port type
+    // Returns the port type
     virtual const int getType() const = 0;
 
-	// Returns true if the port can be read
+    // Returns true if the port can be read
     virtual const bool isPortReadable() const = 0;
 
-	// Returns true if the port can be written
+    // Returns true if the port can be written
     virtual const bool isPortWritable() const = 0;
 
-	// Returns bytes read up to the specified length
+    // Returns bytes read up to the specified length
     virtual Buffer* readBytes(int length) = 0;
 
-	// Sets the current input buffer size
+    // Sets the current input buffer size
     virtual void setInputBufferSize(int size) = 0;
 
-	// Sets the current output buffer size
+    // Sets the current output buffer size
     virtual void setOutputBufferSize(int size) = 0;
 
-	// Writes bytes up to the specified length, returns number of bytes written
+    // Writes bytes up to the specified length, returns number of bytes written
     virtual const int writeBytes(Buffer*) = 0;
 };
 
@@ -158,7 +158,7 @@ public:
 class CommPortFactory
 {
 public:
-	// Returns a CommPort instance, or throws NoSuchPortException
+    // Returns a CommPort instance, or throws NoSuchPortException
     static CommPort* getInstance(const char *portName, int portType);
 private:
     CommPortFactory() {}
@@ -175,37 +175,37 @@ class ParallelPort : public CommPort
 public:
     virtual ~ParallelPort() {}
 
-	// Returns the port type
+    // Returns the port type
     virtual const int getMode() const = 0;
 
-	// Returns the number of bytes available in the output buffer
+    // Returns the number of bytes available in the output buffer
     virtual const int getOutputBufferFree() const = 0;
 
-	// Returns true if the output buffer is empty
+    // Returns true if the output buffer is empty
     virtual const bool isOutputBufferEmpty() const = 0;
 
-	// Returns true if the paper out signal is raised
+    // Returns true if the paper out signal is raised
     virtual const bool isPaperOut() const = 0;
 
-	// Returns true if the printer busy signal is raised
+    // Returns true if the printer busy signal is raised
     virtual const bool isPrinterBusy() const = 0;
 
-	// Returns true if there is a printer error
+    // Returns true if there is a printer error
     virtual const bool isPrinterError() const = 0;
 
-	// Returns true if the printer selected signal is raised
+    // Returns true if the printer selected signal is raised
     virtual const bool isPrinterSelected() const = 0;
 
-	// Returns true if the printer timed out
+    // Returns true if the printer timed out
     virtual const bool isPrinterTimedOut() const = 0;
 
-	// Restarts the printer
+    // Restarts the printer
     virtual void restart() = 0;
 
-	// Sets the port mode
+    // Sets the port mode
     virtual int setMode(int mode) = 0;
 
-	// Suspends the printer
+    // Suspends the printer
     virtual void suspend() = 0;
 };
 
@@ -219,19 +219,19 @@ public:
     PortInfoList() {}
     ~PortInfoList();
 
-	// Adds a PortInfo to the list
+    // Adds a PortInfo to the list
     void addPortInfo(const char *portName, int portType);
 
-	// Adds valid PortInfos to the list
+    // Adds valid PortInfos to the list
     void getValidPorts();
 
-	// Returns the PortInfo list size
+    // Returns the PortInfo list size
     const int size() const;
 
-	// TODO: Create iterator
+    // TODO: Create iterator
     const std::list<PortInfo*> * getList();
 private:
-	std::list<PortInfo*> portInfos;
+    std::list<PortInfo*> portInfos;
 };
 
 // ------------------------------------------------------------------------- //
@@ -241,9 +241,9 @@ private:
 class PortEntry {
 public:
     PortEntry(int portHandle, CommPort *port) : portHandle(portHandle), port(port) {}
-	~PortEntry();
-	int portHandle;
-	CommPort* port;
+    ~PortEntry();
+    int portHandle;
+    CommPort* port;
 };
 
 class PortManager

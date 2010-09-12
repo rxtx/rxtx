@@ -67,39 +67,39 @@ directives that accommodate compiler differences are allowed.
 jclass IllegalArgumentException::getJavaClass(JNIEnv *env)
 {
     jclass exceptionClass = env->FindClass("java/lang/IllegalArgumentException");
-	if (exceptionClass == NULL)
-		throw JavaRuntimeException();
+    if (exceptionClass == NULL)
+        throw JavaRuntimeException();
     return exceptionClass;
 }
 
 jclass IllegalStateException::getJavaClass(JNIEnv *env)
 {
     jclass exceptionClass = env->FindClass("java/lang/IllegalStateException");
-	if (exceptionClass == NULL)
-		throw JavaRuntimeException();
+    if (exceptionClass == NULL)
+        throw JavaRuntimeException();
     return exceptionClass;
 }
 
 jclass IOException::getJavaClass(JNIEnv *env)
 {
     jclass exceptionClass = env->FindClass("java/io/IOException");
-	if (exceptionClass == NULL)
-		throw JavaRuntimeException();
+    if (exceptionClass == NULL)
+        throw JavaRuntimeException();
     return exceptionClass;
 }
 
 jclass NoSuchPortException::getJavaClass(JNIEnv *env)
 {
     jclass exceptionClass = env->FindClass("gnu/io/NoSuchPortException");
-	if (exceptionClass == NULL)
-		throw JavaRuntimeException();
+    if (exceptionClass == NULL)
+        throw JavaRuntimeException();
     return exceptionClass;
 }
 
 jclass UnsupportedCommOperationException::getJavaClass(JNIEnv *env)
 {
     jclass exceptionClass = env->FindClass("gnu/io/UnsupportedCommOperationException");
-	if (exceptionClass == NULL)
-		throw JavaRuntimeException();
+    if (exceptionClass == NULL)
+        throw JavaRuntimeException();
     return exceptionClass;
 }
