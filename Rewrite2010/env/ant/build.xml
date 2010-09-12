@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project default="jar" name="RxTx" basedir=".">
+	<property name="jar.name" value="RXTXcomm.jar" />
+	<property name="dist.dir" value="../../dist" />
+	<property name="lib.dir" value="../../lib" />
+	<property name="main.classes.dir" value="build/main" />
+    <property name="test.classes.dir" value="build/test" />
+    <property name="javadoc.dir" value="../../doc"/>
+    <property name="java.src.dir" value="../../src/java/main"/>
+    <property name="c.include.dir" value="../../src/c/include"/>
+    <property name="java.test.src.dir" value="../../src/java/test"/>
+
+	<target name="compile" description="Compile the Java code">
+		<mkdir dir="${main.classes.dir}"/>
+        <mkdir dir="${lib.dir}"/>
+		<javac destdir="${main.classes.dir}" debug="true" optimize="true">
+			<src>
+				<pathelement location="${java.src.dir}"/>
+			</src>
+			<classpath>
+				<fileset dir="${lib.dir}">
+					<include name="*.jar"/>
+				</fileset>
+			</classpath>
+		</javac>
+	</target>
+
+	<target name="jar" description="Create the RXTXcomm.jar file" depends="compile">
+        <mkdir dir="${dist.dir}"/>
+		<jar jarfile="${dist.dir}/${jar.name}" basedir="${main.classes.dir}"/>
+	</target>
+
+	<!--
+	<target name="build-start" description="Create the Start application" depends="jar">
+        <mkdir dir="${dist.dir}"/>
+        <mkdir dir="${test.classes.dir}"/>
+        <mkdir dir="${lib.dir}"/>
+        <javac destdir="${test.classes.dir}" debug="true" optimize="true">
+            <src>
+                <pathelement location="${java.test.src.dir}"/>
+            </src>
+            <classpath>
+                <fileset dir="${lib.dir}">
+                    <include name="*.jar"/>
+                </fileset>
+                <fileset dir="${dist.dir}">
+                    <include name="${jar.name}"/>
+                </fileset>
+            </classpath>
+        </javac>
+        <jar jarfile="${dist.dir}/start.jar" basedir="${test.classes.dir}">
+            <manifest>
+                <attribute name="Manifest-Version" value="1.0" />
+                <attribute name="Implementation-Title" value="RXTX Start" />
+                <attribute name="Implementation-Vendor" value="The RXTX Project" />
+                <attribute name="Main-Class" value="gnu.io.Start" />
+                <attribute name="Class-Path" value="RXTXcomm.jar RXTXnative.dll" />
+            </manifest>
+        </jar>
+    </target>
+    -->
+
+    <target name="jni" description="Create the JNI C headers" depends="compile">
+        <javah class="gnu.io.Dispatcher"
+        	classpath="${main.classes.dir}" destdir="${c.include.dir}">
+       	</javah>
+    </target>
+
+	<target name="clean" description="Clean up the generated directories">
+		<delete dir="${main.classes.dir}"/>
+        <delete dir="${test.classes.dir}"/>
+        <delete dir="${dist.dir}"/>
+		<delete dir="${javadoc.dir}"/>
+	</target>
+
+	<target name="doc" description="Generate JavaDocs" depends="jar">
+		<mkdir dir="${javadoc.dir}"/>
+		<javadoc use="true" destdir="${javadoc.dir}" author="true" version="true" sourcepath="${java.src.dir}">
+			<classpath>
+				<fileset dir="${lib.dir}">
+					<include name="*.jar"/>
+				</fileset>
+				<pathelement location="${dist.dir}/{jar.name}.jar"/>
+			</classpath>
+		</javadoc>
+	</target>
+
+</project>
