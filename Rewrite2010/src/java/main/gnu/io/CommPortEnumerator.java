@@ -80,7 +80,7 @@ public class CommPortEnumerator implements Enumeration {
         return iterator.hasNext();
     }
 
-    public Object nextElement() {
+    public synchronized Object nextElement() {
         if (!iterator.hasNext()) {
             throw new NoSuchElementException();
         }
