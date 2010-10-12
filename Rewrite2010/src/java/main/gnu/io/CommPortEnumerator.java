@@ -59,7 +59,6 @@ package gnu.io;
 
 import java.util.Enumeration;
 import java.util.Iterator;
-import java.util.NoSuchElementException;
 
 /**
  * A <code>CommPort</code> enumerator.
@@ -80,10 +79,7 @@ public class CommPortEnumerator implements Enumeration {
         return iterator.hasNext();
     }
 
-    public synchronized Object nextElement() {
-        if (!iterator.hasNext()) {
-            throw new NoSuchElementException();
-        }
+    public Object nextElement() {
         return iterator.next();
     }
 }
