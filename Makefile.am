@@ -58,7 +58,7 @@
 srcdir = @srcdir@
 abs_srcdir=$(TOP)/@srcdir@
 VPATH = @srcdir@
-
+ACLOCAL_AMFLAGS =-I m4
 AUTOMAKE_OPTIONS = foreign
 INCLUDES= -I$(TOP) -I$(DEST) -I. $(JAVAINCLUDE) $(JAVANATINC)
 ####################### vars for rxtx-1.4->1.5 transition

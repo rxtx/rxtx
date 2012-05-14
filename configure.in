@@ -57,6 +57,7 @@
 ############################################################################
 AC_INIT(src/SerialImp.c)
 AM_CONFIG_HEADER(config.h)
+AC_CONFIG_MACRO_DIR([m4])
 AC_CANONICAL_SYSTEM
 AC_MSG_WARN(Trying libtool.  If the following fails install libtool)
 AC_PROG_CC
@@ -789,7 +790,7 @@ Solaris*)
 	TARGETLIB="\$(target_triplet)/librxtxSerial.la \
 		\$(target_triplet)/librxtxParallel.la"
 	JHOME=$JPATH/"lib"
-	CFLAGS=$CFLAGS" -D_NO_POSIX=1 -D_NO_XOPEN4=1"
+	CFLAGS=$CFLAGS" -D_NO_POSIX=1 -D_NO_XOPEN4=1 -D_REENTRANT=1"
 	CLASSPATH=".:\$(TOP):\$(TOP)/src:\$(JPATH)/lib/classes.zip:\$(JPATH)/lib/RXTXcomm.jar:$CLASSPATH"
 
 	case $JAVA_VERSION in

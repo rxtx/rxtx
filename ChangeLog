@@ -6,6 +6,9 @@ rxtx-2.1 and rxtx-2.0 changes are kept in the same file.  skip to the version
 you downloaded.
 
 2.2 ???
+		Fixed compile on Solaris with native tools.
+		http://bugzilla.qbang.org/show_bug.cgi?id=187	
+		Martin Oberhuber <martin.oberhuber@windriver.com>
 
 		Fixed the gnu.io.rxtx.properties code that didn't work. 
 		Fixed unsafe code in the registerSpecifiedPorts method. 
