@@ -467,8 +467,15 @@ int translate_parity( JNIEnv *, tcflag_t *, jint );
 void system_wait();
 void finalize_event_info_struct( struct event_info_struct * );
 int read_byte_array( JNIEnv *, jobject *, int, unsigned char *, int, int );
-long get_java_var_long( JNIEnv *, jobject, char *, char * );
-size_t get_java_var( JNIEnv *, jobject, char *, char * );
+
+jint get_java_var_int( JNIEnv *env, jobject jobj, char *id );
+jint get_java_var_pid( JNIEnv *env, jobject jobj );
+jint get_java_var_fd( JNIEnv *env, jobject jobj );
+jint get_java_var_timeout( JNIEnv *env, jobject jobj );
+jlong get_java_var_long( JNIEnv *env, jobject jobj, char *id );
+struct event_info_struct * get_java_var_eis( JNIEnv *env, jobject jobj );
+void set_java_var_eis( JNIEnv *env, jclass jclazz, jobject jobj, struct event_info_struct *eis );
+
 jboolean is_interrupted( struct event_info_struct * );
 int send_event(struct event_info_struct *, jint, int );
 void dump_termios(char *,struct termios *);

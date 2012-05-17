@@ -149,6 +149,8 @@
 
 extern int errno;
 
+#include <stdint.h> /* for uintptr_t */
+
 #include "SerialImp.h"
 
 JavaVM *javaVM = NULL;
@@ -192,6 +194,28 @@ struct event_info_struct *master_index = NULL;
 
 
 /*----------------------------------------------------------
+checkVariableSizes
+	check if jlong can hold pointer
+	uintptr_t
+	    is an unsigned integer memsize-type that can safely store a pointer
+	    regardless of the platform capacity.
+	    The type uintptr_t is similar to the types size_t and UINT_PTR.
+	    f.e. @see <a href="http://www.viva64.com/en/t/0030/">uintptr_t</a>
+----------------------------------------------------------*/
+void checkVariableSizes( void )
+{
+	/* check that jlong can hold a pointer (for "eis") */
+	switch(0) { case 0: case (sizeof(jlong)>=sizeof(uintptr_t)?1:0):;}
+	
+	/* check that jint can hold a int (for "fd" and "timeout") */
+	switch(0) { case 0: case (sizeof(jint)>=sizeof(int)?1:0):;}
+
+	/* check that jint can hold a pid_t (for "pid") */
+	switch(0) { case 0: case (sizeof(jint)>=sizeof(pid_t)?1:0):;}
+}
+
+
+/*----------------------------------------------------------
 RXTXPort.Initialize
 
    accept:      The JNIEnv and jobj of the thread, the original eis.
@@ -216,7 +240,7 @@ struct event_info_struct build_threadsafe_eis(
 	myeis.env = env;
 	myeis.jclazz = (*env)->GetObjectClass( env, *jobj );
 	myeis.jobj = jobj;
-	myeis.fd = get_java_var( env, *jobj, "fd", "I" );
+	myeis.fd = get_java_var_fd( env, *jobj );
 	myeis.send_event = (*env)->GetMethodID(
 		env,
 		myeis.jclazz,
@@ -607,7 +631,7 @@ JNIEXPORT jint JNICALL RXTXPort(open)(
 	)
 {
 	int fd;
-	int  pid = -1;
+	pid_t  pid = -1;
 	char message[80];
 	const char *filename;
 	jclass jclazz = (*env)->GetObjectClass( env, jobj );
@@ -711,12 +735,13 @@ RXTXPort.nativeClose
 JNIEXPORT void JNICALL RXTXPort(nativeClose)( JNIEnv *env,
 	jobject jobj,jstring jstr )
 {
-	int result, pid;
-	int fd = get_java_var( env, jobj,"fd","I" );
+	int result;
+	pid_t pid;
+	int fd = get_java_var_fd( env, jobj );
 	const char *filename = (*env)->GetStringUTFChars( env, jstr, 0 );
 	jclass jclazz = (*env)->GetObjectClass( env, jobj );
 	report_time_start( );
-	pid = get_java_var( env, jobj,"pid","I" );
+	pid = get_java_var_pid( env, jobj );
 
 	report(">nativeClose pid\n");
 	/*
@@ -903,7 +928,7 @@ JNIEXPORT jboolean JNICALL RXTXPort(nativeSetSerialPortParams)(
 	JNIEnv *env, jobject jobj, jint speed, jint dataBits, jint stopBits,
 	jint parity )
 {
-	int fd = get_java_var( env, jobj,"fd","I" );
+	int fd = get_java_var_fd( env, jobj );
 	int cspeed = translate_speed( env, speed );
 
 	ENTER( "RXTXPort:nativeSetSerialPortParams" );
@@ -1358,7 +1383,6 @@ init_threads( )
 ----------------------------------------------------------*/
 int init_threads( struct event_info_struct *eis )
 {
-	jfieldID jeis;
 #if !defined(TIOCSERGETLSR) & !defined(WIN32)
 	sigset_t newmask, oldmask;
 	struct sigaction newaction, oldaction;
@@ -1405,15 +1429,17 @@ int init_threads( struct event_info_struct *eis )
 	eis->drain_tid = tid;
 	eis->drain_loop_running = 1;
 #endif /* TIOCSERGETLSR */
-	report("init_threads: get eis\n");
-	jeis  = (*eis->env)->GetFieldID( eis->env, eis->jclazz, "eis", "J" );
 	report("init_threads: set eis\n");
-	(*eis->env)->SetLongField(eis->env, *eis->jobj, jeis, ( size_t ) eis );
+	set_java_var_eis( eis->env, eis->jclazz, *eis->jobj, eis ); 
 	report("init_threads:  stop\n");
 	report_time_end( );
 	return( 1 );
 }
 
+					 
+					 
+					 
+					 
 /*----------------------------------------------------------
 RXTXPort.writeByte
 
@@ -1430,7 +1456,7 @@ JNIEXPORT void JNICALL RXTXPort(writeByte)( JNIEnv *env,
 	struct event_info_struct *index = master_index;
 #endif
 	unsigned char byte = (unsigned char)ji;
-	int fd = get_java_var( env, jobj,"fd","I" );
+	int fd = get_java_var_fd( env, jobj );
 	int result;
 	char msg[80];
 #if defined ( __sun__ )
@@ -1516,7 +1542,7 @@ JNIEXPORT void JNICALL RXTXPort(writeArray)( JNIEnv *env,
 	retspec.tv_sec = 0;
 	retspec.tv_nsec = 50000;
 #endif /* __sun__ */
-	fd = get_java_var( env, jobj,"fd","I" );
+	fd = get_java_var_fd( env, jobj );
 	body = (*env)->GetByteArrayElements( env, jbarray, 0 );
 	/* result=WRITE (fd, body + total + offset, count - total);
 	(*env)->ReleaseByteArrayElements( env, jbarray, body, 0 ); */
@@ -1598,8 +1624,8 @@ RXTXPort.nativeDrain
 JNIEXPORT jboolean JNICALL RXTXPort(nativeDrain)( JNIEnv *env,
 	jobject jobj, jboolean interrupted )
 {
-	int fd = get_java_var( env, jobj,"fd","I" );
-	struct event_info_struct *eis = ( struct event_info_struct * ) get_java_var_long( env, jobj, "eis", "J" );
+	int fd = get_java_var_fd( env, jobj );
+	struct event_info_struct *eis = get_java_var_eis( env, jobj );
 	int result, count=0;
 
 	char message[80];
@@ -1631,7 +1657,7 @@ JNIEXPORT jboolean JNICALL RXTXPort(nativeDrain)( JNIEnv *env,
 #endif /* !TIOCSERGETLSR !WIN32 */
 	if( eis && eis->eventflags[SPE_OUTPUT_BUFFER_EMPTY] )
 	{
-                struct event_info_struct myeis =
+		struct event_info_struct myeis =
 			build_threadsafe_eis( env, &jobj, eis );
 		send_event( &myeis, SPE_OUTPUT_BUFFER_EMPTY, 1 );
 	}
@@ -1650,7 +1676,7 @@ RXTXPort.sendBreak
 JNIEXPORT void JNICALL RXTXPort(sendBreak)( JNIEnv *env,
 	jobject jobj, jint duration )
 {
-	int fd = get_java_var( env, jobj,"fd","I" );
+	int fd = get_java_var_fd( env, jobj );
 	report_time_start( );
 	ENTER( "RXTXPort:sendBreak()" );
 	tcsendbreak( fd, (int)( duration / 250 ) );
@@ -1671,7 +1697,7 @@ JNIEXPORT jint JNICALL RXTXPort(NativegetReceiveTimeout)(
 	jobject jobj
 	)
 {
-	int fd = get_java_var( env, jobj,"fd","I" );
+	int fd = get_java_var_fd( env, jobj );
 	struct termios ttyset;
 
 	ENTER( "RXTXPort:nativegetRecieveTimeout()" );
@@ -1698,7 +1724,7 @@ JNIEXPORT jboolean JNICALL RXTXPort(NativeisReceiveTimeoutEnabled)(
 	jobject jobj
 	)
 {
-	int fd = get_java_var( env, jobj,"fd","I" );
+	int fd = get_java_var_fd( env, jobj );
 	struct termios ttyset;
 	ENTER( "RXTXPort:NativeisRecieveTimeoutEnabled()" );
 	if( tcgetattr( fd, &ttyset ) < 0 ) goto fail;
@@ -1725,7 +1751,7 @@ JNIEXPORT jboolean JNICALL RXTXPort(isDSR)( JNIEnv *env,
 	jobject jobj )
 {
 	unsigned int result = 0;
-	int fd = get_java_var( env, jobj,"fd","I" );
+	int fd = get_java_var_fd( env, jobj );
 	char message[80];
 
 	ENTER( "RXTXPort:isDSR" );
@@ -1755,7 +1781,7 @@ JNIEXPORT jboolean JNICALL RXTXPort(isCD)( JNIEnv *env,
 	jobject jobj )
 {
 	unsigned int result = 0;
-	int fd = get_java_var( env, jobj,"fd","I" );
+	int fd = get_java_var_fd( env, jobj );
 	char message[80];
 
 	ENTER( "RXTXPort:isCD" );
@@ -1780,7 +1806,7 @@ JNIEXPORT jboolean JNICALL RXTXPort(isCTS)( JNIEnv *env,
 	jobject jobj )
 {
 	unsigned int result = 0;
-	int fd = get_java_var( env, jobj,"fd","I" );
+	int fd = get_java_var_fd( env, jobj );
 	char message[80];
 
 	ENTER( "RXTXPort:isCTS" );
@@ -1806,7 +1832,7 @@ JNIEXPORT jboolean JNICALL RXTXPort(isRI)( JNIEnv *env,
 	jobject jobj )
 {
 	unsigned int result = 0;
-	int fd = get_java_var( env, jobj,"fd","I" );
+	int fd = get_java_var_fd( env, jobj );
 	char message[80];
 
 	ENTER( "RXTXPort:isRI" );
@@ -1832,7 +1858,7 @@ JNIEXPORT jboolean JNICALL RXTXPort(isRTS)( JNIEnv *env,
 	jobject jobj )
 {
 	unsigned int result = 0;
-	int fd = get_java_var( env, jobj,"fd","I" );
+	int fd = get_java_var_fd( env, jobj );
 	char message[80];
 
 	ENTER( "RXTXPort:isRTS" );
@@ -1859,7 +1885,7 @@ JNIEXPORT void JNICALL RXTXPort(setRTS)( JNIEnv *env,
 	jobject jobj, jboolean state )
 {
 	unsigned int result = 0;
-	int fd = get_java_var( env, jobj,"fd","I" );
+	int fd = get_java_var_fd( env, jobj );
 	char message[80];
 
 	ENTER( "RXTXPort:setRTS" );
@@ -1888,7 +1914,7 @@ JNIEXPORT void JNICALL RXTXPort(setDSR)( JNIEnv *env,
 	jobject jobj, jboolean state )
 {
 	unsigned int result = 0;
-	int fd = get_java_var( env, jobj,"fd","I" );
+	int fd = get_java_var_fd( env, jobj );
 	char message[80];
 
 	ENTER( "RXTXPort:setDSR()" );
@@ -1918,7 +1944,7 @@ JNIEXPORT jboolean JNICALL RXTXPort(isDTR)( JNIEnv *env,
 	jobject jobj )
 {
 	unsigned int result = 0;
-	int fd = get_java_var( env, jobj,"fd","I" );
+	int fd = get_java_var_fd( env, jobj );
 	char message[80];
 
 	ENTER( "RXTXPort:isDTR" );
@@ -1944,7 +1970,7 @@ JNIEXPORT void JNICALL RXTXPort(setDTR)( JNIEnv *env,
 	jobject jobj, jboolean state )
 {
 	unsigned int result = 0;
-	int fd = get_java_var( env, jobj,"fd","I" );
+	int fd = get_java_var_fd( env, jobj );
 	char message[80];
 
 	ENTER( "RXTXPort:setDTR" );
@@ -2033,7 +2059,7 @@ JNIEXPORT jboolean JNICALL RXTXPort(nativeSetBaudBase)(
 
 #if defined(TIOCGSERIAL)
 
-	int fd = get_java_var( env, jobj,"fd","I" );
+	int fd = get_java_var_fd( env, jobj );
 	struct serial_struct sstruct;
 
 	if ( ioctl( fd, TIOCGSERIAL, &sstruct ) < 0 )
@@ -2079,7 +2105,7 @@ JNIEXPORT jint JNICALL RXTXPort(nativeGetBaudBase)(
 
 #if defined(TIOCGSERIAL)
 
-	int fd = get_java_var( env, jobj,"fd","I" );
+	int fd = get_java_var_fd( env, jobj );
 	struct serial_struct sstruct;
 
 	if ( ioctl( fd, TIOCGSERIAL, &sstruct ) < 0 )
@@ -2119,7 +2145,7 @@ JNIEXPORT jboolean JNICALL RXTXPort(nativeSetDivisor)(
 
 #if defined(TIOCGSERIAL)
 
-	int fd = get_java_var( env, jobj,"fd","I" );
+	int fd = get_java_var_fd( env, jobj );
 	struct serial_struct sstruct;
 
 	if ( ioctl( fd, TIOCGSERIAL, &sstruct ) < 0 )
@@ -2163,7 +2189,7 @@ JNIEXPORT jint JNICALL RXTXPort(nativeGetDivisor)(
 
 #if defined(TIOCGSERIAL)
 
-	int fd = get_java_var( env, jobj,"fd","I" );
+	int fd = get_java_var_fd( env, jobj );
 	struct serial_struct sstruct;
 
 	if ( ioctl( fd, TIOCGSERIAL, &sstruct ) < 0 )
@@ -2203,7 +2229,7 @@ JNIEXPORT jboolean JNICALL RXTXPort(nativeStaticSetDSR) (JNIEnv *env,
 	jclass jclazz, jstring jstr, jboolean flag)
 {
 	int fd;
-	int  pid = -1;
+	pid_t  pid = -1;
 	int result;
 	const char *filename = (*env)->GetStringUTFChars( env, jstr, 0 );
 
@@ -2269,7 +2295,7 @@ JNIEXPORT jboolean JNICALL RXTXPort(nativeStaticSetRTS) (JNIEnv *env,
 	jclass jclazz, jstring jstr, jboolean flag)
 {
 	int fd;
-	int  pid = -1;
+	pid_t  pid = -1;
 	int result;
 	const char *filename = (*env)->GetStringUTFChars( env, jstr, 0 );
 
@@ -2335,7 +2361,7 @@ JNIEXPORT void JNICALL RXTXPort(nativeStaticSetSerialPortParams) (JNIEnv *env,
 	jclass jclazz, jstring jstr, jint baudrate, jint dataBits, jint stopBits, jint parity )
 {
 	int fd;
-	int  pid = -1;
+	pid_t  pid = -1;
 	const char *filename = (*env)->GetStringUTFChars( env, jstr, 0 );
 	int cspeed = translate_speed( env, baudrate );
 
@@ -2419,7 +2445,7 @@ JNIEXPORT jboolean JNICALL RXTXPort(nativeStaticSetDTR) (JNIEnv *env,
 	jclass jclazz, jstring jstr, jboolean flag)
 {
 	int fd;
-	int  pid = -1;
+	pid_t  pid = -1;
 	const char *filename = (*env)->GetStringUTFChars( env, jstr, 0 );
 	int result;
 
@@ -2851,7 +2877,8 @@ JNIEXPORT jbyte JNICALL RXTXPort(nativeGetParityErrorChar)( JNIEnv *env,
 	ENTER( "nativeGetParityErrorChar" );
 #ifdef WIN32
 	result = ( jbyte ) termiosGetParityErrorChar(
-			get_java_var(env, jobj, "fd", "I" ) );
+		get_java_var_fd(env, jobj )
+	);
 #else
 	/*
 	   arg!  I cant find a way to change it from \0 in Linux.  I think
@@ -2876,7 +2903,7 @@ RXTXPort.nativeGetEndOfInputChar
 JNIEXPORT jbyte JNICALL RXTXPort(nativeGetEndOfInputChar)( JNIEnv *env,
 	jobject jobj )
 {
-	int fd = get_java_var( env, jobj,"fd","I" );
+	int fd = get_java_var_fd( env, jobj );
 	struct termios ttyset;
 
 	ENTER( "nativeGetEndOfInputChar" );
@@ -2908,7 +2935,7 @@ JNIEXPORT jboolean JNICALL RXTXPort(nativeSetParityErrorChar)( JNIEnv *env,
 	{
 
 #ifdef WIN32
-		int fd = get_java_var( env, jobj,"fd","I" );
+		int fd = get_java_var_fd( env, jobj );
 		ENTER( "nativeSetParityErrorChar" );
 		termiosSetParityError( fd, ( char ) value );
 		LEAVE( "nativeSetParityErrorChar" );
@@ -2946,7 +2973,7 @@ RXTXPort.nativeSetEndOfInputChar
 JNIEXPORT jboolean JNICALL RXTXPort(nativeSetEndOfInputChar)( JNIEnv *env,
 	jobject jobj, jbyte value )
 {
-	int fd = get_java_var( env, jobj,"fd","I" );
+	int fd = get_java_var_fd( env, jobj );
 	struct termios ttyset;
 
 	ENTER( "nativeSetEndOfInputChar" );
@@ -3015,9 +3042,15 @@ int read_byte_array( JNIEnv *env,
 	fd_set rset;
 	/* TRENT */
 	int flag, count = 0;
-	struct event_info_struct *eis = ( struct event_info_struct * )
-		get_java_var_long( env, *jobj,"eis","J" );
+	struct event_info_struct *eis = get_java_var_eis( env, *jobj );
 
+	if ( eis == NULL )
+	{
+		report( "read_byte_array: FATAL error: eis == NULL, returned -1\n" );
+		return -1;
+	}
+	
+	
 	report_time_start();
 	flag = eis->eventflags[SPE_DATA_AVAILABLE];
 	eis->eventflags[SPE_DATA_AVAILABLE] = 0;
@@ -3251,7 +3284,7 @@ NativeEnableReceiveTimeoutThreshold
 JNIEXPORT void JNICALL RXTXPort(NativeEnableReceiveTimeoutThreshold)(
 	JNIEnv *env, jobject jobj, jint vtime, jint threshold, jint buffer)
 {
-	int fd = get_java_var( env, jobj,"fd","I" );
+	int fd = get_java_var_fd( env, jobj );
 	struct termios ttyset;
 	int timeout;
 
@@ -3419,8 +3452,8 @@ JNIEXPORT jint JNICALL RXTXPort(readByte)( JNIEnv *env,
 {
 	int bytes;
 	unsigned char buffer[ 1 ];
-	int fd = get_java_var( env, jobj,"fd","I" );
-	int timeout = get_java_var( env, jobj, "timeout", "I" );
+	int fd = get_java_var_fd( env, jobj );
+	int timeout = get_java_var_timeout( env, jobj );
 	/* char msg[80]; */
 
 /*
@@ -3461,8 +3494,8 @@ JNIEXPORT jint JNICALL RXTXPort(readArray)( JNIEnv *env,
 	int bytes;
 	jbyte *body;
 	/* char msg[80]; */
-	int fd = get_java_var( env, jobj, "fd", "I" );
-	int timeout = get_java_var( env, jobj, "timeout", "I" );
+	int fd = get_java_var_fd( env, jobj );
+	int timeout = get_java_var_timeout( env, jobj );
 
 /*
 	ENTER( "readArray" );
@@ -3510,7 +3543,7 @@ RXTXPort.nativeClearCommInput
 JNIEXPORT jboolean JNICALL RXTXPort(nativeClearCommInput)( JNIEnv *env,
 	jobject jobj )
 {
-	int fd = get_java_var( env, jobj, "fd", "I" );
+	int fd = get_java_var_fd( env, jobj );
 	if ( tcflush( fd, TCIFLUSH ) )
 		return( JNI_FALSE );
 	return( JNI_TRUE );
@@ -3538,8 +3571,8 @@ JNIEXPORT jint JNICALL RXTXPort(readTerminatedArray)( JNIEnv *env,
 	int bytes, total = 0;
 	jbyte *body, *terminator;
 	/* char msg[80]; */
-	int fd = get_java_var( env, jobj, "fd", "I" );
-	int timeout = get_java_var( env, jobj, "timeout", "I" );
+	int fd = get_java_var_fd( env, jobj );
+	int timeout = get_java_var_timeout( env, jobj );
 
 /*
 	ENTER( "readArray" );
@@ -3600,7 +3633,7 @@ RXTXPort.nativeavailable
 JNIEXPORT jint JNICALL RXTXPort(nativeavailable)( JNIEnv *env,
 	jobject jobj )
 {
-	int fd = get_java_var( env, jobj,"fd","I" );
+	int fd = get_java_var_fd( env, jobj );
 	int result;
 /*
 	char message[80];
@@ -3667,7 +3700,7 @@ JNIEXPORT void JNICALL RXTXPort(setflowcontrol)( JNIEnv *env,
 	jobject jobj, jint flowmode )
 {
 	struct termios ttyset;
-	int fd = get_java_var( env, jobj,"fd","I" );
+	int fd = get_java_var_fd( env, jobj );
 
 	ENTER( "RXTXPort:setflowcontrol" );
 	if( tcgetattr( fd, &ttyset ) ) goto fail;
@@ -4090,7 +4123,7 @@ int initialise_event_info_struct( struct event_info_struct *eis )
 	eis->eventloop_interrupted = 0;
 	eis->closing = 0;
 
-	eis->fd = get_java_var( env, jobj, "fd", "I" );
+	eis->fd = get_java_var_fd( env, jobj );
 	eis->has_tiocsergetlsr = has_line_status_register_access( eis->fd );
 	eis->has_tiocgicount = driver_has_tiocgicount( eis );
 
@@ -4126,6 +4159,8 @@ finalize_event_info_struct
 ----------------------------------------------------------*/
 void finalize_event_info_struct( struct event_info_struct *eis )
 {
+	set_java_var_eis( eis->env, eis->jclazz, *eis->jobj, NULL ); 
+
 	if( eis->jclazz)
 	{
 		(*eis->env)->DeleteLocalRef( eis->env, eis->jclazz );
@@ -4143,6 +4178,8 @@ void finalize_event_info_struct( struct event_info_struct *eis )
 	else if( eis->prev )
 		eis->prev->next = NULL;
 	else master_index = NULL;
+	
+	free( eis );
 }
 
 /*----------------------------------------------------------
@@ -4159,34 +4196,41 @@ JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 #ifdef WIN32
 	int i = 0;
 #endif /* WIN32 */
-	struct event_info_struct eis;
-	eis.jclazz = (*env)->GetObjectClass( env, jobj );
-	eis.env = env;
-	eis.jobj = &jobj;
-	eis.initialised = 0;
+	struct event_info_struct* peis = malloc( sizeof( struct event_info_struct ) );
+
+	if ( peis == NULL )
+	{
+		report("eventLoop: FATAL error: can not allocate eis structure\n");
+		goto end;
+	}
+	
+	peis->jclazz = (*env)->GetObjectClass( env, jobj );
+	peis->env = env;
+	peis->jobj = &jobj;
+	peis->initialised = 0;
 
 	ENTER( "eventLoop\n" );
-	if ( !initialise_event_info_struct( &eis ) ) goto end;
-	if ( !init_threads( &eis ) ) goto end;
-	unlock_monitor_thread( &eis );
+	if ( !initialise_event_info_struct( peis ) ) goto end;
+	if ( !init_threads( peis ) ) goto end;
+	unlock_monitor_thread( peis );
 	do{
 		report_time_eventLoop( );
 		do {
 			/* nothing goes between this call and select */
-			if( eis.closing )
+			if( peis->closing )
 			{
 				report("eventLoop: got interrupt\n");
-				finalize_threads( &eis );
-				finalize_event_info_struct( &eis );
+				finalize_threads( peis );
+				finalize_event_info_struct( peis );
 				LEAVE("eventLoop");
-				return;
+				goto end;
 			}
 #ifndef WIN32
 			/* report( "." ); */
 			do {
-				eis.ret = SELECT( eis.fd + 1, &eis.rfds, NULL, NULL,
-					&eis.tv_sleep );
-			} while (eis.ret < 0 && errno==EINTR);
+				peis->ret = SELECT( peis->fd + 1, &(peis->rfds), NULL, NULL,
+					&(peis->tv_sleep) );
+			} while (peis->ret < 0 && errno==EINTR);
 #else
 			/*
 			    termios.c:serial_select is instable for some
@@ -4197,26 +4241,26 @@ JNIEXPORT void JNICALL RXTXPort(eventLoop)( JNIEnv *env, jobject jobj )
 /*
 			usleep(5000);
 */
-			eis.ret=1;
+			peis->ret=1;
 			while( i++ < 5 )
 			{
-				if(eis.eventflags[SPE_DATA_AVAILABLE] )
+				if(peis->eventflags[SPE_DATA_AVAILABLE] )
 				{
-					if( port_has_changed_fionread( &eis ) )
+					if( port_has_changed_fionread( peis ) )
 					{
-						send_event( &eis, SPE_DATA_AVAILABLE, 1 );
+						send_event( peis, SPE_DATA_AVAILABLE, 1 );
 					}
 				}
 				usleep(1000);
 			}
 			i = 0;
 #endif /* WIN32 */
-		}  while ( eis.ret < 0 && errno == EINTR );
-		if( eis.ret >= 0 )
+		}  while ( peis->ret < 0 && errno == EINTR );
+		if( peis->ret >= 0 )
 		{
-			report_serial_events( &eis );
+			report_serial_events( peis );
 		}
-		initialise_event_info_struct( &eis );
+		initialise_event_info_struct( peis );
 	} while( 1 );
 end:
 	LEAVE( "eventLoop:  Bailing!\n" );
@@ -4266,7 +4310,7 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(testRead)(
 	struct termios ttyset;
 	char c;
 	int fd;
-	int pid = -1;
+	pid_t pid = -1;
 #endif
 #ifdef TRENT_IS_HERE_DEBUGGING_ENUMERATION
 	char message[80];
@@ -4807,7 +4851,7 @@ JNIEXPORT void JNICALL RXTXPort(interruptEventLoop)(JNIEnv *env,
 	jobject jobj)
 {
 	struct event_info_struct *index = master_index;
-	int fd = get_java_var( env, jobj, "fd", "I" );
+	int fd = get_java_var_fd( env, jobj );
 	int searching = 1;
 
 
@@ -4978,49 +5022,108 @@ int send_event( struct event_info_struct *eis, jint type, int flag )
 }
 
 /*----------------------------------------------------------
-get_java_var
+get_java_var_int
 
    accept:      env (keyhole to java)
                 jobj (java RXTXPort object)
-   return:      the fd field from the java object
+   return:      the field from the java object with name id
    exceptions:  none
    comments:
 ----------------------------------------------------------*/
-size_t get_java_var( JNIEnv *env, jobject jobj, char *id, char *type ) {
-  return (size_t) get_java_var_long( env, jobj, id, type );
-}
 
-long get_java_var_long( JNIEnv *env, jobject jobj, char *id, char *type )
+jint get_java_var_int( JNIEnv *env, jobject jobj, char *id )
 {
-	long result = 0;
+	jint result = 0;
 	jclass jclazz = (*env)->GetObjectClass( env, jobj );
-	jfieldID jfd = (*env)->GetFieldID( env, jclazz, id, type );
+	jfieldID jfd = (*env)->GetFieldID( env, jclazz, id, "I" );
 
 /*
-	ENTER( "get_java_var" );
+	ENTER( "get_java_var_int" );
 */
 	if( !jfd ) {
 		(*env)->ExceptionDescribe( env );
 		(*env)->ExceptionClear( env );
 		(*env)->DeleteLocalRef( env, jclazz );
-		LEAVE( "get_java_var" );
+		LEAVE( "get_java_var_int" );
 		return result;
 	}
-	if ( !strcmp( type, "J" ) ) {
-	  result = (long)( (*env)->GetLongField( env, jobj, jfd ) );
-	} else {
-	  result = (size_t) ( (*env)->GetIntField( env, jobj, jfd ) );
-	}
+	
+	result = (*env)->GetIntField( env, jobj, jfd );
+	
 /* ct7 & gel * Added DeleteLocalRef */
 	(*env)->DeleteLocalRef( env, jclazz );
-	if(!strncmp( "fd",id,2) && result == 0)
-		report_error( "get_java_var: invalid file descriptor\n" );
+	
 /*
 	LEAVE( "get_java_var" );
 */
 	return result;
 }
 
+jint get_java_var_pid( JNIEnv *env, jobject jobj )
+{
+	return get_java_var_int( env, jobj, "pid" );
+}
+
+jint get_java_var_fd( JNIEnv *env, jobject jobj )
+{
+	jint result = get_java_var_int( env, jobj, "fd" );
+	
+	if( result == 0)
+	{
+		report_error( "get_java_var_int: invalid file descriptor\n" );
+	}
+	
+	return result;
+}
+
+jint get_java_var_timeout( JNIEnv *env, jobject jobj )
+{
+	return get_java_var_int( env, jobj, "timeout" );
+}
+
+
+
+jlong get_java_var_long( JNIEnv *env, jobject jobj, char *id )
+{
+	jlong result = 0;
+	jclass jclazz = (*env)->GetObjectClass( env, jobj );
+	jfieldID jfd = (*env)->GetFieldID( env, jclazz, id, "J" );
+
+/*
+	ENTER( "get_java_var_long" );
+*/
+	if( !jfd ) {
+		(*env)->ExceptionDescribe( env );
+		(*env)->ExceptionClear( env );
+		(*env)->DeleteLocalRef( env, jclazz );
+		LEAVE( "get_java_var_long" );
+		return result;
+	}
+	
+	result = (*env)->GetLongField( env, jobj, jfd );
+	
+/* ct7 & gel * Added DeleteLocalRef */
+	(*env)->DeleteLocalRef( env, jclazz );
+/*
+	LEAVE( "get_java_var_long" );
+*/
+	return result;
+}
+
+
+struct event_info_struct * get_java_var_eis( JNIEnv *env, jobject jobj )
+{
+	return ( struct event_info_struct * )get_java_var_long( env, jobj, "eis" );
+}
+
+
+void set_java_var_eis( JNIEnv *env, jclass jclazz, jobject jobj, struct event_info_struct *eis )
+{
+	jfieldID jeis  = (*env)->GetFieldID( env, jclazz, "eis", "J" );
+	(*env)->SetLongField(env, jobj, jeis, (jlong) eis );
+}								  
+					 
+					 
 /*----------------------------------------------------------
 throw_java_exception
 
@@ -5127,7 +5230,7 @@ void report(char *msg)
    comments:
 
 ----------------------------------------------------------*/
-int lfs_lock( const char *filename, int pid )
+int lfs_lock( const char *filename, pid_t pid )
 {
 	int s;
 	int ret;
@@ -5171,7 +5274,7 @@ int lfs_lock( const char *filename, int pid )
    comments:
 
 ----------------------------------------------------------*/
-int lfs_unlock( const char *filename, int pid )
+int lfs_unlock( const char *filename, pid_t pid )
 {
 	int s;
 	int ret;
@@ -5217,7 +5320,7 @@ int lfs_unlock( const char *filename, int pid )
 
 ----------------------------------------------------------*/
 #ifdef LIBLOCKDEV
-int lib_lock_dev_unlock( const char *filename, int pid )
+int lib_lock_dev_unlock( const char *filename, pid_t pid )
 {
 	if( dev_unlock( filename, pid ) )
 	{
@@ -5245,7 +5348,7 @@ int lib_lock_dev_unlock( const char *filename, int pid )
 
 ----------------------------------------------------------*/
 #ifdef LIBLOCKDEV
-int lib_lock_dev_lock( const char *filename, int pid )
+int lib_lock_dev_lock( const char *filename, pid_t pid )
 {
 	char message[80];
 	printf("LOCKING %s\n", filename);
@@ -5281,7 +5384,7 @@ int lib_lock_dev_lock( const char *filename, int pid )
 		more reading:
 
 ----------------------------------------------------------*/
-int fhs_lock( const char *filename, int pid )
+int fhs_lock( const char *filename, pid_t pid )
 {
 	/*
 	 * There is a zoo of lockdir possibilities
@@ -5380,7 +5483,7 @@ int fhs_lock( const char *filename, int pid )
 		rather than an exercise, we will handle them.
 
 ----------------------------------------------------------*/
-int uucp_lock( const char *filename, int pid )
+int uucp_lock( const char *filename, pid_t pid )
 {
 	char lockfilename[80], lockinfo[12], message[80];
 	char name[80];
@@ -5787,7 +5890,9 @@ int is_device_locked( const char *port_filename )
 	};
 	const char *lockprefixes[] = { "LCK..", "lk..", "LK.", NULL };
 	char *p, file[80], pid_buffer[20], message[80];
-	int i = 0, j, k, fd , pid;
+	int i = 0, j, k, fd;
+	pid_t pid;
+	int   pidTemp;
 	struct stat buf, buf2, lockbuf;
 
 	j = strlen( port_filename );
@@ -5917,7 +6022,9 @@ int is_device_locked( const char *port_filename )
 		}
 		/* FIXME null terminiate pid_buffer? need to check in Solaris */
 		close( fd );
-		sscanf( pid_buffer, "%d", &pid );
+		
+		sscanf( pid_buffer, "%d", &pidTemp );
+		pid = (pid_t)pidTemp;
 
 		if( kill( (pid_t) pid, 0 ) && errno==ESRCH )
 		{
@@ -5949,7 +6056,7 @@ int is_device_locked( const char *port_filename )
    exceptions:  none
    comments:    OS's like Win32 may not have lock files.
 ----------------------------------------------------------*/
-int system_does_not_lock( const char * filename, int pid )
+int system_does_not_lock( const char * filename, pid_t pid )
 {
 	return 0;
 }
