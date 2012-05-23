@@ -64,7 +64,6 @@ import java.lang.Math;
 /**
  * @author Trent Jarvi
  * @version $Id: Raw.java,v 1.1.2.18 2010/01/03 23:15:25 jarvi Exp $
- * @since JDK1.0
  */
 final class Raw extends RawPort {
 

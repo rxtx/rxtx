@@ -67,8 +67,6 @@ public class UnsupportedCommOperationException extends Exception {
 
     /**
      * create an instances with no message about why the Exception was thrown.
-     *
-     * @since JDK1.0
      */
     public UnsupportedCommOperationException() {
         super();
@@ -78,7 +76,6 @@ public class UnsupportedCommOperationException extends Exception {
      * create an instance with a message about why the Exception was thrown.
      *
      * @param str	A detailed message explaining the reason for the Exception.
-     * @since JDK1.0
      */
     public UnsupportedCommOperationException(String str) {
         super(str);
