@@ -253,14 +253,10 @@ final class LPRPort extends ParallelPort {
         return threshold > 1;
     }
 
-    ;
-
-	/**
-		Input/output buffers
-		These are native stubs...
-	*/
-
-	public native void setInputBufferSize(int size);
+    /**
+     * Input/output buffers These are native stubs...
+     */
+    public native void setInputBufferSize(int size);
 
     public native int getInputBufferSize();
 

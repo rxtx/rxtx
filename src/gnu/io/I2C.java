@@ -546,8 +546,9 @@ final class I2C extends I2CPort {
 
         public int read(byte b[], int off, int len) throws IOException {
             dataAvailable = 0;
-            int i = 0, Minimum = 0;
-            int intArray[] = {
+            int i = 0;
+            int minimum = 0;
+            int[] intArray = {
                 b.length,
                 InputBuffer,
                 len
@@ -560,20 +561,23 @@ final class I2C extends I2CPort {
             while (intArray[i] == 0 && i < intArray.length) {
                 i++;
             }
-            Minimum = intArray[i];
+            minimum = intArray[i];
             while (i < intArray.length) {
                 if (intArray[i] > 0) {
-                    Minimum = Math.min(Minimum, intArray[i]);
+                    minimum = Math.min(minimum, intArray[i]);
                 }
                 i++;
             }
-            Minimum = Math.min(Minimum, threshold);
-            if (Minimum == 0) {
-                Minimum = 1;
+            minimum = Math.min(minimum, threshold);
+            if (minimum == 0) {
+                minimum = 1;
             }
-            int Available = available();
-            int Ret = readArray(b, off, Minimum);
-            return Ret;
+            /*
+             * TODO (Alexander Graf): why is available called here with return
+             * value ignored?
+             */
+            available();
+            return readArray(b, off, minimum);
         }
 
         public int available() throws IOException {

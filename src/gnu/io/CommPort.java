@@ -71,7 +71,7 @@ import java.io.IOException;
 public abstract class CommPort extends Object {
 
     protected String name;
-    private final static boolean debug = false;
+    private static final  boolean debug = false;
 
     public abstract void enableReceiveFraming(int f)
             throws UnsupportedCommOperationException;
@@ -112,7 +112,6 @@ public abstract class CommPort extends Object {
         if (debug) {
             System.out.println("CommPort:close()");
         }
-
         try {
             CommPortIdentifier cp =
                     CommPortIdentifier.getPortIdentifier(this);

@@ -77,18 +77,19 @@ public class I2CPortEvent extends EventObject {
     public static final int PE = 8;
     public static final int FE = 9;
     public static final int BI = 10;
-    private boolean OldValue;
-    private boolean NewValue;
+    private boolean oldValue;
+    private boolean newValue;
     private int eventType;
     /*
      * public int eventType =0; depricated
      */
 
-    public I2CPortEvent(I2CPort srcport, int eventtype, boolean oldvalue, boolean newvalue) {
+    public I2CPortEvent(I2CPort srcport, int eventType, boolean oldValue,
+            boolean newValue) {
         super(srcport);
-        OldValue = oldvalue;
-        NewValue = newvalue;
-        eventType = eventtype;
+        this.oldValue = oldValue;
+        this.newValue = newValue;
+        this.eventType = eventType;
     }
 
     public int getEventType() {
@@ -96,10 +97,10 @@ public class I2CPortEvent extends EventObject {
     }
 
     public boolean getNewValue() {
-        return NewValue;
+        return newValue;
     }
 
     public boolean getOldValue() {
-        return OldValue;
+        return oldValue;
     }
 }

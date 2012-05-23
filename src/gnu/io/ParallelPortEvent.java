@@ -65,21 +65,21 @@ import java.util.*;
  */
 public class ParallelPortEvent extends EventObject {
 
-    static public final int PAR_EV_ERROR = 1;
-    static public final int PAR_EV_BUFFER = 2;
-    private boolean OldValue;
-    private boolean NewValue;
+    public static final int PAR_EV_ERROR = 1;
+    public static final int PAR_EV_BUFFER = 2;
+    private boolean oldValue;
+    private boolean newValue;
     private int eventType;
     /*
      * public int eventType =0; depricated
      */
 
-    public ParallelPortEvent(ParallelPort srcport, int eventtype,
-            boolean oldvalue, boolean newvalue) {
+    public ParallelPortEvent(ParallelPort srcport, int eventType,
+            boolean oldValue, boolean newValue) {
         super(srcport);
-        OldValue = oldvalue;
-        NewValue = newvalue;
-        eventType = eventtype;
+        this.oldValue = oldValue;
+        this.newValue = newValue;
+        this.eventType = eventType;
     }
 
     public int getEventType() {
@@ -87,10 +87,10 @@ public class ParallelPortEvent extends EventObject {
     }
 
     public boolean getNewValue() {
-        return NewValue;
+        return newValue;
     }
 
     public boolean getOldValue() {
-        return OldValue;
+        return oldValue;
     }
 }

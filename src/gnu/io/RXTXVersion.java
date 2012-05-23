@@ -68,11 +68,11 @@ public class RXTXVersion {
 ------------------------------------------------------------------------------
      */
 
-    private static String Version;
+    private static String version;
 
     static {
         RXTXVersion.loadLibrary("rxtxSerial");
-        Version = "RXTX-2.2";
+        version = "RXTX-2.2";
     }
 
     /**
@@ -81,7 +81,7 @@ public class RXTXVersion {
      * @return a string representing the version "RXTX-1.4-9"
      */
     public static String getVersion() {
-        return Version;
+        return version;
     }
 
     public static native String nativeGetVersion();

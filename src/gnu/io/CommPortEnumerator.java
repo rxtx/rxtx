@@ -66,7 +66,7 @@ import java.util.Enumeration;
 class CommPortEnumerator implements Enumeration {
 
     private CommPortIdentifier index;
-    private final static boolean debug = false;
+    private static final boolean debug = false;
 
     static {
         if (debug) {
@@ -103,14 +103,14 @@ class CommPortEnumerator implements Enumeration {
 
     public boolean hasMoreElements() {
         if (debug) {
-            System.out.println("CommPortEnumerator:hasMoreElements() " + CommPortIdentifier.CommPortIndex == null ? false : true);
+            System.out.println("CommPortEnumerator:hasMoreElements() "
+                    + (CommPortIdentifier.CommPortIndex != null));
         }
         synchronized (CommPortIdentifier.Sync) {
             if (index != null) {
-                return index.next == null ? false : true;
+                return (index.next != null);
             } else {
-                return CommPortIdentifier.CommPortIndex == null
-                        ? false : true;
+                return (CommPortIdentifier.CommPortIndex != null);
             }
         }
     }

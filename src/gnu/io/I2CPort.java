@@ -140,7 +140,4 @@ abstract class I2CPort extends CommPort {
     public abstract void notifyOnFramingError(boolean enable);
 
     public abstract void notifyOnBreakInterrupt(boolean enable);
-    /*
-     * public abstract void setRcvFifoTrigger(int trigger); deprecated
-     */
 }

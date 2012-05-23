@@ -541,10 +541,13 @@ final class RS485 extends RS485Port {
             return read(b, 0, b.length);
         }
 
+        // TODO (Alexander Graf) the content of this funcion seems to be copied
+        // several times to other port types I2C.java, ...
         public int read(byte b[], int off, int len) throws IOException {
             dataAvailable = 0;
-            int i = 0, Minimum = 0;
-            int intArray[] = {
+            int i = 0;
+            int minimum = 0;
+            int[] intArray = {
                 b.length,
                 InputBuffer,
                 len
@@ -557,20 +560,23 @@ final class RS485 extends RS485Port {
             while (intArray[i] == 0 && i < intArray.length) {
                 i++;
             }
-            Minimum = intArray[i];
+            minimum = intArray[i];
             while (i < intArray.length) {
                 if (intArray[i] > 0) {
-                    Minimum = Math.min(Minimum, intArray[i]);
+                    minimum = Math.min(minimum, intArray[i]);
                 }
                 i++;
             }
-            Minimum = Math.min(Minimum, threshold);
-            if (Minimum == 0) {
-                Minimum = 1;
+            minimum = Math.min(minimum, threshold);
+            if (minimum == 0) {
+                minimum = 1;
             }
-            int Available = available();
-            int Ret = readArray(b, off, Minimum);
-            return Ret;
+            /*
+             * TODO (Alexander Graf): why is available called here with return
+             * value ignored?
+             */
+            available();
+            return readArray(b, off, minimum);
         }
 
         public int available() throws IOException {
