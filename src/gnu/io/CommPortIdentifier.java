@@ -65,7 +65,6 @@ import java.util.Enumeration;
 /**
  * @author Trent Jarvi
  * @version %I%, %G%
- * @since JDK1.0
  */
 public class CommPortIdentifier extends Object /*
  * extends Vector?

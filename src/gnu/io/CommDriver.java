@@ -60,7 +60,6 @@ package gnu.io;
 /**
  * @author Trent Jarvi
  * @version %I%, %G%
- * @since JDK1.0
  */
 public interface CommDriver {
 

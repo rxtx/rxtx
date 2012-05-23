@@ -63,7 +63,6 @@ import java.util.*;
 /**
  * @author Trent Jarvi
  * @version %I%, %G%
- * @since JDK1.0
  */
 abstract class RawPort extends CommPort {
 

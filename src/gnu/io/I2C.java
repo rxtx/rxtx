@@ -64,7 +64,6 @@ import java.lang.Math;
 /**
  * @author Trent Jarvi
  * @version,
- * @since JDK1.0
  */
 /**
  * I2C

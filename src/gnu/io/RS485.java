@@ -64,7 +64,6 @@ import java.lang.Math;
 /**
  * @author Trent Jarvi
  * @version %I%, %G%
- * @since JDK1.0
  */
 final class RS485 extends RS485Port {
 
