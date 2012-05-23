@@ -143,7 +143,6 @@ public class Zystem {
          * if ( mode == NET_MODE ) { nativeNetInit( ); } if ( nativeInit( ) ) {
          * throw new UnSupportedLoggerException( "Port initializion failed" ); }
          */
-        return;
     }
 
     public void finalize() {
