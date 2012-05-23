@@ -232,11 +232,11 @@ final class Raw extends RawPort {
     }
 
     public boolean isReceiveTimeoutEnabled() {
-        return (NativeisReceiveTimeoutEnabled());
+        return NativeisReceiveTimeoutEnabled();
     }
 
     public int getReceiveTimeout() {
-        return (NativegetReceiveTimeout());
+        return NativegetReceiveTimeout();
     }
     /**
      * Receive threshold control
@@ -282,7 +282,7 @@ final class Raw extends RawPort {
     }
 
     public int getInputBufferSize() {
-        return (InputBuffer);
+        return InputBuffer;
     }
 
     public void setOutputBufferSize(int size) {
@@ -290,7 +290,7 @@ final class Raw extends RawPort {
     }
 
     public int getOutputBufferSize() {
-        return (OutputBuffer);
+        return OutputBuffer;
     }
 
     /**
@@ -606,6 +606,6 @@ final class Raw extends RawPort {
 
     public String getVersion() {
         String Version = "$Id: Raw.java,v 1.1.2.18 2010/01/03 23:15:25 jarvi Exp $";
-        return (Version);
+        return Version;
     }
 }

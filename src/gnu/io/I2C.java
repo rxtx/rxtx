@@ -233,11 +233,11 @@ final class I2C extends I2CPort {
     }
 
     public boolean isReceiveTimeoutEnabled() {
-        return (NativeisReceiveTimeoutEnabled());
+        return NativeisReceiveTimeoutEnabled();
     }
 
     public int getReceiveTimeout() {
-        return (NativegetReceiveTimeout());
+        return NativegetReceiveTimeout();
     }
     /**
      * Receive threshold control
@@ -248,9 +248,9 @@ final class I2C extends I2CPort {
         if (thresh >= 0) {
             threshold = thresh;
             NativeEnableReceiveTimeoutThreshold(timeout, threshold, InputBuffer);
-        } else /*
-         * invalid thresh
-         */ {
+        } else {/*
+             * invalid thresh
+             */
             System.out.println("Invalid Threshold");
         }
     }
@@ -283,7 +283,7 @@ final class I2C extends I2CPort {
     }
 
     public int getInputBufferSize() {
-        return (InputBuffer);
+        return InputBuffer;
     }
 
     public void setOutputBufferSize(int size) {
@@ -291,7 +291,7 @@ final class I2C extends I2CPort {
     }
 
     public int getOutputBufferSize() {
-        return (OutputBuffer);
+        return OutputBuffer;
     }
 
     /**

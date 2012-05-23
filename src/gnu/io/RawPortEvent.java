@@ -92,14 +92,14 @@ public class RawPortEvent extends EventObject {
     }
 
     public int getEventType() {
-        return (eventType);
+        return eventType;
     }
 
     public boolean getNewValue() {
-        return (NewValue);
+        return NewValue;
     }
 
     public boolean getOldValue() {
-        return (OldValue);
+        return OldValue;
     }
 }

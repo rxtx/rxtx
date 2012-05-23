@@ -123,9 +123,7 @@ public abstract class CommPort extends Object {
         }
     }
 
-    ;
-
-	public abstract InputStream getInputStream() throws IOException;
+    public abstract InputStream getInputStream() throws IOException;
 
     public abstract OutputStream getOutputStream() throws IOException;
 
@@ -133,13 +131,13 @@ public abstract class CommPort extends Object {
         if (debug) {
             System.out.println("CommPort:getName()");
         }
-        return (name);
+        return name;
     }
 
     public String toString() {
         if (debug) {
             System.out.println("CommPort:toString()");
         }
-        return (name);
+        return name;
     }
 }

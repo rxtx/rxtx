@@ -459,7 +459,7 @@ final public class RXTXPort extends SerialPort {
         if (debug) {
             z.reportln("RXTXPort:isReceiveTimeoutEnabled() called and returning " + NativeisReceiveTimeoutEnabled());
         }
-        return (NativeisReceiveTimeoutEnabled());
+        return NativeisReceiveTimeoutEnabled();
     }
 
     /**
@@ -469,7 +469,7 @@ final public class RXTXPort extends SerialPort {
         if (debug) {
             z.reportln("RXTXPort:getReceiveTimeout() called and returning " + NativegetReceiveTimeout());
         }
-        return (NativegetReceiveTimeout());
+        return NativegetReceiveTimeout();
     }
     /**
      * Receive threshold control
@@ -564,7 +564,7 @@ final public class RXTXPort extends SerialPort {
         if (debug) {
             z.reportln("RXTXPort:getInputBufferSize() called and returning " + InputBuffer);
         }
-        return (InputBuffer);
+        return InputBuffer;
     }
 
     /**
@@ -595,7 +595,7 @@ final public class RXTXPort extends SerialPort {
         if (debug) {
             z.reportln("RXTXPort:getOutputBufferSize() called and returning " + OutputBuffer);
         }
-        return (OutputBuffer);
+        return OutputBuffer;
     }
 
     /*
@@ -707,7 +707,7 @@ final public class RXTXPort extends SerialPort {
         if (debug) {
             z.reportln("monThread is null ");
         }
-        return (true);
+        return true;
     }
 
     /**
@@ -724,7 +724,7 @@ final public class RXTXPort extends SerialPort {
          */
 
         if (fd == 0 || SPEventListener == null || monThread == null) {
-            return (true);
+            return true;
         }
 
         switch (event) {
@@ -805,55 +805,55 @@ final public class RXTXPort extends SerialPort {
                 if (monThread.Data) {
                     break;
                 }
-                return (false);
+                return false;
             case SerialPortEvent.OUTPUT_BUFFER_EMPTY:
                 if (monThread.Output) {
                     break;
                 }
-                return (false);
+                return false;
             case SerialPortEvent.CTS:
                 if (monThread.CTS) {
                     break;
                 }
-                return (false);
+                return false;
             case SerialPortEvent.DSR:
                 if (monThread.DSR) {
                     break;
                 }
-                return (false);
+                return false;
             case SerialPortEvent.RI:
                 if (monThread.RI) {
                     break;
                 }
-                return (false);
+                return false;
             case SerialPortEvent.CD:
                 if (monThread.CD) {
                     break;
                 }
-                return (false);
+                return false;
             case SerialPortEvent.OE:
                 if (monThread.OE) {
                     break;
                 }
-                return (false);
+                return false;
             case SerialPortEvent.PE:
                 if (monThread.PE) {
                     break;
                 }
-                return (false);
+                return false;
             case SerialPortEvent.FE:
                 if (monThread.FE) {
                     break;
                 }
-                return (false);
+                return false;
             case SerialPortEvent.BI:
                 if (monThread.BI) {
                     break;
                 }
-                return (false);
+                return false;
             default:
                 System.err.println("unknown event: " + event);
-                return (false);
+                return false;
         }
         if (debug_events && debug_verbose) {
             z.reportln("	getting event");
@@ -867,7 +867,7 @@ final public class RXTXPort extends SerialPort {
             if (debug_events) {
                 z.reportln("	sendEvent return");
             }
-            return (true);
+            return true;
         }
         if (SPEventListener != null) {
             SPEventListener.serialEvent(e);
@@ -878,9 +878,9 @@ final public class RXTXPort extends SerialPort {
         }
 
         if (fd == 0 || SPEventListener == null || monThread == null) {
-            return (true);
+            return true;
         } else {
-            return (false);
+            return false;
         }
     }
     /**
@@ -1433,7 +1433,7 @@ final public class RXTXPort extends SerialPort {
                 {
                     z.reportln("RXTXPort:SerialInputStream:read() returns");
                 }
-                return (result);
+                return result;
             } finally {
                 synchronized (IOLockedMutex) {
                     IOLocked--;
@@ -1459,7 +1459,7 @@ final public class RXTXPort extends SerialPort {
                 z.reportln("RXTXPort:SerialInputStream:read(" + b.length + ") called");
             }
             if (monThreadisInterrupted == true) {
-                return (0);
+                return 0;
             }
             synchronized (IOLockedMutex) {
                 IOLocked++;
@@ -1470,7 +1470,7 @@ final public class RXTXPort extends SerialPort {
                 if (debug_read_results) {
                     z.reportln("RXTXPort:SerialInputStream:read() returned " + result + " bytes");
                 }
-                return (result);
+                return result;
             } finally {
                 synchronized (IOLockedMutex) {
                     IOLocked--;
@@ -1571,7 +1571,7 @@ final public class RXTXPort extends SerialPort {
                 if (debug_read) {
                     z.reportln("RXTXPort:SerialInputStream:read() Interrupted");
                 }
-                return (0);
+                return 0;
             }
             synchronized (IOLockedMutex) {
                 IOLocked++;
@@ -1584,7 +1584,7 @@ final public class RXTXPort extends SerialPort {
                              * + new String(b)
                              */);
                 }
-                return (result);
+                return result;
             } finally {
                 synchronized (IOLockedMutex) {
                     IOLocked--;
@@ -1681,7 +1681,7 @@ final public class RXTXPort extends SerialPort {
                 if (debug_read) {
                     z.reportln("RXTXPort:SerialInputStream:read() Interrupted");
                 }
-                return (0);
+                return 0;
             }
             synchronized (IOLockedMutex) {
                 IOLocked++;
@@ -1694,7 +1694,7 @@ final public class RXTXPort extends SerialPort {
                              * + new String(b)
                              */);
                 }
-                return (result);
+                return result;
             } finally {
                 synchronized (IOLockedMutex) {
                     IOLocked--;
@@ -1708,7 +1708,7 @@ final public class RXTXPort extends SerialPort {
          */
         public synchronized int available() throws IOException {
             if (monThreadisInterrupted == true) {
-                return (0);
+                return 0;
             }
             if (debug_verbose) {
                 z.reportln("RXTXPort:available() called");
@@ -1899,7 +1899,7 @@ final public class RXTXPort extends SerialPort {
             z.reportln(
                     "RXTXPort:staticGetBaudRate( " + port + " )");
         }
-        return (nativeStaticGetBaudRate(port));
+        return nativeStaticGetBaudRate(port);
     }
 
     /**
@@ -1917,7 +1917,7 @@ final public class RXTXPort extends SerialPort {
             z.reportln(
                     "RXTXPort:staticGetDataBits( " + port + " )");
         }
-        return (nativeStaticGetDataBits(port));
+        return nativeStaticGetDataBits(port);
     }
 
     /**
@@ -1935,7 +1935,7 @@ final public class RXTXPort extends SerialPort {
             z.reportln(
                     "RXTXPort:staticGetParity( " + port + " )");
         }
-        return (nativeStaticGetParity(port));
+        return nativeStaticGetParity(port);
     }
 
     /**
@@ -1953,7 +1953,7 @@ final public class RXTXPort extends SerialPort {
             z.reportln(
                     "RXTXPort:staticGetStopBits( " + port + " )");
         }
-        return (nativeStaticGetStopBits(port));
+        return nativeStaticGetStopBits(port);
     }
 
     /**
@@ -2000,7 +2000,7 @@ final public class RXTXPort extends SerialPort {
             z.reportln("RXTXPort:staticSetDSR( " + port
                     + " " + flag);
         }
-        return (nativeStaticSetDSR(port, flag));
+        return nativeStaticSetDSR(port, flag);
     }
 
     /**
@@ -2021,7 +2021,7 @@ final public class RXTXPort extends SerialPort {
             z.reportln("RXTXPort:staticSetDTR( " + port
                     + " " + flag);
         }
-        return (nativeStaticSetDTR(port, flag));
+        return nativeStaticSetDTR(port, flag);
     }
 
     /**
@@ -2042,7 +2042,7 @@ final public class RXTXPort extends SerialPort {
             z.reportln("RXTXPort:staticSetRTS( " + port
                     + " " + flag);
         }
-        return (nativeStaticSetRTS(port, flag));
+        return nativeStaticSetRTS(port, flag);
     }
 
     /**
@@ -2061,7 +2061,7 @@ final public class RXTXPort extends SerialPort {
         if (debug) {
             z.reportln("RXTXPort:staticIsRTS( " + port + " )");
         }
-        return (nativeStaticIsRTS(port));
+        return nativeStaticIsRTS(port);
     }
 
     /**
@@ -2080,7 +2080,7 @@ final public class RXTXPort extends SerialPort {
         if (debug) {
             z.reportln("RXTXPort:staticIsCD( " + port + " )");
         }
-        return (nativeStaticIsCD(port));
+        return nativeStaticIsCD(port);
     }
 
     /**
@@ -2099,7 +2099,7 @@ final public class RXTXPort extends SerialPort {
         if (debug) {
             z.reportln("RXTXPort:staticIsCTS( " + port + " )");
         }
-        return (nativeStaticIsCTS(port));
+        return nativeStaticIsCTS(port);
     }
 
     /**
@@ -2118,7 +2118,7 @@ final public class RXTXPort extends SerialPort {
         if (debug) {
             z.reportln("RXTXPort:staticIsDSR( " + port + " )");
         }
-        return (nativeStaticIsDSR(port));
+        return nativeStaticIsDSR(port);
     }
 
     /**
@@ -2137,7 +2137,7 @@ final public class RXTXPort extends SerialPort {
         if (debug) {
             z.reportln("RXTXPort:staticIsDTR( " + port + " )");
         }
-        return (nativeStaticIsDTR(port));
+        return nativeStaticIsDTR(port);
     }
 
     /**
@@ -2156,7 +2156,7 @@ final public class RXTXPort extends SerialPort {
         if (debug) {
             z.reportln("RXTXPort:staticIsRI( " + port + " )");
         }
-        return (nativeStaticIsRI(port));
+        return nativeStaticIsRI(port);
     }
 
     /**
@@ -2179,7 +2179,7 @@ final public class RXTXPort extends SerialPort {
             z.reportln("getParityErrorChar() returns "
                     + ret);
         }
-        return (ret);
+        return ret;
     }
 
     /**
@@ -2197,7 +2197,7 @@ final public class RXTXPort extends SerialPort {
         if (debug) {
             z.reportln("setParityErrorChar(" + b + ")");
         }
-        return (nativeSetParityErrorChar(b));
+        return nativeSetParityErrorChar(b);
     }
 
     /**
@@ -2220,7 +2220,7 @@ final public class RXTXPort extends SerialPort {
             z.reportln("getEndOfInputChar() returns "
                     + ret);
         }
-        return (ret);
+        return ret;
     }
 
     /**
@@ -2236,7 +2236,7 @@ final public class RXTXPort extends SerialPort {
         if (debug) {
             z.reportln("setEndOfInputChar(" + b + ")");
         }
-        return (nativeSetEndOfInputChar(b));
+        return nativeSetEndOfInputChar(b);
     }
 
     /**

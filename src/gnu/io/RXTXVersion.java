@@ -81,7 +81,7 @@ public class RXTXVersion {
      * @return a string representing the version "RXTX-1.4-9"
      */
     public static String getVersion() {
-        return (Version);
+        return Version;
     }
 
     public static native String nativeGetVersion();

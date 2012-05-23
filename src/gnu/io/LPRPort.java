@@ -145,7 +145,7 @@ final class LPRPort extends ParallelPort {
             return -1;
         }
         lprmode = mode;
-        return (0);
+        return 0;
     }
 
     public void restart() {
@@ -307,7 +307,7 @@ final class LPRPort extends ParallelPort {
         if (monThread != null) {
             return monThread.isInterrupted();
         }
-        return (true);
+        return true;
     }
 
     public synchronized boolean sendEvent(int event, boolean state) {
@@ -316,7 +316,7 @@ final class LPRPort extends ParallelPort {
          */
 
         if (fd == 0 || PPEventListener == null || monThread == null) {
-            return (true);
+            return true;
         }
 
         switch (event) {
@@ -324,15 +324,15 @@ final class LPRPort extends ParallelPort {
                 if (monThread.monBuffer) {
                     break;
                 }
-                return (false);
+                return false;
             case ParallelPortEvent.PAR_EV_ERROR:
                 if (monThread.monError) {
                     break;
                 }
-                return (false);
+                return false;
             default:
                 System.err.println("unknown event:" + event);
-                return (false);
+                return false;
         }
         ParallelPortEvent e = new ParallelPortEvent(this, event, !state,
                 state);
@@ -340,13 +340,13 @@ final class LPRPort extends ParallelPort {
             PPEventListener.parallelEvent(e);
         }
         if (fd == 0 || PPEventListener == null || monThread == null) {
-            return (true);
+            return true;
         } else {
             try {
                 Thread.sleep(50);
             } catch (Exception exc) {
             }
-            return (false);
+            return false;
         }
     }
 

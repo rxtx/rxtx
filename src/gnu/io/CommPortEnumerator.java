@@ -92,7 +92,7 @@ class CommPortEnumerator implements Enumeration {
             } else {
                 index = CommPortIdentifier.CommPortIndex;
             }
-            return (index);
+            return index;
         }
     }
     /*

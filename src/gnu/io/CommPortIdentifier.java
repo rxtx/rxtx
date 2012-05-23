@@ -92,7 +92,7 @@ public class CommPortIdentifier extends Object /*
      * static {} aka initialization accept: - perform: load the rxtx driver
      * return: - exceptions: Throwable comments: static block to initialize the
      * class
-------------------------------------------------------------------------------
+     * ------------------------------------------------------------------------------
      */
     // initialization only done once....
     static {
@@ -132,7 +132,7 @@ public class CommPortIdentifier extends Object /*
      * addPortName() accept: Name of the port s, Port type, reverence to
      * RXTXCommDriver. perform: place a new CommPortIdentifier in the linked
      * list return: none. exceptions: none. comments:
-------------------------------------------------------------------------------
+     * ------------------------------------------------------------------------------
      */
     public static void addPortName(String s, int type, CommDriver c) {
 
@@ -145,7 +145,7 @@ public class CommPortIdentifier extends Object /*
      * ------------------------------------------------------------------------------
      * AddIdentifierToList() accept: The cpi to add to the list. perform:
      * return: exceptions: comments:
-------------------------------------------------------------------------------
+     * ------------------------------------------------------------------------------
      */
 
     private static void AddIdentifierToList(CommPortIdentifier cpi) {
@@ -172,8 +172,8 @@ public class CommPortIdentifier extends Object /*
     }
     /*
      * ------------------------------------------------------------------------------
-     * addPortOwnershipListener() accept: perform: return: exceptions: comments:   
-------------------------------------------------------------------------------
+     * addPortOwnershipListener() accept: perform: return: exceptions: comments:
+     * ------------------------------------------------------------------------------
      */
 
     public void addPortOwnershipListener(CommPortOwnershipListener c) {
@@ -199,32 +199,32 @@ public class CommPortIdentifier extends Object /*
     }
     /*
      * ------------------------------------------------------------------------------
-     * getCurrentOwner() accept: perform: return: exceptions: comments:    
-------------------------------------------------------------------------------
+     * getCurrentOwner() accept: perform: return: exceptions: comments:
+     * ------------------------------------------------------------------------------
      */
 
     public String getCurrentOwner() {
         if (debug) {
             System.out.println("CommPortIdentifier:getCurrentOwner()");
         }
-        return (Owner);
+        return Owner;
     }
     /*
      * ------------------------------------------------------------------------------
      * getName() accept: perform: return: exceptions: comments:
-------------------------------------------------------------------------------
+     * ------------------------------------------------------------------------------
      */
 
     public String getName() {
         if (debug) {
             System.out.println("CommPortIdentifier:getName()");
         }
-        return (PortName);
+        return PortName;
     }
     /*
      * ------------------------------------------------------------------------------
-     * getPortIdentifier() accept: perform: return: exceptions: comments:   
-------------------------------------------------------------------------------
+     * getPortIdentifier() accept: perform: return: exceptions: comments:
+     * ------------------------------------------------------------------------------
      */
 
     static public CommPortIdentifier getPortIdentifier(String s) throws NoSuchPortException {
@@ -263,8 +263,8 @@ public class CommPortIdentifier extends Object /*
     }
     /*
      * ------------------------------------------------------------------------------
-     * getPortIdentifier() accept: perform: return: exceptions: comments:    
-------------------------------------------------------------------------------
+     * getPortIdentifier() accept: perform: return: exceptions: comments:
+     * ------------------------------------------------------------------------------
      */
 
     static public CommPortIdentifier getPortIdentifier(CommPort p)
@@ -280,7 +280,7 @@ public class CommPortIdentifier extends Object /*
             }
         }
         if (c != null) {
-            return (c);
+            return c;
         }
 
         if (debug) {
@@ -291,7 +291,7 @@ public class CommPortIdentifier extends Object /*
     /*
      * ------------------------------------------------------------------------------
      * getPortIdentifiers() accept: perform: return: exceptions: comments:
-------------------------------------------------------------------------------
+     * ------------------------------------------------------------------------------
      */
 
     static public Enumeration getPortIdentifiers() {
@@ -348,31 +348,31 @@ public class CommPortIdentifier extends Object /*
     /*
      * ------------------------------------------------------------------------------
      * getPortType() accept: perform: return: exceptions: comments:
-------------------------------------------------------------------------------
+     * ------------------------------------------------------------------------------
      */
 
     public int getPortType() {
         if (debug) {
             System.out.println("CommPortIdentifier:getPortType()");
         }
-        return (PortType);
+        return PortType;
     }
     /*
      * ------------------------------------------------------------------------------
-     * isCurrentlyOwned() accept: perform: return: exceptions: comments:    
-------------------------------------------------------------------------------
+     * isCurrentlyOwned() accept: perform: return: exceptions: comments:
+     * ------------------------------------------------------------------------------
      */
 
     public synchronized boolean isCurrentlyOwned() {
         if (debug) {
             System.out.println("CommPortIdentifier:isCurrentlyOwned()");
         }
-        return (!Available);
+        return !Available;
     }
     /*
      * ------------------------------------------------------------------------------
      * open() accept: perform: return: exceptions: comments:
-------------------------------------------------------------------------------
+     * ------------------------------------------------------------------------------
      */
 
     public synchronized CommPort open(FileDescriptor f) throws UnsupportedCommOperationException {
@@ -389,7 +389,7 @@ public class CommPortIdentifier extends Object /*
      * open() accept: application making the call and milliseconds to block
      * during open. perform: open the port if possible return: CommPort if
      * successful exceptions: PortInUseException if in use. comments:
-------------------------------------------------------------------------------
+     * ------------------------------------------------------------------------------
      */
     private boolean HideOwnerEvents;
 
@@ -462,7 +462,7 @@ public class CommPortIdentifier extends Object /*
     /*
      * ------------------------------------------------------------------------------
      * removePortOwnership() accept: perform: return: exceptions: comments:
-------------------------------------------------------------------------------
+     * ------------------------------------------------------------------------------
      */
 
     public void removePortOwnershipListener(CommPortOwnershipListener c) {
@@ -482,7 +482,7 @@ public class CommPortIdentifier extends Object /*
      * internalClosePort() accept: None perform: clean up the Ownership
      * information and send the event return: None exceptions: None comments:
      * None
-------------------------------------------------------------------------------
+     * ------------------------------------------------------------------------------
      */
     void internalClosePort() {
         synchronized (this) {
@@ -502,7 +502,7 @@ public class CommPortIdentifier extends Object /*
     /*
      * ------------------------------------------------------------------------------
      * fireOwnershipEvent() accept: perform: return: exceptions: comments:
-------------------------------------------------------------------------------
+     * ------------------------------------------------------------------------------
      */
 
     void fireOwnershipEvent(int eventType) {

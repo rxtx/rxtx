@@ -230,11 +230,11 @@ final class RS485 extends RS485Port {
     }
 
     public boolean isReceiveTimeoutEnabled() {
-        return (NativeisReceiveTimeoutEnabled());
+        return NativeisReceiveTimeoutEnabled();
     }
 
     public int getReceiveTimeout() {
-        return (NativegetReceiveTimeout());
+        return NativegetReceiveTimeout();
     }
     /**
      * Receive threshold control
@@ -280,7 +280,7 @@ final class RS485 extends RS485Port {
     }
 
     public int getInputBufferSize() {
-        return (InputBuffer);
+        return InputBuffer;
     }
 
     public void setOutputBufferSize(int size) {
@@ -288,7 +288,7 @@ final class RS485 extends RS485Port {
     }
 
     public int getOutputBufferSize() {
-        return (OutputBuffer);
+        return OutputBuffer;
     }
 
     /**

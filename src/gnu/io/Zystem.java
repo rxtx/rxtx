@@ -170,20 +170,20 @@ public class Zystem {
             //	return( nativeNetReportln( s ) );
         } else if (mode == PRINT_MODE) {
             System.out.println(s);
-            return (true);
+            return true;
         } else if (mode == MEX_MODE) {
             //	return( nativeMexReport( s ) );
         } else if (mode == SILENT_MODE) {
-            return (true);
+            return true;
         } else if (mode == FILE_MODE) {
             filewrite(s);
         } else if (mode == J2EE_MSG_MODE) {
-            return (false);
+            return false;
         } else if (mode == J2SE_LOG_MODE) {
             java.util.logging.Logger.getLogger("gnu.io").fine(s);
-            return (true);
+            return true;
         }
-        return (false);
+        return false;
     }
 
     public boolean reportln() {
@@ -193,18 +193,18 @@ public class Zystem {
             //	return(b);
         } else if (mode == PRINT_MODE) {
             System.out.println();
-            return (true);
+            return true;
         } else if (mode == MEX_MODE) {
             //	b = nativeMexReportln( "\n" );
             //	return(b);
         } else if (mode == SILENT_MODE) {
-            return (true);
+            return true;
         } else if (mode == FILE_MODE) {
             filewrite("\n");
         } else if (mode == J2EE_MSG_MODE) {
-            return (false);
+            return false;
         }
-        return (false);
+        return false;
     }
 
     public boolean reportln(String s) {
@@ -214,20 +214,20 @@ public class Zystem {
             //	return(b);
         } else if (mode == PRINT_MODE) {
             System.out.println(s);
-            return (true);
+            return true;
         } else if (mode == MEX_MODE) {
             //	b = nativeMexReportln( s + "\n" );
             //	return(b);
         } else if (mode == SILENT_MODE) {
-            return (true);
+            return true;
         } else if (mode == FILE_MODE) {
             filewrite(s + "\n");
         } else if (mode == J2EE_MSG_MODE) {
-            return (false);
+            return false;
         } else if (mode == J2SE_LOG_MODE) {
-            return (true);
+            return true;
         }
-        return (false);
+        return false;
     }
 
     /*
