@@ -142,7 +142,8 @@ all: $(TARGETLIB)
 
 #  create the javadoc files.
 docs: $(CLASSES)
-	$(JAVADOC) $(javafiles)
+	mkdir api
+	cd api && $(JAVADOC) $(javafiles)
 
 ################  WIN32 CrossCompiling from here down #######################
 

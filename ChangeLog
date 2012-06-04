@@ -6,7 +6,33 @@ rxtx-2.1 and rxtx-2.0 changes are kept in the same file.  skip to the version
 you downloaded.
 
 2.2 ???
+		print exception if Zystem initialization fails
+		Bug: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=472053
+		Author: Jan Niehusmann <jan@gondor.com>
+
+		-merged- Removes makefile install of RXTXcomm.jar, silences an
+		unnecessary compiling error
+		Origin: Mario Joussen <joussen@debian.org>, edited by Scott
+		Howard <showard314@gmail.com>
+
+		sys/io.h does not exist on all systems
+		Bug: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=609152
+		Author: Scott Howard <showard@debian.org>
+			
+		Hurd fix - Defines __GNU__ to use the FHS
+		Author: Scott Howard <showard@debian.org>
 		
+		BSD - libc_r is not available, use libpthread
+		Bug: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=585089
+		Author: Scott Howard <showard@debian.org>
+		
+		improve debug information for port enumeration
+		debug function signature cleanup
+
+		-merged- Handles the case when "java.ext.dirs" system
+		property contains more than one directory.
+		Author: Philip Ashmore <contact@philipashmore.com>
+		Bug: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=646069
 
 		add uninstall target to Makefile
 		Bug: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=646069

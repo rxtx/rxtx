@@ -11344,6 +11344,18 @@ fi
 
 done
 
+for ac_header in sys/io.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "sys/io.h" "ac_cv_header_sys_io_h" "$ac_includes_default"
+if test "x$ac_cv_header_sys_io_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SYS_IO_H 1
+_ACEOF
+
+fi
+
+done
+
 for ac_header in signal.h
 do :
   ac_fn_c_check_header_mongrel "$LINENO" "signal.h" "ac_cv_header_signal_h" "$ac_includes_default"
@@ -12010,7 +12022,7 @@ Linux)
 ;;
 
 *BSD)
-	LDFLAGS=$LDFLAGS" -lc_r"
+	LDFLAGS=$LDFLAGS" -lpthread"
 	JHOME=$JPATH/"lib"
 	CFLAGS=$CFLAGS" -D_NO_POSIX=1 -D_NO_XOPEN4=1"
 	TARGETLIB="\$(target_triplet)/librxtxSerial.la \

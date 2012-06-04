@@ -4370,7 +4370,11 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(testRead)(
 
 	if( fd < 0 )
 	{
-		report_verbose( "testRead() open failed\n" );
+		report_verbose( "testRead() open \"" );
+		report_verbose( name );
+		report_verbose( "\" failed: " );
+		report_verbose( strerror(errno) );
+		report_verbose( "\n" );
 		ret = JNI_FALSE;
 		goto END;
 	}
@@ -5167,7 +5171,7 @@ void throw_java_exception( JNIEnv *env, char *exc, char *foo, char *msg )
    exceptions:  none
    comments:
 ----------------------------------------------------------*/
-void report_warning(char *msg)
+void report_warning(const char *msg)
 {
 	fprintf(stderr, "%s", msg);
 }
@@ -5181,7 +5185,7 @@ void report_warning(char *msg)
    exceptions:  none
    comments:
 ----------------------------------------------------------*/
-void report_verbose(char *msg)
+void report_verbose(const char *msg)
 {
 #ifdef DEBUG_VERBOSE
 	fprintf(stderr, "%s", msg);
@@ -5196,7 +5200,7 @@ void report_verbose(char *msg)
    exceptions:  none
    comments:
 ----------------------------------------------------------*/
-void report_error(char *msg)
+void report_error(const char *msg)
 {
 	fprintf(stderr, "%s", msg);
 }
@@ -5210,7 +5214,7 @@ void report_error(char *msg)
    exceptions:  none
    comments:
 ----------------------------------------------------------*/
-void report(char *msg)
+void report(const char *msg)
 {
 #ifdef DEBUG
 	fprintf(stderr, "%s", msg);

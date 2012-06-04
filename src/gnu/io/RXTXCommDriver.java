@@ -2,7 +2,7 @@
 |   RXTX License v 2.1 - LGPL v 2.1 + Linking Over Controlled Interface.
 |   RXTX is a native interface to serial ports in java.
 |   Copyright 1998 Kevin Hester, kevinh@acm.org
-|   Copyright 2000-2010 Trent Jarvi tjarvi@qbang.org and others who
+|   Copyright 2000-2012 Trent Jarvi tjarvi@qbang.org and others who
 |   actually wrote it.  See individual source files for more information.
 |
 |   A copy of the LGPL v 2.1 may be found at
@@ -379,10 +379,18 @@ public class RXTXCommDriver implements CommDriver
 		while (tok.hasMoreElements())
 		{
 			String PortName = tok.nextToken();
-
-			if (testRead(PortName, PortType))
+			if(debug)
+				System.out.println("Trying " + PortName + ".");
+			if (testRead(PortName, PortType)) {
 				CommPortIdentifier.addPortName(PortName,
 					PortType, this);
+				if(debug)
+					System.out.println("Success: Read from " + PortName + ".");
+			}else{
+				if(debug)
+					System.out.println("Fail: Cannot read from " + PortName
+						+ ".");
+			}
 		}
 	}
 
@@ -410,15 +418,17 @@ public class RXTXCommDriver implements CommDriver
 		Properties props = null;
 		String file_loc = null;
 		// Old style: properties file must be in JRE folder
-		String ext_dirs = System.getProperty("java.ext.dirs");
+		String [] ext_dirs = System.getProperty("java.ext.dirs").split(":");
+		String fs = System.getProperty("file.seporator");
 		String[] dirArray = ext_dirs.split(System.getProperty("path.separator"));
+
 		for (int i = 0; i < dirArray.length; i++)
 		{
-			String file_name = dirArray[i] + System.getProperty("file.separator") + "gnu.io.rxtx.properties";
-			File file = new File(file_name);
+			String ext_file = dirArray[i] + fs + "gnu.io.rxtx.properties";
+			File file = new File(ext_file);
 			if (file.exists())
 			{
-				file_loc = file_name;
+				file_loc = ext_file;
 				break;
 			}
 		}

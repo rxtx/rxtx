@@ -148,7 +148,7 @@ struct event_info_struct
 };
 
 /*  Ports known on the OS */
-#if defined(__linux__)
+if defined(__linux__) || defined(__FreeBSD_kernel__) || defined(__GNU__)
 /*
 	This is a small hack to get mark and space parity working on older systems
 	https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=147533
@@ -479,10 +479,10 @@ void set_java_var_eis( JNIEnv *env, jclass jclazz, jobject jobj, struct event_in
 jboolean is_interrupted( struct event_info_struct * );
 int send_event(struct event_info_struct *, jint, int );
 void dump_termios(char *,struct termios *);
-void report_verbose(char *);
-void report_error(char *);
-void report_warning(char *);
-void report(char *);
+void report_verbose(const char *);
+void report_error(const char *);
+void report_warning(const char *);
+void report(const char *);
 void throw_java_exception( JNIEnv *, char *, char *, char * );
 int lock_device( const char * );
 void unlock_device( const char * );
