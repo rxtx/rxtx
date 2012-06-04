@@ -6,6 +6,12 @@ rxtx-2.1 and rxtx-2.0 changes are kept in the same file.  skip to the version
 you downloaded.
 
 2.2 ???
+		
+
+		add uninstall target to Makefile
+		Bug: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=646069
+		Scott Howard <showard@debian.org>
+
 		move eis to the heap so other functions don't get in trouble
 		if the eventLoop returns.  use type safe functions for 
 		retrieving 64 bit values from java.

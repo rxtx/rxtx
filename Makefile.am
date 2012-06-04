@@ -129,6 +129,11 @@ install: all
 	done` $(RXTX_PATH)
 	$(INSTALL_PROGRAM) $(JARTARGET) $(JHOME)/
 
+uninstall:
+	cd $(RXTX_PATH) && $(RM) librxtx*
+	$(RM) $(JHOME)/$(JARTARGET)
+
+
 clean-generic:
 	rm -rf $(DEST) $(TOP)/$(CLASSTOP)
 	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
