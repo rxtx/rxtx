@@ -127,7 +127,6 @@ final public class RXTXPort extends SerialPort
 
 			MonitorThreadLock = true;
 			monThread = new MonitorThread();
-			monThread.setDaemon(true);
 			monThread.start();
 			waitForTheNativeCodeSilly();
 			MonitorThreadAlive=true;
@@ -1631,6 +1630,7 @@ Documentation is at http://java.sun.com/products/jdk/1.2/docs/api/java/io/InputS
 
 		MonitorThread() 
 		{
+			setDaemon(true);
 			if (debug)
 				z.reportln( "RXTXPort:MontitorThread:MonitorThread()"); 
 		}

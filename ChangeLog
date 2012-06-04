@@ -6,6 +6,15 @@ rxtx-2.1 and rxtx-2.0 changes are kept in the same file.  skip to the version
 you downloaded.
 
 2.2 ???
+		created Java threads are not marked as daemon
+		http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=674975
+		Christopher Wellons <mosquitopsu@gmail.com>
+
+		Prevent crashes when files are locked
+		http://mailman.qbang.org/pipermail/rxtx/2009-May/10897125.html
+		http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=673778
+		Michael Tandy <michaeltandy@googlemail.com>
+
 		print exception if Zystem initialization fails
 		Bug: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=472053
 		Author: Jan Niehusmann <jan@gondor.com>

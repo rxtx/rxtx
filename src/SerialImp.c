@@ -5363,7 +5363,7 @@ int lib_lock_dev_lock( const char *filename, pid_t pid )
 	}
 	if ( dev_lock( filename ) )
 	{
-		sprintf( message,
+		snprintf( message, 80,
 			"RXTX fhs_lock() Error: creating lock file for: %s: %s\n",
 			filename, strerror(errno) );
 		report_error( message );
@@ -5423,14 +5423,14 @@ int fhs_lock( const char *filename, pid_t pid )
 	fd = open( file, O_CREAT | O_WRONLY | O_EXCL, 0444 );
 	if( fd < 0 )
 	{
-		sprintf( message,
+		snprintf( message, 80,
 			"RXTX fhs_lock() Error: opening lock file: %s: %s\n",
 			file, strerror(errno) );
 		report_error( message );
 		return 1;
 	}
-	sprintf( lockinfo, "%10d\n",(int) getpid() );
-	sprintf( message, "fhs_lock: creating lockfile: %s\n", lockinfo );
+	snprintf( lockinfo, 12, "%10d\n",(int) getpid() );
+	snprintf( message, 80, "fhs_lock: creating lockfile: %s\n", lockinfo );
 	report( message );
 	if( ( write( fd, lockinfo, 11 ) ) < 0 )
 	{
@@ -5610,7 +5610,7 @@ void fhs_unlock( const char *filename, int openpid )
 	p = ( char * ) filename + i;
 	/*  FIXME  need to handle subdirectories /dev/cua/... */
 	while( *( p - 1 ) != '/' && i-- != 1 ) p--;
-	sprintf( file, "%s/LCK..%s", LOCKDIR, p );
+	snprintf( file, 80, "%s/LCK..%s", LOCKDIR, p );
 
 	if( !check_lock_pid( file, openpid ) )
 	{
