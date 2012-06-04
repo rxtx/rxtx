@@ -148,7 +148,7 @@ struct event_info_struct
 };
 
 /*  Ports known on the OS */
-if defined(__linux__) || defined(__FreeBSD_kernel__) || defined(__GNU__)
+#if defined(__linux__) || defined(__FreeBSD_kernel__) || defined(__GNU__)
 /*
 	This is a small hack to get mark and space parity working on older systems
 	https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=147533
@@ -156,7 +156,6 @@ if defined(__linux__) || defined(__FreeBSD_kernel__) || defined(__GNU__)
 #	if !defined(CMSPAR)
 #		define CMSPAR 010000000000
 #	endif /* CMSPAR */
-#	
 #	define DEVICEDIR "/dev/"
 #	define LOCKDIR "/var/lock"
 #	define LOCKFILEPREFIX "LCK.."

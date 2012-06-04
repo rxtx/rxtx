@@ -420,11 +420,10 @@ public class RXTXCommDriver implements CommDriver
 		// Old style: properties file must be in JRE folder
 		String [] ext_dirs = System.getProperty("java.ext.dirs").split(":");
 		String fs = System.getProperty("file.seporator");
-		String[] dirArray = ext_dirs.split(System.getProperty("path.separator"));
 
-		for (int i = 0; i < dirArray.length; i++)
+		for (int i = 0; i < ext_dirs.length; i++)
 		{
-			String ext_file = dirArray[i] + fs + "gnu.io.rxtx.properties";
+			String ext_file = ext_dirs[i] + fs + "gnu.io.rxtx.properties";
 			File file = new File(ext_file);
 			if (file.exists())
 			{
