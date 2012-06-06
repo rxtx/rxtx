@@ -5,7 +5,12 @@ Thu May 17 00:22:44 EDT 2012
 rxtx-2.1 and rxtx-2.0 changes are kept in the same file.  skip to the version
 you downloaded.
 
-2.2 ???
+2.2 
+
+		LibraryLoader class for adding a suffix to library names.
+		Jeff Benjamin <jeff@ivertex.com>
+		https://bitbucket.org/ivertex/rxtx/src/aea6634cbeb5/src/gnu/io/LibraryLoader.java
+
 		created Java threads are not marked as daemon
 		http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=674975
 		Christopher Wellons <mosquitopsu@gmail.com>
