@@ -1,4 +1,4 @@
-This is PORTING Tue Nov 13 14:45:26 MST 2001
+This is PORTING Wed Jun  6 11:20:40 EDT 2012
 
 If you want to port rxtx to a new Unix platform do the following.
 
@@ -35,12 +35,15 @@ Common problems include the following variables in the Makefile
 Which are defined in configure.in
 
 We will gladly help with any UNIX platform.  Send questions to
-taj@www.linux.org.uk.  New OS's usually require tweaks.
+tjarvi@qbang.org or the rxtx mail-list.  New OS's usually require tweaks.
 
 If its not compiling try backing out functionality until it compiles.
 
-win32 support has not been tested.  Contact taj@www.linux.org.uk if your 
-interested in developing win32 support.   
+kFreeBSD support has not been tested.  Contact tjarvi@qbang.org if your 
+interested in developing kFreeBSD support.   Also see
+http://glibc-bsd.alioth.debian.org/porting/PORTING for hints on how to use
+rxtx with BSD and glibc.
+
 
 For all Unix flavors... If the package did not work out of the box please
 see BUGS and send a comment.
