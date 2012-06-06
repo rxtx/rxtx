@@ -31,8 +31,11 @@ you downloaded.
 		Hurd fix - Defines __GNU__ to use the FHS
 		Author: Scott Howard <showard@debian.org>
 		
-		BSD - libc_r is not available, use libpthread
+		BSD - libc_r is not available on kFreeBSD, try -DREENTRANT
+		response to downstream attempt:
 		Bug: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=585089
+		Also see:
+		http://patch-tracker.debian.org/patch/series/view/rxtx/2.2pre2-10/kfreebsd_port.patch
 		Author: Scott Howard <showard@debian.org>
 		
 		improve debug information for port enumeration

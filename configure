@@ -12022,9 +12022,9 @@ Linux)
 ;;
 
 *BSD)
-	LDFLAGS=$LDFLAGS" -lpthread"
+	LDFLAGS=$LDFLAGS  #" -lc_r" we are trying to use REENTRANT as a cflag instead
 	JHOME=$JPATH/"lib"
-	CFLAGS=$CFLAGS" -D_NO_POSIX=1 -D_NO_XOPEN4=1"
+	CFLAGS=$CFLAGS" -D_NO_POSIX=1 -D_NO_XOPEN4=1 -D_REENTRANT=1"
 	TARGETLIB="\$(target_triplet)/librxtxSerial.la \
 			\$(target_triplet)/librxtxParallel.la"
 	case $JAVA_VERSION in
