@@ -120,7 +120,7 @@ JAVA=$(JDKHOME)\bin\java -ea -esa
 ######################
 
 CFLAGS_CYGWIN= -O2 $(INCLUDE) -DWIN32 -D __int64="long long" -mno-fp-ret-in-387  -Wall 
-CFLAGS= -O2 $(INCLUDE) -mno-cygwin -DWIN32 -D_JNI_IMPLEMENTATION_ -D __int64="long long" -DHAVE_STDINT_H=1 -mno-fp-ret-in-387  -Wall
+CFLAGS= -O2 $(INCLUDE) -DWIN32 -D_JNI_IMPLEMENTATION_ -D __int64="long long" -DHAVE_STDINT_H=1 -mno-fp-ret-in-387  -Wall
 #CFLAGS= -O2 $(INCLUDE) -mno-cygwin -DWIN32 -D_JNI_IMPLEMENTATION_ -D __int64="long long" -mno-fp-ret-in-387 -Wall -D TRENT_IS_HERE_DEBUGGING_ENUMERATION -DTRENT_IS_HERE_DEBUGGING_THREADS
 INCLUDE= -I c:\matlab6p5/extern/include/ -I . -I $(JDKINCLUDE) -I $(JDKINCLUDE)/win32 -I $(SRC) -I include -I $(MINGINCLUDE)
 LIBS=-L . -L $(LIBDIR) -LC:/tmp/rxtx5/build -luser32 -lgdi32 -lcomdlg32 -lkernel32 -ladvapi32 -lmoldname -lcrtdll
