@@ -5,6 +5,14 @@ rxtx-2.1 and rxtx-2.0 changes are kept in the same file.  skip to the version
 you downloaded.
 
 2.2 
+   
+		Fix Regression: System Properties for registering serial ports not observed since 27-Aug-2010
+		Martin Oberhuber <martin.oberhuber@windriver.com>
+		http://bugzilla.qbang.org/show_bug.cgi?id=196
+
+		Fix Regression: Solaris build broken
+		Martin Oberhuber <martin.oberhuber@windriver.com>
+		http://bugzilla.qbang.org/show_bug.cgi?id=195
 
 		LibraryLoader class for adding a suffix to library names.
 		Jeff Benjamin <jeff@ivertex.com>
