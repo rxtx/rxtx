@@ -111,6 +111,7 @@ RXTXcomm.jar:
 config.h: Makefile
 	echo #define HAVE_FCNTL_H >> config.h
 	echo #define HAVE_SIGNAL_H >> config.h
+	echo #define HAVE_STDINT_H 1 >> config.h
 	echo #undef HAVE_SYS_FCNTL_H >> config.h
 	echo #undef HAVE_SYS_FILE_H >> config.h
 	echo #undef HAVE_SYS_SIGNAL_H >> config.h

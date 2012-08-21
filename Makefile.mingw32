@@ -75,10 +75,10 @@
 SRC=../src
 
 # path to the jdk directory that has include, bin, lib, ... Unix style path
-JDKHOME=D:\Apps\Java\j2sdk1.4.2_17
+JDKHOME=D:\Apps\Java\j2sdk1.4.2_19
 
 #path to mingw32
-MINGHOME="D:\mingw"
+MINGHOME="C:\MinGW"
 
 # path to install RXTXcomm.jar DOS style path
 COMMINSTALL="$(JDKHOME)\jre\lib\ext"
@@ -120,7 +120,7 @@ JAVA=$(JDKHOME)\bin\java -ea -esa
 ######################
 
 CFLAGS_CYGWIN= -O2 $(INCLUDE) -DWIN32 -D __int64="long long" -mno-fp-ret-in-387  -Wall 
-CFLAGS= -O2 $(INCLUDE) -mno-cygwin -DWIN32 -D_JNI_IMPLEMENTATION_ -D __int64="long long" -mno-fp-ret-in-387  -Wall
+CFLAGS= -O2 $(INCLUDE) -mno-cygwin -DWIN32 -D_JNI_IMPLEMENTATION_ -D __int64="long long" -DHAVE_STDINT_H=1 -mno-fp-ret-in-387  -Wall
 #CFLAGS= -O2 $(INCLUDE) -mno-cygwin -DWIN32 -D_JNI_IMPLEMENTATION_ -D __int64="long long" -mno-fp-ret-in-387 -Wall -D TRENT_IS_HERE_DEBUGGING_ENUMERATION -DTRENT_IS_HERE_DEBUGGING_THREADS
 INCLUDE= -I c:\matlab6p5/extern/include/ -I . -I $(JDKINCLUDE) -I $(JDKINCLUDE)/win32 -I $(SRC) -I include -I $(MINGINCLUDE)
 LIBS=-L . -L $(LIBDIR) -LC:/tmp/rxtx5/build -luser32 -lgdi32 -lcomdlg32 -lkernel32 -ladvapi32 -lmoldname -lcrtdll
@@ -187,12 +187,13 @@ RXTXcomm.jar: $(JAVAFILES)
 	$(JAR) -cf RXTXcomm.jar gnu
 
 config.h: Makefile
-	echo "#define HAVE_FCNTL_H 1" > config.h
-	echo "#define HAVE_SIGNAL_H 1" >> config.h
-	echo "#define HAVE_SYS_FCNTL_H 1" >> config.h
-	echo "#define HAVE_SYS_FILE_H 1" >> config.h
-	echo "#undef HAVE_SYS_SIGNAL_H" >> config.h
-	echo "#undef HAVE_TERMIOS_H" >> config.h
+	echo #define HAVE_FCNTL_H 1 > config.h
+	echo #define HAVE_SIGNAL_H 1 >> config.h
+	echo #define HAVE_SYS_FCNTL_H 1 >> config.h
+	echo #define HAVE_SYS_FILE_H 1 >> config.h
+	echo #define HAVE_STDINT_H 1 >> config.h
+	echo #undef HAVE_SYS_SIGNAL_H >> config.h
+	echo #undef HAVE_TERMIOS_H >> config.h
 
 testcp\stamp: RXTXcomm.jar $(TESTFILES)
 	-mkdir testcp
