@@ -52,10 +52,16 @@ COMMINSTALL=$(JDKHOME)\jre\lib\ext
 LIBINSTALL=$(JDKHOME)\jre\bin
 JUNIT_JAR=D:\Apps\junit3.8.2\junit.jar
 
-JAVAC = $(JDKHOME)\bin\javac -source 1.2 -target 1.2
-JAR = $(JDKHOME)\bin\jar
-JAVAH = $(JDKHOME)\bin\javah
-JAVA = $(JDKHOME)\bin\java
+# Expect javac to be in the PATH
+#JAVAC = $(JDKHOME)\bin\javac -source 1.2 -target 1.2
+#JAR = $(JDKHOME)\bin\jar
+#JAVAH = $(JDKHOME)\bin\javah
+#JAVA = $(JDKHOME)\bin\java
+JAVAC = javac -source 1.2 -target 1.2
+JAR = jar
+JAVAH = javah
+JAVA = java
+
 
 SRC=..\src
 CFLAGS= -nologo -I$(JDKHOME)\include -I$(JDKHOME)\include\win32 -I$(SRC) -I. -DWIN32
