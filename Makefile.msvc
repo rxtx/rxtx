@@ -64,8 +64,8 @@ JAVA = java
 
 
 SRC=..\src
-CFLAGS= -nologo -I$(JDKHOME)\include -I$(JDKHOME)\include\win32 -I$(SRC) -I. -DWIN32
-LINK_FLAGS = -nologo -map -incremental:no
+CFLAGS= -nologo -MD -I$(JDKHOME)\include -I$(JDKHOME)\include\win32 -I$(SRC) -I. -DWIN32
+LINK_FLAGS = -nologo -map -incremental:no -opt:REF
 
 !IFDEF DEBUG_INFO
 JAVAC = $(JAVAC) -g
@@ -75,7 +75,8 @@ CFLAGS_DLL = $(CFLAGS_DLL) -GZ
 LINK_FLAGS = $(LINK_FLAGS) -debug 
 DEBUG_INFO_FLAG = DEBUG_INFO^=1
 !ELSE
-CFLAGS = $(CFLAGS) -Ox
+#CFLAGS = $(CFLAGS) -Ox
+CFLAGS = $(CFLAGS) -O1
 !ENDIF
 
 OBJS=init.obj SerialImp.obj termios.obj fuserImp.obj
