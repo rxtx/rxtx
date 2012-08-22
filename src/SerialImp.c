@@ -153,6 +153,9 @@ extern int errno;
 #ifdef HAVE_STDINT_H
 #include <stdint.h> /* for uintptr_t */
 #endif
+#if defined(HAVE_INTTYPES_H) || defined(WIN32)
+#include <inttypes.h> /* C99 standard way getting uintptr_t */
+#endif
 
 #include "SerialImp.h"
 
