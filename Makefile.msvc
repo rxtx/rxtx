@@ -44,17 +44,21 @@
 
 # Expect JAVA_HOME to be set as an environment variable from the outside
 #JAVA_HOME = D:\Apps\Java\j2sdk1.4.2_17
-COMMINSTALL="$(JAVA_HOME)\jre\lib\ext"
-LIBINSTALL="$(JAVA_HOME)\jre\bin"
+
+# Support spaces in directory name
+set JDKHOME="$(JAVA_HOME)"
+
+COMMINSTALL=$(JDKHOME)\jre\lib\ext
+LIBINSTALL=$(JDKHOME)\jre\bin
 JUNIT_JAR=D:\Apps\junit3.8.2\junit.jar
 
-JAVAC = $(JAVA_HOME)\bin\javac -source 1.2 -target 1.2
-JAR = $(JAVA_HOME)\bin\jar
-JAVAH = $(JAVA_HOME)\bin\javah
-JAVA = $(JAVA_HOME)\bin\java
+JAVAC = $(JDKHOME)\bin\javac -source 1.2 -target 1.2
+JAR = $(JDKHOME)\bin\jar
+JAVAH = $(JDKHOME)\bin\javah
+JAVA = $(JDKHOME)\bin\java
 
 SRC=..\src
-CFLAGS= -nologo -I$(JAVA_HOME)\include -I$(JAVA_HOME)\include\win32 -I$(SRC) -I. -DWIN32
+CFLAGS= -nologo -I$(JDKHOME)\include -I$(JDKHOME)\include\win32 -I$(SRC) -I. -DWIN32
 LINK_FLAGS = -nologo -map -incremental:no
 
 !IFDEF DEBUG_INFO

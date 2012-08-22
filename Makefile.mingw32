@@ -77,16 +77,18 @@ SRC=../src
 # path to the jdk directory that has include, bin, lib, ... Unix style path
 # Expect JAVA_HOME to be set as an environment variable from the outside
 #JAVA_HOME = D:\Apps\Java\j2sdk1.4.2_19
-JDKHOME=$(JAVA_HOME)
+
+# Support spaces in directory name
+JDKHOME="$(JAVA_HOME)"
 
 #path to mingw32
 MINGHOME="C:\MinGW"
 
 # path to install RXTXcomm.jar DOS style path
-COMMINSTALL="$(JDKHOME)\jre\lib\ext"
+COMMINSTALL=$(JDKHOME)\jre\lib\ext
 
 # path to install the shared libraries DOS style path
-LIBINSTALL="$(JDKHOME)\jre\bin"
+LIBINSTALL=$(JDKHOME)\jre\bin
 
 # path to the mingw32 libraries (directory with libmingw32.a) DOS style path
 LIBDIR="$(MINGHOME)\lib"
@@ -110,7 +112,7 @@ DLLTOOL=dlltool
 # this looks like a nice tool but I was not able to get symbols in the dll.
 DLLWRAP=dllwrap
 
-CLASSPATH=-classpath ".;C:\jdk13\lib\RXTXcomm.jar;c:\BlackBox.jar;$(JDKHOME)\lib\classes.zip;$(JDKHOME)\jre\lib\rt.jar"
+CLASSPATH=-classpath ".;C:\jdk13\lib\RXTXcomm.jar;c:\BlackBox.jar;$(JAVA_HOME)\lib\classes.zip;$(JAVA_HOME)\jre\lib\rt.jar"
 JAVAH=$(JDKHOME)\bin\javah
 JAR=$(JDKHOME)\bin\jar 
 JAVAC=$(JDKHOME)\bin\javac -source 1.2 -target 1.2 -g
