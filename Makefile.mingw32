@@ -75,7 +75,9 @@
 SRC=../src
 
 # path to the jdk directory that has include, bin, lib, ... Unix style path
-JDKHOME=D:\Apps\Java\j2sdk1.4.2_19
+# Expect JAVA_HOME to be set as an environment variable from the outside
+#JAVA_HOME = D:\Apps\Java\j2sdk1.4.2_19
+JDKHOME=$(JAVA_HOME)
 
 #path to mingw32
 MINGHOME="C:\MinGW"

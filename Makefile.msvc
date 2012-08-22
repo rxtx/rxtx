@@ -42,7 +42,8 @@
 # your Java SDK is located
 #
 
-JAVA_HOME = D:\Apps\Java\j2sdk1.4.2_17
+# Expect JAVA_HOME to be set as an environment variable from the outside
+#JAVA_HOME = D:\Apps\Java\j2sdk1.4.2_17
 COMMINSTALL="$(JAVA_HOME)\jre\lib\ext"
 LIBINSTALL="$(JAVA_HOME)\jre\bin"
 JUNIT_JAR=D:\Apps\junit3.8.2\junit.jar
