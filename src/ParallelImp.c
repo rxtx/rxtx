@@ -185,6 +185,8 @@ JNIEXPORT jboolean JNICALL LPRPort(setLPRMode)(JNIEnv *env,
 /* CTL_CODE is already defined in winioctl.h with MSVC - not redefining over platform SDK headers.
    MSVC does not need this */
 #define CTL_CODE( DeviceType, Function, Method, Access ) (((DeviceType) << 16) | ((Access) << 14) | ((Function) << 2) | (Method))
+#else
+#include <winioctl.h>
 #endif /* MSVC */
 
 #define FILE_DEVICE_PARALLEL_PORT       0x00000016
