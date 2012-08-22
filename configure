@@ -12231,8 +12231,8 @@ Mac\ OS\ X)
 	# LIBTOOL_FIX="sed s/echo\ so/echo\ jnilib/g libtool > tmp; mv tmp libtool; chmod +x libtool;"
 ;;
 
-Solaris*)
-+ 	LDFLAGS=$LDFLAGS" -lpthread"
+SunOS|*Solaris*)
+	# LDFLAGS=$LDFLAGS" -lpthread"
 	TARGETLIB="\$(target_triplet)/librxtxSerial.la \
 		\$(target_triplet)/librxtxParallel.la"
 	JHOME=$JPATH/"lib"
