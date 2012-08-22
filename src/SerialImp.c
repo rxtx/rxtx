@@ -84,6 +84,7 @@
 /*  FIXME  returns 0 in all cases on win32
 #define S_ISCHR(m)	(((m)&S_IFMT) == S_IFCHR)
 */
+#	define pid_t int
 #	if !defined(S_ISCHR)
 #		define S_ISCHR(m) (1)
 #	endif /* S_ISCHR(m) */
