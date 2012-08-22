@@ -46,7 +46,7 @@
 #JAVA_HOME = D:\Apps\Java\j2sdk1.4.2_17
 
 # Support spaces in directory name
-set JDKHOME="$(JAVA_HOME)"
+JDKHOME="$(JAVA_HOME)"
 
 COMMINSTALL=$(JDKHOME)\jre\lib\ext
 LIBINSTALL=$(JDKHOME)\jre\bin
