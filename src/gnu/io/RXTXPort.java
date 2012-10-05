@@ -1,7 +1,7 @@
 /*-------------------------------------------------------------------------
  |   RXTX License v 2.1 - LGPL v 2.1 + Linking Over Controlled Interface.
  |   RXTX is a native interface to serial ports in java.
- |   Copyright 1997-2008 by Trent Jarvi tjarvi@qbang.org and others who
+ |   Copyright 1997-2012 by Trent Jarvi tjarvi@qbang.org and others who
  |   actually wrote it.  See individual source files for more information.
  |
  |   A copy of the LGPL v 2.1 may be found at
@@ -86,6 +86,7 @@ public final class RXTXPort extends SerialPort {
         try {
             sys = new Zystem();
         } catch (Exception e) {
+            throw new Error(e.toString());
         }
 
         if (debug) {
@@ -128,7 +129,6 @@ public final class RXTXPort extends SerialPort {
 
         MonitorThreadLock = true;
         monThread = new MonitorThread();
-        monThread.setDaemon(true);
         monThread.start();
         waitForTheNativeCodeSilly();
         MonitorThreadAlive = true;

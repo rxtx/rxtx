@@ -11117,7 +11117,7 @@ fi
 
 # Define the identity of the package.
  PACKAGE=Serial
- VERSION=2.2pre1
+ VERSION=2.2
 
 
 cat >>confdefs.h <<_ACEOF
@@ -11338,6 +11338,18 @@ do :
 if test "x$ac_cv_header_sys_signal_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_SYS_SIGNAL_H 1
+_ACEOF
+
+fi
+
+done
+
+for ac_header in sys/io.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "sys/io.h" "ac_cv_header_sys_io_h" "$ac_includes_default"
+if test "x$ac_cv_header_sys_io_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SYS_IO_H 1
 _ACEOF
 
 fi
@@ -12010,9 +12022,9 @@ Linux)
 ;;
 
 *BSD)
-	LDFLAGS=$LDFLAGS" -lc_r"
+	LDFLAGS=$LDFLAGS  #" -lc_r" we are trying to use REENTRANT as a cflag instead
 	JHOME=$JPATH/"lib"
-	CFLAGS=$CFLAGS" -D_NO_POSIX=1 -D_NO_XOPEN4=1"
+	CFLAGS=$CFLAGS" -D_NO_POSIX=1 -D_NO_XOPEN4=1 -D_REENTRANT=1"
 	TARGETLIB="\$(target_triplet)/librxtxSerial.la \
 			\$(target_triplet)/librxtxParallel.la"
 	case $JAVA_VERSION in
@@ -12219,8 +12231,8 @@ Mac\ OS\ X)
 	# LIBTOOL_FIX="sed s/echo\ so/echo\ jnilib/g libtool > tmp; mv tmp libtool; chmod +x libtool;"
 ;;
 
-Solaris*)
-+ 	LDFLAGS=$LDFLAGS" -lpthread"
+SunOS|*Solaris*)
+	# LDFLAGS=$LDFLAGS" -lpthread"
 	TARGETLIB="\$(target_triplet)/librxtxSerial.la \
 		\$(target_triplet)/librxtxParallel.la"
 	JHOME=$JPATH/"lib"

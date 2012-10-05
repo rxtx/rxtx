@@ -2,7 +2,7 @@
  |   RXTX License v 2.1 - LGPL v 2.1 + Linking Over Controlled Interface.
  |   RXTX is a native interface to serial ports in java.
  |   Copyright 1998 Kevin Hester, kevinh@acm.org
- |   Copyright 2000-2010 Trent Jarvi tjarvi@qbang.org and others who
+ |   Copyright 2000-2012 Trent Jarvi tjarvi@qbang.org and others who
  |   actually wrote it.  See individual source files for more information.
  |
  |   A copy of the LGPL v 2.1 may be found at
@@ -372,18 +372,49 @@ public class RXTXCommDriver implements CommDriver {
      */
     private boolean registerSpecifiedPorts(int portType) {
         String val = null;
+        if (DEBUG) {
+            System.out.println("checking for system-known ports of type " + portType);
+        }
+        if (DEBUG) {
+            System.out.println("checking registry for ports of type " + portType);
+        }
+        switch (portType) {
+            case CommPortIdentifier.PORT_SERIAL:
+                val = getSpecifiedPorts("gnu.io.rxtx.SerialPorts", "gnu.io.SerialPorts");
+                break;
+
+            case CommPortIdentifier.PORT_PARALLEL:
+                val = getSpecifiedPorts("gnu.io.rxtx.ParallelPorts", "gnu.io.ParallelPorts");
+                break;
+            default:
+                if (DEBUG) {
+                    System.out.println("unknown port type " + portType + " passed to RXTXCommDriver.registerSpecifiedPorts()");
+                }
+        }
+        if (val != null) {
+            addSpecifiedPorts(val, portType);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /*
+     * Load the "gnu.io.rxtx.properties" file.
+     * The file gnu.io.rxtx.properties may reside in the java extension dir,
+     * or it can be anywhere in the classpath.
+     */
+    private Properties loadRxtxProperties() {
         Properties props = null;
         String fileLoc = null;
         // Old style: properties file must be in JRE folder
-        String extDirs = System.getProperty("java.ext.dirs");
-        String[] dirArray = extDirs.split(System.getProperty("path.separator"));
-        for (int i = 0; i < dirArray.length; i++) {
-            String fileName = dirArray[i]
-                    + System.getProperty("file.separator")
-                    + "gnu.io.rxtx.properties";
-            File file = new File(fileName);
+        String[] extDirs = System.getProperty("java.ext.dirs").split(":");
+        String fs = System.getProperty("file.seporator");
+        for (int i = 0; i < extDirs.length; i++) {
+            String extFile = extDirs[i] + fs + "gnu.io.rxtx.properties";
+            File file = new File(extFile);
             if (file.exists()) {
-                fileLoc = fileName;
+                fileLoc = extFile;
                 break;
             }
         }
@@ -425,39 +456,53 @@ public class RXTXCommDriver implements CommDriver {
                 }
             }
         }
-        if (DEBUG) {
-            System.out.println("checking for system-known ports of type " + portType);
-            System.out.println("checking registry for ports of type " + portType);
-        }
-        if (props != null) {
-            switch (portType) {
-                case CommPortIdentifier.PORT_SERIAL:
-                    if ((val = props.getProperty("gnu.io.rxtx.SerialPorts")) == null) {
-                        val = props.getProperty("gnu.io.SerialPorts");
-                    }
-                    break;
-
-                case CommPortIdentifier.PORT_PARALLEL:
-                    if ((val = props.getProperty("gnu.io.rxtx.ParallelPorts")) == null) {
-                        val = props.getProperty("gnu.io.ParallelPorts");
-                    }
-                    break;
-                default:
-                    if (DEBUG) {
-                        System.out.println("unknown port type " + portType + " passed to RXTXCommDriver.registerSpecifiedPorts()");
-                    }
-            }
-        } else {
+        if (props == null) {
             if (DEBUG) {
                 System.out.println("The file: gnu.io.rxtx.properties doesn't exist.");
             }
         }
-        if (val != null) {
-            addSpecifiedPorts(val, portType);
-            return true;
-        } else {
-            return false;
+        return props;
+    }
+
+    /*
+     * Return list of specified ports from System Property or Property File.
+     * 
+     * System Properties take precedence over the gnu.io.rxtx.properties file.
+     * Data from the properties file is cached in System Properties to avoid 
+     * re-loading the file at a later time.
+     * 
+     * @param key1 primary (new) key
+     * @param key2 legacy (fallback) key
+     * @return RXTX specified ports as per requested keys, or <code>null</code> if none found.
+     */
+    private String getSpecifiedPorts(String key1, String key2) {
+        //Try loading from System Properties first
+        String val = System.getProperty(key1);
+        if (val == null && key2 != null) {
+            val = System.getProperty(key2);
         }
+        if (val == null) {
+            //Not specified: Try loading from gnu.io.rxtx.properties file
+            Properties props = loadRxtxProperties();
+            if (props != null) {
+                val = props.getProperty(key1);
+                if (val != null) {
+                    System.setProperty(key1, val);
+                } else if (key2 != null) {
+                    val = props.getProperty(key2);
+                    if (val != null) {
+                        System.setProperty(key2, val);
+                    } else {
+                        //Cache empty String: avoid trying to load properties again later
+                        System.setProperty(key1, "");
+                    }
+                }
+            }
+        } else if (val.equals("")) {
+            //Return null rather than cached empty String
+            val = null;
+        }
+        return val;
     }
 
     /*

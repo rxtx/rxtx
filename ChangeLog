@@ -1,11 +1,67 @@
 This is ChangeLog
-Thu May 17 00:22:44 EDT 2012
-
+Wed Jun  6 21:58:51 EDT 2012
 
 rxtx-2.1 and rxtx-2.0 changes are kept in the same file.  skip to the version
 you downloaded.
 
-2.2 ???
+2.2 
+   
+		Fix Regression: System Properties for registering serial ports not observed since 27-Aug-2010
+		Martin Oberhuber <martin.oberhuber@windriver.com>
+		http://bugzilla.qbang.org/show_bug.cgi?id=196
+
+		Fix Regression: Solaris build broken
+		Martin Oberhuber <martin.oberhuber@windriver.com>
+		http://bugzilla.qbang.org/show_bug.cgi?id=195
+
+		LibraryLoader class for adding a suffix to library names.
+		Jeff Benjamin <jeff@ivertex.com>
+		https://bitbucket.org/ivertex/rxtx/src/aea6634cbeb5/src/gnu/io/LibraryLoader.java
+
+		created Java threads are not marked as daemon
+		http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=674975
+		Christopher Wellons <mosquitopsu@gmail.com>
+
+		Prevent crashes when files are locked
+		http://mailman.qbang.org/pipermail/rxtx/2009-May/10897125.html
+		http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=673778
+		Michael Tandy <michaeltandy@googlemail.com>
+
+		print exception if Zystem initialization fails
+		Bug: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=472053
+		Author: Jan Niehusmann <jan@gondor.com>
+
+		-merged- Removes makefile install of RXTXcomm.jar, silences an
+		unnecessary compiling error
+		Origin: Mario Joussen <joussen@debian.org>, edited by Scott
+		Howard <showard314@gmail.com>
+
+		sys/io.h does not exist on all systems
+		Bug: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=609152
+		Author: Scott Howard <showard@debian.org>
+			
+		Hurd fix - Defines __GNU__ to use the FHS
+		Author: Scott Howard <showard@debian.org>
+		
+		BSD - libc_r is not available on kFreeBSD, try -DREENTRANT
+		response to downstream attempt:
+		Bug: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=585089
+		Also see:
+		http://patch-tracker.debian.org/patch/series/view/rxtx/2.2pre2-10/kfreebsd_port.patch
+		Author: Scott Howard <showard@debian.org>
+		
+		improve debug information for port enumeration
+		debug function signature cleanup
+
+		-merged- Handles the case when "java.ext.dirs" system
+		property contains more than one directory.
+		Author: Philip Ashmore <contact@philipashmore.com>
+		Bug: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=646069
+
+		add uninstall target to Makefile
+		Bug: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=646069
+		Scott Howard <showard@debian.org>
+
 		move eis to the heap so other functions don't get in trouble
 		if the eventLoop returns.  use type safe functions for 
 		retrieving 64 bit values from java.

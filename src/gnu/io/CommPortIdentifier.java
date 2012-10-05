@@ -140,7 +140,7 @@ public class CommPortIdentifier extends Object {
     }
     /*
      * ------------------------------------------------------------------------------
-     * AddIdentifierToList() accept: The cpi to add to the list. perform:
+     * addIdentifierToList() accept: The cpi to add to the list. perform:
      * return: exceptions: comments:
      * ------------------------------------------------------------------------------
      */

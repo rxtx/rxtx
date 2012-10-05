@@ -99,11 +99,9 @@
 #	include <linux/serial.h>
 #	include <linux/version.h>
 #endif
-#ifndef __APPLE__  /* dima */
-#ifndef PPC
-#include <sys/io.h>
-#endif /* PPC */
-#endif /* dima */
+#ifdef HAVE_SYS_IO_H
+#   include <sys/io.h>
+#endif
 
 extern int errno;
 #include "I2CImp.h"

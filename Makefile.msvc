@@ -42,19 +42,30 @@
 # your Java SDK is located
 #
 
-JAVA_HOME = D:\Apps\Java\j2sdk1.4.2_17
-COMMINSTALL="$(JAVA_HOME)\jre\lib\ext"
-LIBINSTALL="$(JAVA_HOME)\jre\bin"
+# Expect JAVA_HOME to be set as an environment variable from the outside
+#JAVA_HOME = D:\Apps\Java\j2sdk1.4.2_17
+
+# Support spaces in directory name
+JDKHOME="$(JAVA_HOME)"
+
+COMMINSTALL=$(JDKHOME)\jre\lib\ext
+LIBINSTALL=$(JDKHOME)\jre\bin
 JUNIT_JAR=D:\Apps\junit3.8.2\junit.jar
 
-JAVAC = $(JAVA_HOME)\bin\javac -source 1.2 -target 1.2
-JAR = $(JAVA_HOME)\bin\jar
-JAVAH = $(JAVA_HOME)\bin\javah
-JAVA = $(JAVA_HOME)\bin\java
+# Expect javac to be in the PATH
+#JAVAC = $(JDKHOME)\bin\javac -source 1.2 -target 1.2
+#JAR = $(JDKHOME)\bin\jar
+#JAVAH = $(JDKHOME)\bin\javah
+#JAVA = $(JDKHOME)\bin\java
+JAVAC = javac -source 1.2 -target 1.2
+JAR = jar
+JAVAH = javah
+JAVA = java
+
 
 SRC=..\src
-CFLAGS= -nologo -I$(JAVA_HOME)\include -I$(JAVA_HOME)\include\win32 -I$(SRC) -I. -DWIN32
-LINK_FLAGS = -nologo -map -incremental:no
+CFLAGS= -nologo -MD -I$(JDKHOME)\include -I$(JDKHOME)\include\win32 -I$(SRC) -I. -DWIN32
+LINK_FLAGS = -nologo -map -incremental:no -opt:REF
 
 !IFDEF DEBUG_INFO
 JAVAC = $(JAVAC) -g
@@ -64,7 +75,8 @@ CFLAGS_DLL = $(CFLAGS_DLL) -GZ
 LINK_FLAGS = $(LINK_FLAGS) -debug 
 DEBUG_INFO_FLAG = DEBUG_INFO^=1
 !ELSE
-CFLAGS = $(CFLAGS) -Ox
+#CFLAGS = $(CFLAGS) -Ox
+CFLAGS = $(CFLAGS) -O1
 !ENDIF
 
 OBJS=init.obj SerialImp.obj termios.obj fuserImp.obj
@@ -111,6 +123,7 @@ RXTXcomm.jar:
 config.h: Makefile
 	echo #define HAVE_FCNTL_H >> config.h
 	echo #define HAVE_SIGNAL_H >> config.h
+	echo #define HAVE_STDINT_H 1 >> config.h
 	echo #undef HAVE_SYS_FCNTL_H >> config.h
 	echo #undef HAVE_SYS_FILE_H >> config.h
 	echo #undef HAVE_SYS_SIGNAL_H >> config.h

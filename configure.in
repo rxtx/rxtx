@@ -65,12 +65,13 @@ AC_PROG_CC
 AC_DISABLE_STATIC
 AM_PROG_LIBTOOL
 # end of SCO fixes
-AM_INIT_AUTOMAKE(Serial,2.2pre1)
+AM_INIT_AUTOMAKE(Serial,2.2)
 AC_CHECK_HEADERS(fcntl.h)
 AC_CHECK_HEADERS(sys/fcntl.h)
 AC_CHECK_HEADERS(sys/file.h)
 AC_CHECK_HEADERS(sys/time.h)
 AC_CHECK_HEADERS(sys/signal.h)
+AC_CHECK_HEADERS(sys/io.h)
 AC_CHECK_HEADERS(signal.h)
 AC_CHECK_HEADERS(termios.h)
 AC_CHECK_HEADERS(grp.h)
@@ -576,9 +577,9 @@ Linux)
 ;;
 
 *BSD)
-	LDFLAGS=$LDFLAGS" -lc_r"
+	LDFLAGS=$LDFLAGS  #" -lc_r" we are trying to use REENTRANT as a cflag instead
 	JHOME=$JPATH/"lib"
-	CFLAGS=$CFLAGS" -D_NO_POSIX=1 -D_NO_XOPEN4=1"
+	CFLAGS=$CFLAGS" -D_NO_POSIX=1 -D_NO_XOPEN4=1 -D_REENTRANT=1"
 	TARGETLIB="\$(target_triplet)/librxtxSerial.la \
 			\$(target_triplet)/librxtxParallel.la"
 	case $JAVA_VERSION in
@@ -785,8 +786,8 @@ Mac\ OS\ X)
 	# LIBTOOL_FIX="sed s/echo\ so/echo\ jnilib/g libtool > tmp; mv tmp libtool; chmod +x libtool;"
 ;;
 
-Solaris*)
-+ 	LDFLAGS=$LDFLAGS" -lpthread"
+SunOS|*Solaris*)
+	# LDFLAGS=$LDFLAGS" -lpthread"
 	TARGETLIB="\$(target_triplet)/librxtxSerial.la \
 		\$(target_triplet)/librxtxParallel.la"
 	JHOME=$JPATH/"lib"

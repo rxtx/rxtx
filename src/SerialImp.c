@@ -84,6 +84,7 @@
 /*  FIXME  returns 0 in all cases on win32
 #define S_ISCHR(m)	(((m)&S_IFMT) == S_IFCHR)
 */
+#	define pid_t int
 #	if !defined(S_ISCHR)
 #		define S_ISCHR(m) (1)
 #	endif /* S_ISCHR(m) */
@@ -149,7 +150,16 @@
 
 extern int errno;
 
-#include <stdint.h> /* for uintptr_t */
+#ifdef WIN32
+#  define uintptr_t UINT_PTR
+#else
+#  ifdef HAVE_STDINT_H
+#  include <stdint.h> /* for uintptr_t */
+#  endif
+#  ifdef HAVE_INTTYPES_H
+#  include <inttypes.h> /* C99 standard way getting uintptr_t */
+#  endif
+#endif
 
 #include "SerialImp.h"
 
@@ -4282,7 +4292,7 @@ RXTXVersion.nativeGetVersion
 JNIEXPORT jstring JNICALL RXTXVersion(nativeGetVersion) (JNIEnv *env,
 	jclass jclazz )
 {
-	return (*env)->NewStringUTF( env, "RXTX-2.2pre2" );
+	return (*env)->NewStringUTF( env, "RXTX-2.2" );
 }
 
 /*----------------------------------------------------------
@@ -4370,7 +4380,11 @@ JNIEXPORT jboolean  JNICALL RXTXCommDriver(testRead)(
 
 	if( fd < 0 )
 	{
-		report_verbose( "testRead() open failed\n" );
+		report_verbose( "testRead() open \"" );
+		report_verbose( name );
+		report_verbose( "\" failed: " );
+		report_verbose( strerror(errno) );
+		report_verbose( "\n" );
 		ret = JNI_FALSE;
 		goto END;
 	}
@@ -5167,7 +5181,7 @@ void throw_java_exception( JNIEnv *env, char *exc, char *foo, char *msg )
    exceptions:  none
    comments:
 ----------------------------------------------------------*/
-void report_warning(char *msg)
+void report_warning(const char *msg)
 {
 	fprintf(stderr, "%s", msg);
 }
@@ -5181,7 +5195,7 @@ void report_warning(char *msg)
    exceptions:  none
    comments:
 ----------------------------------------------------------*/
-void report_verbose(char *msg)
+void report_verbose(const char *msg)
 {
 #ifdef DEBUG_VERBOSE
 	fprintf(stderr, "%s", msg);
@@ -5196,7 +5210,7 @@ void report_verbose(char *msg)
    exceptions:  none
    comments:
 ----------------------------------------------------------*/
-void report_error(char *msg)
+void report_error(const char *msg)
 {
 	fprintf(stderr, "%s", msg);
 }
@@ -5210,7 +5224,7 @@ void report_error(char *msg)
    exceptions:  none
    comments:
 ----------------------------------------------------------*/
-void report(char *msg)
+void report(const char *msg)
 {
 #ifdef DEBUG
 	fprintf(stderr, "%s", msg);
@@ -5359,7 +5373,7 @@ int lib_lock_dev_lock( const char *filename, pid_t pid )
 	}
 	if ( dev_lock( filename ) )
 	{
-		sprintf( message,
+		snprintf( message, 80,
 			"RXTX fhs_lock() Error: creating lock file for: %s: %s\n",
 			filename, strerror(errno) );
 		report_error( message );
@@ -5419,14 +5433,14 @@ int fhs_lock( const char *filename, pid_t pid )
 	fd = open( file, O_CREAT | O_WRONLY | O_EXCL, 0444 );
 	if( fd < 0 )
 	{
-		sprintf( message,
+		snprintf( message, 80,
 			"RXTX fhs_lock() Error: opening lock file: %s: %s\n",
 			file, strerror(errno) );
 		report_error( message );
 		return 1;
 	}
-	sprintf( lockinfo, "%10d\n",(int) getpid() );
-	sprintf( message, "fhs_lock: creating lockfile: %s\n", lockinfo );
+	snprintf( lockinfo, 12, "%10d\n",(int) getpid() );
+	snprintf( message, 80, "fhs_lock: creating lockfile: %s\n", lockinfo );
 	report( message );
 	if( ( write( fd, lockinfo, 11 ) ) < 0 )
 	{
@@ -5606,7 +5620,7 @@ void fhs_unlock( const char *filename, int openpid )
 	p = ( char * ) filename + i;
 	/*  FIXME  need to handle subdirectories /dev/cua/... */
 	while( *( p - 1 ) != '/' && i-- != 1 ) p--;
-	sprintf( file, "%s/LCK..%s", LOCKDIR, p );
+	snprintf( file, 80, "%s/LCK..%s", LOCKDIR, p );
 
 	if( !check_lock_pid( file, openpid ) )
 	{

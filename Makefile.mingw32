@@ -75,16 +75,20 @@
 SRC=../src
 
 # path to the jdk directory that has include, bin, lib, ... Unix style path
-JDKHOME=D:\Apps\Java\j2sdk1.4.2_17
+# Expect JAVA_HOME to be set as an environment variable from the outside
+#JAVA_HOME = D:\Apps\Java\j2sdk1.4.2_19
+
+# Support spaces in directory name
+JDKHOME="$(JAVA_HOME)"
 
 #path to mingw32
-MINGHOME="D:\mingw"
+MINGHOME="C:\MinGW"
 
 # path to install RXTXcomm.jar DOS style path
-COMMINSTALL="$(JDKHOME)\jre\lib\ext"
+COMMINSTALL=$(JDKHOME)\jre\lib\ext
 
 # path to install the shared libraries DOS style path
-LIBINSTALL="$(JDKHOME)\jre\bin"
+LIBINSTALL=$(JDKHOME)\jre\bin
 
 # path to the mingw32 libraries (directory with libmingw32.a) DOS style path
 LIBDIR="$(MINGHOME)\lib"
@@ -108,7 +112,7 @@ DLLTOOL=dlltool
 # this looks like a nice tool but I was not able to get symbols in the dll.
 DLLWRAP=dllwrap
 
-CLASSPATH=-classpath ".;C:\jdk13\lib\RXTXcomm.jar;c:\BlackBox.jar;$(JDKHOME)\lib\classes.zip;$(JDKHOME)\jre\lib\rt.jar"
+CLASSPATH=-classpath ".;C:\jdk13\lib\RXTXcomm.jar;c:\BlackBox.jar;$(JAVA_HOME)\lib\classes.zip;$(JAVA_HOME)\jre\lib\rt.jar"
 JAVAH=$(JDKHOME)\bin\javah
 JAR=$(JDKHOME)\bin\jar 
 JAVAC=$(JDKHOME)\bin\javac -source 1.2 -target 1.2 -g
@@ -120,7 +124,7 @@ JAVA=$(JDKHOME)\bin\java -ea -esa
 ######################
 
 CFLAGS_CYGWIN= -O2 $(INCLUDE) -DWIN32 -D __int64="long long" -mno-fp-ret-in-387  -Wall 
-CFLAGS= -O2 $(INCLUDE) -mno-cygwin -DWIN32 -D_JNI_IMPLEMENTATION_ -D __int64="long long" -mno-fp-ret-in-387  -Wall
+CFLAGS= -O2 $(INCLUDE) -DWIN32 -D_JNI_IMPLEMENTATION_ -D __int64="long long" -DHAVE_STDINT_H=1 -mno-fp-ret-in-387  -Wall
 #CFLAGS= -O2 $(INCLUDE) -mno-cygwin -DWIN32 -D_JNI_IMPLEMENTATION_ -D __int64="long long" -mno-fp-ret-in-387 -Wall -D TRENT_IS_HERE_DEBUGGING_ENUMERATION -DTRENT_IS_HERE_DEBUGGING_THREADS
 INCLUDE= -I c:\matlab6p5/extern/include/ -I . -I $(JDKINCLUDE) -I $(JDKINCLUDE)/win32 -I $(SRC) -I include -I $(MINGINCLUDE)
 LIBS=-L . -L $(LIBDIR) -LC:/tmp/rxtx5/build -luser32 -lgdi32 -lcomdlg32 -lkernel32 -ladvapi32 -lmoldname -lcrtdll
@@ -174,10 +178,10 @@ rxtxZystem.dll:	RXTXcomm.jar $(DLLOBJECTS) $(SRC)/ZystemImp.c #ZystemImp.o
 	dllwrap --verbose --no-default-excludes --export-all-symbols --output-exp Zystem.exp --output-def Zystem.def --add-stdcall-alias --driver-name gcc  -o rxtxZystem.dll ZystemImp.o -Wl,-e,__cygwin_noncygwin_dll_entry@12 -s
 
 rxtxSerial.dll:	RXTXcomm.jar $(DLLOBJECTS)
-	gcc -mno-cygwin -shared -o $@ $(DLLOBJECTS) -lmingw32 -Wl,--kill-at
+	gcc -shared -o $@ $(DLLOBJECTS) -lmingw32 -Wl,--kill-at
 
 rxtxParallel.dll: $(PARALLELOBJECTS)
-	gcc -mno-cygwin -shared -o $@ $(PARALLELOBJECTS) -lmingw32 -Wl,--kill-at
+	gcc -shared -o $@ $(PARALLELOBJECTS) -lmingw32 -Wl,--kill-at
 
 gnu_io_RXTXPort.h gnu_io_CommPortIdentifier.h gnu_io_LPRPort.h gnu_io_RXTXVersion.h: RXTXcomm.jar
 	$(JAVAH) $(CLASSPATH) -jni gnu.io.RXTXPort gnu.io.CommPortIdentifier gnu.io.LPRPort gnu.io.RXTXVersion
@@ -187,12 +191,13 @@ RXTXcomm.jar: $(JAVAFILES)
 	$(JAR) -cf RXTXcomm.jar gnu
 
 config.h: Makefile
-	echo "#define HAVE_FCNTL_H 1" > config.h
-	echo "#define HAVE_SIGNAL_H 1" >> config.h
-	echo "#define HAVE_SYS_FCNTL_H 1" >> config.h
-	echo "#define HAVE_SYS_FILE_H 1" >> config.h
-	echo "#undef HAVE_SYS_SIGNAL_H" >> config.h
-	echo "#undef HAVE_TERMIOS_H" >> config.h
+	echo #define HAVE_FCNTL_H 1 > config.h
+	echo #define HAVE_SIGNAL_H 1 >> config.h
+	echo #define HAVE_SYS_FCNTL_H 1 >> config.h
+	echo #define HAVE_SYS_FILE_H 1 >> config.h
+	echo #define HAVE_STDINT_H 1 >> config.h
+	echo #undef HAVE_SYS_SIGNAL_H >> config.h
+	echo #undef HAVE_TERMIOS_H >> config.h
 
 testcp\stamp: RXTXcomm.jar $(TESTFILES)
 	-mkdir testcp
