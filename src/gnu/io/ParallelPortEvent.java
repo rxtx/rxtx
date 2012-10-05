@@ -57,7 +57,7 @@
  --------------------------------------------------------------------------*/
 package gnu.io;
 
-import java.util.*;
+import java.util.EventObject;
 
 /**
  * @author Trent Jarvi

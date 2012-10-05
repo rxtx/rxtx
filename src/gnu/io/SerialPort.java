@@ -57,8 +57,8 @@
  --------------------------------------------------------------------------*/
 package gnu.io;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.util.TooManyListenersException;
 
 /**
  * @author Trent Jarvi

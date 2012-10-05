@@ -59,7 +59,7 @@
  --------------------------------------------------------------------------*/
 package gnu.io;
 
-import java.util.*;
+import java.util.EventListener;
 
 /**
  * @author Trent Jarvi

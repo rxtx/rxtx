@@ -57,9 +57,21 @@
  --------------------------------------------------------------------------*/
 package gnu.io;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.io.*;
+import java.awt.BorderLayout;
+import java.awt.Button;
+import java.awt.Checkbox;
+import java.awt.Frame;
+import java.awt.GridLayout;
+import java.awt.Label;
+import java.awt.Panel;
+import java.awt.TextArea;
+import java.awt.TextField;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 class Configure extends Frame {
 
@@ -138,7 +150,6 @@ class Configure extends Frame {
         p1 = new Panel();
         p1.setLayout(new GridLayout(16, 4));
         ActionListener l = new ActionListener() {
-
             public void actionPerformed(ActionEvent e) {
                 {
                     String res = e.getActionCommand();
@@ -159,7 +170,6 @@ class Configure extends Frame {
         p2.add(new Label("Port Name:"));
         TextField tf = new TextField(devPath, 8);
         tf.addActionListener(new ActionListener() {
-
             public void actionPerformed(ActionEvent e) {
                 addCheckBoxes(e.getActionCommand());
                 f.setVisible(true);
@@ -172,7 +182,6 @@ class Configure extends Frame {
         for (int j = 0, i = 4; i < 129; i *= 2, j++) {
             b[j] = new Button("1-" + i);
             b[j].addActionListener(new ActionListener() {
-
                 public void actionPerformed(ActionEvent e) {
                     int k = Integer.parseInt(
                             e.getActionCommand().substring(2));
@@ -196,7 +205,6 @@ class Configure extends Frame {
         f.add("North", t);
         f.addWindowListener(
                 new WindowAdapter() {
-
                     public void windowClosing(WindowEvent e) {
                         System.exit(0);
                     }
