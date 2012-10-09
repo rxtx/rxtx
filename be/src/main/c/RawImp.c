@@ -66,7 +66,7 @@
 #if defined(__MWERKS__)/* dima */
 #include "Raw.h"
 #else /* dima */
-#include "config.h"
+//#include "config.h"
 #include "gnu_io_Raw.h"
 #endif /* dima */
 #include <time.h>

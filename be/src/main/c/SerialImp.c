@@ -59,7 +59,7 @@
 #include "RXTXPort.h" /* dima */
 #else  /* dima */
 #ifndef WIN32
-#	include "config.h"
+//#	include "config.h"
 #endif
 #include "gnu_io_RXTXPort.h"
 #endif /* dima */
