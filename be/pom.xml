@@ -2,11 +2,31 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>gnu.io.rxtx</groupId>
-    <artifactId>be</artifactId>
+    <artifactId>rxtx-be</artifactId>
     <packaging>so</packaging>
     <version>2.2-stabilize-SNAPSHOT</version>
-    <name>be</name>
+    <name>RXTX native backend</name>
     <url>http://rxtx.qbang.org</url>
+    <parent>    
+        <groupId>gnu.io.rxtx</groupId>
+        <artifactId>rxtx-top</artifactId>
+        <version>2.2-stabilize-SNAPSHOT</version>
+    </parent>
+    <profiles>
+        <profile>
+            <id>unix-x86</id>
+            <activation>
+                <os>
+                    <family>linux</family>
+                    <arch>i386</arch>
+                </os>
+            </activation>
+            <properties>
+                <rxtx.os>linux</rxtx.os>
+                <rxtx.arch>i386</rxtx.arch>
+            </properties>
+        </profile>
+    </profiles>
     <build>
         <plugins>
             <plugin>
@@ -15,6 +35,7 @@
                 <version>1.0-alpha-7</version>
                 <extensions>true</extensions>
                 <configuration>
+                    <classifier>${rxtx.os}-${rxtx.arch}</classifier>
                     <javahClassNames>
                         <javahClassName>gnu.io.RXTXPort</javahClassName>
                     </javahClassNames>
@@ -24,6 +45,7 @@
                         <compilerStartOption>-DHAVE_STDINT_H</compilerStartOption>
                         <compilerStartOption>-DHAVE_SYS_FCNTL_H</compilerStartOption>
                         <compilerStartOption>-DHAVE_SYS_SIGNAL_H</compilerStartOption>
+                        <compilerStartOption></compilerStartOption>
                     </compilerStartOptions>
                     <linkerStartOptions>
                         <linkerStartOption>-shared</linkerStartOption>
@@ -37,19 +59,13 @@
                         </source>
                     </sources>
                 </configuration>
-            </plugin>
+            </plugin>        
         </plugins>
     </build>
-    <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>3.8.1</version>
-            <scope>test</scope>
-        </dependency>        
+    <dependencies>      
         <dependency>
             <groupId>gnu.io.rxtx</groupId>
-            <artifactId>fe</artifactId>
+            <artifactId>rxtx-fe</artifactId>
             <version>2.2-stabilize-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
