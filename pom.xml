@@ -25,6 +25,37 @@
                 <module>be-linux-i386</module>
             </modules>
         </profile>
+        <profile>
+            <id>failOnUnsupportedPlatforms</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build> 
+                <plugins> 
+                    <plugin> 
+                        <groupId>org.apache.maven.plugins</groupId> 
+                        <artifactId>maven-enforcer-plugin</artifactId> 
+                        <version>1.1.1</version> 
+                        <executions> 
+                            <execution> 
+                                <id>enforce</id> 
+                                <goals> 
+                                    <goal>enforce</goal> 
+                                </goals>
+                                <configuration> 
+                                    <rules> 
+                                        <AlwaysFail>
+                                            <message>Your platform (=os/arch combination) is currently unsupported to build its own binary, however it might be possible to use other platforms to compile the necessary binary for you. This message does not necessarily mean that there is no way to run rxtx on your platform.</message>
+                                        </AlwaysFail>
+                                    </rules> 
+                                    <fail>true</fail> 
+                                </configuration> 
+                            </execution> 
+                        </executions> 
+                    </plugin> 
+                </plugins> 
+            </build>
+        </profile>
     </profiles>
     <build>
         <pluginManagement>
