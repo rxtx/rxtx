@@ -3,71 +3,34 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>gnu.io.rxtx</groupId>
     <artifactId>rxtx-be</artifactId>
-    <packaging>so</packaging>
+    <packaging>pom</packaging>
     <version>2.2-stabilize-SNAPSHOT</version>
-    <name>RXTX native backend</name>
+    <name>RXTX native backend source</name>
     <url>http://rxtx.qbang.org</url>
     <parent>    
         <groupId>gnu.io.rxtx</groupId>
         <artifactId>rxtx-top</artifactId>
         <version>2.2-stabilize-SNAPSHOT</version>
     </parent>
-    <profiles>
-        <profile>
-            <id>unix-x86</id>
-            <activation>
-                <os>
-                    <family>linux</family>
-                    <arch>i386</arch>
-                </os>
-            </activation>
-            <properties>
-                <rxtx.os>linux</rxtx.os>
-                <rxtx.arch>i386</rxtx.arch>
-            </properties>
-        </profile>
-    </profiles>
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>native-maven-plugin</artifactId>
-                <version>1.0-alpha-7</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <classifier>${rxtx.os}-${rxtx.arch}</classifier>
-                    <javahClassNames>
-                        <javahClassName>gnu.io.RXTXPort</javahClassName>
-                    </javahClassNames>
-                    <javahOS>linux</javahOS>
-                    <compilerStartOptions>
-                        <compilerStartOption>-DHAVE_TERMIOS_H</compilerStartOption>
-                        <compilerStartOption>-DHAVE_STDINT_H</compilerStartOption>
-                        <compilerStartOption>-DHAVE_SYS_FCNTL_H</compilerStartOption>
-                        <compilerStartOption>-DHAVE_SYS_SIGNAL_H</compilerStartOption>
-                        <compilerStartOption></compilerStartOption>
-                    </compilerStartOptions>
-                    <linkerStartOptions>
-                        <linkerStartOption>-shared</linkerStartOption>
-                    </linkerStartOptions>
-                    <sources>
-                        <source>
-                            <directory>src/main/c</directory>
-                            <fileNames>
-                                <fileName>SerialImp.c</fileName>
-                            </fileNames>
-                        </source>
-                    </sources>
-                </configuration>
-            </plugin>        
+           <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>source-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>src/assemble/src.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>    
         </plugins>
     </build>
-    <dependencies>      
-        <dependency>
-            <groupId>gnu.io.rxtx</groupId>
-            <artifactId>rxtx-fe</artifactId>
-            <version>2.2-stabilize-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
-    </dependencies>
 </project>

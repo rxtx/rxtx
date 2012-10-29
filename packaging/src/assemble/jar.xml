@@ -20,12 +20,13 @@
         <moduleSet>
             <useAllReactorProjects>true</useAllReactorProjects>
             <includes>
-                <include>gnu.io.rxtx:rxtx-be</include>
+                <include>gnu.io.rxtx:rxtx-be-*</include>
             </includes>
             <binaries>
                 <includeDependencies>false</includeDependencies>
                 <outputDirectory>/bin/</outputDirectory>
                 <unpack>false</unpack>
+                <outputFileNameMapping>${module.artifactId}.${module.extension}</outputFileNameMapping>
             </binaries>
         </moduleSet>
     </moduleSets>

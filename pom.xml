@@ -12,6 +12,20 @@
         <module>be</module>
         <module>packaging</module>
     </modules>
+    <profiles>
+        <profile>
+            <id>with-be-linux-i386</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                    <arch>i386</arch>
+                </os>
+            </activation>
+            <modules>
+                <module>be-linux-i386</module>
+            </modules>
+        </profile>
+    </profiles>
     <build>
         <pluginManagement>
             <plugins>
