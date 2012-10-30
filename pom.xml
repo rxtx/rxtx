@@ -7,6 +7,47 @@
     <version>2.2-stabilize-SNAPSHOT</version>
     <name>RXTX parent POM</name>
     <url>http://rxtx.qbang.org</url>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>gnu.io.rxtx</groupId>
+                <artifactId>rxtx-java</artifactId>
+                <version>2.2-stabilize-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>gnu.io.rxtx</groupId>
+                <artifactId>rxtx-native</artifactId>
+                <version>2.2-stabilize-SNAPSHOT</version>
+                <scope>compile</scope>
+                <classifier>sources</classifier>
+                <type>zip</type>
+            </dependency>
+            <dependency>
+                <groupId>gnu.io.rxtx</groupId>
+                <artifactId>rxtx-native-linux-i386</artifactId>
+                <version>2.2-stabilize-SNAPSHOT</version>
+                <type>so</type>
+            </dependency>
+            <dependency>
+                <groupId>gnu.io.rxtx</groupId>
+                <artifactId>rxtx-native-linux-x86_64</artifactId>
+                <version>2.2-stabilize-SNAPSHOT</version>
+                <type>so</type>
+            </dependency>
+            <dependency>
+                <groupId>gnu.io.rxtx</groupId>
+                <artifactId>rxtx-native-windows-i386</artifactId>
+                <version>2.2-stabilize-SNAPSHOT</version>
+                <type>dll</type>
+            </dependency>
+            <dependency>
+                <groupId>gnu.io.rxtx</groupId>
+                <artifactId>rxtx-native-windows-x86_64</artifactId>
+                <version>2.2-stabilize-SNAPSHOT</version>
+                <type>dll</type>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <modules>
         <module>rxtx-java</module>
         <module>rxtx-native</module>
