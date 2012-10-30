@@ -26,6 +26,42 @@
             </modules>
         </profile>
         <profile>
+            <id>with-be-linux-x86_64</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                    <arch>x86_64</arch>
+                </os>
+            </activation>
+            <modules>
+                <module>be-linux-x86_64</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>with-be-windows-i386</id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                    <arch>i386</arch>
+                </os>
+            </activation>
+            <modules>
+                <module>be-windows-i386</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>with-be-windows-x86_64</id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                    <arch>x86_64</arch>
+                </os>
+            </activation>
+            <modules>
+                <module>be-windows-x86_64</module>
+            </modules>
+        </profile>
+        <profile>
             <id>failOnUnsupportedPlatforms</id>
             <activation>
                 <activeByDefault>true</activeByDefault>

@@ -99,11 +99,13 @@ typedef unsigned int    tcflag_t;
    interfaces.
 */
 
+#ifndef __MINGW32__
 struct timespec
 {
 	time_t	tv_sec;
 	long	tv_nsec;
 };
+#endif
 
 #define NCCS 32
 struct termios

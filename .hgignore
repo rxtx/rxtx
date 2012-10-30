@@ -1,6 +1,1 @@
-fe/target/
-be/target/
-packaging/target/
-be-linux-i386/target/
-
-
+^[^/]*\/target$
