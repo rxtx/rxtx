@@ -18,6 +18,7 @@
             <activation>
                 <os>
                     <family>unix</family>
+                    <name>linux</name>
                     <arch>i386</arch>
                 </os>
             </activation>
@@ -27,36 +28,18 @@
         </profile>
         <profile>
             <id>with-linux-x86_64</id>
-            <activation>
-                <os>
-                    <family>unix</family>
-                    <arch>x86_64</arch>
-                </os>
-            </activation>
             <modules>
                 <module>native-linux-x86_64</module>
             </modules>
         </profile>
         <profile>
             <id>with-windows-i386</id>
-            <activation>
-                <os>
-                    <family>windows</family>
-                    <arch>i386</arch>
-                </os>
-            </activation>
             <modules>
                 <module>native-windows-i386</module>
             </modules>
         </profile>
         <profile>
             <id>with-windows-x86_64</id>
-            <activation>
-                <os>
-                    <family>windows</family>
-                    <arch>x86_64</arch>
-                </os>
-            </activation>
             <modules>
                 <module>native-windows-x86_64</module>
             </modules>
