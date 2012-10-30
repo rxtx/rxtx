@@ -2,14 +2,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>gnu.io.rxtx</groupId>
-    <artifactId>rxtx-be</artifactId>
+    <artifactId>rxtx-native</artifactId>
     <packaging>pom</packaging>
     <version>2.2-stabilize-SNAPSHOT</version>
-    <name>RXTX native backend source</name>
+    <name>RXTX native source</name>
     <url>http://rxtx.qbang.org</url>
     <parent>    
         <groupId>gnu.io.rxtx</groupId>
-        <artifactId>rxtx-top</artifactId>
+        <artifactId>rxtx-parent</artifactId>
         <version>2.2-stabilize-SNAPSHOT</version>
     </parent>
     <build>

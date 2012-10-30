@@ -2,14 +2,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>gnu.io.rxtx</groupId>
-    <artifactId>rxtx-be-windows-x86_64</artifactId>
+    <artifactId>rxtx-native-windows-x86_64</artifactId>
     <packaging>dll</packaging>
     <version>2.2-stabilize-SNAPSHOT</version>
-    <name>[windows/x86_64] RXTX backend</name>
+    <name>[windows/x86_64] RXTX native lib</name>
     <url>http://rxtx.qbang.org</url>
     <parent>    
         <groupId>gnu.io.rxtx</groupId>
-        <artifactId>rxtx-top</artifactId>
+        <artifactId>rxtx-parent</artifactId>
         <version>2.2-stabilize-SNAPSHOT</version>
     </parent>
     <profiles>
@@ -74,7 +74,7 @@
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>gnu.io.rxtx</groupId>
-                                    <artifactId>rxtx-be</artifactId>
+                                    <artifactId>rxtx-native</artifactId>
                                     <version>2.2-stabilize-SNAPSHOT</version>
                                     <type>zip</type>
                                     <classifier>sources</classifier>
@@ -119,13 +119,13 @@
     <dependencies>      
         <dependency>
             <groupId>gnu.io.rxtx</groupId>
-            <artifactId>rxtx-fe</artifactId>
+            <artifactId>rxtx-java</artifactId>
             <version>2.2-stabilize-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>gnu.io.rxtx</groupId>
-            <artifactId>rxtx-be</artifactId>
+            <artifactId>rxtx-native</artifactId>
             <version>2.2-stabilize-SNAPSHOT</version>
             <scope>compile</scope>
             <classifier>sources</classifier>

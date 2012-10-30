@@ -2,14 +2,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>gnu.io.rxtx</groupId>
-    <artifactId>rxtx-be-linux-x86_64</artifactId>
+    <artifactId>rxtx-native-linux-i386</artifactId>
     <packaging>so</packaging>
     <version>2.2-stabilize-SNAPSHOT</version>
-    <name>[linux/x86_64] RXTX backend</name>
+    <name>[linux/i386] RXTX native lib</name>
     <url>http://rxtx.qbang.org</url>
     <parent>    
         <groupId>gnu.io.rxtx</groupId>
-        <artifactId>rxtx-top</artifactId>
+        <artifactId>rxtx-parent</artifactId>
         <version>2.2-stabilize-SNAPSHOT</version>
     </parent>
     <profiles>
@@ -43,7 +43,7 @@
                                 <requireOS>
                                     <family>unix</family>
                                     <arch>i386</arch>
-                                    <message>Sorry, the rxtx binary for the unix/x86_64 platform can be build on the following systems only: * unix/i386 If you know about a working cross-platform build procedure for other platforms, please bring this up at the rxtx mailing list.</message>
+                                    <message>Sorry, the rxtx binary for the unix/i386 platform can be build on the following systems only: * unix/i386 If you know about a working cross-platform build procedure for other platforms, please bring this up at the rxtx mailing list.</message>
                                 </requireOS>
                             </rules>  
                             <fail>true</fail>
@@ -74,7 +74,7 @@
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>gnu.io.rxtx</groupId>
-                                    <artifactId>rxtx-be</artifactId>
+                                    <artifactId>rxtx-native</artifactId>
                                     <version>2.2-stabilize-SNAPSHOT</version>
                                     <type>zip</type>
                                     <classifier>sources</classifier>
@@ -102,13 +102,10 @@
                         <compilerStartOption>-DHAVE_STDINT_H</compilerStartOption>
                         <compilerStartOption>-DHAVE_SYS_FCNTL_H</compilerStartOption>
                         <compilerStartOption>-DHAVE_SYS_SIGNAL_H</compilerStartOption>
-                        <compilerStartOption>-m64</compilerStartOption>
-                        <compilerStartOption>-shared</compilerStartOption>
-                        <compilerStartOption>-fPIC</compilerStartOption>
+                        <compilerStartOption></compilerStartOption>
                     </compilerStartOptions>
                     <linkerStartOptions>
                         <linkerStartOption>-shared</linkerStartOption>
-                        <linkerStartOption>-m64</linkerStartOption>
                     </linkerStartOptions>
                     <sources>
                         <source>
@@ -125,13 +122,13 @@
     <dependencies>      
         <dependency>
             <groupId>gnu.io.rxtx</groupId>
-            <artifactId>rxtx-fe</artifactId>
+            <artifactId>rxtx-java</artifactId>
             <version>2.2-stabilize-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>gnu.io.rxtx</groupId>
-            <artifactId>rxtx-be</artifactId>
+            <artifactId>rxtx-native</artifactId>
             <version>2.2-stabilize-SNAPSHOT</version>
             <scope>compile</scope>
             <classifier>sources</classifier>

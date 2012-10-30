@@ -10,7 +10,7 @@
         <moduleSet>
             <useAllReactorProjects>true</useAllReactorProjects>
             <includes>
-                <include>gnu.io.rxtx:rxtx-fe</include>
+                <include>gnu.io.rxtx:rxtx-java</include>
             </includes>
             <binaries>
                 <outputDirectory>/</outputDirectory>
@@ -20,7 +20,7 @@
         <moduleSet>
             <useAllReactorProjects>true</useAllReactorProjects>
             <includes>
-                <include>gnu.io.rxtx:rxtx-be-*</include>
+                <include>gnu.io.rxtx:rxtx-native-*</include>
             </includes>
             <binaries>
                 <includeDependencies>false</includeDependencies>

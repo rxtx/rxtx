@@ -2,19 +2,19 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>gnu.io.rxtx</groupId>
-    <artifactId>rxtx-top</artifactId>
+    <artifactId>rxtx-parent</artifactId>
     <packaging>pom</packaging>
     <version>2.2-stabilize-SNAPSHOT</version>
-    <name>RXTX top POM</name>
+    <name>RXTX parent POM</name>
     <url>http://rxtx.qbang.org</url>
     <modules>
-        <module>fe</module>
-        <module>be</module>
+        <module>rxtx-java</module>
+        <module>rxtx-native</module>
         <module>packaging</module>
     </modules>
     <profiles>
         <profile>
-            <id>with-be-linux-i386</id>
+            <id>with-linux-i386</id>
             <activation>
                 <os>
                     <family>unix</family>
@@ -22,11 +22,11 @@
                 </os>
             </activation>
             <modules>
-                <module>be-linux-i386</module>
+                <module>native-linux-i386</module>
             </modules>
         </profile>
         <profile>
-            <id>with-be-linux-x86_64</id>
+            <id>with-linux-x86_64</id>
             <activation>
                 <os>
                     <family>unix</family>
@@ -34,11 +34,11 @@
                 </os>
             </activation>
             <modules>
-                <module>be-linux-x86_64</module>
+                <module>native-linux-x86_64</module>
             </modules>
         </profile>
         <profile>
-            <id>with-be-windows-i386</id>
+            <id>with-windows-i386</id>
             <activation>
                 <os>
                     <family>windows</family>
@@ -46,11 +46,11 @@
                 </os>
             </activation>
             <modules>
-                <module>be-windows-i386</module>
+                <module>native-windows-i386</module>
             </modules>
         </profile>
         <profile>
-            <id>with-be-windows-x86_64</id>
+            <id>with-windows-x86_64</id>
             <activation>
                 <os>
                     <family>windows</family>
@@ -58,7 +58,7 @@
                 </os>
             </activation>
             <modules>
-                <module>be-windows-x86_64</module>
+                <module>native-windows-x86_64</module>
             </modules>
         </profile>
         <profile>
