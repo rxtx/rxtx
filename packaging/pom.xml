@@ -53,6 +53,12 @@
         </dependency>
         <dependency>
             <groupId>gnu.io.rxtx</groupId>
+            <artifactId>rxtx-native-linux-arm</artifactId>
+            <type>so</type>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>gnu.io.rxtx</groupId>
             <artifactId>rxtx-native-windows-x86</artifactId>
             <type>dll</type>
             <scope>compile</scope>

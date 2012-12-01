@@ -52,6 +52,12 @@
                 <version>2.2-stabilize-SNAPSHOT</version>
                 <type>dll</type>
             </dependency>
+            <dependency>
+                <groupId>gnu.io.rxtx</groupId>
+                <artifactId>rxtx-native-linux-arm</artifactId>
+                <version>2.2-stabilize-SNAPSHOT</version>
+                <type>so</type>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <modules>
@@ -77,6 +83,12 @@
             <id>with-linux-x86_64</id>
             <modules>
                 <module>native-linux-x86_64</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>with-linux-arm</id>
+            <modules>
+                <module>native-linux-arm</module>
             </modules>
         </profile>
         <profile>
