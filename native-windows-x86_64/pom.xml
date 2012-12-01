@@ -14,7 +14,7 @@
     </parent>
     <profiles>
         <profile>
-            <id>unix-i386</id>
+            <id>build-host-linux-x86</id>
             <activation>
                 <os>
                     <family>unix</family>
@@ -42,7 +42,7 @@
                                 <requireOS>
                                     <family>unix</family>
                                     <arch>i386</arch>
-                                    <message>Sorry, the rxtx binary for the windows/x86_64 platform can be build on the following systems only: * unix/i386 If you know about a working cross-platform build procedure for other platforms, please bring this up at the rxtx mailing list.</message>
+                                    <message>Sorry, the rxtx binary for the windows/x86_64 platform can be build on the following systems only: * unix/x86 If you know about a working cross-platform build procedure for other platforms, please bring this up at the rxtx mailing list.</message>
                                 </requireOS>
                             </rules>  
                             <fail>true</fail>

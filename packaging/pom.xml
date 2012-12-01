@@ -41,7 +41,7 @@
         </dependency>
         <dependency>
             <groupId>gnu.io.rxtx</groupId>
-            <artifactId>rxtx-native-linux-i386</artifactId>
+            <artifactId>rxtx-native-linux-x86</artifactId>
             <type>so</type>
             <scope>compile</scope>
         </dependency>
@@ -53,7 +53,7 @@
         </dependency>
         <dependency>
             <groupId>gnu.io.rxtx</groupId>
-            <artifactId>rxtx-native-windows-i386</artifactId>
+            <artifactId>rxtx-native-windows-x86</artifactId>
             <type>dll</type>
             <scope>compile</scope>
         </dependency>

@@ -2,10 +2,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>gnu.io.rxtx</groupId>
-    <artifactId>rxtx-native-linux-i386</artifactId>
-    <packaging>so</packaging>
+    <artifactId>rxtx-native-windows-x86</artifactId>
+    <packaging>dll</packaging>
     <version>2.2-stabilize-SNAPSHOT</version>
-    <name>[linux/i386] RXTX native lib</name>
+    <name>[windows/x86] RXTX native lib</name>
     <url>http://rxtx.qbang.org</url>
     <parent>    
         <groupId>gnu.io.rxtx</groupId>
@@ -14,7 +14,7 @@
     </parent>
     <profiles>
         <profile>
-            <id>unix-i386</id>
+            <id>build-host-linux-x86</id>
             <activation>
                 <os>
                     <family>unix</family>
@@ -42,7 +42,7 @@
                                 <requireOS>
                                     <family>unix</family>
                                     <arch>i386</arch>
-                                    <message>Sorry, the rxtx binary for the unix/i386 platform can be build on the following systems only: * unix/i386 If you know about a working cross-platform build procedure for other platforms, please bring this up at the rxtx mailing list.</message>
+                                    <message>Sorry, the rxtx binary for the windows/x86 platform can be build on the following systems only: * unix/x86 If you know about a working cross-platform build procedure for other platforms, please bring this up at the rxtx mailing list.</message>
                                 </requireOS>
                             </rules>  
                             <fail>true</fail>
@@ -60,7 +60,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.5.1</version>
                 <executions>
                     <execution>
                         <id>unpack-sources</id>
@@ -94,13 +93,9 @@
                         <javahClassName>gnu.io.RXTXPort</javahClassName>
                     </javahClassNames>
                     <javahOS>${rxtx.os.javah}</javahOS>
-                    <compilerStartOptions>
-                        <compilerStartOption>-DHAVE_TERMIOS_H</compilerStartOption>
-                        <compilerStartOption>-DHAVE_STDINT_H</compilerStartOption>
-                        <compilerStartOption>-DHAVE_SYS_FCNTL_H</compilerStartOption>
-                        <compilerStartOption>-DHAVE_SYS_SIGNAL_H</compilerStartOption>
-                        <compilerStartOption></compilerStartOption>
-                    </compilerStartOptions>
+                    <compilerProvider>generic-classic</compilerProvider>
+                    <compilerExecutable>i686-w64-mingw32-gcc</compilerExecutable>
+                    <linkerExecutable>i686-w64-mingw32-gcc</linkerExecutable>
                     <linkerStartOptions>
                         <linkerStartOption>-shared</linkerStartOption>
                     </linkerStartOptions>
@@ -109,6 +104,7 @@
                             <directory>${project.build.directory}/extracted-c</directory>
                             <fileNames>
                                 <fileName>SerialImp.c</fileName>
+                                <fileName>termios.c</fileName>
                             </fileNames>
                         </source>
                     </sources>
