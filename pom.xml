@@ -42,6 +42,12 @@
             </dependency>
             <dependency>
                 <groupId>gnu.io.rxtx</groupId>
+                <artifactId>rxtx-native-linux-arm</artifactId>
+                <version>2.2-stabilize-SNAPSHOT</version>
+                <type>so</type>
+            </dependency>
+            <dependency>
+                <groupId>gnu.io.rxtx</groupId>
                 <artifactId>rxtx-native-windows-x86</artifactId>
                 <version>2.2-stabilize-SNAPSHOT</version>
                 <type>dll</type>
@@ -54,9 +60,9 @@
             </dependency>
             <dependency>
                 <groupId>gnu.io.rxtx</groupId>
-                <artifactId>rxtx-native-linux-arm</artifactId>
+                <artifactId>rxtx-native-osx-x86_64</artifactId>
                 <version>2.2-stabilize-SNAPSHOT</version>
-                <type>so</type>
+                <type>jnilib</type>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -101,6 +107,18 @@
             <id>with-windows-x86_64</id>
             <modules>
                 <module>native-windows-x86_64</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>with-osx-x86_64</id>
+            <activation>
+                <os>
+                    <family>mac</family>
+                    <arch>x86_64</arch>
+                </os>
+            </activation>
+            <modules>
+                <module>native-osx-x86_64</module>
             </modules>
         </profile>
         <profile>

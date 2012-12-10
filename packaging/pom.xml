@@ -69,5 +69,11 @@
             <type>dll</type>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>gnu.io.rxtx</groupId>
+            <artifactId>rxtx-native-osx-x86_64</artifactId>
+            <type>jnilib</type>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 </project>
