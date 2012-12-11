@@ -18,7 +18,8 @@
             <activation>
                 <os>
                     <family>unix</family>
-                    <arch>x86_64</arch>
+                    <name>linux</name>
+                    <arch>amd64</arch>
                 </os>
             </activation>
             <properties>
