@@ -87,6 +87,13 @@
         </profile>
         <profile>
             <id>with-linux-x86_64</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                    <name>linux</name>
+                    <arch>x86_64</arch>
+                </os>
+            </activation>
             <modules>
                 <module>native-linux-x86_64</module>
             </modules>
