@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # This is a wrapper script for mingw compiler executable
 # As the binary name is not equal on all linux syytem, this script
@@ -9,62 +9,67 @@
 #
 #
 
-OS_NAME="<not yet checked>";
-OS_VERSION="<version unknown>";
+#########################################
 
-#
-# Check OS
-#
-system=unknown
-if [ -f /etc/redhat-release ]; then
+# Debian
+X32_EXEC[0]="i586-mingw32msvc-gcc"
+X64_EXEC[0]="amd64-mingw32msvc-gcc"
 
-    OS_NAME="redhat"    
-    OS_VERSION=`cat /etc/redhat-release`
-    
-elif [ -f /etc/SuSE-release ]; then
+# Ubuntu
+X32_EXEC[1]="i686-w64-mingw32-gcc"
+X64_EXEC[1]="x86_64-w64-mingw32-gcc"
 
-    OS_NAME="suse"
-    OS_VERSION=`cat /etc/SuSE-release`
-    
-elif [ -f /etc/debian_version ]; then
+#########################################
 
-    OS_NAME="debian"
-    OS_VERSION=`cat /etc/debian_version`
-    MINGW_EXECUTABLE="i586-mingw32msvc-gcc"
-    
-elif [ -f /etc/gentoo-release ]; then
-    
-    OS_NAME="gentoo"
-    OS_VERSION=`cat /etc/gentoo-release`
-    
-elif [ -f /etc/arch-release ]; then
-    
-    OS_NAME="arch"
-    OS_VERSION=`/etc/issue`
-    
-elif [ -f /etc/slackware-version ]; then
-    
-    OS_NAME="slackware"
-    OS_VERSION=`cat /etc/slackware-version`
-    
-elif [ -f /etc/lfs-release ]; then
-    
-    OS_NAME="lfs"
-    if [ -e /etc/lfs-release ]; then
-        OS_VERSION=`cat /etc/lfs-release`
-    fi
-    
-else
-    
-    OS_NAME="other"
-    
+## Get some information about the linux system
+LSB_RELEASE=`command -v lsb_release`
+OS_NAME="<unknown, install 'lsb_release' and try again>";
+
+# get machine hardware type
+MACHINE=`uname -m`
+
+# get os name
+if [ -f $LSB_RELEASE ]; then
+	OS_NAME=`$LSB_RELEASE -d -s`
 fi
+
+# Search for executable based on detected hardware (32bit / 64bit)
+function findExecutable() {
+	if [ $MACHINE = "x86_64" ]; then
+		# 64bit
+		echo "Checking 64bit executables..."
+		for t in "${X64_EXEC[@]}" 
+		do
+			CMD=`command -v $t`
+			echo "   ... $t -> $CMD"
+			if [ -f $CMD ]; then
+				MINGW_EXECUTABLE=$CMD;
+				echo "   -> found!";
+				break;
+			fi
+		done
+	else	
+		# 32 bit
+		echo "Checking 32bit executables..."
+		for t in "${X32_EXEC[@]}" 
+		do
+			CMD=`command -v $t`
+			echo "   ... $t -> $CMD"
+			if [ -f $CMD ]; then
+				MINGW_EXECUTABLE=$CMD;
+				echo "   -> found!";
+				break;
+			fi
+		done
+	fi
+}
 
 echo                                
 echo "*********************************************"
-echo "MinGW 32bit - Compiler Wrapper"
+echo "MinGW 32/64bit - Compiler Wrapper"
 echo "---------------------------------------------"
-echo "Detected OS: $OS_NAME $OS_VERSION"
+echo "Detected OS: $OS_NAME $MACHINE"
+findExecutable
 echo "MinGW compiler executable: $MINGW_EXECUTABLE"
 echo "*********************************************"
 echo
