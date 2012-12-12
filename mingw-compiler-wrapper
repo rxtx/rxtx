@@ -37,7 +37,7 @@ fi
 function findExecutable() {
 	if [ $MACHINE = "x86_64" ]; then
 		# 64bit
-		echo "Checking 64bit executables..."
+		echo "-> Checking 64bit executables..."
 		for t in "${X64_EXEC[@]}" 
 		do
 			CMD=`command -v $t`
@@ -50,7 +50,7 @@ function findExecutable() {
 		done
 	else	
 		# 32 bit
-		echo "Checking 32bit executables..."
+		echo "-> Checking 32bit executables..."
 		for t in "${X32_EXEC[@]}" 
 		do
 			CMD=`command -v $t`
@@ -69,7 +69,11 @@ echo "*********************************************"
 echo "MinGW 32/64bit - Compiler Wrapper"
 echo "---------------------------------------------"
 echo "Detected OS: $OS_NAME $MACHINE"
-findExecutable
+if [ -z "$MINGW_EXECUTABLE" ]; then 
+	findExecutable
+else
+	echo "-> Using preset executable name";	
+fi
 echo "MinGW compiler executable: $MINGW_EXECUTABLE"
 echo "*********************************************"
 echo
