@@ -1,0 +1,79 @@
+#!/bin/sh
+#
+# This is a wrapper script for mingw compiler executable
+# As the binary name is not equal on all linux syytem, this script
+# tries to determinate the correct name and run it
+#
+# (c) 2012, Alexander Christian <alex@root1.de>
+# This file GPL v3 licensed!
+#
+#
+
+OS_NAME="<not yet checked>";
+OS_VERSION="<version unknown>";
+
+#
+# Check OS
+#
+system=unknown
+if [ -f /etc/redhat-release ]; then
+
+    OS_NAME="redhat"    
+    OS_VERSION=`cat /etc/redhat-release`
+    
+elif [ -f /etc/SuSE-release ]; then
+
+    OS_NAME="suse"
+    OS_VERSION=`cat /etc/SuSE-release`
+    
+elif [ -f /etc/debian_version ]; then
+
+    OS_NAME="debian"
+    OS_VERSION=`cat /etc/debian_version`
+    MINGW_EXECUTABLE="i586-mingw32msvc-gcc"
+    
+elif [ -f /etc/gentoo-release ]; then
+    
+    OS_NAME="gentoo"
+    OS_VERSION=`cat /etc/gentoo-release`
+    
+elif [ -f /etc/arch-release ]; then
+    
+    OS_NAME="arch"
+    OS_VERSION=`/etc/issue`
+    
+elif [ -f /etc/slackware-version ]; then
+    
+    OS_NAME="slackware"
+    OS_VERSION=`cat /etc/slackware-version`
+    
+elif [ -f /etc/lfs-release ]; then
+    
+    OS_NAME="lfs"
+    if [ -e /etc/lfs-release ]; then
+        OS_VERSION=`cat /etc/lfs-release`
+    fi
+    
+else
+    
+    OS_NAME="other"
+    
+fi
+
+echo                                
+echo "*********************************************"
+echo "MinGW 32bit - Compiler Wrapper"
+echo "---------------------------------------------"
+echo "Detected OS: $OS_NAME $OS_VERSION"
+echo "MinGW compiler executable: $MINGW_EXECUTABLE"
+echo "*********************************************"
+echo
+if [ -z "$MINGW_EXECUTABLE" ]; then
+    echo "No mingw executable name for os '$OS_NAME' found."
+    echo "Please run 'export MINGW_EXECUTABLE=/my/path/to/mingwexecutable' before build!"
+    exit 1;
+fi
+
+
+# run the compiler
+$MINGW_EXECUTABLE $*
