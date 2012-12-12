@@ -74,6 +74,8 @@ if [ -z "$MINGW_EXECUTABLE" ]; then
     exit 1;
 fi
 
-
 # run the compiler
 $MINGW_EXECUTABLE $*
+
+echo 
+echo "*********************************************"
