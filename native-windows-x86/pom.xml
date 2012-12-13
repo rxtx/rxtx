@@ -51,7 +51,47 @@
                     </plugin> 
                 </plugins>
             </build>
-        </profile><profile>
+        </profile>
+        <profile>
+            <id>build-host-linux-x86_64</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                    <arch>amd64</arch>
+                </os>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>native-maven-plugin</artifactId>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <javahClassNames>
+                                <javahClassName>gnu.io.RXTXPort</javahClassName>
+                            </javahClassNames>
+                            <javahOS>linux</javahOS>
+                            <compilerProvider>generic-classic</compilerProvider>
+                            <compilerExecutable>./mingw32</compilerExecutable>
+                            <linkerExecutable>./mingw32</linkerExecutable>
+                            <linkerStartOptions>
+                                <linkerStartOption>-shared</linkerStartOption>
+                            </linkerStartOptions>
+                            <sources>
+                                <source>
+                                    <directory>${project.build.directory}/extracted-c</directory>
+                                    <fileNames>
+                                        <fileName>SerialImp.c</fileName>
+                                        <fileName>termios.c</fileName>
+                                    </fileNames>
+                                </source>
+                            </sources>
+                        </configuration>
+                    </plugin> 
+                </plugins>
+            </build>
+        </profile>
+        <profile>
             <id>failOnUnsupportedPlatforms</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -71,7 +111,7 @@
                                 <configuration> 
                                     <rules> 
                                         <AlwaysFail>
-                                            <message>Sorry, the rxtx binary for the windows/x86 platform can be build on the following systems only: * unix/x86 If you know about a working cross-platform build procedure for other platforms, please bring this up at the rxtx mailing list.</message>
+                                            <message>Sorry, the rxtx binary for the windows/x86 platform can be build on the following systems only: * unix/x86 * unix/x86_64 If you know about a working cross-platform build procedure for other platforms, please bring this up at the rxtx mailing list.</message>
                                         </AlwaysFail>
                                     </rules> 
                                     <fail>true</fail> 
