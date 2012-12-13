@@ -94,8 +94,8 @@
                     </javahClassNames>
                     <javahOS>${rxtx.os.javah}</javahOS>
                     <compilerProvider>generic-classic</compilerProvider>
-                    <compilerExecutable>i686-w64-mingw32-gcc</compilerExecutable>
-                    <linkerExecutable>i686-w64-mingw32-gcc</linkerExecutable>
+                    <compilerExecutable>./mingw32</compilerExecutable>
+                    <linkerExecutable>./mingw32</linkerExecutable>
                     <linkerStartOptions>
                         <linkerStartOption>-shared</linkerStartOption>
                     </linkerStartOptions>
