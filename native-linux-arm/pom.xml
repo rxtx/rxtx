@@ -83,6 +83,27 @@
                             <failOnMissingClassifierArtifact>false</failOnMissingClassifierArtifact>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>unpack-cross-toolchain-wrapper</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>gnu.io.rxtx</groupId>
+                                    <artifactId>cross-toolchain-wrapper</artifactId>
+                                    <version>1.0-SNAPSHOT</version>
+                                    <type>zip</type>
+                                    <classifier>sources</classifier>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                            <failOnMissingClassifierArtifact>false</failOnMissingClassifierArtifact>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -95,8 +116,8 @@
                     </javahClassNames>
                     <javahOS>${rxtx.os.javah}</javahOS>
                     <compilerProvider>generic-classic</compilerProvider>
-                    <compilerExecutable>arm-linux-gnueabi-gcc</compilerExecutable>
-                    <linkerExecutable>arm-linux-gnueabi-gcc</linkerExecutable>
+                    <compilerExecutable>${project.build.directory}/arm-linux</compilerExecutable>
+                    <linkerExecutable>${project.build.directory}/arm-linux</linkerExecutable>
                     <compilerStartOptions>
                         <compilerStartOption>-DHAVE_TERMIOS_H</compilerStartOption>
                         <compilerStartOption>-DHAVE_STDINT_H</compilerStartOption>
