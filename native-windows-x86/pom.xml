@@ -72,8 +72,8 @@
                             </javahClassNames>
                             <javahOS>linux</javahOS>
                             <compilerProvider>generic-classic</compilerProvider>
-                            <compilerExecutable>${project.build.directory}/mingw64</compilerExecutable>
-                            <linkerExecutable>${project.build.directory}/mingw64</linkerExecutable>
+                            <compilerExecutable>${project.build.directory}/mingw32</compilerExecutable>
+                            <linkerExecutable>${project.build.directory}/mingw32</linkerExecutable>
                             <linkerStartOptions>
                                 <linkerStartOption>-shared</linkerStartOption>
                             </linkerStartOptions>
