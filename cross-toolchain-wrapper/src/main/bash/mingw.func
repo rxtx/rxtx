@@ -19,7 +19,7 @@ fi
 #######################################################
 # Search for executable
 # Will search the given array for existing executable.
-# Once an executable is found, MINGW_EXECUTABLE is set 
+# Once an executable is found, TOOLCHAIN_EXECUTABLE is set 
 # to the path of the executable
 #
 # param1: Array with executable names
@@ -33,7 +33,7 @@ function findExecutable() {
         if [ $FOUND == 0 ]; then
             echo "   ... [$t] -> [$CMD]"
             if [[ -n $CMD && -f $CMD ]]; then
-                MINGW_EXECUTABLE=$CMD;
+                TOOLCHAIN_EXECUTABLE=$CMD;
                 echo "   --> FOUND!";
                 break;
             fi

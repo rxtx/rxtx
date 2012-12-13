@@ -1,8 +1,8 @@
 #!/bin/bash
 #
-# This is a wrapper script for mingw compiler executable
-# As the binary name is not equal on all linux syytem, this script
-# tries to determinate the correct name and run it
+# This is a wrapper script for cross compiler executables.
+# As the binary name is not equal on all linux systems, this script
+# uses the first available compiler from the configuration file.
 #
 # (c) 2012, Alexander Christian <alex@root1.de>
 # This file GPL v3 licensed!
@@ -10,7 +10,7 @@
 
 #########################################
 
-# get base-folder of mingw-wrapper
+# get base-folder of wrapper
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 source "$DIR"/mingw.conf
@@ -23,22 +23,22 @@ echo "*********************************************"
 echo "MinGW 32bit - Compiler Wrapper"
 echo "---------------------------------------------"
 echo "Detected OS: $OS_NAME $MACHINE"
-if [ -z "$MINGW_EXECUTABLE" ]; then 
+if [ -z "$TOOLCHAIN_EXECUTABLE" ]; then 
 	findExecutable "${WINDOWS_X86_EXEC[@]}"
 else
 	echo "-> Using preset executable name";	
 fi
-echo "MinGW compiler executable: $MINGW_EXECUTABLE"
+echo "Toolchain executable: $TOOLCHAIN_EXECUTABLE"
 echo "*********************************************"
 echo
-if [ -z "$MINGW_EXECUTABLE" ]; then
-    echo "No mingw executable name for os '$OS_NAME' found."
-    echo "Please run 'export MINGW_EXECUTABLE=/my/path/to/mingwexecutable' before build!"
+if [ -z "$TOOLCHAIN_EXECUTABLE" ]; then
+    echo "No toolchain executable name for os '$OS_NAME' found."
+    echo "Please run 'export TOOLCHAIN_EXECUTABLE=/my/path/to/toolchain-executable' before build!"
     exit 1;
 fi
 
 # run the compiler
-$MINGW_EXECUTABLE "$@"
+$TOOLCHAIN_EXECUTABLE "$@"
 
 echo 
 echo "*********************************************"
