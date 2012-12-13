@@ -30,7 +30,7 @@
             </dependency>
             <dependency>
                 <groupId>gnu.io.rxtx</groupId>
-                <artifactId>mingw-wrapper</artifactId>
+                <artifactId>cross-toolchain-wrapper</artifactId>
                 <version>1.0-SNAPSHOT</version>
                 <scope>compile</scope>
                 <classifier>sources</classifier>
@@ -75,7 +75,7 @@
         </dependencies>
     </dependencyManagement>
     <modules>
-    	<module>mingw-wrapper</module>
+    	<module>cross-toolchain-wrapper</module>
         <module>rxtx-java</module>
         <module>rxtx-native</module>
         <module>packaging</module>

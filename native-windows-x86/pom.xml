@@ -158,7 +158,7 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>unpack-mingw-scripts</id>
+                        <id>unpack-cross-toolchain-wrapper</id>
                         <phase>process-sources</phase>
                         <goals>
                             <goal>unpack</goal>
@@ -167,7 +167,7 @@
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>gnu.io.rxtx</groupId>
-                                    <artifactId>mingw-wrapper</artifactId>
+                                    <artifactId>cross-toolchain-wrapper</artifactId>
                                     <version>1.0-SNAPSHOT</version>
                                     <type>zip</type>
                                     <classifier>sources</classifier>
@@ -197,8 +197,7 @@
         </dependency>
         <dependency>
             <groupId>gnu.io.rxtx</groupId>
-            <artifactId>mingw-wrapper</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <artifactId>cross-toolchain-wrapper</artifactId>
             <scope>compile</scope>
             <classifier>sources</classifier>
             <type>zip</type>
