@@ -33,7 +33,7 @@ if [ -z "$MINGW_EXECUTABLE" ]; then
 fi
 
 # run the compiler
-$MINGW_EXECUTABLE $*
+$MINGW_EXECUTABLE "$@"
 
 echo 
 echo "*********************************************"
