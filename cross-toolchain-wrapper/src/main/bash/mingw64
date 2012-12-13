@@ -23,7 +23,7 @@ echo "MinGW 64bit - Compiler Wrapper"
 echo "---------------------------------------------"
 echo "Detected OS: $OS_NAME $MACHINE"
 if [ -z "$MINGW_EXECUTABLE" ]; then 
-	findExecutable "${X64_EXEC[@]}"
+	findExecutable "${WINDOWS_X86_64_EXEC[@]}"
 else
 	echo "-> Using preset executable name";	
 fi
