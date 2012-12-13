@@ -1,0 +1,40 @@
+#!/bin/bash
+#
+# This is a wrapper script for mingw compiler executable
+# As the binary name is not equal on all linux syytem, this script
+# tries to determinate the correct name and run it
+#
+# (c) 2012, Alexander Christian <alex@root1.de>
+# This file GPL v3 licensed!
+#
+#
+
+#########################################
+source mingw.conf
+source mingw.func
+#########################################
+
+echo                                
+echo "*********************************************"
+echo "MinGW 64bit - Compiler Wrapper"
+echo "---------------------------------------------"
+echo "Detected OS: $OS_NAME $MACHINE"
+if [ -z "$MINGW_EXECUTABLE" ]; then 
+	findExecutable "${X64_EXEC[@]}"
+else
+	echo "-> Using preset executable name";	
+fi
+echo "MinGW compiler executable: $MINGW_EXECUTABLE"
+echo "*********************************************"
+echo
+if [ -z "$MINGW_EXECUTABLE" ]; then
+    echo "No mingw executable name for os '$OS_NAME' found."
+    echo "Please run 'export MINGW_EXECUTABLE=/my/path/to/mingwexecutable' before build!"
+    exit 1;
+fi
+
+# run the compiler
+$MINGW_EXECUTABLE $*
+
+echo 
+echo "*********************************************"
