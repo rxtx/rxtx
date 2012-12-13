@@ -13,8 +13,8 @@
 # get base-folder of wrapper
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-source "$DIR"/mingw.conf
-source "$DIR"/mingw.func
+source "$DIR"/toolchain.conf
+source "$DIR"/toolchain.func
 
 #########################################
 
