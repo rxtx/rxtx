@@ -33,8 +33,8 @@
                             </javahClassNames>
                             <javahOS>linux</javahOS>
                             <compilerProvider>generic-classic</compilerProvider>
-                            <compilerExecutable>./mingw32</compilerExecutable>
-                            <linkerExecutable>./mingw32</linkerExecutable>
+                            <compilerExecutable>${project.build.directory}/mingw32</compilerExecutable>
+                            <linkerExecutable>${project.build.directory}/mingw32</linkerExecutable>
                             <linkerStartOptions>
                                 <linkerStartOption>-shared</linkerStartOption>
                             </linkerStartOptions>
@@ -72,8 +72,8 @@
                             </javahClassNames>
                             <javahOS>linux</javahOS>
                             <compilerProvider>generic-classic</compilerProvider>
-                            <compilerExecutable>./mingw32</compilerExecutable>
-                            <linkerExecutable>./mingw32</linkerExecutable>
+                            <compilerExecutable>${project.build.directory}/mingw64</compilerExecutable>
+                            <linkerExecutable>${project.build.directory}/mingw64</linkerExecutable>
                             <linkerStartOptions>
                                 <linkerStartOption>-shared</linkerStartOption>
                             </linkerStartOptions>
@@ -157,11 +157,32 @@
                             <failOnMissingClassifierArtifact>false</failOnMissingClassifierArtifact>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>unpack-mingw-scripts</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>gnu.io.rxtx</groupId>
+                                    <artifactId>mingw-wrapper</artifactId>
+                                    <version>1.0-SNAPSHOT</version>
+                                    <type>zip</type>
+                                    <classifier>sources</classifier>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                            <failOnMissingClassifierArtifact>false</failOnMissingClassifierArtifact>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
         </plugins>
     </build>
-    <dependencies>      
+    <dependencies>
         <dependency>
             <groupId>gnu.io.rxtx</groupId>
             <artifactId>rxtx-java</artifactId>
@@ -170,6 +191,14 @@
         <dependency>
             <groupId>gnu.io.rxtx</groupId>
             <artifactId>rxtx-native</artifactId>
+            <scope>compile</scope>
+            <classifier>sources</classifier>
+            <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>gnu.io.rxtx</groupId>
+            <artifactId>mingw-wrapper</artifactId>
+            <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>
             <classifier>sources</classifier>
             <type>zip</type>
