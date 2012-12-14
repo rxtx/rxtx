@@ -348,12 +348,24 @@ public class RXTXCommDriver implements CommDriver {
         while (tok.hasMoreElements()) {
             String portName = tok.nextToken();
 
+            if (DEBUG) {
+                System.out.println("Trying " + portName + ".");
+            }
             if (testRead(portName, portType)) {
                 CommPortIdentifier.addPortName(portName,
                         portType, this);
+                if (DEBUG) {
+                    System.out.println("Success: Read from " + portName + ".");
+                }
+            } else {
+                if (DEBUG) {
+                    System.out.println("Fail: Cannot read from " + portName
+                            + ".");
+                }
             }
         }
     }
+
 
     /*
      * Register ports specified in the file "gnu.io.rxtx.properties" Key system
@@ -374,8 +386,6 @@ public class RXTXCommDriver implements CommDriver {
         String val = null;
         if (DEBUG) {
             System.out.println("checking for system-known ports of type " + portType);
-        }
-        if (DEBUG) {
             System.out.println("checking registry for ports of type " + portType);
         }
         switch (portType) {

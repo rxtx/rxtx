@@ -1,7 +1,7 @@
 /*-------------------------------------------------------------------------
  |   RXTX License v 2.1 - LGPL v 2.1 + Linking Over Controlled Interface.
  |   RXTX is a native interface to serial ports in java.
- |   Copyright 1997-2009 by Trent Jarvi tjarvi@qbang.org and others who
+ |   Copyright 1997-2012 by Trent Jarvi tjarvi@qbang.org and others who
  |   actually wrote it.  See individual source files for more information.
  |
  |   A copy of the LGPL v 2.1 may be found at
@@ -112,7 +112,11 @@ public class CommPortIdentifier extends Object {
                 System.out.println("Have not implemented native_psmisc_report_owner(PortName)); in CommPortIdentifier");
             }
         }
-        System.loadLibrary("rxtxSerial");
+        if ("true".equals(System.getProperty("gnu.io.rxtx.LibraryLoader"))) {
+            LibraryLoader.loadLibrary("rxtxSerial");
+        } else {
+            System.loadLibrary("rxtxSerial");
+        }
     }
 
     CommPortIdentifier(String portName, CommPort commPort, int portType,
@@ -132,7 +136,6 @@ public class CommPortIdentifier extends Object {
      * ------------------------------------------------------------------------------
      */
     public static void addPortName(String portName, int portType, CommDriver driver) {
-
         if (debug) {
             System.out.println("CommPortIdentifier:addPortName(" + portName + ")");
         }

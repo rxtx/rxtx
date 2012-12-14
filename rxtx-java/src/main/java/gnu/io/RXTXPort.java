@@ -1751,6 +1751,7 @@ public final class RXTXPort extends SerialPort {
         private volatile boolean Output = false;
 
         MonitorThread() {
+            setDaemon(true);
             if (debug) {
                 sys.reportln("RXTXPort:MontitorThread:MonitorThread()");
             }
@@ -1784,12 +1785,9 @@ public final class RXTXPort extends SerialPort {
      */
     public void setRcvFifoTrigger(int trigger) {
     }
+    /*------------------------  END OF CommAPI -----------------------------*/
 
-    ;  
-
-/*------------------------  END OF CommAPI -----------------------------*/
-
-	private native static void nativeStaticSetSerialPortParams(String f,
+    private native static void nativeStaticSetSerialPortParams(String f,
             int b, int d, int s, int p)
             throws UnsupportedCommOperationException;
 
