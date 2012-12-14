@@ -63,7 +63,7 @@ package gnu.io;
  *
  * @author Jeff Benjamin
  */
-public final class LibraryLoader {
+final class LibraryLoader {
 
     /**
      * This private constructor prevents the utility class LibraryLoader from
