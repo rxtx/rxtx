@@ -64,12 +64,12 @@ import java.util.TooManyListenersException;
 
 public final class RXTXPort extends SerialPort {
 
-    protected static final boolean debug = false;
-    protected static final boolean debug_read = false;
-    protected static final boolean debug_read_results = false;
-    protected static final boolean debug_write = false;
-    protected static final boolean debug_events = false;
-    protected static final boolean debug_verbose = false;
+    protected static final boolean DEBUG = false;
+    protected static final boolean DEBUG_READ = false;
+    protected static final boolean DEBUG_READ_RESULTS = false;
+    protected static final boolean DEBUG_WRITE = false;
+    protected static final boolean DEBUG_EVENTS = false;
+    protected static final boolean DEBUG_VERBOSE = false;
     private static Zystem sys;
 
     static {
@@ -79,7 +79,7 @@ public final class RXTXPort extends SerialPort {
             throw new Error(e.toString());
         }
 
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort {}");
         }
         RXTXVersion.loadLibrary("rxtxSerial");
@@ -90,7 +90,7 @@ public final class RXTXPort extends SerialPort {
      * Initialize the native library
      */
     private native static void Initialize();
-    boolean MonitorThreadAlive = false;
+    boolean monitorThreadAlive = false;
 
     /**
      * Open the named port
@@ -100,7 +100,7 @@ public final class RXTXPort extends SerialPort {
      * @see gnu.io.SerialPort
      */
     public RXTXPort(String name) throws PortInUseException {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:RXTXPort(" + name + ") called");
         }
         /*
@@ -121,18 +121,18 @@ public final class RXTXPort extends SerialPort {
         monThread = new MonitorThread();
         monThread.start();
         waitForTheNativeCodeSilly();
-        MonitorThreadAlive = true;
+        monitorThreadAlive = true;
         //	} catch ( PortInUseException e ){}
         timeout = -1;	/*
          * default disabled timeout
          */
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:RXTXPort(" + name + ") returns with fd = "
                     + fd);
         }
     }
 
-    private native synchronized int open(String name)
+    private synchronized native int open(String name)
             throws PortInUseException;
     /*
      * dont close the file while accessing the fd
@@ -165,7 +165,7 @@ public final class RXTXPort extends SerialPort {
     private final SerialOutputStream out = new SerialOutputStream();
 
     public OutputStream getOutputStream() {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:getOutputStream() called and returning");
         }
         return out;
@@ -176,7 +176,7 @@ public final class RXTXPort extends SerialPort {
     private final SerialInputStream in = new SerialInputStream();
 
     public InputStream getInputStream() {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:getInputStream() called and returning");
         }
         return in;
@@ -202,7 +202,7 @@ public final class RXTXPort extends SerialPort {
     public synchronized void setSerialPortParams(int b, int d, int s,
             int p)
             throws UnsupportedCommOperationException {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:setSerialPortParams("
                     + b + " " + d + " " + s + " " + p + ") called");
         }
@@ -236,7 +236,7 @@ public final class RXTXPort extends SerialPort {
     private int speed = 9600;
 
     public int getBaudRate() {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:getBaudRate() called and returning " + speed);
         }
         return speed;
@@ -247,7 +247,7 @@ public final class RXTXPort extends SerialPort {
     private int dataBits = DATABITS_8;
 
     public int getDataBits() {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:getDataBits() called and returning " + dataBits);
         }
         return dataBits;
@@ -258,7 +258,7 @@ public final class RXTXPort extends SerialPort {
     private int stopBits = SerialPort.STOPBITS_1;
 
     public int getStopBits() {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:getStopBits() called and returning " + stopBits);
         }
         return stopBits;
@@ -269,7 +269,7 @@ public final class RXTXPort extends SerialPort {
     private int parity = SerialPort.PARITY_NONE;
 
     public int getParity() {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:getParity() called and returning " + parity);
         }
         return parity;
@@ -280,11 +280,11 @@ public final class RXTXPort extends SerialPort {
     private int flowmode = SerialPort.FLOWCONTROL_NONE;
 
     public void setFlowControlMode(int flowcontrol) {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:setFlowControlMode( " + flowcontrol + " ) called");
         }
         if (monThreadisInterrupted) {
-            if (debug_events) {
+            if (DEBUG_EVENTS) {
                 sys.reportln("RXTXPort:setFlowControlMode MonThread is Interrupeted returning");
             }
             return;
@@ -296,13 +296,13 @@ public final class RXTXPort extends SerialPort {
             return;
         }
         flowmode = flowcontrol;
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:setFlowControlMode( " + flowcontrol + " ) returning");
         }
     }
 
     public int getFlowControlMode() {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:getFlowControlMode() returning " + flowmode);
         }
         return flowmode;
@@ -315,27 +315,27 @@ public final class RXTXPort extends SerialPort {
      */
     public void enableReceiveFraming(int f)
             throws UnsupportedCommOperationException {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:enableReceiveFramming() throwing exception");
         }
         throw new UnsupportedCommOperationException("Not supported");
     }
 
     public void disableReceiveFraming() {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:disableReceiveFramming() called and returning (noop)");
         }
     }
 
     public boolean isReceiveFramingEnabled() {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:isReceiveFrammingEnabled() called and returning " + false);
         }
         return false;
     }
 
     public int getReceiveFramingByte() {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:getReceiveFrammingByte() called and returning " + 0);
         }
         return 0;
@@ -364,18 +364,18 @@ public final class RXTXPort extends SerialPort {
             int threshold, int InputBuffer);
 
     public void disableReceiveTimeout() {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:disableReceiveTimeout() called");
         }
         timeout = -1;
         NativeEnableReceiveTimeoutThreshold(timeout, threshold, InputBuffer);
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:disableReceiveTimeout() returning");
         }
     }
 
     public void enableReceiveTimeout(int time) {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:enableReceiveTimeout() called");
         }
         if (time >= 0) {
@@ -386,20 +386,20 @@ public final class RXTXPort extends SerialPort {
             throw new IllegalArgumentException(
                     "Unexpected negative timeout value");
         }
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:enableReceiveTimeout() returning");
         }
     }
 
     public boolean isReceiveTimeoutEnabled() {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:isReceiveTimeoutEnabled() called and returning " + NativeisReceiveTimeoutEnabled());
         }
         return NativeisReceiveTimeoutEnabled();
     }
 
     public int getReceiveTimeout() {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:getReceiveTimeout() called and returning " + NativegetReceiveTimeout());
         }
         return NativegetReceiveTimeout();
@@ -410,7 +410,7 @@ public final class RXTXPort extends SerialPort {
     private int threshold = 0;
 
     public void enableReceiveThreshold(int thresh) {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:enableReceiveThreshold( " + thresh + " ) called");
         }
         if (thresh >= 0) {
@@ -421,20 +421,20 @@ public final class RXTXPort extends SerialPort {
             throw new IllegalArgumentException(
                     "Unexpected negative threshold value");
         }
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:enableReceiveThreshold( " + thresh + " ) returned");
         }
     }
 
     public void disableReceiveThreshold() {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:disableReceiveThreshold() called and returning");
         }
         enableReceiveThreshold(0);
     }
 
     public int getReceiveThreshold() {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:getReceiveThreshold() called and returning " + threshold);
         }
         return threshold;
@@ -444,7 +444,7 @@ public final class RXTXPort extends SerialPort {
      * @return boolean true if receive threshold is enabled
      */
     public boolean isReceiveThresholdEnabled() {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:isReceiveThresholdEnable() called and returning" + (threshold > 0));
         }
         return (threshold > 0);
@@ -459,7 +459,7 @@ public final class RXTXPort extends SerialPort {
     private int OutputBuffer = 0;
 
     public void setInputBufferSize(int size) {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:setInputBufferSize( "
                     + size + ") called");
         }
@@ -469,21 +469,21 @@ public final class RXTXPort extends SerialPort {
         } else {
             InputBuffer = size;
         }
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:setInputBufferSize( "
                     + size + ") returning");
         }
     }
 
     public int getInputBufferSize() {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:getInputBufferSize() called and returning " + InputBuffer);
         }
         return InputBuffer;
     }
 
     public void setOutputBufferSize(int size) {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:setOutputBufferSize( "
                     + size + ") called");
         }
@@ -493,7 +493,7 @@ public final class RXTXPort extends SerialPort {
         } else {
             OutputBuffer = size;
         }
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:setOutputBufferSize( "
                     + size + ") returned");
         }
@@ -501,7 +501,7 @@ public final class RXTXPort extends SerialPort {
     }
 
     public int getOutputBufferSize() {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:getOutputBufferSize() called and returning " + OutputBuffer);
         }
         return OutputBuffer;
@@ -593,18 +593,18 @@ public final class RXTXPort extends SerialPort {
     private native void interruptEventLoop();
 
     public boolean checkMonitorThread() {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:checkMonitorThread()");
         }
         if (monThread != null) {
-            if (debug) {
+            if (DEBUG) {
                 sys.reportln(
                         "monThreadisInterrupted = "
                         + monThreadisInterrupted);
             }
             return monThreadisInterrupted;
         }
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("monThread is null ");
         }
         return true;
@@ -616,7 +616,7 @@ public final class RXTXPort extends SerialPort {
      * @return boolean true if the port is closing
      */
     public boolean sendEvent(int event, boolean state) {
-        if (debug_events) {
+        if (DEBUG_EVENTS) {
             sys.report("RXTXPort:sendEvent(");
         }
         /*
@@ -629,74 +629,74 @@ public final class RXTXPort extends SerialPort {
 
         switch (event) {
             case SerialPortEvent.DATA_AVAILABLE:
-                if (debug_events) {
+                if (DEBUG_EVENTS) {
                     sys.reportln("DATA_AVAILABLE "
                             + monThread.Data + ")");
                 }
                 break;
             case SerialPortEvent.OUTPUT_BUFFER_EMPTY:
-                if (debug_events) {
+                if (DEBUG_EVENTS) {
                     sys.reportln(
                             "OUTPUT_BUFFER_EMPTY "
                             + monThread.Output + ")");
                 }
                 break;
             case SerialPortEvent.CTS:
-                if (debug_events) {
+                if (DEBUG_EVENTS) {
                     sys.reportln("CTS "
                             + monThread.CTS + ")");
                 }
                 break;
             case SerialPortEvent.DSR:
-                if (debug_events) {
+                if (DEBUG_EVENTS) {
                     sys.reportln("DSR "
                             + monThread.Output + ")");
                 }
                 break;
             case SerialPortEvent.RI:
-                if (debug_events) {
+                if (DEBUG_EVENTS) {
                     sys.reportln("RI "
                             + monThread.RI + ")");
                 }
                 break;
             case SerialPortEvent.CD:
-                if (debug_events) {
+                if (DEBUG_EVENTS) {
                     sys.reportln("CD "
                             + monThread.CD + ")");
                 }
                 break;
             case SerialPortEvent.OE:
-                if (debug_events) {
+                if (DEBUG_EVENTS) {
                     sys.reportln("OE "
                             + monThread.OE + ")");
                 }
                 break;
             case SerialPortEvent.PE:
-                if (debug_events) {
+                if (DEBUG_EVENTS) {
                     sys.reportln("PE "
                             + monThread.PE + ")");
                 }
                 break;
             case SerialPortEvent.FE:
-                if (debug_events) {
+                if (DEBUG_EVENTS) {
                     sys.reportln("FE "
                             + monThread.FE + ")");
                 }
                 break;
             case SerialPortEvent.BI:
-                if (debug_events) {
+                if (DEBUG_EVENTS) {
                     sys.reportln("BI "
                             + monThread.BI + ")");
                 }
                 break;
             default:
-                if (debug_events) {
+                if (DEBUG_EVENTS) {
                     sys.reportln("XXXXXXXXXXXXXX "
                             + event + ")");
                 }
                 break;
         }
-        if (debug_events && debug_verbose) {
+        if (DEBUG_EVENTS && DEBUG_VERBOSE) {
             sys.reportln("	checking flags ");
         }
 
@@ -755,16 +755,16 @@ public final class RXTXPort extends SerialPort {
                 System.err.println("unknown event: " + event);
                 return false;
         }
-        if (debug_events && debug_verbose) {
+        if (DEBUG_EVENTS && DEBUG_VERBOSE) {
             sys.reportln("	getting event");
         }
         SerialPortEvent e = new SerialPortEvent(this, event, !state,
                 state);
-        if (debug_events && debug_verbose) {
+        if (DEBUG_EVENTS && DEBUG_VERBOSE) {
             sys.reportln("	sending event");
         }
         if (monThreadisInterrupted) {
-            if (debug_events) {
+            if (DEBUG_EVENTS) {
                 sys.reportln("	sendEvent return");
             }
             return true;
@@ -773,7 +773,7 @@ public final class RXTXPort extends SerialPort {
             SPEventListener.serialEvent(e);
         }
 
-        if (debug_events && debug_verbose) {
+        if (DEBUG_EVENTS && DEBUG_VERBOSE) {
             sys.reportln("	sendEvent return");
         }
 
@@ -792,28 +792,28 @@ public final class RXTXPort extends SerialPort {
          * ready
          */
 
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:addEventListener()");
         }
         if (SPEventListener != null) {
             throw new TooManyListenersException();
         }
         SPEventListener = lsnr;
-        if (!MonitorThreadAlive) {
+        if (!monitorThreadAlive) {
             MonitorThreadLock = true;
             monThread = new MonitorThread();
             monThread.setDaemon(true);
             monThread.start();
             waitForTheNativeCodeSilly();
-            MonitorThreadAlive = true;
+            monitorThreadAlive = true;
         }
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:Interrupt=false");
         }
     }
 
     public void removeEventListener() {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:removeEventListener() called");
         }
         waitForTheNativeCodeSilly();
@@ -824,7 +824,7 @@ public final class RXTXPort extends SerialPort {
             SPEventListener = null;
             return;
         } else if (monThread != null && monThread.isAlive()) {
-            if (debug) {
+            if (DEBUG) {
                 sys.reportln("	RXTXPort:Interrupt=true");
             }
             monThreadisInterrupted = true;
@@ -832,12 +832,12 @@ public final class RXTXPort extends SerialPort {
              * Notify all threads in this PID that something is up They will
              * call back to see if its their thread using isInterrupted().
              */
-            if (debug) {
+            if (DEBUG) {
                 sys.reportln("	RXTXPort:calling interruptEventLoop");
             }
             interruptEventLoop();
 
-            if (debug) {
+            if (DEBUG) {
                 sys.reportln("	RXTXPort:calling monThread.join()");
             }
             try {
@@ -851,7 +851,7 @@ public final class RXTXPort extends SerialPort {
                 return;
             }
 
-            if (debug && monThread.isAlive()) {
+            if (DEBUG && monThread.isAlive()) {
                 sys.reportln("	MonThread is still alive!");
 
             }
@@ -860,7 +860,7 @@ public final class RXTXPort extends SerialPort {
         monThread = null;
         SPEventListener = null;
         MonitorThreadLock = false;
-        MonitorThreadAlive = false;
+        monitorThreadAlive = false;
         monThreadisInterrupted = true;
         sys.reportln("RXTXPort:removeEventListener() returning");
     }
@@ -886,7 +886,7 @@ public final class RXTXPort extends SerialPort {
             boolean flag);
 
     public void notifyOnDataAvailable(boolean enable) {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:notifyOnDataAvailable( "
                     + enable + " )");
         }
@@ -901,7 +901,7 @@ public final class RXTXPort extends SerialPort {
     }
 
     public void notifyOnOutputEmpty(boolean enable) {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:notifyOnOutputEmpty( "
                     + enable + " )");
         }
@@ -914,7 +914,7 @@ public final class RXTXPort extends SerialPort {
     }
 
     public void notifyOnCTS(boolean enable) {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:notifyOnCTS( "
                     + enable + " )");
         }
@@ -926,7 +926,7 @@ public final class RXTXPort extends SerialPort {
     }
 
     public void notifyOnDSR(boolean enable) {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:notifyOnDSR( "
                     + enable + " )");
         }
@@ -938,7 +938,7 @@ public final class RXTXPort extends SerialPort {
     }
 
     public void notifyOnRingIndicator(boolean enable) {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:notifyOnRingIndicator( "
                     + enable + " )");
         }
@@ -950,7 +950,7 @@ public final class RXTXPort extends SerialPort {
     }
 
     public void notifyOnCarrierDetect(boolean enable) {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:notifyOnCarrierDetect( "
                     + enable + " )");
         }
@@ -962,7 +962,7 @@ public final class RXTXPort extends SerialPort {
     }
 
     public void notifyOnOverrunError(boolean enable) {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:notifyOnOverrunError( "
                     + enable + " )");
         }
@@ -974,7 +974,7 @@ public final class RXTXPort extends SerialPort {
     }
 
     public void notifyOnParityError(boolean enable) {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:notifyOnParityError( "
                     + enable + " )");
         }
@@ -986,7 +986,7 @@ public final class RXTXPort extends SerialPort {
     }
 
     public void notifyOnFramingError(boolean enable) {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:notifyOnFramingError( "
                     + enable + " )");
         }
@@ -998,7 +998,7 @@ public final class RXTXPort extends SerialPort {
     }
 
     public void notifyOnBreakInterrupt(boolean enable) {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:notifyOnBreakInterrupt( "
                     + enable + " )");
         }
@@ -1017,12 +1017,12 @@ public final class RXTXPort extends SerialPort {
 
     public void close() {
         synchronized (this) {
-            if (debug) {
+            if (DEBUG) {
                 sys.reportln("RXTXPort:close( " + this.name + " )");
             }
 
             while (IOLocked > 0) {
-                if (debug) {
+                if (DEBUG) {
                     sys.reportln("IO is locked " + IOLocked);
                 }
                 try {
@@ -1049,33 +1049,33 @@ public final class RXTXPort extends SerialPort {
         }
         setDTR(false);
         setDSR(false);
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:close( " + this.name + " ) setting monThreadisInterrupted");
         }
         if (!monThreadisInterrupted) {
             removeEventListener();
         }
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:close( " + this.name + " ) calling nativeClose");
         }
         nativeClose(this.name);
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:close( " + this.name + " ) calling super.close");
         }
         super.close();
         fd = 0;
         closeLock = false;
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:close( " + this.name + " ) leaving");
         }
     }
 
     protected void finalize() {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:finalize()");
         }
         if (fd > 0) {
-            if (debug) {
+            if (DEBUG) {
                 sys.reportln("RXTXPort:calling close()");
             }
             close();
@@ -1089,7 +1089,7 @@ public final class RXTXPort extends SerialPort {
     class SerialOutputStream extends OutputStream {
 
         public void write(int b) throws IOException {
-            if (debug_write) {
+            if (DEBUG_WRITE) {
                 sys.reportln("RXTXPort:SerialOutputStream:write(int)");
             }
             if (speed == 0) {
@@ -1107,7 +1107,7 @@ public final class RXTXPort extends SerialPort {
                     throw new IOException();
                 }
                 writeByte(b, monThreadisInterrupted);
-                if (debug_write) {
+                if (DEBUG_WRITE) {
                     sys.reportln("Leaving RXTXPort:SerialOutputStream:write( int )");
                 }
             } finally {
@@ -1118,7 +1118,7 @@ public final class RXTXPort extends SerialPort {
         }
 
         public void write(byte b[]) throws IOException {
-            if (debug_write) {
+            if (DEBUG_WRITE) {
                 sys.reportln("Entering RXTXPort:SerialOutputStream:write(" + b.length + ") "/*
                          * + new String(b)
                          */);
@@ -1138,7 +1138,7 @@ public final class RXTXPort extends SerialPort {
             try {
                 waitForTheNativeCodeSilly();
                 writeArray(b, 0, b.length, monThreadisInterrupted);
-                if (debug_write) {
+                if (DEBUG_WRITE) {
                     sys.reportln("Leaving RXTXPort:SerialOutputStream:write(" + b.length + ")");
                 }
             } finally {
@@ -1161,7 +1161,7 @@ public final class RXTXPort extends SerialPort {
 
             byte send[] = new byte[len];
             System.arraycopy(b, off, send, 0, len);
-            if (debug_write) {
+            if (DEBUG_WRITE) {
                 sys.reportln("Entering RXTXPort:SerialOutputStream:write(" + send.length + " " + off + " " + len + " " + ") " /*
                          * + new String(send)
                          */);
@@ -1178,7 +1178,7 @@ public final class RXTXPort extends SerialPort {
             try {
                 waitForTheNativeCodeSilly();
                 writeArray(send, 0, len, monThreadisInterrupted);
-                if (debug_write) {
+                if (DEBUG_WRITE) {
                     sys.reportln("Leaving RXTXPort:SerialOutputStream:write(" + send.length + " " + off + " " + len + " " + ") " /*
                              * + new String(send)
                              */);
@@ -1191,7 +1191,7 @@ public final class RXTXPort extends SerialPort {
         }
 
         public void flush() throws IOException {
-            if (debug) {
+            if (DEBUG) {
                 sys.reportln("RXTXPort:SerialOutputStream:flush() enter");
             }
             if (speed == 0) {
@@ -1201,7 +1201,7 @@ public final class RXTXPort extends SerialPort {
                 throw new IOException();
             }
             if (monThreadisInterrupted == true) {
-                if (debug) {
+                if (DEBUG) {
                     sys.reportln("RXTXPort:SerialOutputStream:flush() Leaving Interrupted");
                 }
                 return;
@@ -1218,7 +1218,7 @@ public final class RXTXPort extends SerialPort {
                 if (nativeDrain(monThreadisInterrupted)) {
                     sendEvent(SerialPortEvent.OUTPUT_BUFFER_EMPTY, true);
                 }
-                if (debug) {
+                if (DEBUG) {
                     sys.reportln("RXTXPort:SerialOutputStream:flush() leave");
                 }
             } finally {
@@ -1243,7 +1243,7 @@ public final class RXTXPort extends SerialPort {
          * a role
          */
         public synchronized int read() throws IOException {
-            if (debug_read) {
+            if (DEBUG_READ) {
                 sys.reportln("RXTXPort:SerialInputStream:read() called");
             }
             if (fd == 0) {
@@ -1256,15 +1256,15 @@ public final class RXTXPort extends SerialPort {
                 IOLocked++;
             }
             try {
-                if (debug_read_results) {
+                if (DEBUG_READ_RESULTS) {
                     sys.reportln("RXTXPort:SerialInputStream:read() L");
                 }
                 waitForTheNativeCodeSilly();
-                if (debug_read_results) {
+                if (DEBUG_READ_RESULTS) {
                     sys.reportln("RXTXPort:SerialInputStream:read() N");
                 }
                 int result = readByte();
-                if (debug_read_results) //z.reportln(  "RXTXPort:SerialInputStream:read() returns byte = " + result );
+                if (DEBUG_READ_RESULTS) //z.reportln(  "RXTXPort:SerialInputStream:read() returns byte = " + result );
                 {
                     sys.reportln("RXTXPort:SerialInputStream:read() returns");
                 }
@@ -1285,7 +1285,7 @@ public final class RXTXPort extends SerialPort {
          */
         public synchronized int read(byte b[]) throws IOException {
             int result;
-            if (debug_read) {
+            if (DEBUG_READ) {
                 sys.reportln("RXTXPort:SerialInputStream:read(" + b.length + ") called");
             }
             if (monThreadisInterrupted == true) {
@@ -1297,7 +1297,7 @@ public final class RXTXPort extends SerialPort {
             try {
                 waitForTheNativeCodeSilly();
                 result = read(b, 0, b.length);
-                if (debug_read_results) {
+                if (DEBUG_READ_RESULTS) {
                     sys.reportln("RXTXPort:SerialInputStream:read() returned " + result + " bytes");
                 }
                 return result;
@@ -1318,7 +1318,7 @@ public final class RXTXPort extends SerialPort {
          */
         public synchronized int read(byte b[], int off, int len)
                 throws IOException {
-            if (debug_read) {
+            if (DEBUG_READ) {
                 sys.reportln("RXTXPort:SerialInputStream:read(" + b.length + " " + off + " " + len + ") called" /*
                          * + new String(b)
                          */);
@@ -1328,7 +1328,7 @@ public final class RXTXPort extends SerialPort {
              * Some sanity checks
              */
             if (fd == 0) {
-                if (debug_read) {
+                if (DEBUG_READ) {
                     sys.reportln("RXTXPort:SerialInputStream:read() fd == 0");
                 }
                 sys.reportln("+++++++ IOException()\n");
@@ -1337,7 +1337,7 @@ public final class RXTXPort extends SerialPort {
 
             if (b == null) {
                 sys.reportln("+++++++ NullPointerException()\n");
-                if (debug_read) {
+                if (DEBUG_READ) {
                     sys.reportln("RXTXPort:SerialInputStream:read() b == 0");
                 }
                 throw new NullPointerException();
@@ -1345,7 +1345,7 @@ public final class RXTXPort extends SerialPort {
 
             if ((off < 0) || (len < 0) || (off + len > b.length)) {
                 sys.reportln("+++++++ IndexOutOfBoundsException()\n");
-                if (debug_read) {
+                if (DEBUG_READ) {
                     sys.reportln("RXTXPort:SerialInputStream:read() off < 0 ..");
                 }
                 throw new IndexOutOfBoundsException();
@@ -1355,7 +1355,7 @@ public final class RXTXPort extends SerialPort {
              * Return immediately if len==0
              */
             if (len == 0) {
-                if (debug_read) {
+                if (DEBUG_READ) {
                     sys.reportln("RXTXPort:SerialInputStream:read() off < 0 ..");
                 }
                 return 0;
@@ -1387,7 +1387,7 @@ public final class RXTXPort extends SerialPort {
                 Minimum = Math.min(Minimum, threshold);
             }
             if (monThreadisInterrupted == true) {
-                if (debug_read) {
+                if (DEBUG_READ) {
                     sys.reportln("RXTXPort:SerialInputStream:read() Interrupted");
                 }
                 return 0;
@@ -1398,7 +1398,7 @@ public final class RXTXPort extends SerialPort {
             try {
                 waitForTheNativeCodeSilly();
                 result = readArray(b, off, Minimum);
-                if (debug_read_results) {
+                if (DEBUG_READ_RESULTS) {
                     sys.reportln("RXTXPort:SerialInputStream:read(" + b.length + " " + off + " " + len + ") returned " + result + " bytes" /*
                              * + new String(b)
                              */);
@@ -1421,7 +1421,7 @@ public final class RXTXPort extends SerialPort {
          */
         public synchronized int read(byte b[], int off, int len, byte t[])
                 throws IOException {
-            if (debug_read) {
+            if (DEBUG_READ) {
                 sys.reportln("RXTXPort:SerialInputStream:read(" + b.length + " " + off + " " + len + ") called" /*
                          * + new String(b)
                          */);
@@ -1431,7 +1431,7 @@ public final class RXTXPort extends SerialPort {
              * Some sanity checks
              */
             if (fd == 0) {
-                if (debug_read) {
+                if (DEBUG_READ) {
                     sys.reportln("RXTXPort:SerialInputStream:read() fd == 0");
                 }
                 sys.reportln("+++++++ IOException()\n");
@@ -1440,7 +1440,7 @@ public final class RXTXPort extends SerialPort {
 
             if (b == null) {
                 sys.reportln("+++++++ NullPointerException()\n");
-                if (debug_read) {
+                if (DEBUG_READ) {
                     sys.reportln("RXTXPort:SerialInputStream:read() b == 0");
                 }
                 throw new NullPointerException();
@@ -1448,7 +1448,7 @@ public final class RXTXPort extends SerialPort {
 
             if ((off < 0) || (len < 0) || (off + len > b.length)) {
                 sys.reportln("+++++++ IndexOutOfBoundsException()\n");
-                if (debug_read) {
+                if (DEBUG_READ) {
                     sys.reportln("RXTXPort:SerialInputStream:read() off < 0 ..");
                 }
                 throw new IndexOutOfBoundsException();
@@ -1458,7 +1458,7 @@ public final class RXTXPort extends SerialPort {
              * Return immediately if len==0
              */
             if (len == 0) {
-                if (debug_read) {
+                if (DEBUG_READ) {
                     sys.reportln("RXTXPort:SerialInputStream:read() off < 0 ..");
                 }
                 return 0;
@@ -1490,7 +1490,7 @@ public final class RXTXPort extends SerialPort {
                 Minimum = Math.min(Minimum, threshold);
             }
             if (monThreadisInterrupted == true) {
-                if (debug_read) {
+                if (DEBUG_READ) {
                     sys.reportln("RXTXPort:SerialInputStream:read() Interrupted");
                 }
                 return 0;
@@ -1501,7 +1501,7 @@ public final class RXTXPort extends SerialPort {
             try {
                 waitForTheNativeCodeSilly();
                 result = readTerminatedArray(b, off, Minimum, t);
-                if (debug_read_results) {
+                if (DEBUG_READ_RESULTS) {
                     sys.reportln("RXTXPort:SerialInputStream:read(" + b.length + " " + off + " " + len + ") returned " + result + " bytes" /*
                              * + new String(b)
                              */);
@@ -1518,7 +1518,7 @@ public final class RXTXPort extends SerialPort {
             if (monThreadisInterrupted == true) {
                 return 0;
             }
-            if (debug_verbose) {
+            if (DEBUG_VERBOSE) {
                 sys.reportln("RXTXPort:available() called");
             }
             synchronized (IOLockedMutex) {
@@ -1526,7 +1526,7 @@ public final class RXTXPort extends SerialPort {
             }
             try {
                 int r = nativeavailable();
-                if (debug_verbose) {
+                if (DEBUG_VERBOSE) {
                     sys.reportln("RXTXPort:available() returning "
                             + r);
                 }
@@ -1559,7 +1559,7 @@ public final class RXTXPort extends SerialPort {
 
         MonitorThread() {
             setDaemon(true);
-            if (debug) {
+            if (DEBUG) {
                 sys.reportln("RXTXPort:MontitorThread:MonitorThread()");
             }
         }
@@ -1568,18 +1568,18 @@ public final class RXTXPort extends SerialPort {
          * run the thread and call the event loop.
          */
         public void run() {
-            if (debug) {
+            if (DEBUG) {
                 sys.reportln("RXTXPort:MontitorThread:run()");
             }
             monThreadisInterrupted = false;
             eventLoop();
-            if (debug) {
+            if (DEBUG) {
                 sys.reportln("eventLoop() returned");
             }
         }
 
         protected void finalize() throws Throwable {
-            if (debug) {
+            if (DEBUG) {
                 sys.reportln("RXTXPort:MonitorThread exiting");
             }
         }
@@ -1698,7 +1698,7 @@ public final class RXTXPort extends SerialPort {
      */
     public static int staticGetBaudRate(String port)
             throws UnsupportedCommOperationException {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln(
                     "RXTXPort:staticGetBaudRate( " + port + " )");
         }
@@ -1716,7 +1716,7 @@ public final class RXTXPort extends SerialPort {
      */
     public static int staticGetDataBits(String port)
             throws UnsupportedCommOperationException {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln(
                     "RXTXPort:staticGetDataBits( " + port + " )");
         }
@@ -1734,7 +1734,7 @@ public final class RXTXPort extends SerialPort {
      */
     public static int staticGetParity(String port)
             throws UnsupportedCommOperationException {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln(
                     "RXTXPort:staticGetParity( " + port + " )");
         }
@@ -1752,7 +1752,7 @@ public final class RXTXPort extends SerialPort {
      */
     public static int staticGetStopBits(String port)
             throws UnsupportedCommOperationException {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln(
                     "RXTXPort:staticGetStopBits( " + port + " )");
         }
@@ -1777,7 +1777,7 @@ public final class RXTXPort extends SerialPort {
     public static void staticSetSerialPortParams(String f, int b, int d,
             int s, int p)
             throws UnsupportedCommOperationException {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln(
                     "RXTXPort:staticSetSerialPortParams( "
                     + f + " " + b + " " + d + " " + s + " " + p);
@@ -1799,7 +1799,7 @@ public final class RXTXPort extends SerialPort {
      */
     public static boolean staticSetDSR(String port, boolean flag)
             throws UnsupportedCommOperationException {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:staticSetDSR( " + port
                     + " " + flag);
         }
@@ -1820,7 +1820,7 @@ public final class RXTXPort extends SerialPort {
      */
     public static boolean staticSetDTR(String port, boolean flag)
             throws UnsupportedCommOperationException {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:staticSetDTR( " + port
                     + " " + flag);
         }
@@ -1841,7 +1841,7 @@ public final class RXTXPort extends SerialPort {
      */
     public static boolean staticSetRTS(String port, boolean flag)
             throws UnsupportedCommOperationException {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:staticSetRTS( " + port
                     + " " + flag);
         }
@@ -1861,7 +1861,7 @@ public final class RXTXPort extends SerialPort {
      */
     public static boolean staticIsRTS(String port)
             throws UnsupportedCommOperationException {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:staticIsRTS( " + port + " )");
         }
         return nativeStaticIsRTS(port);
@@ -1880,7 +1880,7 @@ public final class RXTXPort extends SerialPort {
      */
     public static boolean staticIsCD(String port)
             throws UnsupportedCommOperationException {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:staticIsCD( " + port + " )");
         }
         return nativeStaticIsCD(port);
@@ -1899,7 +1899,7 @@ public final class RXTXPort extends SerialPort {
      */
     public static boolean staticIsCTS(String port)
             throws UnsupportedCommOperationException {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:staticIsCTS( " + port + " )");
         }
         return nativeStaticIsCTS(port);
@@ -1918,7 +1918,7 @@ public final class RXTXPort extends SerialPort {
      */
     public static boolean staticIsDSR(String port)
             throws UnsupportedCommOperationException {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:staticIsDSR( " + port + " )");
         }
         return nativeStaticIsDSR(port);
@@ -1937,7 +1937,7 @@ public final class RXTXPort extends SerialPort {
      */
     public static boolean staticIsDTR(String port)
             throws UnsupportedCommOperationException {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:staticIsDTR( " + port + " )");
         }
         return nativeStaticIsDTR(port);
@@ -1956,7 +1956,7 @@ public final class RXTXPort extends SerialPort {
      */
     public static boolean staticIsRI(String port)
             throws UnsupportedCommOperationException {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:staticIsRI( " + port + " )");
         }
         return nativeStaticIsRI(port);
@@ -1974,11 +1974,11 @@ public final class RXTXPort extends SerialPort {
     public byte getParityErrorChar()
             throws UnsupportedCommOperationException {
         byte ret;
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("getParityErrorChar()");
         }
         ret = nativeGetParityErrorChar();
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("getParityErrorChar() returns "
                     + ret);
         }
@@ -1997,7 +1997,7 @@ public final class RXTXPort extends SerialPort {
      */
     public boolean setParityErrorChar(byte b)
             throws UnsupportedCommOperationException {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("setParityErrorChar(" + b + ")");
         }
         return nativeSetParityErrorChar(b);
@@ -2015,11 +2015,11 @@ public final class RXTXPort extends SerialPort {
     public byte getEndOfInputChar()
             throws UnsupportedCommOperationException {
         byte ret;
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("getEndOfInputChar()");
         }
         ret = nativeGetEndOfInputChar();
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("getEndOfInputChar() returns "
                     + ret);
         }
@@ -2036,7 +2036,7 @@ public final class RXTXPort extends SerialPort {
      */
     public boolean setEndOfInputChar(byte b)
             throws UnsupportedCommOperationException {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("setEndOfInputChar(" + b + ")");
         }
         return nativeSetEndOfInputChar(b);
@@ -2054,7 +2054,7 @@ public final class RXTXPort extends SerialPort {
      */
     public boolean setUARTType(String type, boolean test)
             throws UnsupportedCommOperationException {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:setUARTType()");
         }
         return nativeSetUartType(type, test);
@@ -2084,7 +2084,7 @@ public final class RXTXPort extends SerialPort {
     public boolean setBaudBase(int BaudBase)
             throws UnsupportedCommOperationException,
             IOException {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:setBaudBase()");
         }
         return nativeSetBaudBase(BaudBase);
@@ -2098,7 +2098,7 @@ public final class RXTXPort extends SerialPort {
      */
     public int getBaudBase() throws UnsupportedCommOperationException,
             IOException {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:getBaudBase()");
         }
         return nativeGetBaudBase();
@@ -2113,7 +2113,7 @@ public final class RXTXPort extends SerialPort {
      */
     public boolean setDivisor(int Divisor)
             throws UnsupportedCommOperationException, IOException {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:setDivisor()");
         }
         return nativeSetDivisor(Divisor);
@@ -2127,7 +2127,7 @@ public final class RXTXPort extends SerialPort {
      */
     public int getDivisor() throws UnsupportedCommOperationException,
             IOException {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:getDivisor()");
         }
         return nativeGetDivisor();
@@ -2139,7 +2139,7 @@ public final class RXTXPort extends SerialPort {
      * @throws UnsupportedCommOperationException
      */
     public boolean setLowLatency() throws UnsupportedCommOperationException {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:setLowLatency()");
         }
         return nativeSetLowLatency();
@@ -2151,7 +2151,7 @@ public final class RXTXPort extends SerialPort {
      * @throws UnsupportedCommOperationException
      */
     public boolean getLowLatency() throws UnsupportedCommOperationException {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:getLowLatency()");
         }
         return nativeGetLowLatency();
@@ -2164,7 +2164,7 @@ public final class RXTXPort extends SerialPort {
      */
     public boolean setCallOutHangup(boolean NoHup)
             throws UnsupportedCommOperationException {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:setCallOutHangup()");
         }
         return nativeSetCallOutHangup(NoHup);
@@ -2177,7 +2177,7 @@ public final class RXTXPort extends SerialPort {
      */
     public boolean getCallOutHangup()
             throws UnsupportedCommOperationException {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:getCallOutHangup()");
         }
         return nativeGetCallOutHangup();
@@ -2190,7 +2190,7 @@ public final class RXTXPort extends SerialPort {
      */
     public boolean clearCommInput()
             throws UnsupportedCommOperationException {
-        if (debug) {
+        if (DEBUG) {
             sys.reportln("RXTXPort:clearCommInput()");
         }
         return nativeClearCommInput();
