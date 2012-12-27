@@ -14,6 +14,51 @@
     </parent>
     <profiles>
         <profile>
+            <id>build-host-linux-arm</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                    <arch>arm</arch>
+                </os>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>native-maven-plugin</artifactId>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <javahClassNames>
+                                <javahClassName>gnu.io.RXTXPort</javahClassName>
+                            </javahClassNames>
+                            <javahOS>linux</javahOS>
+                            <compilerProvider>generic-classic</compilerProvider>
+                            <compilerStartOptions>
+                                <compilerStartOption>-DHAVE_TERMIOS_H</compilerStartOption>
+                                <compilerStartOption>-DHAVE_STDINT_H</compilerStartOption>
+                                <compilerStartOption>-DHAVE_SYS_FCNTL_H</compilerStartOption>
+                                <compilerStartOption>-DHAVE_SYS_SIGNAL_H</compilerStartOption>
+                                <compilerStartOption>-shared</compilerStartOption>
+                                <compilerStartOption>-fPIC</compilerStartOption>
+                            </compilerStartOptions>
+                            <linkerStartOptions>
+                                <linkerStartOption>-shared</linkerStartOption>
+                                <linkerStartOption>-fPIC</linkerStartOption>
+                            </linkerStartOptions>
+                            <sources>
+                                <source>
+                                    <directory>${project.build.directory}/extracted-c</directory>
+                                    <fileNames>
+                                        <fileName>SerialImp.c</fileName>
+                                    </fileNames>
+                                </source>
+                            </sources>
+                        </configuration>
+                    </plugin>  
+                </plugins>
+            </build>
+        </profile>
+        <profile>
             <id>build-host-linux-x86</id>
             <activation>
                 <os>
