@@ -109,6 +109,13 @@
         </profile>
         <profile>
             <id>with-linux-arm</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                    <name>linux</name>
+                    <arch>arm</arch>
+                </os>
+            </activation>
             <modules>
                 <module>native-linux-arm</module>
             </modules>
