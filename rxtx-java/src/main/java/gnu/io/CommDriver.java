@@ -27,7 +27,7 @@
  |   any confusion about linking to RXTX.   We want to allow in part what
  |   section 5, paragraph 2 of the LGPL does not permit in the special
  |   case of linking over a controlled interface.  The intent is to add a
- |   Java Specification Request or standards body defined interface in the 
+ |   Java Specification Request or standards body defined interface in the
  |   future as another exception but one is not currently available.
  |
  |   http://www.fsf.org/licenses/gpl-faq.html#LinkingOverControlledInterface
@@ -58,12 +58,50 @@
 package gnu.io;
 
 /**
+ * The
+ * <code>CommDriver</code> is a service provider interface for device drivers.
+ * Device drivers implement the mapping between port hardware and the
+ * <code>CommPort</code> class. All device driver implementations must implement
+ * this interface in order to be discovered by a service loader.
+ *
+ * <b>Please note:</b> Rxtx does not <i>currently</i> provide an implementation
+ * for the service loader mechanism and therefor only the build in driver can be
+ * used.
+ *
  * @author Trent Jarvi
- * @version %I%, %G%
  */
 public interface CommDriver {
 
+    /**
+     * The driver returns a
+     * <code>CommPort</code> for a given name and type. The driver
+     * implementation must return a
+     * <code>CommPort</code> instance of the type which is related to the
+     * <code>portType</code> option and matches the given
+     * <code>portName</code>. If the driver can not find a device matching the
+     * combination of
+     * <code>portName</code> and
+     * <code>portType</code>
+     * <code>null</code> must be returned.
+     *
+     * It is guaranteed that rxtx will not call this method before calling
+     * <code>initialize()</code>.
+     *
+     * @param portName the name of the port
+     * @param portType a constant from <code>CommPortIdentifier.PORT_*</code>
+     * describing the type of the port
+     * @return the <code>CommPort</code> instance or <code>null</code>
+     */
     public abstract CommPort getCommPort(String portName, int portType);
 
+    /**
+     * Initializes this driver. This method is called by rxtx once in a virtual
+     * machines lifetime when a driver was discovered. The driver can use this
+     * call to configure itself and register devices via
+     * <code>CommPortIdentifier.addPortName()</code> to be prepared for
+     * calls to
+     * <code>getCommPort()</code>. For robustness reasons subsequent calls to
+     * <code>initialize()</code> should not do any harm.
+     */
     public abstract void initialize();
 }

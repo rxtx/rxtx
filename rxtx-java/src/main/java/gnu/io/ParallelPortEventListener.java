@@ -27,7 +27,7 @@
  |   any confusion about linking to RXTX.   We want to allow in part what
  |   section 5, paragraph 2 of the LGPL does not permit in the special
  |   case of linking over a controlled interface.  The intent is to add a
- |   Java Specification Request or standards body defined interface in the 
+ |   Java Specification Request or standards body defined interface in the
  |   future as another exception but one is not currently available.
  |
  |   http://www.fsf.org/licenses/gpl-faq.html#LinkingOverControlledInterface
@@ -60,10 +60,28 @@ package gnu.io;
 import java.util.EventListener;
 
 /**
+ * Observer interface which is informed about events happening on a
+ * <code>ParallelPort</code>.
+ *
+ * First, instances of
+ * <code>ParallelPortEventListener</code> are registered on a port using the
+ * <code>ParallelPort.addEventListener()</code> method. Then the desired events
+ * must be enabled on the port by calling
+ * <code>ParallelPort.notifyOn*(true)</code>.
+ *
+ * If one of the enabled events occurred on a port, the
+ * <code>parallelEvent</code> method of the listener is called with an event
+ * object describing the event.
+ *
  * @author Trent Jarvi
- * @version %I%, %G%
  */
 public interface ParallelPortEventListener extends EventListener {
 
-    public abstract void parallelEvent(ParallelPortEvent ev);
+    /**
+     * Receives enabled event notifications from the port the event listener is
+     * registered to.
+     *
+     * @param event an event object describing the event
+     */
+    public abstract void parallelEvent(ParallelPortEvent event);
 }

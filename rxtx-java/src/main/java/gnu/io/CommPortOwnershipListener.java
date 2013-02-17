@@ -60,14 +60,41 @@ package gnu.io;
 import java.util.EventListener;
 
 /**
+ * The
+ * <code>CommPortOwnershipListener</code> is an observer interface which keeps
+ * track of the ownership of a port.
+ *
+ * The listener must be registered on a port via
+ * <code>CommPortIdentiefer.addPortOwnershipListener()</code> first. Then it is
+ * notified when other applications try to access the port or the ownership
+ * changes.
+ *
  * @author Trent Jarvi
  * @version %I%, %G%
  */
 public interface CommPortOwnershipListener extends EventListener {
 
-    public static final int PORT_OWNED = 1;
-    public static final int PORT_UNOWNED = 2;
-    public static final int PORT_OWNERSHIP_REQUESTED = 3;
+    /**
+     * The port is owned by an application.
+     */
+    int PORT_OWNED = 1;
+    /**
+     * The pot is not owned by an application and is ready to be opened.
+     */
+    int PORT_UNOWNED = 2;
+    /**
+     * Another application requests to open the port. If this application
+     * receives this event while holding the port and wants to give ownership to
+     * the requesting application, then
+     * <code>CommPort.close()</code> should be called as fast as possible.
+     */
+    int PORT_OWNERSHIP_REQUESTED = 3;
 
+    /**
+     * Receives change notifications about the port ownership.
+     *
+     * @param type one of the <code>PORT_*</code> constants indicating the
+     * notification type.
+     */
     public abstract void ownershipChange(int type);
 }

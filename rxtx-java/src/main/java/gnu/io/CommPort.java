@@ -62,6 +62,15 @@ import java.io.OutputStream;
 import java.io.IOException;
 
 /**
+ * Represents an exclusively owned, opened port.
+ *
+ * In contrast to
+ * <code>CommPortIdentifier</code> this class represents an opened port which is
+ * owned by this application. The application can therefor access the ports
+ * properties.
+ *
+ * The <code>CommPort</code> class is the base class for all port types.
+ *
  * @author Trent Jarvi
  * @version %I%, %G%
  */
@@ -71,7 +80,7 @@ import java.io.IOException;
 public abstract class CommPort extends Object {
 
     protected String name;
-    private static final  boolean debug = false;
+    private static final boolean debug = false;
 
     public abstract void enableReceiveFraming(int f)
             throws UnsupportedCommOperationException;
