@@ -68,6 +68,7 @@ public class PortInUseException extends Exception {
     /**
      * the owner of the port requested.
      */
+    // TODO visibility (by Alexander Graf) why is this public? use getter
     public String currentOwner;
 
     /**
@@ -75,11 +76,15 @@ public class PortInUseException extends Exception {
      *
      * @param str detailed information about the current owner
      */
+    //TODO (by Alexander Graf) super argument should be a message and not only
+    // the current owner of the port
     PortInUseException(String str) {
         super(str);
         currentOwner = str;
     }
 
+    //TODO visibility (by Alexander Graf) this should not be public and should
+    // not exist in general. The one argument constr. is sufficent.
     public PortInUseException() {
         super();
     }

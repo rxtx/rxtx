@@ -96,5 +96,8 @@ public interface CommPortOwnershipListener extends EventListener {
      * @param type one of the <code>PORT_*</code> constants indicating the
      * notification type.
      */
+    //TODO (by Alexander Graf): it would be nice to get the port identifier on
+    // which the ownership event occured. This would enable us to register a
+    // single listener implementation on multiple port identifiers
     public abstract void ownershipChange(int type);
 }
