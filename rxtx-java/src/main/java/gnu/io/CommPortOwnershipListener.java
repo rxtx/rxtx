@@ -70,7 +70,6 @@ import java.util.EventListener;
  * changes.
  *
  * @author Trent Jarvi
- * @version %I%, %G%
  */
 public interface CommPortOwnershipListener extends EventListener {
 
@@ -99,5 +98,5 @@ public interface CommPortOwnershipListener extends EventListener {
     //TODO (by Alexander Graf): it would be nice to get the port identifier on
     // which the ownership event occured. This would enable us to register a
     // single listener implementation on multiple port identifiers
-    public abstract void ownershipChange(int type);
+    void ownershipChange(int type);
 }

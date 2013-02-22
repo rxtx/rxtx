@@ -92,7 +92,7 @@ public interface CommDriver {
      * describing the type of the port
      * @return the <code>CommPort</code> instance or <code>null</code>
      */
-    public abstract CommPort getCommPort(String portName, int portType);
+    CommPort getCommPort(String portName, int portType);
 
     /**
      * Initializes this driver. This method is called by rxtx once in a virtual
@@ -103,5 +103,5 @@ public interface CommDriver {
      * <code>getCommPort()</code>. For robustness reasons subsequent calls to
      * <code>initialize()</code> should not do any harm.
      */
-    public abstract void initialize();
+    void initialize();
 }

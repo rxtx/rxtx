@@ -83,5 +83,5 @@ public interface ParallelPortEventListener extends EventListener {
      *
      * @param event an event object describing the event
      */
-    public abstract void parallelEvent(ParallelPortEvent event);
+    void parallelEvent(ParallelPortEvent ev);
 }

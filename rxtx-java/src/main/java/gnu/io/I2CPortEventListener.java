@@ -67,5 +67,5 @@ import java.util.EventListener;
  */
 public interface I2CPortEventListener extends EventListener {
 
-    public abstract void I2CEvent(I2CPortEvent ev);
+    void I2CEvent(I2CPortEvent ev);
 }
