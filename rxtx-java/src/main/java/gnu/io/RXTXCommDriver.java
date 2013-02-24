@@ -62,6 +62,7 @@
  * known ports, and scanned ports, July 2001 */
 package gnu.io;
 
+import gnu.io.spi.CommDriver;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;

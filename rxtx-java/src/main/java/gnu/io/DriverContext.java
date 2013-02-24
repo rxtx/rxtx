@@ -57,6 +57,8 @@
  --------------------------------------------------------------------------*/
 package gnu.io;
 
+import gnu.io.spi.CommDriver;
+
 /**
  * The
  * <code>DriverContext</code> gives access to a part of the API which is

@@ -57,6 +57,7 @@
  --------------------------------------------------------------------------*/
 package gnu.io;
 
+import gnu.io.spi.CommDriver;
 import java.io.FileDescriptor;
 import java.util.HashMap;
 import java.util.Vector;
