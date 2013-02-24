@@ -75,11 +75,9 @@ import java.util.StringTokenizer;
  */
 // TODO (by Alexander Graf) it seems this class is used to access all kinds
 // of drivers, not only the linux drivers as stated in the comment above
-// TODO visibility (by Alexander Graf) This class is the implementation of a
-// SPI. Therefor it should be package private and not exposed as API.
 // TODO (by Alexander Graf) this class seems to implement a driver for both
 // serial and parallel ports. The drivers should be separated.
-public class RXTXCommDriver implements CommDriver {
+final class RXTXCommDriver implements CommDriver {
 
     private static final boolean DEBUG = false;
     private static final boolean DEVEL = false;
