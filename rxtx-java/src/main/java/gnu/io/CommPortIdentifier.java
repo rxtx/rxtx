@@ -74,8 +74,7 @@ import java.util.Enumeration;
  *
  * @author Trent Jarvi
  */
-//TODO visibility (by Alexander Graf) class should be final
-public class CommPortIdentifier extends Object {
+public final class CommPortIdentifier extends Object {
 
     /**
      * The port is a RS232 serial port.
