@@ -63,7 +63,7 @@ import java.util.EventObject;
  * @author Trent Jarvi
  * @version %I%, %G%
  */
-public class ParallelPortEvent extends EventObject {
+public final class ParallelPortEvent extends EventObject {
 
     public static final int PAR_EV_ERROR = 1;
     public static final int PAR_EV_BUFFER = 2;

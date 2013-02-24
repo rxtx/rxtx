@@ -62,8 +62,7 @@ import java.util.EventObject;
 /**
  * @author Trent Jarvi
  */
-//TODO visibility (by Alexander Graf): class should be final
-public class SerialPortEvent extends EventObject {
+public final class SerialPortEvent extends EventObject {
 
     /**
      * The DATA_AVAILABLE port event notifies that new data was received on the

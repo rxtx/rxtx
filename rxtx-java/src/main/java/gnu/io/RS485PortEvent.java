@@ -64,7 +64,7 @@ import java.util.EventObject;
  * @author Trent Jarvi
  * @version %I%, %G%
  */
-public class RS485PortEvent extends EventObject {
+public final class RS485PortEvent extends EventObject {
 
     public static final int DATA_AVAILABLE = 1;
     public static final int OUTPUT_BUFFER_EMPTY = 2;
