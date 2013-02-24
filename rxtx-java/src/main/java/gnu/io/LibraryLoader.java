@@ -62,7 +62,7 @@ package gnu.io;
  *
  * @author Jeff Benjamin
  */
-public class LibraryLoader {
+final class LibraryLoader {
 	private static final String librarySuffix;
 
 	static {
