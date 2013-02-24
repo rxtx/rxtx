@@ -618,8 +618,7 @@ public final class CommPortIdentifier extends Object {
         fireOwnershipEvent(CommPortOwnershipListener.PORT_UNOWNED);
     }
 
-    //TODO visibility (by Alexander Graf) method should be private
-    void fireOwnershipEvent(int eventType) {
+    private void fireOwnershipEvent(int eventType) {
         if (debug) {
             System.out.println("CommPortIdentifier:fireOwnershipEvent( " + eventType + " )");
         }
