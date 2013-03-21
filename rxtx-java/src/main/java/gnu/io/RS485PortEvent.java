@@ -83,7 +83,7 @@ public final class RS485PortEvent extends EventObject {
      * public int eventType =0; depricated
      */
 
-    public RS485PortEvent(RS485Port srcPort, int eventType, boolean oldValue, boolean newValue) {
+    RS485PortEvent(RS485Port srcPort, int eventType, boolean oldValue, boolean newValue) {
         super(srcPort);
         this.oldValue = oldValue;
         this.newValue = newValue;

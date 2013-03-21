@@ -57,6 +57,12 @@
  --------------------------------------------------------------------------*/
 package gnu.io;
 
+import gnu.io.DriverContext;
+import gnu.io.PortInUseException;
+import gnu.io.SerialPort;
+import gnu.io.SerialPortEvent;
+import gnu.io.SerialPortEventListener;
+import gnu.io.UnsupportedCommOperationException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
@@ -71,6 +77,7 @@ final class RXTXPort extends SerialPort {
     protected static final boolean DEBUG_EVENTS = false;
     protected static final boolean DEBUG_VERBOSE = false;
     private static Zystem sys;
+    private final DriverContext context;
 
     static {
         try {
@@ -99,10 +106,11 @@ final class RXTXPort extends SerialPort {
      * @throws PortInUseException
      * @see gnu.io.SerialPort
      */
-    public RXTXPort(String name) throws PortInUseException {
+    public RXTXPort(DriverContext context, String name) throws PortInUseException {
         if (DEBUG) {
             sys.reportln("RXTXPort:RXTXPort(" + name + ") called");
         }
+        this.context = context;
         /*
          * commapi/javadocs/API_users_guide.html specifies that whenever an
          * application tries to open a port in use by another application the
@@ -758,8 +766,8 @@ final class RXTXPort extends SerialPort {
         if (DEBUG_EVENTS && DEBUG_VERBOSE) {
             sys.reportln("	getting event");
         }
-        SerialPortEvent e = new SerialPortEvent(this, event, !state,
-                state);
+        SerialPortEvent e = context.getEventFactory()
+                .createSerialPortEvent(this, event, !state, state);
         if (DEBUG_EVENTS && DEBUG_VERBOSE) {
             sys.reportln("	sending event");
         }

@@ -74,7 +74,7 @@ public final class ParallelPortEvent extends EventObject {
      * public int eventType =0; depricated
      */
 
-    public ParallelPortEvent(ParallelPort srcport, int eventType,
+    ParallelPortEvent(ParallelPort srcport, int eventType,
             boolean oldValue, boolean newValue) {
         super(srcport);
         this.oldValue = oldValue;

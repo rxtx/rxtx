@@ -84,7 +84,7 @@ public final class I2CPortEvent extends EventObject {
      * public int eventType =0; depricated
      */
 
-    public I2CPortEvent(I2CPort srcport, int eventType, boolean oldValue,
+    I2CPortEvent(I2CPort srcport, int eventType, boolean oldValue,
             boolean newValue) {
         super(srcport);
         this.oldValue = oldValue;

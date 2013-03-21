@@ -131,8 +131,7 @@ public final class SerialPortEvent extends EventObject {
      * @param oldValue the value of the signal before the event
      * @param newValue the value of the signal after the event
      */
-    //TODO  visibility (by Alexander Graf): constructure should be package private
-    public SerialPortEvent(SerialPort srcPort, int eventType, boolean oldValue,
+    SerialPortEvent(SerialPort srcPort, int eventType, boolean oldValue,
             boolean newValue) {
         super(srcPort);
         this.oldValue = oldValue;

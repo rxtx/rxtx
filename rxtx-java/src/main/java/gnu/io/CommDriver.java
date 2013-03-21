@@ -98,10 +98,11 @@ public interface CommDriver {
      * Initializes this driver. This method is called by rxtx once in a virtual
      * machines lifetime when a driver was discovered. The driver can use this
      * call to configure itself and register devices via
-     * <code>CommPortIdentifier.addPortName()</code> to be prepared for
-     * calls to
-     * <code>getCommPort()</code>. For robustness reasons subsequent calls to
-     * <code>initialize()</code> should not do any harm.
+     * <code>DriverContext.addPortName()</code> to be prepared for calls to
+     * <code>getCommPort()</code>.
+     *
+     * @param context a callback class for the driver to get access to the
+     * driver service provider interface
      */
-    void initialize();
+    void initialize(DriverContext context);
 }
