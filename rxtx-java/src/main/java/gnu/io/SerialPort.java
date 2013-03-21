@@ -84,6 +84,10 @@ public abstract class SerialPort extends CommPort {
     public static final int FLOWCONTROL_XONXOFF_IN = 4;
     public static final int FLOWCONTROL_XONXOFF_OUT = 8;
 
+    public SerialPort(String name) {
+        super(name);
+    }
+
     public abstract void setSerialPortParams(int b, int d, int s, int p)
             throws UnsupportedCommOperationException;
 

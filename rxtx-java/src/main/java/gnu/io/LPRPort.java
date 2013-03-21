@@ -83,6 +83,7 @@ final class LPRPort extends ParallelPort {
      * Open the named port
      */
     public LPRPort(DriverContext context, String name) throws PortInUseException {
+        super(name);
         if (debug) {
             System.out.println("LPRPort:LPRPort(" + name + ")");
         }
@@ -99,7 +100,6 @@ final class LPRPort extends ParallelPort {
          */
         //	try {
         fd = open(name);
-        this.name = name;
         //	} catch ( PortInUseException e ){}
         if (debug) {
             System.out.println("LPRPort:LPRPort(" + name + ") fd = "

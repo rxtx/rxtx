@@ -107,6 +107,7 @@ final class RXTXPort extends SerialPort {
      * @see gnu.io.SerialPort
      */
     public RXTXPort(DriverContext context, String name) throws PortInUseException {
+        super(name);
         if (DEBUG) {
             sys.reportln("RXTXPort:RXTXPort(" + name + ") called");
         }
@@ -123,7 +124,6 @@ final class RXTXPort extends SerialPort {
          */
         //	try {
         fd = open(name);
-        this.name = name;
 
         MonitorThreadLock = true;
         monThread = new MonitorThread();

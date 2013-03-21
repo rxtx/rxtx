@@ -85,6 +85,7 @@ final class RS485 extends RS485Port {
      * Open the named port
      */
     public RS485(String name) throws PortInUseException {
+        super(name);
         fd = open(name);
     }
 
