@@ -155,18 +155,6 @@ public final class CommPortIdentifier extends Object {
             System.out.println("CommPortIdentifier:static initialization()");
         }
         Sync = new Object();
-        // TODO (by Alexander Graf) There should be a declarative SPI
-        // (some service loader mechanism) to
-        // register all drivers and then load them here.
-        // (instread of hardcoded driver implementation name
-        try {
-            CommDriver driver = (CommDriver) Class.forName(
-                    "gnu.io.impl.serial.RXTXCommDriver").newInstance();
-            driver.initialize(DriverContext.getInstance());
-        } catch (Throwable e) {
-            System.err.println(
-                    e + " thrown while loading gnu.io.impl.serial.RXTXCommDriver");
-        }
 
         if (debug) {
             String os = System.getProperty("os.name");
