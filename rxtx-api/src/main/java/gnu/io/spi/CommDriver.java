@@ -100,7 +100,8 @@ public interface CommDriver {
     /**
      * Initializes this driver. This method is called by rxtx once in a virtual
      * machines lifetime when a driver was discovered. The driver can use this
-     * call to configure itself and register devices via
+     * call to configure itself, load any required native libraries and register
+     * devices via
      * <code>DriverContext.addPortName()</code> to be prepared for calls to
      * <code>getCommPort()</code>.
      *

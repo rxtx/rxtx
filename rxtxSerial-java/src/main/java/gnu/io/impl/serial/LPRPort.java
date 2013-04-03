@@ -75,7 +75,6 @@ import java.util.TooManyListenersException;
 final class LPRPort extends ParallelPort {
 
     static {
-        RXTXVersion.loadLibrary("rxtxParallel");
         Initialize();
     }
 

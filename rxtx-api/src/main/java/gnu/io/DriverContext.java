@@ -99,6 +99,39 @@ public final class DriverContext {
     }
 
     /**
+     * Creates a new loader for native libraries. <p>The library loader can be
+     * used by drivers which require a native library (JNI library). The loader
+     * is able to discover libraries in a JAR file as well as on the native
+     * library path.</p>
+     *
+     * <p>To find a library in a JAR, a
+     * <code>ClassLoader</code> is required. Typically this is the class loader
+     * of the driver implementation class: We assume YourDriver extends
+     * CommDriver, then the class loader can be obtained by:
+     * <code>YourDriver.class.getClassLoader()</code></p>
+     *
+     * <p>The given classLoader will be used to find
+     * the native library in the resources (e.g. a JAR file) at the given
+     * resourcePath.</p>
+     *
+     * @param classLoader The class loader which has access to the JAR file.
+     * @param resourcePath the path inside the JAR without trailing slash
+     * @return the new library loader instance
+     * @throws NullPointerException if <code>classLoader</code> or
+     * <code>resourcePath</code> is null
+     */
+    public LibraryLoader createLibraryLoader(final ClassLoader classLoader,
+            final String resourcePath) {
+        if (classLoader == null) {
+            throw new NullPointerException("ClassLoader must not be null.");
+        }
+        if (resourcePath == null) {
+            throw new NullPointerException("resource path must not be null");
+        }
+        return new LibraryLoader(classLoader, resourcePath);
+    }
+
+    /**
      * Provides a port to the API. Using this method, drivers can register ports
      * which are available through them. When the user is interested in such a
      * port the API might request a
@@ -108,8 +141,7 @@ public final class DriverContext {
      *
      * @param portName a port name which uniquely identifies a port provided by
      * this driver.
-     * @param portType the port type encoded
-     * as <code>CommPortIdentifier.PORT_*</code> constant
+     * @param portType the port type encoded as <code>CommPortIdentifier.PORT_*</code> constant
      * @param driver the driver which is providing the port
      */
     public void registerPort(final String portName, final int portType,
