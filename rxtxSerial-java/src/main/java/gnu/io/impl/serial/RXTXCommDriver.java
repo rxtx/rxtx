@@ -80,12 +80,18 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * This is the default rxtx serial driver implementation.
+ *
+ * @author Trent Jarvi
+ * @author Holger Lehmann (IBM)
+ * @author Peter Bennett (Bencom)
+ * @author Alexander Graf
+ *
  * @deprecated Do NOT use this class. Your code WILL break. As an API user you
  * must not depend on implementation details, this class is one of them. Always
  * code against the service interface. Do not cast instances to this class type.
+ *
  */
-// TODO (by Alexander Graf) it seems this class is used to access all kinds
-// of drivers, not only the linux drivers as stated in the comment above
 // TODO (by Alexander Graf) this class seems to implement a driver for both
 // serial and parallel ports. The drivers should be separated.
 @Deprecated
@@ -106,7 +112,6 @@ public final class RXTXCommDriver implements CommDriver {
     @Deprecated
     public RXTXCommDriver() {
     }
-    
 
     private native boolean registerKnownPorts(int PortType);
 
@@ -232,7 +237,7 @@ public final class RXTXCommDriver implements CommDriver {
 
     public void initialize(final DriverContext context) {
         this.context = context;
-        
+
         LibraryLoader loader = context.createLibraryLoader(
                 RXTXCommDriver.class.getClassLoader(),
                 "gnu/io/impl/serial");
