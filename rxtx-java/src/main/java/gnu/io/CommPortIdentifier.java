@@ -74,6 +74,7 @@ import java.util.Enumeration;
  *
  * @author Trent Jarvi
  */
+//TODO visibility (by Alexander Graf) class should be final
 public class CommPortIdentifier extends Object {
 
     /**
@@ -121,18 +122,27 @@ public class CommPortIdentifier extends Object {
      * The driver which is used to access the associated port.
      */
     private CommDriver driver;
+    // TODO (by Alexander Graf) commPortIndex and next are part of reinventing
+    // the wheel by implementing a linked list
     static CommPortIdentifier CommPortIndex;
     CommPortIdentifier next;
     /**
      * A PORT_* constant indicating the port hardware type.
      */
     private int portType;
+    // TODO (by Alexander Graf) all the debug statements are ugly, debuggers
+    // are made for that ...
     private static final boolean debug = false;
+    // TODO (by Alexander Graf) the access to this field from all corners of
+    // rxtx is really ugly and should be rewritten
     static Object Sync;
     /**
      * A list of registered
      * <code>PortOwnershipListener</code>s.
      */
+    // TODO (by Alexander Graf) the list of listeners should have a plural name
+    // and should be private. Should use interface type here and Vector is
+    // deprecated
     Vector ownershipListener;
 
     /*
@@ -143,6 +153,10 @@ public class CommPortIdentifier extends Object {
             System.out.println("CommPortIdentifier:static initialization()");
         }
         Sync = new Object();
+        // TODO (by Alexander Graf) There should be a declarative SPI
+        // (some service loader mechanism) to
+        // register all drivers and then load them here.
+        // (instread of hardcoded driver implementation name
         try {
             CommDriver driver = (CommDriver) Class.forName(
                     "gnu.io.RXTXCommDriver").newInstance();
@@ -158,6 +172,9 @@ public class CommPortIdentifier extends Object {
                 System.out.println("Have not implemented native_psmisc_report_owner(PortName)); in CommPortIdentifier");
             }
         }
+        // TODO (by Alexander Graf) the native library is only used by the
+        // driver implementation, therefor it should also be loaded by
+        // the driver (initialize()) and not by this api class
         if ("true".equals(System.getProperty("gnu.io.rxtx.LibraryLoader"))) {
             LibraryLoader.loadLibrary("rxtxSerial");
         } else {
@@ -185,10 +202,25 @@ public class CommPortIdentifier extends Object {
         this.driver = driver;
     }
 
+    // TODO visibility (by Alexander Graf) why is this public? The
+    // only one who is allowed to register new ports is the driver and NOT
+    // the user. This method should be changed to package private access and add
+    // a friend to be accessible by a new subpackage of rxtx which is clearly
+    // marked as API for driver implementers.
+    // (see http://wiki.apidesign.org/wiki/FriendPackages)
+    // The Comm API really sucks here. If the user needs to add a port this
+    // should be done in a declarative manner on a per-driver basis.
     public static void addPortName(String portName, int portType, CommDriver driver) {
         if (debug) {
             System.out.println("CommPortIdentifier:addPortName(" + portName + ")");
         }
+        // TODO (by Alexander Graf) the usage of the constructor with a null
+        // value for the port is a major design problem. Rxtx currently creates
+        // the port objects on a per-open basis. This clashes with the design
+        // idea of the comm API where a port object is created by the driver
+        // once and given to the CommPortIdentifier constructor.
+        // This problem is again introduced by the poor design of the comm APIs
+        // SPI.
         addIdentifierToList(new CommPortIdentifier(portName, null, portType, driver));
     }
 
@@ -197,6 +229,8 @@ public class CommPortIdentifier extends Object {
      *
      * @param identifier the identifier to add to the list
      */
+    //TODO (Alexander Graf) This method/class seems to reinvent the wheel
+    //by implementing its own linked list functionallity
     private static void addIdentifierToList(CommPortIdentifier identifier) {
         if (debug) {
             System.out.println("CommPortIdentifier:AddIdentifierToList()");
@@ -378,6 +412,8 @@ public class CommPortIdentifier extends Object {
                 //and writing them into our CommPortIndex through our method
                 //{@link #addPortName(java.lang.String, int, gnu.io.CommDriver)}
                 //This works while lock on Sync is held
+                // TODO (by Alexander Graf) driver is initialized here and in
+                // static initializer. Should only be done once.
                 CommDriver driver = (CommDriver) Class.forName(
                         "gnu.io.RXTXCommDriver").newInstance();
                 driver.initialize();
@@ -442,6 +478,10 @@ public class CommPortIdentifier extends Object {
         return !available;
     }
 
+    // TODO (by Alexander Graf) this method is for legacy support of the
+    //comm API and is obviosly unsupported by rxtx
+    // It should be deprecated (and possibly removed some day) when we don't
+    // care about compatibility to the comm API
     public synchronized CommPort open(FileDescriptor f)
             throws UnsupportedCommOperationException {
         if (debug) {
@@ -471,6 +511,9 @@ public class CommPortIdentifier extends Object {
      * @throws gnu.io.PortInUseException when the exclusive ownership of the
      * port could not be obtained
      */
+    // TODO (by Alexander Graf) is there really done an ownership request that
+    // can reach applications outside of this virtual machine, probably not
+    // not written in java? I can't see where this request is done.
     public CommPort open(String owner, int timeLimit)
             throws gnu.io.PortInUseException {
         if (debug) {
@@ -563,6 +606,10 @@ public class CommPortIdentifier extends Object {
             }
             owner = null;
             available = true;
+            // TODO (by Alexander Graf) to set the commPort to null is
+            // incompatible with the idea behind the architecture of the
+            // constructor, where commPort is assigned by the driver once
+            // in a virtual machines lifetime.
             commPort = null;
             /*
              * this tosses null pointer??
@@ -572,15 +619,17 @@ public class CommPortIdentifier extends Object {
         fireOwnershipEvent(CommPortOwnershipListener.PORT_UNOWNED);
     }
 
+    //TODO visibility (by Alexander Graf) method should be private
     void fireOwnershipEvent(int eventType) {
         if (debug) {
             System.out.println("CommPortIdentifier:fireOwnershipEvent( " + eventType + " )");
         }
         if (ownershipListener != null) {
             CommPortOwnershipListener c;
+            //TODO (by Alexander Graf) for statement abuse ...
             for (Enumeration e = ownershipListener.elements();
                     e.hasMoreElements();
-                    c.ownershipChange(eventType)) {
+                    c.ownershipChange(eventType)) { // ... here
                 c = (CommPortOwnershipListener) e.nextElement();
             }
         }

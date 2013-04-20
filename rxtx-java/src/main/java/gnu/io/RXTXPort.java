@@ -62,6 +62,9 @@ import java.io.OutputStream;
 import java.io.IOException;
 import java.util.TooManyListenersException;
 
+// TODO visibility (by Alexander Graf) this class is an implementation of the
+// SerialPort API class. The user must not be able to access this implementation
+// directly. Therefor the class should be package private final.
 public final class RXTXPort extends SerialPort {
 
     protected static final boolean DEBUG = false;

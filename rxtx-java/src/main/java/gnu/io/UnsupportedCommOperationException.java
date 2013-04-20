@@ -63,6 +63,7 @@ package gnu.io;
  * @author Trent Jarvi
  * @version %I%, %G%
  */
+//TODO visibility (by Alexander Graf) class should be final
 public class UnsupportedCommOperationException extends Exception {
 
     /**

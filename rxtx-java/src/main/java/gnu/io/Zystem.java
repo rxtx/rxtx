@@ -59,6 +59,13 @@ package gnu.io;
 
 import java.io.RandomAccessFile;
 
+// TODO visibility (by Alexander Graf) there is NO reason for this class to be
+// public. It should be packet private final. If the logging features of this
+// class are really so cool that we want to export them, then this should be
+// done in a separate library. On my opinion this class is a huge waste of time.
+// One of the well known logging solutions should be used and this class
+// removed. As it is currently doing nothing really usefull, it is very unlikely
+// that someone is depending on it.
 public class Zystem {
 
     public static final int SILENT_MODE = 0;
@@ -68,6 +75,7 @@ public class Zystem {
     public static final int PRINT_MODE = 4;
     public static final int J2EE_MSG_MODE = 5;
     public static final int J2SE_LOG_MODE = 6;
+    // TODO (by Alexander Graf) why is this static? should be non-static final
     static int mode;
 
     static {
@@ -84,6 +92,7 @@ public class Zystem {
     }
     private static String target;
 
+    // TODO visibility (by Alexander Graf) should be package private
     public Zystem(int m) throws UnSupportedLoggerException {
         mode = m;
         startLogger("asdf");
@@ -96,6 +105,7 @@ public class Zystem {
      * PRINT_MODE <li> J2EE_MSG_MODE <li> J2SE_LOG_MODE log to java.util.logging
      * </ul>
      */
+    // TODO visibility (by Alexander Graf) should be package private
     public Zystem() throws UnSupportedLoggerException {
         String s = System.getProperty("gnu.io.log.mode");
         if (s != null) {

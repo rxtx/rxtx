@@ -63,6 +63,7 @@ package gnu.io;
  * @author Trent Jarvi
  * @version %I%, %G%
  */
+//TODO visibility (by Alexander Graf) class should be package private final
 public class UnSupportedLoggerException extends Exception {
 
     /**

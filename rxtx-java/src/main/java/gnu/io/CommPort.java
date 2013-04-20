@@ -27,7 +27,7 @@
  |   any confusion about linking to RXTX.   We want to allow in part what
  |   section 5, paragraph 2 of the LGPL does not permit in the special
  |   case of linking over a controlled interface.  The intent is to add a
- |   Java Specification Request or standards body defined interface in the 
+ |   Java Specification Request or standards body defined interface in the
  |   future as another exception but one is not currently available.
  |
  |   http://www.fsf.org/licenses/gpl-faq.html#LinkingOverControlledInterface
@@ -72,13 +72,11 @@ import java.io.IOException;
  * The <code>CommPort</code> class is the base class for all port types.
  *
  * @author Trent Jarvi
- * @version %I%, %G%
- */
-/**
- * CommPort
  */
 public abstract class CommPort extends Object {
 
+    // TODO (by Alexander Graf) the port's name should be final and set
+    // in the constructor (by the driver)
     protected String name;
     private static final boolean debug = false;
 
@@ -125,6 +123,7 @@ public abstract class CommPort extends Object {
             CommPortIdentifier cp =
                     CommPortIdentifier.getPortIdentifier(this);
             if (cp != null) {
+                // TODO (by Alexander Graf) code bug, possible null pointer
                 CommPortIdentifier.getPortIdentifier(this).internalClosePort();
             }
         } catch (NoSuchPortException e) {

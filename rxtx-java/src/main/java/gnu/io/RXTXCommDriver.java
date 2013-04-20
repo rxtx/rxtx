@@ -73,6 +73,12 @@ import java.util.StringTokenizer;
 /**
  * This is the JavaComm for Linux driver.
  */
+// TODO (by Alexander Graf) it seems this class is used to access all kinds
+// of drivers, not only the linux drivers as stated in the comment above
+// TODO visibility (by Alexander Graf) This class is the implementation of a
+// SPI. Therefor it should be package private and not exposed as API.
+// TODO (by Alexander Graf) this class seems to implement a driver for both
+// serial and parallel ports. The drivers should be separated.
 public class RXTXCommDriver implements CommDriver {
 
     private static final boolean DEBUG = false;
@@ -328,7 +334,8 @@ public class RXTXCommDriver implements CommDriver {
          * First try to register ports specified in the properties file. If that
          * doesn't exist, then scan for ports.
          */
-        // TODO (Alexander Graf) iterating should not be done this way
+        // TODO (Alexander Graf) iterating should not rely on the values of 
+        // the constants
         for (int portType = CommPortIdentifier.PORT_SERIAL; portType <= CommPortIdentifier.PORT_PARALLEL; portType++) {
             if (!registerSpecifiedPorts(portType)) {
                 if (!registerKnownPorts(portType)) {
@@ -476,11 +483,11 @@ public class RXTXCommDriver implements CommDriver {
 
     /*
      * Return list of specified ports from System Property or Property File.
-     * 
+     *
      * System Properties take precedence over the gnu.io.rxtx.properties file.
-     * Data from the properties file is cached in System Properties to avoid 
+     * Data from the properties file is cached in System Properties to avoid
      * re-loading the file at a later time.
-     * 
+     *
      * @param key1 primary (new) key
      * @param key2 legacy (fallback) key
      * @return RXTX specified ports as per requested keys, or <code>null</code> if none found.
