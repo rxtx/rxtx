@@ -888,11 +888,4 @@ final class RXTXCommDriver implements CommDriver {
         }
         return null;
     }
-
-    /*
-     * Yikes. Trying to call println from C for odd reasons
-     */
-    public void Report(String arg) {
-        System.out.println(arg);
-    }
 }
