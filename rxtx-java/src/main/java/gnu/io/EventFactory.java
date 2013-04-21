@@ -1,10 +1,8 @@
-/* Non functional contact tjarvi@qbang.org for details */
-
 /*-------------------------------------------------------------------------
  |   RXTX License v 2.1 - LGPL v 2.1 + Linking Over Controlled Interface.
  |   RXTX is a native interface to serial ports in java.
- |   Copyright 1997-2007 by Trent Jarvi tjarvi@qbang.org and others who
- |   actually wrote it.  See individual source files for more information.
+ |   Copyright 2013 by Alexander Graf <alex at antistatix.de> and others
+ |   who actually wrote it.  See individual source files for more information.
  |
  |   A copy of the LGPL v 2.1 may be found at
  |   http://www.gnu.org/licenses/lgpl.txt on March 4th 2007.  A copy is
@@ -29,7 +27,7 @@
  |   any confusion about linking to RXTX.   We want to allow in part what
  |   section 5, paragraph 2 of the LGPL does not permit in the special
  |   case of linking over a controlled interface.  The intent is to add a
- |   Java Specification Request or standards body defined interface in the 
+ |   Java Specification Request or standards body defined interface in the
  |   future as another exception but one is not currently available.
  |
  |   http://www.fsf.org/licenses/gpl-faq.html#LinkingOverControlledInterface
@@ -59,47 +57,72 @@
  --------------------------------------------------------------------------*/
 package gnu.io;
 
-import java.util.EventObject;
-
 /**
- * @author Trent Jarvi
- * @version %I%, %G%
+ * This factory enables driver implementations to create various events. This
+ * class is not intended to be used by API users. It is reserved for driver
+ * implementors (service provider interface users).
+ *
+ * @author Alexander Graf [alex -at- antistatix.de]
+ * @since TBD
  */
-public class RawPortEvent extends EventObject {
+public final class EventFactory {
 
-    public static final int DATA_AVAILABLE = 1;
-    public static final int OUTPUT_BUFFER_EMPTY = 2;
-    public static final int CTS = 3;
-    public static final int DSR = 4;
-    public static final int RI = 5;
-    public static final int CD = 6;
-    public static final int OE = 7;
-    public static final int PE = 8;
-    public static final int FE = 9;
-    public static final int BI = 10;
-    private boolean oldValue;
-    private boolean newValue;
-    private int eventType;
-    /*
-     * public int eventType =0; depricated
+    /**
+     * The singleton event factory.
      */
+    private static EventFactory instance = new EventFactory();
 
-    RawPortEvent(RawPort srcPort, int eventType, boolean oldValue, boolean newValue) {
-        super(srcPort);
-        this.oldValue = oldValue;
-        this.newValue = newValue;
-        this.eventType = eventType;
+    /**
+     * Creates the singleton instance.
+     */
+    private EventFactory() {
     }
 
-    public int getEventType() {
-        return eventType;
+    /**
+     * @return the singleton instance of this class which must not be available
+     * outside of this package
+     */
+    static EventFactory getInstance() {
+        return instance;
     }
 
-    public boolean getNewValue() {
-        return newValue;
+    /**
+     * Creates a new SerialPortEvent. This factory method hides the creation of
+     * events from the API and only allows driver implementations to create
+     * events.
+     *
+     * As an API user do not even try to create your own instances. You will
+     * break your code.
+     *
+     * @param srcPort the port which is associated with the event
+     * @param eventType the type of the event
+     * @param oldValue the value of the signal before the event
+     * @param newValue the value of the signal after the event
+     * @return a new port event never seen before
+     */
+    public SerialPortEvent createSerialPortEvent(
+            final SerialPort srcPort, final int eventType,
+            final boolean oldValue, final boolean newValue) {
+        return new SerialPortEvent(srcPort, eventType, oldValue, newValue);
     }
 
-    public boolean getOldValue() {
-        return oldValue;
+    /**
+     * Creates a new ParallelPortEvent. This factory method hides the creation
+     * of events from the API and only allows driver implementations to create
+     * events.
+     *
+     * As an API user do not even try to create your own instances. You will
+     * break your code.
+     *
+     * @param srcPort the port which is associated with the event
+     * @param eventType the type of the event
+     * @param oldValue the value of the signal before the event
+     * @param newValue the value of the signal after the event
+     * @return a new port event never seen before
+     */
+    public ParallelPortEvent createParallelPortEvent(
+            final ParallelPort srcPort, final int eventType,
+            final boolean oldValue, final boolean newValue) {
+        return new ParallelPortEvent(srcPort, eventType, oldValue, newValue);
     }
 }

@@ -72,6 +72,10 @@ public abstract class ParallelPort extends CommPort {
     public static final int LPT_MODE_ECP = 4;
     public static final int LPT_MODE_NIBBLE = 5;
 
+    public ParallelPort(String name) {
+        super(name);
+    }
+
     public abstract int getMode();
 
     public abstract int setMode(int mode)

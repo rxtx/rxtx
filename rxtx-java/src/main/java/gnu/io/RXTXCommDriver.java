@@ -75,16 +75,15 @@ import java.util.StringTokenizer;
  */
 // TODO (by Alexander Graf) it seems this class is used to access all kinds
 // of drivers, not only the linux drivers as stated in the comment above
-// TODO visibility (by Alexander Graf) This class is the implementation of a
-// SPI. Therefor it should be package private and not exposed as API.
 // TODO (by Alexander Graf) this class seems to implement a driver for both
 // serial and parallel ports. The drivers should be separated.
-public class RXTXCommDriver implements CommDriver {
+final class RXTXCommDriver implements CommDriver {
 
     private static final boolean DEBUG = false;
     private static final boolean DEVEL = false;
     private static final boolean NO_VERSION_OUTPUT = "true".equals(
             System.getProperty("gnu.io.rxtx.NoVersionOutput"));
+    private DriverContext context;
 
     static {
         if (DEBUG) {
@@ -199,8 +198,7 @@ public class RXTXCommDriver implements CommDriver {
         for (char p = 'a'; p <= 'z'; p++) {
             String suffix = String.valueOf(p);
             if (testRead(PortName.concat(suffix), PortType)) {
-                CommPortIdentifier.addPortName(
-                        PortName.concat(suffix), PortType, this);
+                context.registerPort(PortName.concat(suffix), PortType, this);
             }
         }
         /**
@@ -209,8 +207,7 @@ public class RXTXCommDriver implements CommDriver {
         for (char p = '0'; p <= '9'; p++) {
             String suffix = String.valueOf(p);
             if (testRead(PortName.concat(suffix), PortType)) {
-                CommPortIdentifier.addPortName(
-                        PortName.concat(suffix), PortType, this);
+                context.registerPort(PortName.concat(suffix), PortType, this);
             }
         }
     }
@@ -290,10 +287,7 @@ public class RXTXCommDriver implements CommDriver {
                             || osName.equals("SunOS")) {
                         checkSolaris(portName, portType);
                     } else if (testRead(portName, portType)) {
-                        CommPortIdentifier.addPortName(
-                                portName,
-                                portType,
-                                this);
+                        context.registerPort(portName, portType, this);
                     }
                 }
             }
@@ -321,12 +315,11 @@ public class RXTXCommDriver implements CommDriver {
     /**
      * Determine the OS and where the OS has the devices located
      */
-    public void initialize() {
-
+    public void initialize(final DriverContext context) {
         if (DEBUG) {
             System.out.println("RXTXCommDriver:initialize()");
         }
-
+        this.context = context;
         osName = System.getProperty("os.name");
         deviceDirectory = getDeviceDirectory();
 
@@ -359,8 +352,7 @@ public class RXTXCommDriver implements CommDriver {
                 System.out.println("Trying " + portName + ".");
             }
             if (testRead(portName, portType)) {
-                CommPortIdentifier.addPortName(portName,
-                        portType, this);
+                context.registerPort(portName, portType, this);
                 if (DEBUG) {
                     System.out.println("Success: Read from " + portName + ".");
                 }
@@ -877,12 +869,12 @@ public class RXTXCommDriver implements CommDriver {
                 case CommPortIdentifier.PORT_SERIAL:
                     if (osName.toLowerCase().indexOf("windows") == -1) {
 
-                        return new RXTXPort(PortName);
+                        return new RXTXPort(context, PortName);
                     } else {
-                        return new RXTXPort(deviceDirectory + PortName);
+                        return new RXTXPort(context, deviceDirectory + PortName);
                     }
                 case CommPortIdentifier.PORT_PARALLEL:
-                    return new LPRPort(PortName);
+                    return new LPRPort(context, PortName);
                 default:
                     if (DEBUG) {
                         System.out.println("unknown PortType  " + PortType + " passed to RXTXCommDriver.getCommPort()");
@@ -895,12 +887,5 @@ public class RXTXCommDriver implements CommDriver {
             }
         }
         return null;
-    }
-
-    /*
-     * Yikes. Trying to call println from C for odd reasons
-     */
-    public void Report(String arg) {
-        System.out.println(arg);
     }
 }

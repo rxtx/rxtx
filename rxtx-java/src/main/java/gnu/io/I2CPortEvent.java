@@ -65,7 +65,7 @@ import java.util.EventObject;
  * @author Trent Jarvi
  * @version %I%, %G%
  */
-public class I2CPortEvent extends EventObject {
+public final class I2CPortEvent extends EventObject {
 
     public static final int DATA_AVAILABLE = 1;
     public static final int OUTPUT_BUFFER_EMPTY = 2;
@@ -84,7 +84,7 @@ public class I2CPortEvent extends EventObject {
      * public int eventType =0; depricated
      */
 
-    public I2CPortEvent(I2CPort srcport, int eventType, boolean oldValue,
+    I2CPortEvent(I2CPort srcport, int eventType, boolean oldValue,
             boolean newValue) {
         super(srcport);
         this.oldValue = oldValue;

@@ -85,6 +85,7 @@ final class Raw extends RawPort {
      * Open the named port
      */
     public Raw(String name) throws PortInUseException {
+        super(name);
         ciAddress = Integer.parseInt(name);
         open(ciAddress);
     }

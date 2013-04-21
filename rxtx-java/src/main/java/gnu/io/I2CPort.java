@@ -85,6 +85,10 @@ abstract class I2CPort extends CommPort {
     public static final int FLOWCONTROL_XONXOFF_IN = 4;
     public static final int FLOWCONTROL_XONXOFF_OUT = 8;
 
+    public I2CPort(String name) {
+        super(name);
+    }
+
     public abstract void setI2CPortParams(int b, int d, int s, int p) throws UnsupportedCommOperationException;
 
     public abstract int getBaudRate();

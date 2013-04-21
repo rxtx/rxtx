@@ -1,10 +1,8 @@
-/* Non functional contact tjarvi@qbang.org for details */
-
 /*-------------------------------------------------------------------------
  |   RXTX License v 2.1 - LGPL v 2.1 + Linking Over Controlled Interface.
  |   RXTX is a native interface to serial ports in java.
- |   Copyright 1997-2007 by Trent Jarvi tjarvi@qbang.org and others who
- |   actually wrote it.  See individual source files for more information.
+ |   Copyright 2013 by Alexander Graf <alex at antistatix.de> and others
+ |   who actually wrote it.  See individual source files for more information.
  |
  |   A copy of the LGPL v 2.1 may be found at
  |   http://www.gnu.org/licenses/lgpl.txt on March 4th 2007.  A copy is
@@ -29,7 +27,7 @@
  |   any confusion about linking to RXTX.   We want to allow in part what
  |   section 5, paragraph 2 of the LGPL does not permit in the special
  |   case of linking over a controlled interface.  The intent is to add a
- |   Java Specification Request or standards body defined interface in the 
+ |   Java Specification Request or standards body defined interface in the
  |   future as another exception but one is not currently available.
  |
  |   http://www.fsf.org/licenses/gpl-faq.html#LinkingOverControlledInterface
@@ -59,47 +57,61 @@
  --------------------------------------------------------------------------*/
 package gnu.io;
 
-import java.util.EventObject;
-
 /**
- * @author Trent Jarvi
- * @version %I%, %G%
+ * The
+ * <code>DriverContext</code> gives access to a part of the API which is
+ * reserved for driver implementations only.
+ *
+ * @author Alexander Graf [alex -at- antistatix.de]
+ * @since TBD
  */
-public class RawPortEvent extends EventObject {
+public final class DriverContext {
 
-    public static final int DATA_AVAILABLE = 1;
-    public static final int OUTPUT_BUFFER_EMPTY = 2;
-    public static final int CTS = 3;
-    public static final int DSR = 4;
-    public static final int RI = 5;
-    public static final int CD = 6;
-    public static final int OE = 7;
-    public static final int PE = 8;
-    public static final int FE = 9;
-    public static final int BI = 10;
-    private boolean oldValue;
-    private boolean newValue;
-    private int eventType;
-    /*
-     * public int eventType =0; depricated
+    /**
+     * The singleton instance of this class.
      */
+    private static DriverContext instance = new DriverContext();
 
-    RawPortEvent(RawPort srcPort, int eventType, boolean oldValue, boolean newValue) {
-        super(srcPort);
-        this.oldValue = oldValue;
-        this.newValue = newValue;
-        this.eventType = eventType;
+    /**
+     * Creates the singleton instance.
+     */
+    private DriverContext() {
     }
 
-    public int getEventType() {
-        return eventType;
+    /**
+     * @return the singleton instance of this class which must not be available
+     * outside of this package
+     */
+    static DriverContext getInstance() {
+        return instance;
     }
 
-    public boolean getNewValue() {
-        return newValue;
+    /**
+     * Returns a factory class which can be used by device driver
+     * implementations to create various events.
+     *
+     * @return the factory instance
+     */
+    public EventFactory getEventFactory() {
+        return EventFactory.getInstance();
     }
 
-    public boolean getOldValue() {
-        return oldValue;
+    /**
+     * Provides a port to the API. Using this method, drivers can register ports
+     * which are available through them. When the user is interested in such a
+     * port the API might request a
+     * <code>CommPort</code> object later, providing the
+     * <code>portName</code>,
+     * <code>portType</code> combination.
+     *
+     * @param portName a port name which uniquely identifies a port provided by
+     * this driver.
+     * @param portType the port type encoded
+     * as <code>CommPortIdentifier.PORT_*</code> constant
+     * @param driver the driver which is providing the port
+     */
+    public void registerPort(final String portName, final int portType,
+            final CommDriver driver) {
+        CommPortIdentifier.addPortName(portName, portType, driver);
     }
 }

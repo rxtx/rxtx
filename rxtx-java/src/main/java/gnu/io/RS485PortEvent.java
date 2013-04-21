@@ -64,7 +64,7 @@ import java.util.EventObject;
  * @author Trent Jarvi
  * @version %I%, %G%
  */
-public class RS485PortEvent extends EventObject {
+public final class RS485PortEvent extends EventObject {
 
     public static final int DATA_AVAILABLE = 1;
     public static final int OUTPUT_BUFFER_EMPTY = 2;
@@ -83,7 +83,7 @@ public class RS485PortEvent extends EventObject {
      * public int eventType =0; depricated
      */
 
-    public RS485PortEvent(RS485Port srcPort, int eventType, boolean oldValue, boolean newValue) {
+    RS485PortEvent(RS485Port srcPort, int eventType, boolean oldValue, boolean newValue) {
         super(srcPort);
         this.oldValue = oldValue;
         this.newValue = newValue;

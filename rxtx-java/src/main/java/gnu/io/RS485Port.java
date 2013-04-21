@@ -85,6 +85,10 @@ abstract class RS485Port extends CommPort {
     public static final int FLOWCONTROL_XONXOFF_IN = 4;
     public static final int FLOWCONTROL_XONXOFF_OUT = 8;
 
+    public RS485Port(String name) {
+        super(name);
+    }
+
     public abstract void setRS485PortParams(int b, int d, int s, int p) throws UnsupportedCommOperationException;
 
     public abstract int getBaudRate();

@@ -86,6 +86,10 @@ abstract class RawPort extends CommPort {
     public static final int WRITE_SIZE = 8;
     public static final int IO_PORT = 0x378;
 
+    public RawPort(String name) {
+        super(name);
+    }
+
     public abstract void setRawPortParams(int b, int d, int s, int p) throws UnsupportedCommOperationException;
 
     public abstract void addEventListener(RawPortEventListener lsnr) throws TooManyListenersException;

@@ -88,6 +88,7 @@ final class I2C extends I2CPort {
      * Open the named port
      */
     public I2C(String name) throws PortInUseException {
+        super(name);
         fd = open(name);
     }
 

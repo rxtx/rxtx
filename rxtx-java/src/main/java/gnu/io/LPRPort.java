@@ -77,14 +77,17 @@ final class LPRPort extends ParallelPort {
      */
     private native static void Initialize();
     private final static boolean debug = false;
+    private final DriverContext context;
 
     /**
      * Open the named port
      */
-    public LPRPort(String name) throws PortInUseException {
+    public LPRPort(DriverContext context, String name) throws PortInUseException {
+        super(name);
         if (debug) {
             System.out.println("LPRPort:LPRPort(" + name + ")");
         }
+        this.context = context;
         /*
          * commapi/javadocs/API_users_guide.html specifies that whenever an
          * application tries to open a port in use by another application the
@@ -97,7 +100,6 @@ final class LPRPort extends ParallelPort {
          */
         //	try {
         fd = open(name);
-        this.name = name;
         //	} catch ( PortInUseException e ){}
         if (debug) {
             System.out.println("LPRPort:LPRPort(" + name + ") fd = "
@@ -330,8 +332,8 @@ final class LPRPort extends ParallelPort {
                 System.err.println("unknown event:" + event);
                 return false;
         }
-        ParallelPortEvent e = new ParallelPortEvent(this, event, !state,
-                state);
+        ParallelPortEvent e = context.getEventFactory()
+                .createParallelPortEvent(this, event, !state, state);
         if (PPEventListener != null) {
             PPEventListener.parallelEvent(e);
         }

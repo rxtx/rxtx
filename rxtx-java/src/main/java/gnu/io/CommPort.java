@@ -69,15 +69,17 @@ import java.io.IOException;
  * owned by this application. The application can therefor access the ports
  * properties.
  *
- * The <code>CommPort</code> class is the base class for all port types.
+ * The
+ * <code>CommPort</code> class is the base class for all port types.
  *
  * @author Trent Jarvi
  */
 public abstract class CommPort extends Object {
 
-    // TODO (by Alexander Graf) the port's name should be final and set
-    // in the constructor (by the driver)
-    protected String name;
+    CommPort(String name) {
+        this.name = name;
+    }
+    protected final String name;
     private static final boolean debug = false;
 
     public abstract void enableReceiveFraming(int f)

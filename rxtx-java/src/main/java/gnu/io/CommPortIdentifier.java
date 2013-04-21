@@ -74,8 +74,7 @@ import java.util.Enumeration;
  *
  * @author Trent Jarvi
  */
-//TODO visibility (by Alexander Graf) class should be final
-public class CommPortIdentifier extends Object {
+public final class CommPortIdentifier extends Object {
 
     /**
      * The port is a RS232 serial port.
@@ -160,7 +159,7 @@ public class CommPortIdentifier extends Object {
         try {
             CommDriver driver = (CommDriver) Class.forName(
                     "gnu.io.RXTXCommDriver").newInstance();
-            driver.initialize();
+            driver.initialize(DriverContext.getInstance());
         } catch (Throwable e) {
             System.err.println(
                     e + " thrown while loading gnu.io.RXTXCommDriver");
@@ -202,15 +201,7 @@ public class CommPortIdentifier extends Object {
         this.driver = driver;
     }
 
-    // TODO visibility (by Alexander Graf) why is this public? The
-    // only one who is allowed to register new ports is the driver and NOT
-    // the user. This method should be changed to package private access and add
-    // a friend to be accessible by a new subpackage of rxtx which is clearly
-    // marked as API for driver implementers.
-    // (see http://wiki.apidesign.org/wiki/FriendPackages)
-    // The Comm API really sucks here. If the user needs to add a port this
-    // should be done in a declarative manner on a per-driver basis.
-    public static void addPortName(String portName, int portType, CommDriver driver) {
+    static void addPortName(String portName, int portType, CommDriver driver) {
         if (debug) {
             System.out.println("CommPortIdentifier:addPortName(" + portName + ")");
         }
@@ -416,7 +407,7 @@ public class CommPortIdentifier extends Object {
                 // static initializer. Should only be done once.
                 CommDriver driver = (CommDriver) Class.forName(
                         "gnu.io.RXTXCommDriver").newInstance();
-                driver.initialize();
+                driver.initialize(DriverContext.getInstance());
                 //Restore old CommPortIdentifier objects where possible,
                 //in order to support proper ownership event handling.
                 //Clients might still have references to old identifiers!
@@ -619,8 +610,7 @@ public class CommPortIdentifier extends Object {
         fireOwnershipEvent(CommPortOwnershipListener.PORT_UNOWNED);
     }
 
-    //TODO visibility (by Alexander Graf) method should be private
-    void fireOwnershipEvent(int eventType) {
+    private void fireOwnershipEvent(int eventType) {
         if (debug) {
             System.out.println("CommPortIdentifier:fireOwnershipEvent( " + eventType + " )");
         }

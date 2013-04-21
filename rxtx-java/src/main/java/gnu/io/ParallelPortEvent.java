@@ -63,7 +63,7 @@ import java.util.EventObject;
  * @author Trent Jarvi
  * @version %I%, %G%
  */
-public class ParallelPortEvent extends EventObject {
+public final class ParallelPortEvent extends EventObject {
 
     public static final int PAR_EV_ERROR = 1;
     public static final int PAR_EV_BUFFER = 2;
@@ -74,7 +74,7 @@ public class ParallelPortEvent extends EventObject {
      * public int eventType =0; depricated
      */
 
-    public ParallelPortEvent(ParallelPort srcport, int eventType,
+    ParallelPortEvent(ParallelPort srcport, int eventType,
             boolean oldValue, boolean newValue) {
         super(srcport);
         this.oldValue = oldValue;

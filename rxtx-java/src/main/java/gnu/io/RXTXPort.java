@@ -27,7 +27,7 @@
  |   any confusion about linking to RXTX.   We want to allow in part what
  |   section 5, paragraph 2 of the LGPL does not permit in the special
  |   case of linking over a controlled interface.  The intent is to add a
- |   Java Specification Request or standards body defined interface in the 
+ |   Java Specification Request or standards body defined interface in the
  |   future as another exception but one is not currently available.
  |
  |   http://www.fsf.org/licenses/gpl-faq.html#LinkingOverControlledInterface
@@ -57,15 +57,18 @@
  --------------------------------------------------------------------------*/
 package gnu.io;
 
+import gnu.io.DriverContext;
+import gnu.io.PortInUseException;
+import gnu.io.SerialPort;
+import gnu.io.SerialPortEvent;
+import gnu.io.SerialPortEventListener;
+import gnu.io.UnsupportedCommOperationException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
 import java.util.TooManyListenersException;
 
-// TODO visibility (by Alexander Graf) this class is an implementation of the
-// SerialPort API class. The user must not be able to access this implementation
-// directly. Therefor the class should be package private final.
-public final class RXTXPort extends SerialPort {
+final class RXTXPort extends SerialPort {
 
     protected static final boolean DEBUG = false;
     protected static final boolean DEBUG_READ = false;
@@ -74,6 +77,7 @@ public final class RXTXPort extends SerialPort {
     protected static final boolean DEBUG_EVENTS = false;
     protected static final boolean DEBUG_VERBOSE = false;
     private static Zystem sys;
+    private final DriverContext context;
 
     static {
         try {
@@ -102,10 +106,12 @@ public final class RXTXPort extends SerialPort {
      * @throws PortInUseException
      * @see gnu.io.SerialPort
      */
-    public RXTXPort(String name) throws PortInUseException {
+    public RXTXPort(DriverContext context, String name) throws PortInUseException {
+        super(name);
         if (DEBUG) {
             sys.reportln("RXTXPort:RXTXPort(" + name + ") called");
         }
+        this.context = context;
         /*
          * commapi/javadocs/API_users_guide.html specifies that whenever an
          * application tries to open a port in use by another application the
@@ -118,7 +124,6 @@ public final class RXTXPort extends SerialPort {
          */
         //	try {
         fd = open(name);
-        this.name = name;
 
         MonitorThreadLock = true;
         monThread = new MonitorThread();
@@ -761,8 +766,8 @@ public final class RXTXPort extends SerialPort {
         if (DEBUG_EVENTS && DEBUG_VERBOSE) {
             sys.reportln("	getting event");
         }
-        SerialPortEvent e = new SerialPortEvent(this, event, !state,
-                state);
+        SerialPortEvent e = context.getEventFactory()
+                .createSerialPortEvent(this, event, !state, state);
         if (DEBUG_EVENTS && DEBUG_VERBOSE) {
             sys.reportln("	sending event");
         }
