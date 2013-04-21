@@ -76,6 +76,91 @@ final class RXTXPort extends SerialPort {
             Logger.getLogger(RXTXPort.class.getName());
     private final DriverContext context;
 
+    /**
+     * DSR flag
+     */
+    static boolean dsrFlag = false;
+    /*
+     * dont close the file while accessing the fd
+     */
+    int IOLocked = 0;
+    Object IOLockedMutex = new Object();
+    /**
+     * true if monitor thread is interrupted
+     */
+    boolean monThreadisInterrupted = true;
+    boolean MonitorThreadLock = true;
+    /**
+     * a pointer to the event info structure used to share information between
+     * threads so write threads can send output buffer empty from a pthread if
+     * need be.
+     *
+     * long for 64 bit pointers.
+     */
+    long eis = 0;
+    /**
+     * pid for lock files
+     */
+    int pid = 0;
+    /**
+     * Output stream
+     */
+    private final SerialOutputStream out = new SerialOutputStream();
+    boolean closeLock = false;
+    boolean monitorThreadAlive = false;
+    /**
+     * File descriptor
+     */
+    private int fd = 0;
+    /**
+     * Serial Port Event listener
+     */
+    private SerialPortEventListener SPEventListener;
+    /**
+     * Thread to monitor data
+     */
+    private MonitorThread monThread;
+    /**
+     * Input stream
+     */
+    private final SerialInputStream in = new SerialInputStream();
+    /**
+     * Line speed in bits-per-second
+     */
+    private int speed = 9600;
+    /**
+     * Flow control
+     */
+    private int flowmode = SerialPort.FLOWCONTROL_NONE;
+    /**
+     * Data bits port parameter
+     */
+    private int dataBits = DATABITS_8;
+    /**
+     * Stop bits port parameter
+     */
+    private int stopBits = SerialPort.STOPBITS_1;
+    /**
+     * Parity port parameter
+     */
+    private int parity = SerialPort.PARITY_NONE;
+    /**
+     * Receive threshold control
+     */
+    private int threshold = 0;
+    /**
+     * Receive timeout control
+     */
+    private int timeout;
+    /**
+     * FIXME I think this refers to FOPEN(3)/SETBUF(3)/FREAD(3)/FCLOSE(3)
+     * taj@www.linux.org.uk
+     *
+     * These are native stubs...
+     */
+    private int InputBuffer = 0;
+    private int OutputBuffer = 0;
+
     static {
         Initialize();
     }
@@ -84,7 +169,6 @@ final class RXTXPort extends SerialPort {
      * Initialize the native library
      */
     private native static void Initialize();
-    boolean monitorThreadAlive = false;
 
     /**
      * Open the named port
@@ -122,43 +206,10 @@ final class RXTXPort extends SerialPort {
 
     private synchronized native int open(String name)
             throws PortInUseException;
-    /*
-     * dont close the file while accessing the fd
-     */
-    int IOLocked = 0;
-    Object IOLockedMutex = new Object();
-    /**
-     * File descriptor
-     */
-    private int fd = 0;
-    /**
-     * a pointer to the event info structure used to share information between
-     * threads so write threads can send output buffer empty from a pthread if
-     * need be.
-     *
-     * long for 64 bit pointers.
-     */
-    long eis = 0;
-    /**
-     * pid for lock files
-     */
-    int pid = 0;
-    /**
-     * DSR flag *
-     */
-    static boolean dsrFlag = false;
-    /**
-     * Output stream
-     */
-    private final SerialOutputStream out = new SerialOutputStream();
 
     public OutputStream getOutputStream() {
         return out;
     }
-    /**
-     * Input stream
-     */
-    private final SerialInputStream in = new SerialInputStream();
 
     public InputStream getInputStream() {
         return in;
@@ -208,42 +259,22 @@ final class RXTXPort extends SerialPort {
     private native boolean nativeSetSerialPortParams(int speed,
             int dataBits, int stopBits, int parity)
             throws UnsupportedCommOperationException;
-    /**
-     * Line speed in bits-per-second
-     */
-    private int speed = 9600;
 
     public int getBaudRate() {
         return speed;
     }
-    /**
-     * Data bits port parameter
-     */
-    private int dataBits = DATABITS_8;
 
     public int getDataBits() {
         return dataBits;
     }
-    /**
-     * Stop bits port parameter
-     */
-    private int stopBits = SerialPort.STOPBITS_1;
 
     public int getStopBits() {
         return stopBits;
     }
-    /**
-     * Parity port parameter
-     */
-    private int parity = SerialPort.PARITY_NONE;
 
     public int getParity() {
         return parity;
     }
-    /**
-     * Flow control
-     */
-    private int flowmode = SerialPort.FLOWCONTROL_NONE;
 
     public void setFlowControlMode(int flowcontrol) {
         if (monThreadisInterrupted) {
@@ -285,10 +316,6 @@ final class RXTXPort extends SerialPort {
     public int getReceiveFramingByte() {
         return 0;
     }
-    /**
-     * Receive timeout control
-     */
-    private int timeout;
 
     /**
      * @return int the timeout
@@ -331,10 +358,6 @@ final class RXTXPort extends SerialPort {
     public int getReceiveTimeout() {
         return NativegetReceiveTimeout();
     }
-    /**
-     * Receive threshold control
-     */
-    private int threshold = 0;
 
     public void enableReceiveThreshold(int thresh) {
         if (thresh >= 0) {
@@ -361,14 +384,6 @@ final class RXTXPort extends SerialPort {
     public boolean isReceiveThresholdEnabled() {
         return (threshold > 0);
     }
-    /**
-     * FIXME I think this refers to FOPEN(3)/SETBUF(3)/FREAD(3)/FCLOSE(3)
-     * taj@www.linux.org.uk
-     *
-     * These are native stubs...
-     */
-    private int InputBuffer = 0;
-    private int OutputBuffer = 0;
 
     public void setInputBufferSize(int size) {
         if (size < 0) {
@@ -461,23 +476,11 @@ final class RXTXPort extends SerialPort {
 
     protected native int readTerminatedArray(byte b[], int off, int len, byte t[])
             throws IOException;
-    /**
-     * Serial Port Event listener
-     */
-    private SerialPortEventListener SPEventListener;
-    /**
-     * Thread to monitor data
-     */
-    private MonitorThread monThread;
 
     /**
      * Process SerialPortEvents
      */
     native void eventLoop();
-    /**
-     * true if monitor thread is interrupted
-     */
-    boolean monThreadisInterrupted = true;
 
     private native void interruptEventLoop();
 
@@ -573,7 +576,6 @@ final class RXTXPort extends SerialPort {
             return false;
         }
     }
-    boolean MonitorThreadLock = true;
 
     public void addEventListener(
             SerialPortEventListener lsnr) throws TooManyListenersException {
@@ -739,7 +741,6 @@ final class RXTXPort extends SerialPort {
      * Close the port
      */
     private native void nativeClose(String name);
-    boolean closeLock = false;
 
     public void close() {
         synchronized (this) {
