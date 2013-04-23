@@ -10,7 +10,7 @@
         <moduleSet>
             <useAllReactorProjects>true</useAllReactorProjects>
             <includes>
-                <include>gnu.io.rxtx:rxtx-java</include>
+                <include>gnu.io.rxtx:rxtx-api</include>
             </includes>
             <binaries>
                 <outputDirectory>/</outputDirectory>

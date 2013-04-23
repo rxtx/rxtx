@@ -11,7 +11,7 @@
         <dependencies>
             <dependency>
                 <groupId>gnu.io.rxtx</groupId>
-                <artifactId>rxtx-java</artifactId>
+                <artifactId>rxtx-api</artifactId>
                 <version>2.2-stabilize-SNAPSHOT</version>
             </dependency>
             <dependency>
@@ -70,7 +70,7 @@
     </dependencyManagement>
     <modules>
     	<module>cross-toolchain-wrapper</module>
-        <module>rxtx-java</module>
+        <module>rxtx-api</module>
         <module>rxtx-native</module>
         <module>packaging</module>
     </modules>

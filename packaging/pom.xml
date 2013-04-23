@@ -36,7 +36,7 @@
     <dependencies>
         <dependency>
             <groupId>gnu.io.rxtx</groupId>
-            <artifactId>rxtx-java</artifactId>
+            <artifactId>rxtx-api</artifactId>
             <scope>compile</scope>
         </dependency>
         <dependency>
