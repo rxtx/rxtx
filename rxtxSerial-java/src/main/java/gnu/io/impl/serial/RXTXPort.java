@@ -1047,6 +1047,7 @@ final class RXTXPort extends SerialPort {
          * will contain the terminator. Otherwise read behavior should be the
          * same as read( b[], off, len ). Timeouts have not been well tested.
          */
+        //TODO (Alexander Graf) this is very similar to the 3 argument version
         public synchronized int read(byte b[], int off, int len, byte t[])
                 throws IOException {
             int result;
