@@ -60,8 +60,18 @@
  * lists of ports, October 2000. */
 /* Joseph Goldstone <joseph@lp.com> reorganized to support registered ports,
  * known ports, and scanned ports, July 2001 */
-package gnu.io;
+package gnu.io.impl.serial;
 
+import gnu.io.CommPort;
+import gnu.io.CommPort;
+import gnu.io.CommPortIdentifier;
+import gnu.io.CommPortIdentifier;
+import gnu.io.DriverContext;
+import gnu.io.impl.serial.LPRPort;
+import gnu.io.PortInUseException;
+import gnu.io.PortInUseException;
+import gnu.io.impl.serial.RXTXPort;
+import gnu.io.impl.serial.RXTXVersion;
 import gnu.io.spi.CommDriver;
 import java.io.File;
 import java.io.FileInputStream;

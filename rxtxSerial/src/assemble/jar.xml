@@ -10,9 +10,10 @@
         <moduleSet>
             <useAllReactorProjects>true</useAllReactorProjects>
             <includes>
-                <include>gnu.io.rxtx:rxtx-api</include>
+                <include>gnu.io.rxtx:rxtxSerial-java</include>
             </includes>
             <binaries>
+                <includeDependencies>false</includeDependencies>
                 <outputDirectory>/</outputDirectory>
                 <unpack>true</unpack>
             </binaries>
@@ -20,11 +21,17 @@
         <moduleSet>
             <useAllReactorProjects>true</useAllReactorProjects>
             <includes>
-                <include>gnu.io.rxtx:rxtx-native-*</include>
+                <include>gnu.io.rxtx:rxtxSerial-*</include>
+                <include>gnu.io.rxtx:librxtxSerial-*</include>
             </includes>
+            <excludes>
+                <exclude>gnu.io.rxtx:rxtxSerial-native</exclude>
+                <exclude>gnu.io.rxtx:rxtxSerial-java</exclude>
+                <exclude>gnu.io.rxtx:rxtxSerial-test</exclude>
+            </excludes>
             <binaries>
                 <includeDependencies>false</includeDependencies>
-                <outputDirectory>/bin/</outputDirectory>
+                <outputDirectory>/gnu/io/impl/serial/</outputDirectory>
                 <unpack>false</unpack>
                 <outputFileNameMapping>${module.artifactId}.${module.extension}</outputFileNameMapping>
             </binaries>

@@ -55,8 +55,15 @@
  |   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  |   All trademarks belong to their respective owners.
  --------------------------------------------------------------------------*/
-package gnu.io;
+package gnu.io.impl.serial;
 
+import gnu.io.DriverContext;
+import gnu.io.ParallelPort;
+import gnu.io.ParallelPortEvent;
+import gnu.io.ParallelPortEventListener;
+import gnu.io.PortInUseException;
+import gnu.io.UnsupportedCommOperationException;
+import gnu.io.impl.serial.RXTXVersion;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;

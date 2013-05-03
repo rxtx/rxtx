@@ -55,7 +55,7 @@
  |   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  |   All trademarks belong to their respective owners.
  --------------------------------------------------------------------------*/
-package gnu.io;
+package gnu.io.impl.serial;
 
 import gnu.io.DriverContext;
 import gnu.io.PortInUseException;

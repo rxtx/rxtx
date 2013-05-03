@@ -29,7 +29,7 @@
                         <extensions>true</extensions>
                         <configuration>
                             <javahClassNames>
-                                <javahClassName>gnu.io.RXTXPort</javahClassName>
+                                <javahClassName>gnu.io.impl.serial.RXTXPort</javahClassName>
                             </javahClassNames>
                             <javahOS>linux</javahOS>
                             <compilerProvider>generic-classic</compilerProvider>
@@ -68,7 +68,7 @@
                         <extensions>true</extensions>
                         <configuration>
                             <javahClassNames>
-                                <javahClassName>gnu.io.RXTXPort</javahClassName>
+                                <javahClassName>gnu.io.impl.serial.RXTXPort</javahClassName>
                             </javahClassNames>
                             <javahOS>linux</javahOS>
                             <compilerProvider>generic-classic</compilerProvider>
@@ -146,7 +146,7 @@
                             <artifactItems>
                                 <artifactItem>
                                     <groupId>gnu.io.rxtx</groupId>
-                                    <artifactId>rxtx-native</artifactId>
+                                    <artifactId>rxtxSerial-native</artifactId>
                                     <version>2.2-stabilize-SNAPSHOT</version>
                                     <type>zip</type>
                                     <classifier>sources</classifier>
@@ -185,12 +185,12 @@
     <dependencies>
         <dependency>
             <groupId>gnu.io.rxtx</groupId>
-            <artifactId>rxtx-api</artifactId>
+            <artifactId>rxtxSerial-java</artifactId>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>gnu.io.rxtx</groupId>
-            <artifactId>rxtx-native</artifactId>
+            <artifactId>rxtxSerial-native</artifactId>
             <scope>compile</scope>
             <classifier>sources</classifier>
             <type>zip</type>

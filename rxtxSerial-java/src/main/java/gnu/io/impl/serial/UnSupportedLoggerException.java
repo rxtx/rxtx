@@ -1,7 +1,7 @@
 /*-------------------------------------------------------------------------
  |   RXTX License v 2.1 - LGPL v 2.1 + Linking Over Controlled Interface.
  |   RXTX is a native interface to serial ports in java.
- |   Copyright 1997-2009 by Trent Jarvi tjarvi@qbang.org and others who
+ |   Copyright 1997-2007 by Trent Jarvi tjarvi@qbang.org and others who
  |   actually wrote it.  See individual source files for more information.
  |
  |   A copy of the LGPL v 2.1 may be found at
@@ -55,58 +55,31 @@
  |   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  |   All trademarks belong to their respective owners.
  --------------------------------------------------------------------------*/
-package gnu.io;
+package gnu.io.impl.serial;
 
 /**
- * A class to keep the current version in
+ * Exception thrown when a method does not support the requested functionality.
+ *
+ * @author Trent Jarvi
+ * @version %I%, %G%
  */
-public class RXTXVersion {
-    /*
-     * ------------------------------------------------------------------------------
-     * RXTXVersion accept: - perform: Set Version. return: - exceptions:
-     * Throwable comments: See INSTALL for details.
-------------------------------------------------------------------------------
+//TODO visibility (by Alexander Graf) class should be package private final
+public class UnSupportedLoggerException extends Exception {
+
+    /**
+     * create an instances with no message about why the Exception was thrown.
+     *
      */
-
-    private static String version;
-
-    static {
-        RXTXVersion.loadLibrary("rxtxSerial");
-        version = "RXTX-2.2";
+    public UnSupportedLoggerException() {
+        super();
     }
 
     /**
-     * static method to return the current version of RXTX unique to RXTX.
+     * create an instance with a message about why the Exception was thrown.
      *
-     * @return a string representing the version "RXTX-1.4-9"
+     * @param str	A detailed message explaining the reason for the Exception.
      */
-    public static String getVersion() {
-        return version;
-    }
-
-    public static native String nativeGetVersion();
-
-    static void loadLibrary(String baseName) {
-        if (System.getProperty("sun.arch.data.model", "").equals("64")) {
-            try {
-                System.loadLibrary(baseName + "64");
-            } catch (UnsatisfiedLinkError ex64) {
-                try {
-                    System.loadLibrary(baseName);
-                } catch (UnsatisfiedLinkError ignored) {
-                    throw ex64;
-                }
-            }
-        } else {
-            try {
-                System.loadLibrary(baseName);
-            } catch (UnsatisfiedLinkError ex32) {
-                try {
-                    System.loadLibrary(baseName + "64");
-                } catch (UnsatisfiedLinkError ignored) {
-                    throw ex32;
-                }
-            }
-        }
+    public UnSupportedLoggerException(String str) {
+        super(str);
     }
 }

@@ -2,10 +2,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>gnu.io.rxtx</groupId>
-    <artifactId>rxtx-api</artifactId>
+    <artifactId>rxtxSerial-java</artifactId>
     <packaging>jar</packaging>
     <version>2.2-stabilize-SNAPSHOT</version>
-    <name>RXTX API</name>
+    <name>rxtxSerial java</name>
     <url>http://rxtx.qbang.org</url>
     <parent>    
         <groupId>gnu.io.rxtx</groupId>
@@ -25,21 +25,14 @@
                     <target>1.4</target>
                     <encoding>UTF-8</encoding>
                 </configuration>
-            </plugin>      
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <skipTests>true</skipTests>
-                </configuration>
             </plugin>
         </plugins>
     </build>
     <dependencies>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
+            <groupId>gnu.io.rxtx</groupId>
+            <artifactId>rxtx-api</artifactId>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>

@@ -159,11 +159,11 @@ public final class CommPortIdentifier extends Object {
         // (instread of hardcoded driver implementation name
         try {
             CommDriver driver = (CommDriver) Class.forName(
-                    "gnu.io.RXTXCommDriver").newInstance();
+                    "gnu.io.impl.serial.RXTXCommDriver").newInstance();
             driver.initialize(DriverContext.getInstance());
         } catch (Throwable e) {
             System.err.println(
-                    e + " thrown while loading gnu.io.RXTXCommDriver");
+                    e + " thrown while loading gnu.io.impl.serial.RXTXCommDriver");
         }
 
         String os = System.getProperty("os.name");

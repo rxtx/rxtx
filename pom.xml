@@ -15,6 +15,16 @@
                 <version>2.2-stabilize-SNAPSHOT</version>
             </dependency>
             <dependency>
+                <groupId>gnu.io.rxtx</groupId>
+                <artifactId>rxtxSerial-java</artifactId>
+                <version>2.2-stabilize-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>gnu.io.rxtx</groupId>
+                <artifactId>rxtxSerial</artifactId>
+                <version>2.2-stabilize-SNAPSHOT</version>
+            </dependency>
+            <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
                 <version>3.8.1</version>
@@ -22,7 +32,7 @@
             </dependency>
             <dependency>
                 <groupId>gnu.io.rxtx</groupId>
-                <artifactId>rxtx-native</artifactId>
+                <artifactId>rxtxSerial-native</artifactId>
                 <version>2.2-stabilize-SNAPSHOT</version>
                 <scope>compile</scope>
                 <classifier>sources</classifier>
@@ -66,13 +76,26 @@
                 <version>2.2-stabilize-SNAPSHOT</version>
                 <type>jnilib</type>
             </dependency>
+            <dependency>
+                <groupId>gnu.io.rxtx</groupId>
+                <artifactId>rxtxSerial-bin</artifactId>
+                <version>2.2-stabilize-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>gnu.io.rxtx</groupId>
+                <artifactId>rxtxSerial-test</artifactId>
+                <version>2.2-stabilize-SNAPSHOT</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <modules>
     	<module>cross-toolchain-wrapper</module>
         <module>rxtx-api</module>
-        <module>rxtx-native</module>
-        <module>packaging</module>
+        <module>rxtxSerial-java</module>
+        <module>rxtxSerial-test</module>
+        <module>rxtxSerial-native</module>
+        <module>rxtxSerial-bin</module>
+	<module>rxtxSerial</module>
     </modules>
     <profiles>
         <profile>

@@ -1,0 +1,30 @@
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
+    <id>dist</id>
+    <formats>
+        <format>jar</format>
+    </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <moduleSets>
+        <moduleSet>
+            <useAllReactorProjects>true</useAllReactorProjects>
+            <includes>
+                <include>gnu.io.rxtx:rxtxSerial-*</include>
+                <include>gnu.io.rxtx:librxtxSerial-*</include>
+            </includes>
+            <excludes>
+                <exclude>gnu.io.rxtx:rxtxSerial-native</exclude>
+                <exclude>gnu.io.rxtx:rxtxSerial-java</exclude>
+                <exclude>gnu.io.rxtx:rxtxSerial-test</exclude>
+                <exclude>gnu.io.rxtx:rxtxSerial-bin</exclude>
+            </excludes>
+            <binaries>
+                <includeDependencies>false</includeDependencies>
+                <outputDirectory>/gnu/io/impl/serial/</outputDirectory>
+                <unpack>false</unpack>
+                <outputFileNameMapping>${module.artifactId}.${module.extension}</outputFileNameMapping>
+            </binaries>
+        </moduleSet>
+    </moduleSets>
+</assembly>

@@ -61,7 +61,7 @@
 #ifndef WIN32
 //#	include "config.h"
 #endif
-#include "gnu_io_RXTXPort.h"
+#include "gnu_io_impl_serial_RXTXPort.h"
 #endif /* dima */
 #ifdef __LCC__ /* windows lcc compiler for fd_set. probably wrong */
 #   include<winsock.h>
@@ -171,9 +171,9 @@ struct preopened *preopened_port = NULL;
 /* this is so diff will not generate noise when merging 1.4 and 1.5 changes
  * It will eventually be removed.
  * */
-#define RXTXPort(foo) Java_gnu_io_RXTXPort_ ## foo
-#define RXTXVersion(foo) Java_gnu_io_RXTXVersion_ ## foo
-#define RXTXCommDriver(foo) Java_gnu_io_RXTXCommDriver_ ## foo
+#define RXTXPort(foo) Java_gnu_io_impl_serial_RXTXPort_ ## foo
+#define RXTXVersion(foo) Java_gnu_io_impl_serial_RXTXVersion_ ## foo
+#define RXTXCommDriver(foo) Java_gnu_io_impl_serial_RXTXCommDriver_ ## foo
 
 #if defined(__sun__) || defined(__hpux__)
 /*----------------------------------------------------------
