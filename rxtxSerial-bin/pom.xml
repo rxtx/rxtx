@@ -100,11 +100,22 @@
             </dependencies>
         </profile>
         <profile>
-            <id>with-linux-arm</id>
+            <id>with-linux-armel</id>
             <dependencies>
                 <dependency>
                     <groupId>gnu.io.rxtx</groupId>
-                    <artifactId>librxtxSerial-linux-armv6-sf</artifactId>
+                    <artifactId>librxtxSerial-linux-armel</artifactId>
+                    <type>so</type>
+                    <scope>compile</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>with-linux-armhf</id>
+            <dependencies>
+                <dependency>
+                    <groupId>gnu.io.rxtx</groupId>
+                    <artifactId>librxtxSerial-linux-armhf</artifactId>
                     <type>so</type>
                     <scope>compile</scope>
                 </dependency>

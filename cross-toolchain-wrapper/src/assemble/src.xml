@@ -22,6 +22,8 @@
                 <include>mingw32</include>
                 <include>mingw64</include>
                 <include>apple64</include>
+                <include>armel-linux</include>
+                <include>armhf-linux</include>
             </includes>
             <fileMode>0755</fileMode>
         </fileSet>

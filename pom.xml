@@ -60,6 +60,18 @@
             </dependency>
             <dependency>
                 <groupId>gnu.io.rxtx</groupId>
+                <artifactId>librxtxSerial-linux-armel</artifactId>
+                <version>2.2-stabilize-SNAPSHOT</version>
+                <type>so</type>
+            </dependency>
+            <dependency>
+                <groupId>gnu.io.rxtx</groupId>
+                <artifactId>librxtxSerial-linux-armhf</artifactId>
+                <version>2.2-stabilize-SNAPSHOT</version>
+                <type>so</type>
+            </dependency>
+            <dependency>
+                <groupId>gnu.io.rxtx</groupId>
                 <artifactId>rxtxSerial-windows-x86</artifactId>
                 <version>2.2-stabilize-SNAPSHOT</version>
                 <type>dll</type>
@@ -156,6 +168,18 @@
             </activation>
             <modules>
                 <module>librxtxSerial-linux-x86_64</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>with-linux-armel</id>
+            <modules>
+                <module>librxtxSerial-linux-armel</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>with-linux-armhf</id>
+            <modules>
+                <module>librxtxSerial-linux-armhf</module>
             </modules>
         </profile>
         <profile>
