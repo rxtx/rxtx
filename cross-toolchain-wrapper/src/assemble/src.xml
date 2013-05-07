@@ -10,6 +10,7 @@
         <fileSet>
             <directory>${project.basedir}/src/main/bash</directory>
             <outputDirectory/>
+            <fileMode>0755</fileMode>
         </fileSet>
     </fileSets>
 </assembly>
