@@ -28,7 +28,7 @@
  |   any confusion about linking to RXTX.   We want to allow in part what
  |   section 5, paragraph 2 of the LGPL does not permit in the special
  |   case of linking over a controlled interface.  The intent is to add a
- |   Java Specification Request or standards body defined interface in the 
+ |   Java Specification Request or standards body defined interface in the
  |   future as another exception but one is not currently available.
  |
  |   http://www.fsf.org/licenses/gpl-faq.html#LinkingOverControlledInterface
@@ -82,13 +82,15 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 
 /**
- * This is the JavaComm for Linux driver.
+ * @deprecated Do NOT use this class. Your code WILL break. As an API user you
+ * must not depend on implementation details, this class is one of them. Always
+ * code against the service interface. Do not cast instances to this class type.
  */
 // TODO (by Alexander Graf) it seems this class is used to access all kinds
 // of drivers, not only the linux drivers as stated in the comment above
 // TODO (by Alexander Graf) this class seems to implement a driver for both
 // serial and parallel ports. The drivers should be separated.
-final class RXTXCommDriver implements CommDriver {
+public final class RXTXCommDriver implements CommDriver {
 
     private static final boolean DEBUG = false;
     private static final boolean DEVEL = false;
@@ -139,6 +141,13 @@ final class RXTXCommDriver implements CommDriver {
      */
     private String deviceDirectory;
     private String osName;
+
+    /**
+     * @deprecated Do NOT create instances of this class, your code WILL beak!
+     */
+    public RXTXCommDriver() {
+    }
+    
 
     private native boolean registerKnownPorts(int PortType);
 
