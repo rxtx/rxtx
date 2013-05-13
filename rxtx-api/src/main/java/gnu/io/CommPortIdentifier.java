@@ -286,10 +286,7 @@ public final class CommPortIdentifier extends Object {
         if (index != null) {
             return index;
         } else {
-            if (debug) {
-                System.out.println("not found!" + portName);
-            }
-            throw new NoSuchPortException();
+            throw new NoSuchPortException(portName + " not found");
         }
     }
 
@@ -304,9 +301,6 @@ public final class CommPortIdentifier extends Object {
      */
     public static CommPortIdentifier getPortIdentifier(CommPort port)
             throws NoSuchPortException {
-        if (debug) {
-            System.out.println("CommPortIdentifier:getPortIdentifier(CommPort)");
-        }
         CommPortIdentifier c;
         synchronized (Sync) {
             c = CommPortIndex;
@@ -317,11 +311,7 @@ public final class CommPortIdentifier extends Object {
         if (c != null) {
             return c;
         }
-
-        if (debug) {
-            System.out.println("not found!" + port.getName());
-        }
-        throw new NoSuchPortException();
+        throw new NoSuchPortException(port + " not found");
     }
 
     /**
