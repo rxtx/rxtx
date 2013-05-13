@@ -80,7 +80,6 @@ public abstract class CommPort extends Object {
         this.name = name;
     }
     protected final String name;
-    private static final boolean debug = false;
 
     public abstract void enableReceiveFraming(int f)
             throws UnsupportedCommOperationException;
@@ -118,9 +117,6 @@ public abstract class CommPort extends Object {
     public abstract int getOutputBufferSize();
 
     public void close() {
-        if (debug) {
-            System.out.println("CommPort:close()");
-        }
         try {
             CommPortIdentifier cp =
                     CommPortIdentifier.getPortIdentifier(this);
@@ -137,16 +133,10 @@ public abstract class CommPort extends Object {
     public abstract OutputStream getOutputStream() throws IOException;
 
     public String getName() {
-        if (debug) {
-            System.out.println("CommPort:getName()");
-        }
         return name;
     }
 
     public String toString() {
-        if (debug) {
-            System.out.println("CommPort:toString()");
-        }
         return name;
     }
 }
