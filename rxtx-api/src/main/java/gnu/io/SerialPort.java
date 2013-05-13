@@ -146,21 +146,9 @@ public abstract class SerialPort extends CommPort {
     public abstract void notifyOnFramingError(boolean enable);
 
     public abstract void notifyOnBreakInterrupt(boolean enable);
-    /*
-     * public abstract void setRcvFifoTrigger(int trigger); deprecated
-     */
-    /*
-     * ---------------------- end of commapi ------------------------
-     */
 
-    /*
-     * can't have static abstract?
-     *
-     * public abstract static boolean staticSetDTR( String port, boolean flag )
-     * throws UnsupportedCommOperationException; public abstract static boolean
-     * staticSetRTS( String port, boolean flag ) throws
-     * UnsupportedCommOperationException;
-     */
+    // ---------------------- end of commapi ------------------------
+
     public abstract byte getParityErrorChar()
             throws UnsupportedCommOperationException;
 
