@@ -69,11 +69,6 @@ class CommPortEnumerator implements Enumeration {
 
     CommPortEnumerator() {
     }
-    /*
-     * ------------------------------------------------------------------------------
-     * nextElement() accept: perform: return: exceptions: comments:
-     * ------------------------------------------------------------------------------
-     */
 
     public Object nextElement() {
         synchronized (CommPortIdentifier.Sync) {
@@ -85,11 +80,6 @@ class CommPortEnumerator implements Enumeration {
             return index;
         }
     }
-    /*
-     * ------------------------------------------------------------------------------
-     * hasMoreElements() accept: perform: return: exceptions: comments:
-     * ------------------------------------------------------------------------------
-     */
 
     public boolean hasMoreElements() {
         synchronized (CommPortIdentifier.Sync) {
