@@ -10,6 +10,20 @@
         <fileSet>
             <directory>${project.basedir}/src/main/bash</directory>
             <outputDirectory/>
+            <includes>
+                <include>toolchain.conf</include>
+                <include>toolchain.func</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/src/main/bash</directory>
+            <outputDirectory/>
+            <includes>
+                <include>arm-linux</include>
+                <include>mingw32</include>
+                <include>mingw64</include>
+            </includes>
+            <fileMode>0755</fileMode>
         </fileSet>
     </fileSets>
 </assembly>
