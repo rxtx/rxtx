@@ -61,6 +61,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.SecureRandom;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -204,7 +205,7 @@ public final class LibraryLoader {
                 nonHintedBaseName + "-" + osClass + "-" + architecture;
         final String hintedLibraryName = mapLibraryName(hintedBaseName);
         final String fullLibPath = resourcePath + "/" + hintedLibraryName;
-        
+
         if (isAvailableInJar(fullLibPath)) {
             try {
                 final String libCanonicalName =
@@ -266,12 +267,12 @@ public final class LibraryLoader {
      */
     private String extractLibFromJar(final String path, final String fileName)
             throws IOException {
-        final String tmpDir = System.getProperty("java.io.tmpdir");
-        final String outFileName = tmpDir + "/" + fileName;
+        int extPosition = fileName.lastIndexOf('.');
+        final String prefix = fileName.substring(0, extPosition) + "-";
+        final String extension = fileName.substring(extPosition);
+        final File libraryFile = File.createTempFile(prefix, extension);
         InputStream inputStream = classLoader.getResourceAsStream(
                 path + "/" + fileName);
-        File libraryFile = new File(outFileName);
-        libraryFile.createNewFile();
         libraryFile.deleteOnExit();
 
         FileOutputStream fileOutputStream = new FileOutputStream(libraryFile);
@@ -282,7 +283,7 @@ public final class LibraryLoader {
         }
         fileOutputStream.close();
         inputStream.close();
-        return outFileName;
+        return libraryFile.getAbsolutePath();
     }
 
     /**
