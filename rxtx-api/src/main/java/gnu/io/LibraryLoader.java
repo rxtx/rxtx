@@ -240,11 +240,11 @@ public final class LibraryLoader {
             System.loadLibrary(nonHintedBaseName);
             LOGGER.log(Level.FINE,
                     "Loaded non-hinted lib {0} from library path",
-                    hintedLibraryName);
+                    nonHintedBaseName);
             return true;
         } catch (UnsatisfiedLinkError ex) {
             LOGGER.log(Level.FINER, "non-hinted lib {0} not in library path",
-                    hintedLibraryName);
+                    nonHintedBaseName);
         }
         LOGGER.log(Level.WARNING,
                 "Stopping search. No implementation of JNI library {0} found"
