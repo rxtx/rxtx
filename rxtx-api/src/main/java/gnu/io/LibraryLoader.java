@@ -92,6 +92,8 @@ public final class LibraryLoader {
             Logger.getLogger(LibraryLoader.class.getName());
     private final ClassLoader classLoader;
     private final String resourcePath;
+    private final String osClass;
+    private final String architecture;
 
     /**
      * Creates a new LibraryLoader. The given classLoader will be used to find
@@ -107,6 +109,8 @@ public final class LibraryLoader {
     LibraryLoader(ClassLoader classLoader, String resourcePath) {
         this.classLoader = classLoader;
         this.resourcePath = resourcePath;
+        this.osClass = determineOsClass();
+        this.architecture = determineArchitecture();
     }
 
     /**
@@ -184,23 +188,23 @@ public final class LibraryLoader {
      * @return true if the proper library was found and loaded, false otherwise
      */
     public boolean load(String nonHintedBaseName) {
-        final String os = determineOsClass();
-        if (os == null) {
+        if (osClass == null) {
             LOGGER.log(Level.SEVERE,
                     "Unknown operating system! Can't resolve library name");
             return false;
         }
-        final String arch = determineArchitecture();
-        if (arch == null) {
+        if (architecture == null) {
             LOGGER.log(Level.SEVERE,
                     "Unknown CPU/JVM architecture! Can't resolve library name");
             return false;
         }
 
         LOGGER.log(Level.FINEST, "try to load hinted lib from resource");
-        final String hintedBaseName = nonHintedBaseName + "-" + os + "-" + arch;
-        final String hintedLibraryName = System.mapLibraryName(hintedBaseName);
+        final String hintedBaseName =
+                nonHintedBaseName + "-" + osClass + "-" + architecture;
+        final String hintedLibraryName = mapLibraryName(hintedBaseName);
         final String fullLibPath = resourcePath + "/" + hintedLibraryName;
+        
         if (isAvailableInJar(fullLibPath)) {
             try {
                 final String libCanonicalName =
@@ -232,8 +236,6 @@ public final class LibraryLoader {
 
         LOGGER.log(Level.FINEST,
                 "try to load non-hinted lib from default library path");
-        final String nonHintedLibraryName =
-                System.mapLibraryName(nonHintedBaseName);
         try {
             System.loadLibrary(nonHintedBaseName);
             LOGGER.log(Level.FINE,
@@ -247,7 +249,7 @@ public final class LibraryLoader {
         LOGGER.log(Level.WARNING,
                 "Stopping search. No implementation of JNI library {0} found"
                 + "for architecture {1} on OS {2}.",
-                new Object[]{nonHintedBaseName, arch, os});
+                new Object[]{nonHintedBaseName, architecture, osClass});
         return false;
     }
 
@@ -355,6 +357,33 @@ public final class LibraryLoader {
                     "The os.arch value {0} is unknown. Please file a bug.",
                     osArch);
             return null;
+        }
+    }
+
+    /**
+     * Maps the library base name to the platform specific library name.
+     *
+     * Some operating systems allow multiple library naming conventions, but
+     * the architecture of {@link System.mapLibraryName} does not allows this.
+     * On some os like mac OSX the default library mapping depends on the
+     * JVM version, but on all JVMs both library variants can be actually
+     * loaded. This wrapper ensures, that the correct naming convention is
+     * used, independent from the JVM version.
+     *
+     * @param baseName the library base name
+     * @return the platform specific library name
+     * @see System.mapLibraryName
+     */
+    private String mapLibraryName(String baseName) {
+        if (osClass == OS_MACOSX) {
+            /*
+             * On mac OSX System.mapLibraryName uses .jnilib or .dylib extension
+             * depending on the used JVM version. (Java 7 will use .dylib)
+             * This forces the use of .jnilib for all versions.
+             */
+            return "lib" + baseName + ".jnilib";
+        } else {
+            return System.mapLibraryName(baseName);
         }
     }
 }
