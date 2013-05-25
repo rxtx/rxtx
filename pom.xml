@@ -38,31 +38,31 @@
             </dependency>
             <dependency>
                 <groupId>gnu.io.rxtx</groupId>
-                <artifactId>rxtx-native-linux-x86</artifactId>
+                <artifactId>librxtxSerial-linux-x86</artifactId>
                 <version>2.2-stabilize-SNAPSHOT</version>
                 <type>so</type>
             </dependency>
             <dependency>
                 <groupId>gnu.io.rxtx</groupId>
-                <artifactId>rxtx-native-linux-x86_64</artifactId>
+                <artifactId>librxtxSerial-linux-x86_64</artifactId>
                 <version>2.2-stabilize-SNAPSHOT</version>
                 <type>so</type>
             </dependency>
             <dependency>
                 <groupId>gnu.io.rxtx</groupId>
-                <artifactId>rxtx-native-windows-x86</artifactId>
+                <artifactId>rxtxSerial-windows-x86</artifactId>
                 <version>2.2-stabilize-SNAPSHOT</version>
                 <type>dll</type>
             </dependency>
             <dependency>
                 <groupId>gnu.io.rxtx</groupId>
-                <artifactId>rxtx-native-windows-x86_64</artifactId>
+                <artifactId>rxtxSerial-windows-x86_64</artifactId>
                 <version>2.2-stabilize-SNAPSHOT</version>
                 <type>dll</type>
             </dependency>
             <dependency>
                 <groupId>gnu.io.rxtx</groupId>
-                <artifactId>rxtx-native-osx-x86_64</artifactId>
+                <artifactId>librxtxSerial-osx-x86_64</artifactId>
                 <version>2.2-stabilize-SNAPSHOT</version>
                 <type>jnilib</type>
             </dependency>
@@ -85,7 +85,7 @@
                 </os>
             </activation>
             <modules>
-                <module>native-linux-x86</module>
+                <module>librxtxSerial-linux-x86</module>
             </modules>
         </profile>
         <profile>
@@ -98,19 +98,19 @@
                 </os>
             </activation>
             <modules>
-                <module>native-linux-x86_64</module>
+                <module>librxtxSerial-linux-x86_64</module>
             </modules>
         </profile>
         <profile>
             <id>with-windows-x86</id>
             <modules>
-                <module>native-windows-x86</module>
+                <module>rxtxSerial-windows-x86</module>
             </modules>
         </profile>
         <profile>
             <id>with-windows-x86_64</id>
             <modules>
-                <module>native-windows-x86_64</module>
+                <module>rxtxSerial-windows-x86_64</module>
             </modules>
         </profile>
         <profile>
@@ -122,7 +122,7 @@
                 </os>
             </activation>
             <modules>
-                <module>native-osx-x86_64</module>
+                <module>librxtxSerial-osx-x86_64</module>
             </modules>
         </profile>
         <profile>

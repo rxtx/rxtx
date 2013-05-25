@@ -41,31 +41,31 @@
         </dependency>
         <dependency>
             <groupId>gnu.io.rxtx</groupId>
-            <artifactId>rxtx-native-linux-x86</artifactId>
+            <artifactId>librxtxSerial-linux-x86</artifactId>
             <type>so</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>gnu.io.rxtx</groupId>
-            <artifactId>rxtx-native-linux-x86_64</artifactId>
+            <artifactId>librxtxSerial-linux-x86_64</artifactId>
             <type>so</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>gnu.io.rxtx</groupId>
-            <artifactId>rxtx-native-windows-x86</artifactId>
+            <artifactId>rxtxSerial-windows-x86</artifactId>
             <type>dll</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>gnu.io.rxtx</groupId>
-            <artifactId>rxtx-native-windows-x86_64</artifactId>
+            <artifactId>rxtxSerial-windows-x86_64</artifactId>
             <type>dll</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>gnu.io.rxtx</groupId>
-            <artifactId>rxtx-native-osx-x86_64</artifactId>
+            <artifactId>librxtxSerial-osx-x86_64</artifactId>
             <type>jnilib</type>
             <scope>compile</scope>
         </dependency>

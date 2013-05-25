@@ -2,10 +2,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>gnu.io.rxtx</groupId>
-    <artifactId>rxtx-native-windows-x86_64</artifactId>
+    <artifactId>rxtxSerial-windows-x86_64</artifactId>
     <packaging>dll</packaging>
     <version>2.2-stabilize-SNAPSHOT</version>
-    <name>[windows/x86_64] RXTX native lib</name>
+    <name>[windows/x86_64] rxtxSerial</name>
     <url>http://rxtx.qbang.org</url>
     <parent>    
         <groupId>gnu.io.rxtx</groupId>

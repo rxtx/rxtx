@@ -2,10 +2,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>gnu.io.rxtx</groupId>
-    <artifactId>rxtx-native-linux-x86</artifactId>
+    <artifactId>librxtxSerial-linux-x86</artifactId>
     <packaging>so</packaging>
     <version>2.2-stabilize-SNAPSHOT</version>
-    <name>[linux/x86] RXTX native lib</name>
+    <name>[linux/x86] rxtxSerial</name>
     <url>http://rxtx.qbang.org</url>
     <parent>    
         <groupId>gnu.io.rxtx</groupId>
@@ -99,7 +99,6 @@
                         <compilerStartOption>-DHAVE_STDINT_H</compilerStartOption>
                         <compilerStartOption>-DHAVE_SYS_FCNTL_H</compilerStartOption>
                         <compilerStartOption>-DHAVE_SYS_SIGNAL_H</compilerStartOption>
-                        <compilerStartOption></compilerStartOption>
                     </compilerStartOptions>
                     <linkerStartOptions>
                         <linkerStartOption>-shared</linkerStartOption>
