@@ -50,12 +50,6 @@
             </dependency>
             <dependency>
                 <groupId>gnu.io.rxtx</groupId>
-                <artifactId>rxtx-native-linux-arm</artifactId>
-                <version>2.2-stabilize-SNAPSHOT</version>
-                <type>so</type>
-            </dependency>
-            <dependency>
-                <groupId>gnu.io.rxtx</groupId>
                 <artifactId>rxtx-native-windows-x86</artifactId>
                 <version>2.2-stabilize-SNAPSHOT</version>
                 <type>dll</type>
@@ -105,12 +99,6 @@
             </activation>
             <modules>
                 <module>native-linux-x86_64</module>
-            </modules>
-        </profile>
-        <profile>
-            <id>with-linux-arm</id>
-            <modules>
-                <module>native-linux-arm</module>
             </modules>
         </profile>
         <profile>

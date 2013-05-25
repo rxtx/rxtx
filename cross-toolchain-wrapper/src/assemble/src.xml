@@ -19,7 +19,6 @@
             <directory>${project.basedir}/src/main/bash</directory>
             <outputDirectory/>
             <includes>
-                <include>arm-linux</include>
                 <include>mingw32</include>
                 <include>mingw64</include>
             </includes>
