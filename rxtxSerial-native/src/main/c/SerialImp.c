@@ -4622,33 +4622,32 @@ registerKnownSerialPorts(JNIEnv *env, jobject jobj, jint portType) /* dima */
         report( "createSerialIterator failed\n" );
 	return(0);
     } else {
-	jclass cls; /* dima */
-	jmethodID mid; /* dima */
-        cls = (*env)->FindClass(env,"gnu/io/CommPortIdentifier" ); /* dima */
-        if (cls == 0) { /* dima */
-            report( "can't find class of gnu/io/CommPortIdentifier\n" ); /* dima */
-            return numPorts; /* dima */
-        } /* dima */
-        mid = (*env)->GetStaticMethodID(env, cls, "addPortName", "(Ljava/lang/String;ILgnu/io/CommDriver;)V" ); /* dima */
+	jclass rxtxCommDriverClass = (*env)->FindClass(env,
+                "gnu/io/impl/serial/RXTXCommDriver");
+        jmethodID mGetContext = (*env)->GetMethodID(env, rxtxCommDriverClass,
+                "getDriverContext", "()Lgnu/io/DriverContext;");
+	jclass driverContextClass = (*env)->FindClass(env,
+                "gnu/io/DriverContext");
+        jmethodID mRegisterPort = (*env)->GetMethodID(env, driverContextClass,
+                "registerPort", "(Ljava/lang/String;ILgnu/io/spi/CommDriver;)V");
+        jobject context = (*env)->CallObjectMethod(env, jobj, mGetContext);
+        
+        while ( (theObject = IOIteratorNext(theSerialIterator)) ){
+            /* begin dima */
+            char* regString = getRegistryString(theObject, kIODialinDeviceKey);
+            jstring regStringJ = (*env)->NewStringUTF(env, regString);
+            (*env)->CallVoidMethod(env, context, mRegisterPort,
+                    regStringJ, portType, jobj);
+            (*env)->DeleteLocalRef(env, regStringJ);
+            numPorts++;
 
-        if (mid == 0) {
-            printf( "getMethodID of CommDriver.addPortName failed\n" );
-        } else {
-            while ( (theObject = IOIteratorNext(theSerialIterator)) )
-            {
- /* begin dima */
-            	jstring	tempJstring;
-				tempJstring = (*env)->NewStringUTF(env,getRegistryString(theObject, kIODialinDeviceKey));
-                (*env)->CallStaticVoidMethod(env, cls, mid,tempJstring,portType,jobj);/* dima */
- 				(*env)->DeleteLocalRef(env,tempJstring);
-                numPorts++;
-
- 				tempJstring = (*env)->NewStringUTF(env,getRegistryString(theObject, kIOCalloutDeviceKey));
-               (*env)->CallStaticVoidMethod(env, cls, mid,tempJstring,portType,jobj);/* dima */
- 				(*env)->DeleteLocalRef(env,tempJstring);
-                numPorts++;
-/* end dima */
-            }
+            regString = getRegistryString(theObject, kIOCalloutDeviceKey);
+            regStringJ = (*env)->NewStringUTF(env, regString);
+            (*env)->CallVoidMethod(env, context, mRegisterPort,
+                    regStringJ, portType, jobj);
+            (*env)->DeleteLocalRef(env, regStringJ);
+            numPorts++;
+            /* end dima */
         }
     }
     return numPorts;
