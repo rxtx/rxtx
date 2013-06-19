@@ -88,10 +88,6 @@ public final class CommPortIdentifier extends Object {
      */
     public static final int PORT_PARALLEL = 2;
     /**
-     * The port is a I2C (Inter Integrated Circuit) port.
-     */
-    public static final int PORT_I2C = 3;
-    /**
      * The port is a RS485 port.
      */
     public static final int PORT_RS485 = 4;
