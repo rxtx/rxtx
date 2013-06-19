@@ -84,10 +84,6 @@ public final class CommPortIdentifier extends Object {
      */
     public static final int PORT_SERIAL = 1;
     /**
-     * The port is a parallel port.
-     */
-    public static final int PORT_PARALLEL = 2;
-    /**
      * The port is a raw port.
      */
     public static final int PORT_RAW = 5;

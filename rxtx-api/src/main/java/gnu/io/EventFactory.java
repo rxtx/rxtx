@@ -105,24 +105,4 @@ public final class EventFactory {
             final boolean oldValue, final boolean newValue) {
         return new SerialPortEvent(srcPort, eventType, oldValue, newValue);
     }
-
-    /**
-     * Creates a new ParallelPortEvent. This factory method hides the creation
-     * of events from the API and only allows driver implementations to create
-     * events.
-     *
-     * As an API user do not even try to create your own instances. You will
-     * break your code.
-     *
-     * @param srcPort the port which is associated with the event
-     * @param eventType the type of the event
-     * @param oldValue the value of the signal before the event
-     * @param newValue the value of the signal after the event
-     * @return a new port event never seen before
-     */
-    public ParallelPortEvent createParallelPortEvent(
-            final ParallelPort srcPort, final int eventType,
-            final boolean oldValue, final boolean newValue) {
-        return new ParallelPortEvent(srcPort, eventType, oldValue, newValue);
-    }
 }
