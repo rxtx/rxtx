@@ -88,10 +88,6 @@ public final class CommPortIdentifier extends Object {
      */
     public static final int PORT_PARALLEL = 2;
     /**
-     * The port is a RS485 port.
-     */
-    public static final int PORT_RS485 = 4;
-    /**
      * The port is a raw port.
      */
     public static final int PORT_RAW = 5;
