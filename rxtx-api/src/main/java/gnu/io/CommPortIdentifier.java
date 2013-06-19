@@ -84,10 +84,6 @@ public final class CommPortIdentifier extends Object {
      */
     public static final int PORT_SERIAL = 1;
     /**
-     * The port is a raw port.
-     */
-    public static final int PORT_RAW = 5;
-    /**
      * The name of the corresponding port. On linux and probably other systems
      * this will typically look like /dev/ttyx on Windows COMx where x is some
      * integer.
