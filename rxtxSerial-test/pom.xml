@@ -1,0 +1,55 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>gnu.io.rxtx</groupId>
+    <artifactId>rxtxSerial-test</artifactId>
+    <packaging>jar</packaging>
+    <version>2.2-stabilize-SNAPSHOT</version>
+    <name>rxtxSerial integration tests</name>
+    <url>http://rxtx.qbang.org</url>
+    <parent>    
+        <groupId>gnu.io.rxtx</groupId>
+        <artifactId>rxtx-parent</artifactId>
+        <version>2.2-stabilize-SNAPSHOT</version>
+    </parent>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>      
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skipTests>false</skipTests>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <dependencies>
+        <dependency>
+            <groupId>gnu.io.rxtx</groupId>
+            <artifactId>rxtx-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>gnu.io.rxtx</groupId>
+            <artifactId>rxtxSerial</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>
