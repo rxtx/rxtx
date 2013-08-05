@@ -85,6 +85,7 @@ import java.util.StringTokenizer;
 // of drivers, not only the linux drivers as stated in the comment above
 // TODO (by Alexander Graf) this class seems to implement a driver for both
 // serial and parallel ports. The drivers should be separated.
+@Deprecated
 public final class RXTXCommDriver implements CommDriver {
 
     private static final boolean DEBUG = false;
@@ -101,6 +102,7 @@ public final class RXTXCommDriver implements CommDriver {
     /**
      * @deprecated Do NOT create instances of this class, your code WILL beak!
      */
+    @Deprecated
     public RXTXCommDriver() {
     }
     

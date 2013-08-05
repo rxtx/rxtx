@@ -1,8 +1,8 @@
 /*-------------------------------------------------------------------------
  |   RXTX License v 2.1 - LGPL v 2.1 + Linking Over Controlled Interface.
  |   RXTX is a native interface to serial ports in java.
- |   Copyright 1997-2007 by Trent Jarvi tjarvi@qbang.org and others who
- |   actually wrote it.  See individual source files for more information.
+ |   Copyright 2013 by Alexander Graf <alex at antistatix.de> and others
+ |   who actually wrote it.  See individual source files for more information.
  |
  |   A copy of the LGPL v 2.1 may be found at
  |   http://www.gnu.org/licenses/lgpl.txt on March 4th 2007.  A copy is
@@ -55,59 +55,81 @@
  |   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  |   All trademarks belong to their respective owners.
  --------------------------------------------------------------------------*/
-package gnu.io.spi;
+package gnu.io;
 
-import gnu.io.CommPort;
-import gnu.io.DriverContext;
+import gnu.io.spi.CommDriver;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ServiceLoader;
 
 /**
- * The
- * <code>CommDriver</code> is a service provider interface for device drivers.
- * Device drivers implement the mapping between port hardware and the
- * <code>CommPort</code> class. All device driver implementations must implement
- * this interface. In order to be discovered by the Java SE6
- * <code>ServiceLoader</code> mechanism, the service implementation must be
- * registered in the META-INF/service directory as described in
- * <code>ServiceLoader</code>.
+ * The DriverManager class gives access to the driver loading process for the
+ * API user.
  *
- * @see java.util.ServiceLoader
- *
- * @author Trent Jarvi
+ * @author Alexander Graf [alex -at- antistatix.de]
+ * @since TBD
  */
-public interface CommDriver {
+public final class DriverManager {
 
     /**
-     * The driver returns a
-     * <code>CommPort</code> for a given name and type. The driver
-     * implementation must return a
-     * <code>CommPort</code> instance of the type which is related to the
-     * <code>portType</code> option and matches the given
-     * <code>portName</code>. If the driver can not find a device matching the
-     * combination of
-     * <code>portName</code> and
-     * <code>portType</code>
-     * <code>null</code> must be returned.
-     *
-     * It is guaranteed that rxtx will not call this method before calling
-     * <code>initialize()</code>.
-     *
-     * @param portName the name of the port
-     * @param portType a constant from <code>CommPortIdentifier.PORT_*</code>
-     * describing the type of the port
-     * @return the <code>CommPort</code> instance or <code>null</code>
+     * The singleton instance of this manager.
      */
-    CommPort getCommPort(String portName, int portType);
+    private static DriverManager instance;
+    /**
+     * The ServiceLoader instance used to load all driver implementations.
+     */
+    private final ServiceLoader<CommDriver> loader;
+    /**
+     * Holds all known driver classes. This is used to prevent the drivers from
+     * being initialized twice. Initialization of known drivers is skipped in
+     * loadDrivers().
+     */
+    private final List<Class> drivers = new ArrayList<Class>();
 
     /**
-     * Initializes this driver. This method is called by rxtx once in a virtual
-     * machines lifetime when a driver was discovered. The driver can use this
-     * call to configure itself, load any required native libraries and register
-     * devices via
-     * <code>DriverContext.addPortName()</code> to be prepared for calls to
-     * <code>getCommPort()</code>.
-     *
-     * @param context a callback class for the driver to get access to the
-     * driver service provider interface
+     * Creates the singleton instance.
      */
-    void initialize(DriverContext context);
+    private DriverManager() {
+        loader = ServiceLoader.load(CommDriver.class);
+    }
+
+    /**
+     * Returns the singleton instance of
+     * <code>DriverManager</code>.
+     *
+     * @return the DriverManager instance
+     */
+    public static DriverManager getInstance() {
+        synchronized (DriverManager.class) {
+            if (instance == null) {
+                instance = new DriverManager();
+            }
+            return instance;
+        }
+    }
+
+    /**
+     * Loads and initializes all currently registered
+     * <code>CommDriver</code>s.
+     *
+     * In most implementations this method is called only once before any other
+     * interaction with this API happens, to ensure that all drivers are loaded.
+     *
+     * For advanced applications which use plugins and might add drivers at
+     * runtime, this method must be called whenever a new driver was added to
+     * the class path.
+     */
+    public void loadDrivers() {
+        synchronized (this) {
+            loader.reload();
+            for (CommDriver driver : loader) {
+                final Class<? extends CommDriver> driverClass =
+                        driver.getClass();
+                if (!drivers.contains(driverClass)) {
+                    drivers.add(driverClass);
+                    driver.initialize(DriverContext.getInstance());
+                }
+            }
+        }
+    }
 }
