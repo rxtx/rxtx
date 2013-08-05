@@ -66,26 +66,11 @@ import java.util.Enumeration;
 class CommPortEnumerator implements Enumeration {
 
     private CommPortIdentifier index;
-    private static final boolean debug = false;
-
-    static {
-        if (debug) {
-            System.out.println("CommPortEnumerator:{}");
-        }
-    }
 
     CommPortEnumerator() {
     }
-    /*
-     * ------------------------------------------------------------------------------
-     * nextElement() accept: perform: return: exceptions: comments:
-     * ------------------------------------------------------------------------------
-     */
 
     public Object nextElement() {
-        if (debug) {
-            System.out.println("CommPortEnumerator:nextElement()");
-        }
         synchronized (CommPortIdentifier.Sync) {
             if (index != null) {
                 index = index.next;
@@ -95,17 +80,8 @@ class CommPortEnumerator implements Enumeration {
             return index;
         }
     }
-    /*
-     * ------------------------------------------------------------------------------
-     * hasMoreElements() accept: perform: return: exceptions: comments:
-     * ------------------------------------------------------------------------------
-     */
 
     public boolean hasMoreElements() {
-        if (debug) {
-            System.out.println("CommPortEnumerator:hasMoreElements() "
-                    + (CommPortIdentifier.CommPortIndex != null));
-        }
         synchronized (CommPortIdentifier.Sync) {
             if (index != null) {
                 return (index.next != null);

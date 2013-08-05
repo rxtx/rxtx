@@ -132,9 +132,6 @@ public final class CommPortIdentifier extends Object {
      * A PORT_* constant indicating the port hardware type.
      */
     private int portType;
-    // TODO (by Alexander Graf) all the debug statements are ugly, debuggers
-    // are made for that ...
-    private static final boolean debug = false;
     // TODO (by Alexander Graf) the access to this field from all corners of
     // rxtx is really ugly and should be rewritten
     static Object Sync;
@@ -151,17 +148,7 @@ public final class CommPortIdentifier extends Object {
      * Static block to initialize the class. Loads the rxtx driver.
      */
     static {
-        if (debug) {
-            System.out.println("CommPortIdentifier:static initialization()");
-        }
         Sync = new Object();
-
-        if (debug) {
-            String os = System.getProperty("os.name");
-            if (os.toLowerCase().indexOf("linux") == -1) {
-                System.out.println("Have not implemented native_psmisc_report_owner(PortName)); in CommPortIdentifier");
-            }
-        }
     }
 
     /**
@@ -185,9 +172,6 @@ public final class CommPortIdentifier extends Object {
     }
 
     static void addPortName(String portName, int portType, CommDriver driver) {
-        if (debug) {
-            System.out.println("CommPortIdentifier:addPortName(" + portName + ")");
-        }
         // TODO (by Alexander Graf) the usage of the constructor with a null
         // value for the port is a major design problem. Rxtx currently creates
         // the port objects on a per-open basis. This clashes with the design
@@ -206,22 +190,13 @@ public final class CommPortIdentifier extends Object {
     //TODO (Alexander Graf) This method/class seems to reinvent the wheel
     //by implementing its own linked list functionallity
     private static void addIdentifierToList(CommPortIdentifier identifier) {
-        if (debug) {
-            System.out.println("CommPortIdentifier:AddIdentifierToList()");
-        }
         synchronized (Sync) {
             if (CommPortIndex == null) {
                 CommPortIndex = identifier;
-                if (debug) {
-                    System.out.println("CommPortIdentifier:AddIdentifierToList() null");
-                }
             } else {
                 CommPortIdentifier index = CommPortIndex;
                 while (index.next != null) {
                     index = index.next;
-                    if (debug) {
-                        System.out.println("CommPortIdentifier:AddIdentifierToList() index.next");
-                    }
                 }
                 index.next = identifier;
             }
@@ -238,9 +213,6 @@ public final class CommPortIdentifier extends Object {
      * @param c the ownership listener to register
      */
     public void addPortOwnershipListener(CommPortOwnershipListener c) {
-        if (debug) {
-            System.out.println("CommPortIdentifier:addPortOwnershipListener()");
-        }
         if (ownershipListener == null) {
             ownershipListener = new Vector();
         }
@@ -262,9 +234,6 @@ public final class CommPortIdentifier extends Object {
      * @return the port owner or null if the port is not currently owned
      */
     public String getCurrentOwner() {
-        if (debug) {
-            System.out.println("CommPortIdentifier:getCurrentOwner()");
-        }
         return owner;
     }
 
@@ -279,9 +248,6 @@ public final class CommPortIdentifier extends Object {
      * @return the name of the associated port
      */
     public String getName() {
-        if (debug) {
-            System.out.println("CommPortIdentifier:getName()");
-        }
         return portName;
     }
 
@@ -294,10 +260,8 @@ public final class CommPortIdentifier extends Object {
      * @return the identifier of the port
      * @throws NoSuchPortException when no port with the given name was found
      */
-    public static CommPortIdentifier getPortIdentifier(String portName) throws NoSuchPortException {
-        if (debug) {
-            System.out.println("CommPortIdentifier:getPortIdentifier(" + portName + ")");
-        }
+    public static CommPortIdentifier getPortIdentifier(String portName)
+            throws NoSuchPortException {
         CommPortIdentifier index;
 
         synchronized (Sync) {
@@ -322,10 +286,7 @@ public final class CommPortIdentifier extends Object {
         if (index != null) {
             return index;
         } else {
-            if (debug) {
-                System.out.println("not found!" + portName);
-            }
-            throw new NoSuchPortException();
+            throw new NoSuchPortException(portName + " not found");
         }
     }
 
@@ -340,9 +301,6 @@ public final class CommPortIdentifier extends Object {
      */
     public static CommPortIdentifier getPortIdentifier(CommPort port)
             throws NoSuchPortException {
-        if (debug) {
-            System.out.println("CommPortIdentifier:getPortIdentifier(CommPort)");
-        }
         CommPortIdentifier c;
         synchronized (Sync) {
             c = CommPortIndex;
@@ -353,11 +311,7 @@ public final class CommPortIdentifier extends Object {
         if (c != null) {
             return c;
         }
-
-        if (debug) {
-            System.out.println("not found!" + port.getName());
-        }
-        throw new NoSuchPortException();
+        throw new NoSuchPortException(port + " not found");
     }
 
     /**
@@ -367,9 +321,6 @@ public final class CommPortIdentifier extends Object {
      * @return the enumeration of port identifiers
      */
     public static Enumeration getPortIdentifiers() {
-        if (debug) {
-            System.out.println("static CommPortIdentifier:getPortIdentifiers()");
-        }
         //Do not allow anybody get any ports while we are re-initializing
         //because the CommPortIndex points to invalid instances during that time
         synchronized (Sync) {
@@ -418,9 +369,6 @@ public final class CommPortIdentifier extends Object {
      * @return the port type
      */
     public int getPortType() {
-        if (debug) {
-            System.out.println("CommPortIdentifier:getPortType()");
-        }
         return portType;
     }
 
@@ -432,9 +380,6 @@ public final class CommPortIdentifier extends Object {
      * not currently owned.
      */
     public synchronized boolean isCurrentlyOwned() {
-        if (debug) {
-            System.out.println("CommPortIdentifier:isCurrentlyOwned()");
-        }
         return !available;
     }
 
@@ -444,9 +389,6 @@ public final class CommPortIdentifier extends Object {
     // care about compatibility to the comm API
     public synchronized CommPort open(FileDescriptor f)
             throws UnsupportedCommOperationException {
-        if (debug) {
-            System.out.println("CommPortIdentifier:open(FileDescriptor)");
-        }
         throw new UnsupportedCommOperationException();
     }
 
@@ -476,9 +418,6 @@ public final class CommPortIdentifier extends Object {
     // not written in java? I can't see where this request is done.
     public CommPort open(String owner, int timeLimit)
             throws gnu.io.PortInUseException {
-        if (debug) {
-            System.out.println("CommPortIdentifier:open(" + owner + ", " + timeLimit + ")");
-        }
         boolean isAvailable;
         synchronized (this) {
             isAvailable = this.available;
@@ -548,9 +487,6 @@ public final class CommPortIdentifier extends Object {
      * @param c the listener to remove
      */
     public void removePortOwnershipListener(CommPortOwnershipListener c) {
-        if (debug) {
-            System.out.println("CommPortIdentifier:removePortOwnershipListener()");
-        }
         if (ownershipListener != null) {
             ownershipListener.removeElement(c);
         }
@@ -561,9 +497,6 @@ public final class CommPortIdentifier extends Object {
      */
     void internalClosePort() {
         synchronized (this) {
-            if (debug) {
-                System.out.println("CommPortIdentifier:internalClosePort()");
-            }
             owner = null;
             available = true;
             // TODO (by Alexander Graf) to set the commPort to null is
@@ -580,9 +513,6 @@ public final class CommPortIdentifier extends Object {
     }
 
     private void fireOwnershipEvent(int eventType) {
-        if (debug) {
-            System.out.println("CommPortIdentifier:fireOwnershipEvent( " + eventType + " )");
-        }
         if (ownershipListener != null) {
             CommPortOwnershipListener c;
             //TODO (by Alexander Graf) for statement abuse ...

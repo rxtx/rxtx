@@ -80,12 +80,18 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * This is the default rxtx serial driver implementation.
+ *
+ * @author Trent Jarvi
+ * @author Holger Lehmann (IBM)
+ * @author Peter Bennett (Bencom)
+ * @author Alexander Graf
+ *
  * @deprecated Do NOT use this class. Your code WILL break. As an API user you
  * must not depend on implementation details, this class is one of them. Always
  * code against the service interface. Do not cast instances to this class type.
+ *
  */
-// TODO (by Alexander Graf) it seems this class is used to access all kinds
-// of drivers, not only the linux drivers as stated in the comment above
 // TODO (by Alexander Graf) this class seems to implement a driver for both
 // serial and parallel ports. The drivers should be separated.
 @Deprecated
@@ -106,7 +112,6 @@ public final class RXTXCommDriver implements CommDriver {
     @Deprecated
     public RXTXCommDriver() {
     }
-    
 
     private native boolean registerKnownPorts(int PortType);
 
@@ -232,7 +237,7 @@ public final class RXTXCommDriver implements CommDriver {
 
     public void initialize(final DriverContext context) {
         this.context = context;
-        
+
         LibraryLoader loader = context.createLibraryLoader(
                 RXTXCommDriver.class.getClassLoader(),
                 "gnu/io/impl/serial");
@@ -301,28 +306,44 @@ public final class RXTXCommDriver implements CommDriver {
      * @return the properties file object if found or null if no property file
      * found in any extension directory
      */
-    private Properties loadRxtxProperties() {
-        Properties props = null;
-        String fileLoc = null;
-        // Old style: properties file must be in JRE folder
-        String[] extDirs = System.getProperty("java.ext.dirs").split(":");
-        String fs = System.getProperty("file.separator");
-        for (int i = 0; i < extDirs.length; i++) {
-            String extFile = extDirs[i] + fs + "gnu.io.rxtx.properties";
-            File file = new File(extFile);
+    private File findPropertyFile() {
+        final String[] extDirs = System.getProperty("java.ext.dirs").split(":");
+        final String separator = System.getProperty("file.separator");
+        for (final String extDir : extDirs) {
+            final String extFile =
+                    extDir + separator + "gnu.io.rxtx.properties";
+            final File file = new File(extFile);
             if (file.exists()) {
-                fileLoc = extFile;
-                break;
+                return file;
             }
         }
-        if (fileLoc != null) {
+        return null;
+    }
+
+    /**
+     * Loads the "gnu.io.rxtx.properties" file or resource.
+     * The file gnu.io.rxtx.properties may reside in the java extension dir,
+     * or it can be anywhere in the classpath.
+     *
+     * @return the loaded properties or an empty property set if no property
+     * source was found.
+     */
+    private Properties loadRxtxProperties() {
+        final Properties props = new Properties();
+        final File propertyFile = findPropertyFile();
+        if (propertyFile != null) {
             FileInputStream in = null;
             try {
-                in = new FileInputStream(fileLoc);
-                props = new Properties();
+                in = new FileInputStream(propertyFile);
                 props.load(in);
-            } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "could not read property file", e);
+                LOGGER.log(Level.FINE,
+                        "loaded properties from file {0}", propertyFile);
+            } catch (FileNotFoundException ex) {
+                LOGGER.log(Level.WARNING,
+                        "discovered property file disappeared unexpectedly",
+                        ex);
+            } catch (IOException ex) {
+                LOGGER.log(Level.WARNING, "could not read property file", ex);
             } finally {
                 if (in != null) {
                     try {
@@ -334,26 +355,22 @@ public final class RXTXCommDriver implements CommDriver {
                     }
                 }
             }
-        }
-        if (props == null) {
-            // New style: properties file anywhere in classpath
-            ClassLoader loader = Thread.currentThread().getContextClassLoader();
-            try {
-                Enumeration resources = loader.getResources("gnu.io.rxtx.properties");
-                while (resources.hasMoreElements()) {
-                    URL propertyURL = (URL) resources.nextElement();
-                    props = new Properties();
-                    props.load(propertyURL.openStream());
-                    break;
+        } else {
+            final ClassLoader loader = Thread.currentThread()
+                    .getContextClassLoader();
+            final URL propertyResource = loader
+                    .getResource("gnu.io.rxtx.properties");
+            if (propertyResource != null) {
+                try {
+                    props.load(propertyResource.openStream());
+                } catch (IOException ex) {
+                    LOGGER.log(Level.SEVERE,
+                            "could not load property resource file", ex);
                 }
-            } catch (IOException e) {
-                LOGGER.log(Level.SEVERE,
-                        "could not load property resource file", e);
+            } else {
+                LOGGER.log(Level.INFO,
+                        "No property file or resource found (using defaults)");
             }
-        }
-        if (props == null) {
-            LOGGER.log(Level.INFO,
-                    "No property file or resource found (using defaults)");
         }
         return props;
     }
