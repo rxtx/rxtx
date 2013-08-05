@@ -80,16 +80,6 @@ final class RXTXPort extends SerialPort {
     private final DriverContext context;
 
     static {
-        try {
-            sys = new Zystem();
-        } catch (Exception e) {
-            throw new Error(e.toString());
-        }
-
-        if (DEBUG) {
-            sys.reportln("RXTXPort {}");
-        }
-        RXTXVersion.loadLibrary("rxtxSerial");
         Initialize();
     }
 

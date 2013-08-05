@@ -60,53 +60,23 @@ package gnu.io.impl.serial;
 /**
  * A class to keep the current version in
  */
-public class RXTXVersion {
-    /*
-     * ------------------------------------------------------------------------------
-     * RXTXVersion accept: - perform: Set Version. return: - exceptions:
-     * Throwable comments: See INSTALL for details.
-------------------------------------------------------------------------------
-     */
+class RXTXVersion {
 
-    private static String version;
-
-    static {
-        RXTXVersion.loadLibrary("rxtxSerial");
-        version = "RXTX-2.2";
-    }
+    private static final String version = "RXTX-2.2";
 
     /**
-     * static method to return the current version of RXTX unique to RXTX.
+     * returns the current version of the serial driver java part
      *
-     * @return a string representing the version "RXTX-1.4-9"
+     * @return a string representing the version e.g. "RXTX-1.4-9"
      */
     public static String getVersion() {
         return version;
     }
 
+    /**
+     * Returns the version of the native serial driver.
+     *
+     * @return the version of the native driver
+     */
     public static native String nativeGetVersion();
-
-    static void loadLibrary(String baseName) {
-        if (System.getProperty("sun.arch.data.model", "").equals("64")) {
-            try {
-                System.loadLibrary(baseName + "64");
-            } catch (UnsatisfiedLinkError ex64) {
-                try {
-                    System.loadLibrary(baseName);
-                } catch (UnsatisfiedLinkError ignored) {
-                    throw ex64;
-                }
-            }
-        } else {
-            try {
-                System.loadLibrary(baseName);
-            } catch (UnsatisfiedLinkError ex32) {
-                try {
-                    System.loadLibrary(baseName + "64");
-                } catch (UnsatisfiedLinkError ignored) {
-                    throw ex32;
-                }
-            }
-        }
-    }
 }

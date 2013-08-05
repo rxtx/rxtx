@@ -63,15 +63,10 @@
 package gnu.io.impl.serial;
 
 import gnu.io.CommPort;
-import gnu.io.CommPort;
-import gnu.io.CommPortIdentifier;
 import gnu.io.CommPortIdentifier;
 import gnu.io.DriverContext;
-import gnu.io.impl.serial.LPRPort;
+import gnu.io.LibraryLoader;
 import gnu.io.PortInUseException;
-import gnu.io.PortInUseException;
-import gnu.io.impl.serial.RXTXPort;
-import gnu.io.impl.serial.RXTXVersion;
 import gnu.io.spi.CommDriver;
 import java.io.File;
 import java.io.FileInputStream;
@@ -98,49 +93,11 @@ public final class RXTXCommDriver implements CommDriver {
             System.getProperty("gnu.io.rxtx.NoVersionOutput"));
     private DriverContext context;
 
-    static {
-        if (DEBUG) {
-            System.out.println("RXTXCommDriver {}");
-        }
-        RXTXVersion.loadLibrary("rxtxSerial");
-
-        /*
-         * Perform a crude check to make sure people don't mix versions of the
-         * Jar and native lib
-         *
-         * Mixing the libs can create a nightmare.
-         *
-         * It could be possible to move this over to RXTXVersion but All we want
-         * to do is warn people when first loading the Library.
-         */
-        String jarVersion = RXTXVersion.getVersion();
-        String libVersion;
-        try {
-            libVersion = RXTXVersion.nativeGetVersion();
-        } catch (Error unsatisfiedLinkError) {
-            // for rxtx prior to 2.1.7
-            libVersion = nativeGetVersion();
-        }
-        if (DEVEL) {
-            if (!NO_VERSION_OUTPUT) {
-                System.out.println("Stable Library");
-                System.out.println("=========================================");
-                System.out.println("Native lib Version = " + libVersion);
-                System.out.println("Java lib Version   = " + jarVersion);
-            }
-        }
-
-        if (!jarVersion.equals(libVersion)) {
-            System.out.println("WARNING:  RXTX Version mismatch\n\tJar version = " + jarVersion + "\n\tnative lib Version = " + libVersion);
-        } else if (DEBUG) {
-            System.out.println("RXTXCommDriver:\n\tJar version = " + jarVersion + "\n\tnative lib Version = " + libVersion);
-        }
-    }
     /**
      * Get the Serial port prefixes for the running OS
      */
     private String deviceDirectory;
-    private String osName;
+    private final String osName = System.getProperty("os.name");
 
     /**
      * @deprecated Do NOT create instances of this class, your code WILL beak!
@@ -317,42 +274,21 @@ public final class RXTXCommDriver implements CommDriver {
         }
     }
 
-
-    /*
-     * initialize() will be called by the CommPortIdentifier's static
-     * initializer. The responsibility of this method is: 1) Ensure that that
-     * the hardware is present. 2) Load any required native libraries. 3)
-     * Register the port names with the CommPortIdentifier.
-     *
-     * <p>From the NullDriver.java CommAPI sample.
-     *
-     * added printerport stuff Holger Lehmann July 12, 1999 IBM
-     *
-     * Added ttyM for Moxa boards Removed obsolete device cuaa Peter Bennett
-     * January 02, 2000 Bencom
-     *
-     */
-    /**
-     * Determine the OS and where the OS has the devices located
-     */
     public void initialize(final DriverContext context) {
         if (DEBUG) {
             System.out.println("RXTXCommDriver:initialize()");
         }
         this.context = context;
-        osName = System.getProperty("os.name");
-        deviceDirectory = getDeviceDirectory();
-
-        /*
-         * First try to register ports specified in the properties file. If that
-         * doesn't exist, then scan for ports.
-         */
-        // TODO (Alexander Graf) iterating should not rely on the values of 
-        // the constants
-        for (int portType = CommPortIdentifier.PORT_SERIAL; portType <= CommPortIdentifier.PORT_PARALLEL; portType++) {
-            if (!registerSpecifiedPorts(portType)) {
-                if (!registerKnownPorts(portType)) {
-                    registerScannedPorts(portType);
+        
+        LibraryLoader loader = context.createLibraryLoader(
+                RXTXCommDriver.class.getClassLoader(),
+               "gnu/io/impl/serial");
+        final boolean installationSuccessful = loader.load("rxtxSerial");
+        if (installationSuccessful) {
+            deviceDirectory = getDeviceDirectory();
+            if (!registerSpecifiedPorts(CommPortIdentifier.PORT_SERIAL)) {
+                if (!registerKnownPorts(CommPortIdentifier.PORT_SERIAL)) {
+                    registerScannedPorts(CommPortIdentifier.PORT_SERIAL);
                 }
             }
         }

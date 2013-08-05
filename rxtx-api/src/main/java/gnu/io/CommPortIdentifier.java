@@ -62,6 +62,8 @@ import java.io.FileDescriptor;
 import java.util.HashMap;
 import java.util.Vector;
 import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.ServiceLoader;
 
 /**
  * A
@@ -166,19 +168,11 @@ public final class CommPortIdentifier extends Object {
                     e + " thrown while loading gnu.io.impl.serial.RXTXCommDriver");
         }
 
-        String os = System.getProperty("os.name");
-        if (os.toLowerCase().indexOf("linux") == -1) {
-            if (debug) {
+        if (debug) {
+            String os = System.getProperty("os.name");
+            if (os.toLowerCase().indexOf("linux") == -1) {
                 System.out.println("Have not implemented native_psmisc_report_owner(PortName)); in CommPortIdentifier");
             }
-        }
-        // TODO (by Alexander Graf) the native library is only used by the
-        // driver implementation, therefor it should also be loaded by
-        // the driver (initialize()) and not by this api class
-        if ("true".equals(System.getProperty("gnu.io.rxtx.LibraryLoader"))) {
-            LibraryLoader.loadLibrary("rxtxSerial");
-        } else {
-            System.loadLibrary("rxtxSerial");
         }
     }
 
@@ -398,46 +392,32 @@ public final class CommPortIdentifier extends Object {
                 oldPorts.put(p.portName, p);
                 p = p.next;
             }
-            CommPortIndex = null;
-            try {
-                //Initialize RXTX: This leads to detecting all ports
-                //and writing them into our CommPortIndex through our method
-                //{@link #addPortName(java.lang.String, int, gnu.io.CommDriver)}
-                //This works while lock on Sync is held
-                // TODO (by Alexander Graf) driver is initialized here and in
-                // static initializer. Should only be done once.
-                CommDriver driver = (CommDriver) Class.forName(
-                        "gnu.io.RXTXCommDriver").newInstance();
-                driver.initialize(DriverContext.getInstance());
-                //Restore old CommPortIdentifier objects where possible,
-                //in order to support proper ownership event handling.
-                //Clients might still have references to old identifiers!
-                CommPortIdentifier curPort = CommPortIndex;
-                CommPortIdentifier prevPort = null;
-                while (curPort != null) {
-                    CommPortIdentifier matchingOldPort =
-                            (CommPortIdentifier) oldPorts.get(curPort.portName);
-                    if ((matchingOldPort != null)
-                            && (matchingOldPort.portType == curPort.portType)) {
-                        //replace new port by old one
-                        matchingOldPort.driver = curPort.driver;
-                        matchingOldPort.next = curPort.next;
-                        if (prevPort == null) {
-                            CommPortIndex = matchingOldPort;
-                        } else {
-                            prevPort.next = matchingOldPort;
-                        }
-                        prevPort = matchingOldPort;
+            //CommPortIndex = null;
+            //Restore old CommPortIdentifier objects where possible,
+            //in order to support proper ownership event handling.
+            //Clients might still have references to old identifiers!
+            CommPortIdentifier curPort = CommPortIndex;
+            CommPortIdentifier prevPort = null;
+            while (curPort != null) {
+                CommPortIdentifier matchingOldPort =
+                        (CommPortIdentifier) oldPorts.get(curPort.portName);
+                if ((matchingOldPort != null)
+                        && (matchingOldPort.portType == curPort.portType)) {
+                    //replace new port by old one
+                    matchingOldPort.driver = curPort.driver;
+                    matchingOldPort.next = curPort.next;
+                    if (prevPort == null) {
+                        CommPortIndex = matchingOldPort;
                     } else {
-                        prevPort = curPort;
+                        prevPort.next = matchingOldPort;
                     }
-                    curPort = curPort.next;
+                    prevPort = matchingOldPort;
+                } else {
+                    prevPort = curPort;
                 }
-            } catch (Throwable e) {
-                System.err.println(
-                        e + " thrown while loading gnu.io.RXTXCommDriver");
-                System.err.flush();
+                curPort = curPort.next;
             }
+
         }
         return new CommPortEnumerator();
     }
