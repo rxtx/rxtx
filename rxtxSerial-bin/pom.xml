@@ -25,7 +25,7 @@
                         </goals>
                         <configuration>
                             <descriptors>
-                                <descriptor>src/assemble/development.xml</descriptor>
+                                <descriptor>src/assemble/${rxtxSerial.bin.assembler}</descriptor>
                             </descriptors>
                             <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
@@ -36,8 +36,33 @@
     </build>
     <profiles>
         <profile>
+            <id>development-build</id>
+            <activation>
+                <property>
+                    <name>!make.release</name>
+                </property>
+            </activation>
+            <properties>
+                <rxtxSerial.bin.assembler>development.xml</rxtxSerial.bin.assembler>
+            </properties>
+        </profile>
+        <profile>
+            <id>release-build</id>
+            <activation>
+                <property>
+                    <name>make.release</name>
+                </property>
+            </activation>
+            <properties>
+                <rxtxSerial.bin.assembler>release.xml</rxtxSerial.bin.assembler>
+            </properties>
+        </profile>
+        <profile>
             <id>with-linux-x86</id>
             <activation>
+                <property>
+                    <name>make.release</name>
+                </property>
                 <os>
                     <family>unix</family>
                     <name>linux</name>
@@ -56,6 +81,9 @@
         <profile>
             <id>with-linux-x86_64</id>
             <activation>
+                <property>
+                    <name>make.release</name>
+                </property>
                 <os>
                     <family>unix</family>
                     <name>linux</name>
@@ -84,6 +112,11 @@
         </profile>
         <profile>
             <id>with-windows-x86</id>
+            <activation>
+                <property>
+                    <name>make.release</name>
+                </property>
+            </activation>
             <dependencies>
                 <dependency>
                     <groupId>gnu.io.rxtx</groupId>
@@ -95,6 +128,11 @@
         </profile>
         <profile>
             <id>with-windows-x86_64</id>
+            <activation>
+                <property>
+                    <name>make.release</name>
+                </property>
+            </activation>
             <dependencies>
                 <dependency>
                     <groupId>gnu.io.rxtx</groupId>
@@ -107,6 +145,9 @@
         <profile>
             <id>with-osx-x86_64</id>
             <activation>
+                <property>
+                    <name>make.release</name>
+                </property>
                 <os>
                     <family>mac</family>
                     <arch>x86_64</arch>
