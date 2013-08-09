@@ -88,16 +88,50 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-    <modules>
-    	<module>cross-toolchain-wrapper</module>
-        <module>rxtx-api</module>
-        <module>rxtxSerial-java</module>
-        <module>rxtxSerial-test</module>
-        <module>rxtxSerial-native</module>
-        <module>rxtxSerial-bin</module>
-	<module>rxtxSerial</module>
-    </modules>
     <profiles>
+        <profile>
+            <id>run-release-prepare</id>
+            <activation>
+                <property>
+                    <name>make.release</name>
+                    <value>prepare</value>
+                </property>
+            </activation>
+            <modules>
+                <module>cross-toolchain-wrapper</module>
+                <module>rxtx-api</module>
+                <module>rxtxSerial-java</module>
+                <module>rxtxSerial-native</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>run-release-assembly</id>
+            <activation>
+                <property>
+                    <name>make.release</name>
+                    <value>bundle</value>
+                </property>
+            </activation>
+            <modules>
+                <module>rxtxSerial-bin</module>
+                <module>rxtxSerial</module>
+                <module>rxtxSerial-test</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>run-development-build-head</id>
+            <activation>
+                <property>
+                    <name>!make.release</name>
+                </property>
+            </activation>
+            <modules>
+                <module>cross-toolchain-wrapper</module>
+                <module>rxtx-api</module>
+                <module>rxtxSerial-java</module>
+                <module>rxtxSerial-native</module>
+            </modules>
+        </profile>
         <profile>
             <id>with-linux-x86</id>
             <activation>
@@ -146,6 +180,19 @@
             </activation>
             <modules>
                 <module>librxtxSerial-osx-x86_64</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>run-development-build-tail</id>
+            <activation>
+                <property>
+                    <name>!make.release</name>
+                </property>
+            </activation>
+            <modules>
+                <module>rxtxSerial-bin</module>
+                <module>rxtxSerial</module>
+                <module>rxtxSerial-test</module>
             </modules>
         </profile>
         <profile>
