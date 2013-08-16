@@ -124,6 +124,11 @@ public final class RXTXCommDriver implements CommDriver {
 
     public static native String nativeGetVersion();
 
+    // this method is called by native code
+    DriverContext getDriverContext() {
+        return context;
+    }
+
     // FIXME: This method is never called.
     private final String[] getValidPortPrefixes(String candidatePortPrefixes[]) {
         /*
