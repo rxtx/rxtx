@@ -84,22 +84,6 @@ public final class CommPortIdentifier extends Object {
      */
     public static final int PORT_SERIAL = 1;
     /**
-     * The port is a parallel port.
-     */
-    public static final int PORT_PARALLEL = 2;
-    /**
-     * The port is a I2C (Inter Integrated Circuit) port.
-     */
-    public static final int PORT_I2C = 3;
-    /**
-     * The port is a RS485 port.
-     */
-    public static final int PORT_RS485 = 4;
-    /**
-     * The port is a raw port.
-     */
-    public static final int PORT_RAW = 5;
-    /**
      * The name of the corresponding port. On linux and probably other systems
      * this will typically look like /dev/ttyx on Windows COMx where x is some
      * integer.
