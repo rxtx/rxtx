@@ -780,6 +780,13 @@ JNIEXPORT void JNICALL RXTXPort(nativeClose)( JNIEnv *env,
 		report("nativeClose: discarding remaining data (tcflush)\n");
 		/* discard any incoming+outgoing data not yet read/sent */
 		tcflush(fd, TCIOFLUSH);
+#ifdef OPEN_EXCL
+		/*
+		   If the port was opened exclusively, release the exclusive access to allow
+		   re-connects
+		 */
+		ioctl(fd, TIOCNXCL);
+#endif /* OPEN_EXCL */
  		do {
 			report("nativeClose:  calling close\n");
 			result=CLOSE (fd);
