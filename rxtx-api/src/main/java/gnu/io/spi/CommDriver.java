@@ -59,6 +59,9 @@ package gnu.io.spi;
 
 import gnu.io.CommPort;
 import gnu.io.DriverContext;
+import gnu.io.PortInUseException;
+
+import java.io.IOException;
 
 /**
  * The
@@ -96,7 +99,7 @@ public interface CommDriver {
      * describing the type of the port
      * @return the <code>CommPort</code> instance or <code>null</code>
      */
-    CommPort getCommPort(String portName, int portType);
+    CommPort getCommPort(String portName, int portType) throws PortInUseException, IOException;
 
     /**
      * Initializes this driver. This method is called by rxtx once in a virtual

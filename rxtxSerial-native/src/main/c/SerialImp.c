@@ -718,13 +718,21 @@ JNIEXPORT jint JNICALL RXTXPort(open)(
        }
 #endif /* OPEN_EXCL */
 
-	if( configure_port( fd ) ) goto fail;
+	if( configure_port( fd ) ) goto fail_unlock;
 	(*env)->ReleaseStringUTFChars( env, jstr, filename );
 	sprintf( message, "open: fd returned is %i\n", fd );
 	report( message );
 	LEAVE( "RXTXPort:open" );
 	report_time_end( );
 	return (jint)fd;
+
+fail_unlock:
+        UNLOCK( filename, pid );
+	(*env)->ReleaseStringUTFChars( env, jstr, filename );
+	LEAVE( "RXTXPort:open" );
+	throw_java_exception( env, IO_EXCEPTION, "open",
+		strerror( errno ) );
+	return -1;
 
 fail:
 	(*env)->ReleaseStringUTFChars( env, jstr, filename );

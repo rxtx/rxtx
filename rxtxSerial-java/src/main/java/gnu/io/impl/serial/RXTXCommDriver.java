@@ -712,12 +712,14 @@ public final class RXTXCommDriver implements CommDriver {
     /**
      * @param portName The name of the port the OS recognizes
      * @param portType CommPortIdentifier.PORT_SERIAL or PORT_PARALLEL
+     * @throws PortInUseException when port is already in use by another application
+     * @throws IOException when port cannot be opened for another reason
      * @return CommPort getCommPort() will be called by CommPortIdentifier from
      * its openPort() method. PortName is a string that was registered earlier
      * using the CommPortIdentifier.addPortName() method. getCommPort() returns
      * an object that extends either SerialPort or ParallelPort.
      */
-    public CommPort getCommPort(String portName, int portType) {
+    public CommPort getCommPort(String portName, int portType) throws IOException, PortInUseException {
         if (portType != CommPortIdentifier.PORT_SERIAL) {
             LOGGER.log(Level.WARNING,
                     "unknown port type {0} passed, "
@@ -734,7 +736,10 @@ public final class RXTXCommDriver implements CommDriver {
         } catch (PortInUseException e) {
             LOGGER.log(Level.INFO, "Port {0} in use by another application",
                     portName);
+            throw e;
+        } catch (IOException e) {
+            LOGGER.log(Level.INFO, "Port {0} open failed!", portName);
+            throw e;
         }
-        return null;
     }
 }
