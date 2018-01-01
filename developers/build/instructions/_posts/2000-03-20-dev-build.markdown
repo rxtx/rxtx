@@ -1,0 +1,26 @@
+---
+layout: book-article
+title: Development Build
+---
+<div class="alert alert-info">
+  To understand the following instructions, please make sure you have read the <a href="overview.html">overview to the build process</a>. Then install the required tools for your development host. For instructions choose your build host platform from the Menu.
+</div>
+
+The development build is a quick way to test new code or features on a developer's machine. This build type only includes binaries for the developer's machine and at your option, for additionally selected platforms. Although the build process requires less effort, the resulting rxtx won't run on all platforms.
+
+It's as easy as running:
+
+    cd /somewhere/rxtx
+    mvn install
+
+You might want to compile and include drivers for additionally selected platforms. For that, pass a list of maven profiles in the form "with-*os*-*arch* for these platforms. e.g. to include a library for Windows x86 and linux x86_64:
+
+    mvn -Pwith-windows-x86,with-linux-x86_64 install
+
+You can find the complete list of available profiles below the [build matrix](../intro/matrix.html).
+
+When the build finishes, the rxtx api JAR and rxtxSerial driver JAR are installed in your local maven repository. To use the JARs with *ant* or other build systems, you might copy them from the following directories:
+
+    /somewhere/rxtx/rxtx-api/target
+    /somewhere/rxtx/rxtxSerial/target
+

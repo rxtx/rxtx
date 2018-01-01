@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{% if page.title %} {{ page.title }} | {% endif %} {{ site.name }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{site.description}}">
+    <meta name="author" content="{{site.author}}">
+
+    <!-- Le styles -->
+    <link href="{{site.url}}/resources/css/bootstrap.css" rel="stylesheet">
+    <style type="text/css">
+      body {
+        padding-top: 60px;
+        padding-bottom: 40px;
+      }
+    </style>
+    <link href="{{site.url}}/resources/css/rxtx.css" rel="stylesheet">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="resources/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="{{site.url}}/resources/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="{{site.url}}/resources/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="{{site.url}}/resources/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="{{site.url}}/resources/ico/apple-touch-icon-57-precomposed.png">
+    <link rel="shortcut icon" href="{{site.url}}/resources/ico/favicon.png">
+  </head>
+
+  <body>
+    {% include nav.html %}
+    <div class="container">
+      <div class="row">
+        <div class="span-title">
+            <div class="image-text">
+                <img src="{{site.url}}/resources/img/rxtx.jpg" alt="" />
+                <div class="text-over-image">
+                    <h2>The Fun</h2>
+                    <h4>starts with nine Pins</h4>
+                </div>
+            </div>
+            <div class="pic-sub">
+                <p><i class="icon-chevron-sign-up" style="color: #fff;"></i> Find the redundant gender changer in the picture or learn more about rxtx. <i class="icon-chevron-sign-down" style="color: #fff;"></i></p>
+            </div>
+        </div>
+      </div>
+      <!-- we may add some content here
+      <div class="row-fluid rxtx-content">
+        <div class="span4">
+            <p>some container</p>
+        </div>
+        <div class="span4">
+            <p>some container</p>
+        </div>
+        <div class="span4">
+            <p>some container</p>
+        </div>
+      </div>
+      -->
+    </div> <!-- /container -->
+
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="{{site.url}}/resources/js/jquery.js"></script>
+    <script src="{{site.url}}/resources/js/bootstrap-transition.js"></script>
+    <script src="{{site.url}}/resources/js/bootstrap-alert.js"></script>
+    <script src="{{site.url}}/resources/js/bootstrap-modal.js"></script>
+    <script src="{{site.url}}/resources/js/bootstrap-dropdown.js"></script>
+    <script src="{{site.url}}/resources/js/bootstrap-scrollspy.js"></script>
+    <script src="{{site.url}}/resources/js/bootstrap-tab.js"></script>
+    <script src="{{site.url}}/resources/js/bootstrap-tooltip.js"></script>
+    <script src="{{site.url}}/resources/js/bootstrap-popover.js"></script>
+    <script src="{{site.url}}/resources/js/bootstrap-button.js"></script>
+    <script src="{{site.url}}/resources/js/bootstrap-collapse.js"></script>
+    <script src="{{site.url}}/resources/js/bootstrap-carousel.js"></script>
+    <script src="{{site.url}}/resources/js/bootstrap-typeahead.js"></script>
+
+  </body>
+</html>

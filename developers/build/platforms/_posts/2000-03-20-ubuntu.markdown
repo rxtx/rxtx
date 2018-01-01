@@ -1,0 +1,62 @@
+---
+layout: book-article
+title: Ubuntu Linux
+---
+<div class="alert alert-info">
+  These instructions were tested with Ubuntu 12.04 on x86_64.
+</div>
+
+A single Ubuntu Linux machine can be used to build all binaries required for an rxtx release. This is possible thanks to the excellent availability of cross compilers. You only need to install the cross compilers for the target architectures you want to build. To build a release, install everything marked with the <i class="icon-th-large"></i> symbol.
+
+### <i class="icon-th-large"></i> Required packages ###
+The Java Development Kit (JDK):
+
+    sudo apt-get install openjdk-7-jdk openjdk-7-source openjdk-7-jre-headless openjdk-7-jre-lib
+
+The C/C++ compiler, C library for your host platform:
+
+    sudo apt-get install build-essential
+
+Apache Maven, our build tool:
+
+    sudo apt-get install maven
+
+### <i class="icon-th-large"></i> Linux x86/x86_64 ###
+By default you have installed the compiler which matches your build host system architecture (x86 or x86_64). Now choose the opposite architecture.
+
+When you are on x86 and want to build binaries for x86_64:
+
+    sudo apt-get install libc6-dev-amd64
+
+When you are on x86_64 and want to build binaries for x86:
+
+    sudo apt-get install libc6-dev-i386
+
+### Linux ARM soft float ###
+
+    sudo apt-get install gcc-arm-linux-gnueabi binutils-arm-linux-gnueabi
+
+### Linux ARM hard float ###
+
+    sudo apt-get install gcc-arm-linux-gnueabihf binutils-arm-linux-gnueabihf
+
+### <i class="icon-th-large"></i> Windows x86 ###
+
+    sudo apt-get install gcc-mingw-w64-i686
+
+### <i class="icon-th-large"></i> Windows x86_64 ###
+
+    sudo apt-get install gcc-mingw-w64-x86-64
+
+### <i class="icon-th-large"></i> Mac OS X ###
+For mac there is no cross compiler in the official Ubuntu sources. We use the apple-cross toolchain from the [flosoft/cross-apple PPA](https://launchpad.net/~flosoft/+archive/cross-apple). Because our Ubuntu version differs from the PPA version, the package sources have to be added manually (*not* by the *add-apt-repository* Command). Therefor append the following lines to your */etc/apt/sources.list* file.
+
+    deb http://ppa.launchpad.net/flosoft/cross-apple/ubuntu maverick main 
+    deb-src http://ppa.launchpad.net/flosoft/cross-apple/ubuntu maverick main 
+
+Then reload your software sources and install the cross toolchain:
+
+    sudo apt-get update
+    sudo apt-get install apple-x86-gcc
+
+

@@ -1,0 +1,125 @@
+---
+layout: book-article
+title: Build Matrix
+---
+
+<table class="table table-striped table-bordered table-condensed">
+   <tr>
+      <td colspan="3"><b>Target Platform</b></td>
+      <td colspan="7"><b>Build Host</b></td>
+   </tr>
+   <tr>
+      <td colspan="3"></td>
+      <td colspan="4"><b>Linux</b></td>
+      <td colspan="1"><b>Mac OS</b></td>
+      <td colspan="2"><b>Windows</b></td>
+   </tr>
+   <tr>
+      <td colspan="3"></td>
+      <td><b>x86</b></td><td><b>x86_64</b></td><td><b>armel</b></td><td><b>armhf</b></td>
+      <td><b>x86_64</b></td>
+      <td><b>x86</b></td><td><b>x86_64</b></td>
+   </tr>
+   <!-- LINUX -->
+   <tr>
+      <td rowspan="4"><b>Linux</b></td>
+      <td><b>x86</td>
+      <td><i class="icon-th-large"></i></td>
+      <td><i class="icon-ok"></i></td>
+      <td><i class="icon-ok"></i></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+   </tr>
+   <tr>
+      <td><b>x86_64</b></td>
+      <td><i class="icon-th-large"></i></td>
+      <td><i class="icon-ok"></i></td>
+      <td><i class="icon-ok"></i></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+   </tr>
+   <tr>
+      <td><b>armel</b></td>
+      <td></td>
+      <td><i class="icon-wrench"></i></td>
+      <td><i class="icon-wrench"></i></td>
+      <td><i class="icon-pencil"></i></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+   </tr>
+   <tr>
+      <td><b>armhf</b></td>
+      <td></td>
+      <td><i class="icon-wrench"></i></td>
+      <td><i class="icon-wrench"></i></td>
+      <td></td>
+      <td><i class="icon-pencil"></i></td>
+      <td></td>
+      <td></td>
+      <td></td>
+   </tr>
+   <!-- MAC -->
+   <tr>
+      <td rowspan="1"><b>Mac OSX</b></td>
+      <td><b>x86_64</td>
+      <td><i class="icon-th-large"></i></td>
+      <td><i class="icon-wrench"></i></td>
+      <td><i class="icon-ok"></i></td>
+      <td></td>
+      <td></td>
+      <td><i class="icon-ok"></i></td>
+      <td></td>
+      <td></td>
+   </tr>
+   <!-- Windows -->
+   <tr>
+      <td rowspan="2"><b>Windows</b></td>
+      <td><b>x86</td>
+      <td><i class="icon-th-large"></i></td>
+      <td><i class="icon-ok"></i></td>
+      <td><i class="icon-ok"></i></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td><i class="icon-pencil"></i></td>
+      <td></td>
+   </tr>
+   <tr>
+      <td><b>x86_64</td>
+      <td><i class="icon-th-large"></i></td>
+      <td><i class="icon-ok"></i></td>
+      <td><i class="icon-ok"></i></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td><i class="icon-pencil"></i></td>
+   </tr>
+</table>
+<ul class="inline">
+    <li><i class="icon-ok"></i> implemented</li>
+    <li><i class="icon-wrench"></i> in progress</li>
+    <li><i class="icon-pencil"></i> planned</li>
+    <li><i class="icon-th-large"></i> included in official release</li>
+</ul>
+<hr />
+
+The following maven profiles are available to trigger the build of the respective native libraries.
+
+ * with-linux-x86
+ * with-linux-x86_64
+ * with-linux-armel
+ * with-linux-armhf
+ * with-osx-x86_64
+ * with-windows-x86
+ * with-windows-x86_64
+
+

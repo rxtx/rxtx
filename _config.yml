@@ -1,0 +1,46 @@
+# Name of your blog (this will show up at the top of your page and in the RSS feed)
+name: rxtx
+
+# Short description (goes below the title; it will also be used in the RSS feed)
+description: The rxtx communication port library for Java.
+
+# Your name, as you want it to appear underneath each post and in the footer
+author: Alexander Graf
+
+# Your email if you want it to be linked on the contact page
+author_email: alex@antistatix.de
+
+# The directory for category index pages. Change it to something else if
+# for example you want links like /categories/category1 instead of /category1
+category_dir: /
+
+# Uncomment if you are planning to run the blog in a subdirectory
+# Note - if you enable this, and attempt to view your site locally you have to use the baseurl in your local path.
+# Example, you must use http://localhost:4000/path/to/blog
+#baseurl: /static/gf5t433ntn
+
+# The URL of your actual domain. This will be used to make absolute links in the RSS feed.
+#url: http://www.antistatix.de/static/gf5t433ntn
+url: http://localhost:4000
+
+# code parsing via pygments
+highlighter: true
+
+# don't parse javadoc
+exclude: ['javadoc']
+
+#### Under the Hood Stuff #####
+
+# Use rdiscount as the markdown engine because it generates html5 compliant code for stuff like footnotes
+# If you use maroku (default engine) some of your generated pages may not validate or lint as html5
+# If you don't have it install it via gem install rdiscount
+markdown: rdiscount
+
+# Continue compiling even if there are errors. Keep it true, unless troubleshooting.
+#auto: true
+
+# Makes pretty (descriptive) permalinks. See Jekyll docs for alternatives.
+permalink: none
+
+# Exclude metadata and development time dependencies (like Grunt plugins)
+exclude: [README.markdown, package.json, grunt.js, Gruntfile.js, node_modules]

@@ -1,0 +1,46 @@
+<div class="well sidebar-nav">
+    <ul class="nav nav-list">
+        <li class="nav-header">Introduction</li>
+        {% for p in site.categories.developers %}
+            {% if p.categories[0] == 'developers' %}
+                {% if p.categories[1] == 'build' %}
+                    {% if p.categories[2] == 'intro' %}
+                        {% if p.url == page.url %}
+                            <li class="active"><a href="{{p.url}}">{{p.title}}</a></li>
+                        {% else %}
+                            <li><a href="{{site.url}}{{p.url}}">{{p.title}}</a></li>
+                        {% endif %}
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+        <li class="nav-header">Build Platforms</li>
+        {% for p in site.categories.developers %}
+            {% if p.categories[0] == 'developers' %}
+                {% if p.categories[1] == 'build' %}
+                    {% if p.categories[2] == 'platforms' %}
+                        {% if p.url == page.url %}
+                            <li class="active"><a href="{{p.url}}">{{p.title}}</a></li>
+                        {% else %}
+                            <li><a href="{{site.url}}{{p.url}}">{{p.title}}</a></li>
+                        {% endif %}
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+        <li class="nav-header">Build Instructions</li>
+        {% for p in site.categories.developers %}
+            {% if p.categories[0] == 'developers' %}
+                {% if p.categories[1] == 'build' %}
+                    {% if p.categories[2] == 'instructions' %}
+                        {% if p.url == page.url %}
+                            <li class="active"><a href="{{p.url}}">{{p.title}}</a></li>
+                        {% else %}
+                            <li><a href="{{site.url}}{{p.url}}">{{p.title}}</a></li>
+                        {% endif %}
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+    </ul>
+</div><!--/.well -->

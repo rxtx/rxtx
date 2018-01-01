@@ -1,0 +1,63 @@
+---
+layout: book-article
+title: Build Process Overview
+---
+
+Rxtx has a [maven](http://maven.apache.org/) powered build process.
+When building the rxtx project, you have to keep in mind that it is not a single library, but basically consists of two parts:
+
+1. The **rxtx API**, which is the public Java library interacting with user code and providing an SPI to plug in driver implementations.
+2. One or more **driver implementations**, which plug into the SPI and do the work under the hood, hidden from prying eyes. The default rxtxSerial implementation is part of the rxtx project.
+
+The rxtx API is pure Java code, but the default serial port implementation uses native code. This means that a native library must be compiled and makes the build process a bit more complex than a standard Java project. To keep it transparent and conform to the default maven structure, the project was broken into several maven artifacts. The following figure shows them in a dependency graph. Each of the artifacts has its own directory with a POM below the project's root directory. (External dependencies like junit are not in our repository, but pulled in from maven central, as usual.)
+
+![dependency graph]({{site.url}}/resources/img/dependencyGraph.png "rxtx project dependency graph")
+
+In most situations there is no need to interact with sub-directory POMs, because there is a root POM, which is obviously in the project's root directory. The root POM pulls in selected sub-directory POMs when necessary, using maven profiles.
+
+A Walk through the Build
+------------------------
+*For better understanding of this section, every once in a while take a look at the dependency graph above.* Whatever build configuration you will choose later, more or less the following happens:
+
+* At the very beginning the **cross-toolchain-wrapper** scripts are packed into a zip archive to form a valid maven artifact. These simple shell scripts help to resolve the cross compiler executables with their various colorful names.
+* Then the **rxtx-api** is build. It has no dependencies inside the project and is a simple Java artifact. External dependencies are resolved with the maven central repository. Nothing special here. (If only the API must be build, we are finished.)
+* The same thing applies to the Java part of the default serial driver **rxtxSerial-java**, which is build next. Additional driver implementations might build their Java implementation, too.
+* After that, the native source files (C/C++) of the default serial driver implementation are packed into a zip, to form the **rxtxSerial-native** artifact. Likewise other native driver implementations.
+* In the next step the binaries for the driver implementation(s) are build for every target architecture, which was selected by the build. The corresponding maven artifacts are named **[lib]rxtxSerial-os-arch** depending on the operating system and ABI architecture. The actual build steps for each artifact are:
+  * Extract the *cross-toolchain-wrapper* scripts,
+  * extract the native code from *rxtxSerial-native*,
+  * generate the JNI headers via *javah* using the *.class* files from *rxtxSerial-java*
+  * run the compiler and linker of an appropriate (cross-)toolchain.
+* The native libraries of a driver implementation are then clustered into a jar. e.g. the default serial implementation is packed into **rxtxSerial-bin**. Depending on the build configuration, only selected binaries are included or all binaries needed for a release are enforced.
+* To provide a JAR containing the Java (*rxtxSerial-java*) and native (*rxtxSerial-bin*) parts of the serial driver, the **rxtxSerial** artifact is assembled.
+* Finally, the integration test artifact for the default serial port implementation **rxtxSerial-test** is build.
+
+Required Tools
+--------------
+Choose your platform form the navigation section *build platforms* to get installation instructions for the required tools. These are:
+
+* the SCM [git](http://git-scm.com/),
+* the build tool [maven](http://maven.apache.org/),
+* a Java Development Kit (JDK) version 6 or later,
+* various cross compilers.
+
+Cross compilation is not available for all platforms and depends on your build host. Check out the [build matrix](matrix.html).
+
+Checkout Code
+-------------
+To get the latest code from the development branch:
+
+    git clone https://github.com/rxtx/rxtx.git -b development /somewhere/rxtx
+
+Where */somewhere/rxtx* is an existing directory used to store the cloned git repository.
+
+Choose a Build Type
+-------------------
+There are two types of builds which you might use in different situations.
+
+* The [development build](../instructions/dev-build.html) is a quick way to test new code or features on a developer's machine. This build type only includes binaries for the developer's machine and at your option, for additionally selected platforms. Although the build process requires less effort, the resulting rxtx won't run on all platforms.
+
+* A [release build](../instructions/release-build.html) includes all necessary artifacts to run rxtx on all officially supported platforms. However it is costlier and might involve running build steps on multiple platforms/machines.
+
+
+

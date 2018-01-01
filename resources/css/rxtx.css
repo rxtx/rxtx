@@ -1,0 +1,54 @@
+body{
+    margin: 0px;
+    position: relative;
+    padding-top: 40px;
+    background-color: darkslategrey;
+}
+
+.image-text {
+    position: relative;
+}
+
+.text-over-image { 
+   position: absolute;
+   padding-right: 20px;
+   padding-left: 20px;
+   text-align: right;
+   top: 80px;
+   right: 0;
+   color: #fff;
+   background: rgb(0, 0, 0); /* fallback color */
+   background: rgba(0, 0, 0, 0.7);
+}
+
+.text-over-image h2 {
+   font-size: 100px;
+   line-height: 40px;
+}
+
+.span-title{
+    width: 980px;
+}
+
+.text-over-image h4 {
+   line-height: 30px;
+}
+
+.pic-sub {
+    background: rgb(0, 0, 0);
+    padding: 10px;
+    color: #fff;
+    text-align: center;
+}
+.pic-sub p{
+    font-size: 17.5px;
+    line-height: 20px;
+    margin: 0;
+}
+
+.rxtx-content{
+    background: rgb(255, 255, 255);
+    padding: 20px;
+}
+
+
