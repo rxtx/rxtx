@@ -23,8 +23,8 @@ category_dir: /
 #url: http://www.antistatix.de/static/gf5t433ntn
 url: http://rxtx.github.io/rxtx
 
-# code parsing via pygments
-highlighter: true
+# code parsing highlighter
+highlighter: rouge
 
 # don't parse javadoc
 exclude: ['javadoc']
