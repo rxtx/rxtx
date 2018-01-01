@@ -21,7 +21,7 @@ category_dir: /
 
 # The URL of your actual domain. This will be used to make absolute links in the RSS feed.
 #url: http://www.antistatix.de/static/gf5t433ntn
-url: http://localhost:4000
+url: http://rxtx.github.io/rxtx
 
 # code parsing via pygments
 highlighter: true
@@ -34,7 +34,7 @@ exclude: ['javadoc']
 # Use rdiscount as the markdown engine because it generates html5 compliant code for stuff like footnotes
 # If you use maroku (default engine) some of your generated pages may not validate or lint as html5
 # If you don't have it install it via gem install rdiscount
-markdown: rdiscount
+markdown: kramdown
 
 # Continue compiling even if there are errors. Keep it true, unless troubleshooting.
 #auto: true
