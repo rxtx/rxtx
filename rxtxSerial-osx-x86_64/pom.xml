@@ -37,6 +37,8 @@
                                 <compilerStartOption>-fPIC</compilerStartOption>
                                 <compilerStartOption>-I${project.build.directory}/jni-headers</compilerStartOption>
                                 <compilerStartOption>-I/System/Library/Frameworks/JavaVM.framework/Headers</compilerStartOption>
+                                <compilerStartOption>-I${env.JAVA_HOME}/include/darwin</compilerStartOption>
+                                <compilerStartOption>-I${env.JAVA_HOME}/include</compilerStartOption>
                             </compilerStartOptions>
                             <linkerStartOptions>
                                 <linkerStartOption>-shared</linkerStartOption>
