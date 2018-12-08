@@ -101,6 +101,8 @@
                         <compilerStartOption>-shared</compilerStartOption>
                         <compilerStartOption>-fPIC</compilerStartOption>
                         <compilerStartOption>-I/System/Library/Frameworks/JavaVM.framework/Headers</compilerStartOption>
+                        <compilerStartOption>-I${JAVA_HOME}/include/darwin/</compilerStartOption>
+                        <compilerStartOption>-I${JAVA_HOME}/include/</compilerStartOption>
                     </compilerStartOptions>
                     <linkerStartOptions>
                         <linkerStartOption>-shared</linkerStartOption>
