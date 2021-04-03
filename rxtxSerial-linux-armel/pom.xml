@@ -22,9 +22,6 @@
                     <arch>i386</arch>
                 </os>
             </activation>
-            <properties>
-                <rxtx.os.javah>linux</rxtx.os.javah>
-            </properties>
         </profile>
         <profile>
             <id>build-host-linux-x86_64</id>
@@ -35,9 +32,6 @@
                     <arch>amd64</arch>
                 </os>
             </activation>
-            <properties>
-                <rxtx.os.javah>linux</rxtx.os.javah>
-            </properties>
         </profile>
         <profile>
             <id>failOnUnsupportedPlatforms</id>
@@ -107,6 +101,27 @@
                         </configuration>
                     </execution>
                     <execution>
+                        <id>unpack-jni-headers</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>gnu.io.rxtx</groupId>
+                                    <artifactId>rxtxSerial-java</artifactId>
+                                    <version>2.2-stabilize-SNAPSHOT</version>
+                                    <type>zip</type>
+                                    <classifier>jni-headers</classifier>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/jni-headers</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                            <failOnMissingClassifierArtifact>false</failOnMissingClassifierArtifact>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>unpack-cross-toolchain-wrapper</id>
                         <phase>process-sources</phase>
                         <goals>
@@ -134,10 +149,6 @@
                 <artifactId>native-maven-plugin</artifactId>
                 <extensions>true</extensions>
                 <configuration>
-                    <javahClassNames>
-                        <javahClassName>gnu.io.impl.serial.RXTXPort</javahClassName>
-                    </javahClassNames>
-                    <javahOS>${rxtx.os.javah}</javahOS>
                     <compilerProvider>generic-classic</compilerProvider>
                     <compilerExecutable>${project.build.directory}/armel-linux</compilerExecutable>
                     <linkerExecutable>${project.build.directory}/armel-linux</linkerExecutable>
@@ -148,6 +159,9 @@
                         <compilerStartOption>-DHAVE_SYS_SIGNAL_H</compilerStartOption>
                         <compilerStartOption>-shared</compilerStartOption>
                         <compilerStartOption>-fPIC</compilerStartOption>
+                        <compilerStartOption>-I${project.build.directory}/jni-headers</compilerStartOption>
+                        <compilerStartOption>-I${env.JAVA_HOME}/include</compilerStartOption>
+                        <compilerStartOption>-I${env.JAVA_HOME}/include/linux</compilerStartOption>
                     </compilerStartOptions>
                     <linkerStartOptions>
                         <linkerStartOption>-shared</linkerStartOption>

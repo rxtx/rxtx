@@ -29,10 +29,6 @@
                         <artifactId>native-maven-plugin</artifactId>
                         <extensions>true</extensions>
                         <configuration>
-                            <javahClassNames>
-                                <javahClassName>gnu.io.impl.serial.RXTXPort</javahClassName>
-                            </javahClassNames>
-                            <javahOS>linux</javahOS>
                             <compilerStartOptions>
                                 <compilerStartOption>-DHAVE_TERMIOS_H</compilerStartOption>
                                 <compilerStartOption>-DHAVE_STDINT_H</compilerStartOption>
@@ -40,6 +36,9 @@
                                 <compilerStartOption>-DHAVE_SYS_SIGNAL_H</compilerStartOption>
                                 <compilerStartOption>-shared</compilerStartOption>
                                 <compilerStartOption>-fPIC</compilerStartOption>
+                                <compilerStartOption>-I${project.build.directory}/jni-headers</compilerStartOption>
+                                <compilerStartOption>-I${env.JAVA_HOME}/include</compilerStartOption>
+                                <compilerStartOption>-I${env.JAVA_HOME}/include/linux</compilerStartOption>
                             </compilerStartOptions>
                             <linkerStartOptions>
                                 <linkerStartOption>-shared</linkerStartOption>
@@ -73,10 +72,6 @@
                         <artifactId>native-maven-plugin</artifactId>
                         <extensions>true</extensions>
                         <configuration>
-                            <javahClassNames>
-                                <javahClassName>gnu.io.impl.serial.RXTXPort</javahClassName>
-                            </javahClassNames>
-                            <javahOS>linux</javahOS>
                             <compilerStartOptions>
                                 <compilerStartOption>-DHAVE_TERMIOS_H</compilerStartOption>
                                 <compilerStartOption>-DHAVE_STDINT_H</compilerStartOption>
@@ -85,6 +80,9 @@
                                 <compilerStartOption>-m64</compilerStartOption>
                                 <compilerStartOption>-shared</compilerStartOption>
                                 <compilerStartOption>-fPIC</compilerStartOption>
+                                <compilerStartOption>-I${project.build.directory}/jni-headers</compilerStartOption>
+                                <compilerStartOption>-I${env.JAVA_HOME}/include</compilerStartOption>
+                                <compilerStartOption>-I${env.JAVA_HOME}/include/linux</compilerStartOption>
                             </compilerStartOptions>
                             <linkerStartOptions>
                                 <linkerStartOption>-shared</linkerStartOption>
@@ -164,6 +162,27 @@
                                     <classifier>sources</classifier>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>${project.build.directory}/extracted-c</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                            <failOnMissingClassifierArtifact>false</failOnMissingClassifierArtifact>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>unpack-jni-headers</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>gnu.io.rxtx</groupId>
+                                    <artifactId>rxtxSerial-java</artifactId>
+                                    <version>2.2-stabilize-SNAPSHOT</version>
+                                    <type>zip</type>
+                                    <classifier>jni-headers</classifier>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/jni-headers</outputDirectory>
                                 </artifactItem>
                             </artifactItems>
                             <failOnMissingClassifierArtifact>false</failOnMissingClassifierArtifact>
