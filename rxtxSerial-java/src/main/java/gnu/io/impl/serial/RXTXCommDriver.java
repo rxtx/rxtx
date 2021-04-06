@@ -303,79 +303,28 @@ public final class RXTXCommDriver implements CommDriver {
     }
 
     /**
-     * Finds the "gnu.io.rxtx.properties" file in java extension dir
-     * (legacy support).
-     * The file gnu.io.rxtx.properties may reside in the java extension dir,
-     * or it can be anywhere in the classpath.
-     *
-     * @return the properties file object if found or null if no property file
-     * found in any extension directory
-     */
-    private File findPropertyFile() {
-        final String[] extDirs = System.getProperty("java.ext.dirs").split(":");
-        final String separator = System.getProperty("file.separator");
-        for (final String extDir : extDirs) {
-            final String extFile =
-                    extDir + separator + "gnu.io.rxtx.properties";
-            final File file = new File(extFile);
-            if (file.exists()) {
-                return file;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Loads the "gnu.io.rxtx.properties" file or resource.
-     * The file gnu.io.rxtx.properties may reside in the java extension dir,
-     * or it can be anywhere in the classpath.
+     * Loads the "gnu.io.rxtx.properties" file or resource. The file
+     * gnu.io.rxtx.properties can be anywhere in the classpath.
      *
      * @return the loaded properties or an empty property set if no property
      * source was found.
      */
     private Properties loadRxtxProperties() {
         final Properties props = new Properties();
-        final File propertyFile = findPropertyFile();
-        if (propertyFile != null) {
-            FileInputStream in = null;
+        final ClassLoader loader = Thread.currentThread()
+                .getContextClassLoader();
+        final URL propertyResource = loader
+                .getResource("gnu.io.rxtx.properties");
+        if (propertyResource != null) {
             try {
-                in = new FileInputStream(propertyFile);
-                props.load(in);
-                LOGGER.log(Level.FINE,
-                        "loaded properties from file {0}", propertyFile);
-            } catch (FileNotFoundException ex) {
-                LOGGER.log(Level.WARNING,
-                        "discovered property file disappeared unexpectedly",
-                        ex);
+                props.load(propertyResource.openStream());
             } catch (IOException ex) {
-                LOGGER.log(Level.WARNING, "could not read property file", ex);
-            } finally {
-                if (in != null) {
-                    try {
-                        in.close();
-                    } catch (IOException ex) {
-                        LOGGER.log(Level.WARNING,
-                                "could not close property file after loading",
-                                ex);
-                    }
-                }
+                LOGGER.log(Level.SEVERE,
+                        "could not load property resource file", ex);
             }
         } else {
-            final ClassLoader loader = Thread.currentThread()
-                    .getContextClassLoader();
-            final URL propertyResource = loader
-                    .getResource("gnu.io.rxtx.properties");
-            if (propertyResource != null) {
-                try {
-                    props.load(propertyResource.openStream());
-                } catch (IOException ex) {
-                    LOGGER.log(Level.SEVERE,
-                            "could not load property resource file", ex);
-                }
-            } else {
-                LOGGER.log(Level.INFO,
-                        "No property file or resource found (using defaults)");
-            }
+            LOGGER.log(Level.INFO,
+                    "No property file or resource found (using defaults)");
         }
         return props;
     }
