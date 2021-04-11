@@ -1,0 +1,63 @@
+# This workflow will build a distribution bundle containing everything needed to run rxtx on supported platforms.
+
+name: build rxtx-distribution
+
+on:
+  push:
+    branches: [ development ]
+  pull_request:
+    branches: [ development ]
+
+jobs:
+  build-osx-binaries:
+
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK 11
+      uses: actions/setup-java@v2
+      with:
+        java-version: '11'
+        distribution: 'adopt'
+    - name: Build with Maven
+      run: mvn --batch-mode -Pwith-osx-x86_64 package --file pom.xml
+    - name: upload rxtxSerial binaries built on osx
+      uses: actions/upload-artifact@v2
+      with:
+        name: rxtxSerial-binaries-built-on-osx
+        path: rxtxSerial-osx-*/target/librxtxSerial-osx-*.jnilib
+        if-no-files-found: error
+
+  main-build:
+    needs: build-osx-binaries
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Prepare installation of 32bit packages
+      run: sudo dpkg --add-architecture i386 && sudo apt update
+    - name: Install cross toolchains and libraries
+      run: sudo apt install libc6-dev-i386 linux-libc-dev:i386 gcc-arm-linux-gnueabi binutils-arm-linux-gnueabi gcc-arm-linux-gnueabihf binutils-arm-linux-gnueabihf gcc-mingw-w64-i686 gcc-mingw-w64-x86-64
+    - name: Set up JDK 11
+      uses: actions/setup-java@v2
+      with:
+        java-version: '11'
+        distribution: 'adopt'
+    - uses: actions/download-artifact@v2
+      with:
+        name: rxtxSerial-binaries-built-on-osx
+    - name: install osx native library
+      run: cd rxtxSerial-osx-x86_64 && mvn --batch-mode install:install-file -Dfile=target/librxtxSerial-osx-x86_64.jnilib -DgroupId=gnu.io.rxtx -DartifactId=librxtxSerial-osx-x86_64 -Dversion=2.2-stabilize-SNAPSHOT -Dpackaging=jnilib --file pom.xml
+    - name: Build for all other platforms
+      run: mvn --batch-mode -Pwith-linux-x86,with-linux-x86_64,with-linux-armel,with-linux-armhf,with-windows-x86,with-windows-x86_64 package install --file pom.xml
+    - name: Bundle rxtx Java and native libs
+      run: mvn --batch-mode -Dmake.release package --file pom.xml
+    - name: upload rxtx-distribution
+      uses: actions/upload-artifact@v2
+      with:
+        name: rxtx-distribution
+        path: |
+          rxtx-api/target/rxtx-api-*.jar
+          rxtxSerial/target/rxtxSerial-*.jar
+        if-no-files-found: error
