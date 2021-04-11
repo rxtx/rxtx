@@ -317,7 +317,11 @@ public final class LibraryLoader {
                 || "Windows Vista".equals(osName) // Vista on newer Java
                 || "Windows XP".equals(osName)
                 || "Windows 2000".equals(osName)
-                || "Windows 2003".equals(osName)) {
+                || "Windows 2003".equals(osName)
+                || "Windows 7".equals(osName)
+                || "Windows 8".equals(osName)
+                || "Windows 8.1".equals(osName)
+                || "Windows 10".equals(osName)) {
             return OS_WINDOWS;
         } else if ("Mac OS X".equals(osName)) {
             return OS_MACOSX;
