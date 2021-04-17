@@ -100,50 +100,15 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+    <modules>
+        <module>rxtx-api</module>
+        <module>rxtxSerial-java</module>
+        <module>rxtxSerial-native</module>
+        <module>rxtxSerial-bin</module>
+        <module>rxtxSerial</module>
+        <module>rxtxSerial-test</module>
+    </modules>
     <profiles>
-        <profile>
-            <id>run-release-prepare</id>
-            <activation>
-                <property>
-                    <name>make.release</name>
-                    <value>prepare</value>
-                </property>
-            </activation>
-            <modules>
-                <module>cross-toolchain-wrapper</module>
-                <module>rxtx-api</module>
-                <module>rxtxSerial-java</module>
-                <module>rxtxSerial-native</module>
-            </modules>
-        </profile>
-        <profile>
-            <id>run-release-assembly</id>
-            <activation>
-                <property>
-                    <name>make.release</name>
-                    <value>bundle</value>
-                </property>
-            </activation>
-            <modules>
-                <module>rxtxSerial-bin</module>
-                <module>rxtxSerial</module>
-                <module>rxtxSerial-test</module>
-            </modules>
-        </profile>
-        <profile>
-            <id>run-development-build-head</id>
-            <activation>
-                <property>
-                    <name>!make.release</name>
-                </property>
-            </activation>
-            <modules>
-                <module>cross-toolchain-wrapper</module>
-                <module>rxtx-api</module>
-                <module>rxtxSerial-java</module>
-                <module>rxtxSerial-native</module>
-            </modules>
-        </profile>
         <profile>
             <id>with-linux-x86</id>
             <modules>
@@ -159,44 +124,36 @@
         <profile>
             <id>with-linux-armel</id>
             <modules>
+                <module>cross-toolchain-wrapper</module>
                 <module>rxtxSerial-linux-armel</module>
             </modules>
         </profile>
         <profile>
             <id>with-linux-armhf</id>
             <modules>
+                <module>cross-toolchain-wrapper</module>
                 <module>rxtxSerial-linux-armhf</module>
             </modules>
         </profile>
         <profile>
             <id>with-windows-x86</id>
             <modules>
+                <module>cross-toolchain-wrapper</module>
                 <module>rxtxSerial-windows-x86</module>
             </modules>
         </profile>
         <profile>
             <id>with-windows-x86_64</id>
             <modules>
+                <module>cross-toolchain-wrapper</module>
                 <module>rxtxSerial-windows-x86_64</module>
             </modules>
         </profile>
         <profile>
             <id>with-osx-x86_64</id>
             <modules>
+                <module>cross-toolchain-wrapper</module>
                 <module>rxtxSerial-osx-x86_64</module>
-            </modules>
-        </profile>
-        <profile>
-            <id>run-development-build-tail</id>
-            <activation>
-                <property>
-                    <name>!make.release</name>
-                </property>
-            </activation>
-            <modules>
-                <module>rxtxSerial-bin</module>
-                <module>rxtxSerial</module>
-                <module>rxtxSerial-test</module>
             </modules>
         </profile>
         <profile>
