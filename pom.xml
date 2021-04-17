@@ -199,6 +199,38 @@
                 <module>rxtxSerial-test</module>
             </modules>
         </profile>
+        <profile>
+            <id>failNoBinarySelected</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build> 
+                <plugins> 
+                    <plugin> 
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-enforcer-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>enforce</id>
+                                <goals>
+                                    <goal>enforce</goal>
+                                </goals>
+                                <configuration>
+                                    <rules>
+                                        <AlwaysFail>
+                                            <level>ERROR</level>
+                                            <message>No rxtx native target selected. Select target(s) by activating one or more of the following profiles: with-linux-x86, with-linux-x86_64, with-linux-armel, with-linux-armhf, with-windows-x86, with-windows-x86_64, with-osx-x86_64. Profiles can be activated using the maven option -P. Example: "mvn -Pwith-linux-x86,with-windows-x86 install". In order to successfully build the respective native targets, the proper (cross) compiler(s) must be installed. Refer to the rxtx documentation.</message>
+                                        </AlwaysFail>
+                                    </rules>
+                                    <fail>true</fail>
+                                    <failFast>true</failFast>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
     <build>
         <pluginManagement>
