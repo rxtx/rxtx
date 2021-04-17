@@ -146,26 +146,12 @@
         </profile>
         <profile>
             <id>with-linux-x86</id>
-            <activation>
-                <os>
-                    <family>unix</family>
-                    <name>linux</name>
-                    <arch>i386</arch>
-                </os>
-            </activation>
             <modules>
                 <module>rxtxSerial-linux-x86</module>
             </modules>
         </profile>
         <profile>
             <id>with-linux-x86_64</id>
-            <activation>
-                <os>
-                    <family>unix</family>
-                    <name>linux</name>
-                    <arch>amd64</arch>
-                </os>
-            </activation>
             <modules>
                 <module>rxtxSerial-linux-x86_64</module>
             </modules>
@@ -196,12 +182,6 @@
         </profile>
         <profile>
             <id>with-osx-x86_64</id>
-            <activation>
-                <os>
-                    <family>mac</family>
-                    <arch>x86_64</arch>
-                </os>
-            </activation>
             <modules>
                 <module>rxtxSerial-osx-x86_64</module>
             </modules>
@@ -218,37 +198,6 @@
                 <module>rxtxSerial</module>
                 <module>rxtxSerial-test</module>
             </modules>
-        </profile>
-        <profile>
-            <id>failOnUnsupportedPlatforms</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <build> 
-                <plugins> 
-                    <plugin> 
-                        <groupId>org.apache.maven.plugins</groupId> 
-                        <artifactId>maven-enforcer-plugin</artifactId> 
-                        <version>1.1.1</version> 
-                        <executions> 
-                            <execution> 
-                                <id>enforce</id> 
-                                <goals> 
-                                    <goal>enforce</goal> 
-                                </goals>
-                                <configuration> 
-                                    <rules> 
-                                        <AlwaysFail>
-                                            <message>Your platform (=os/arch combination) is currently unsupported to build its own binary, however it might be possible to use other platforms to compile the necessary binary for you. This message does not necessarily mean that there is no way to run rxtx on your platform.</message>
-                                        </AlwaysFail>
-                                    </rules> 
-                                    <fail>true</fail> 
-                                </configuration> 
-                            </execution> 
-                        </executions> 
-                    </plugin> 
-                </plugins> 
-            </build>
         </profile>
     </profiles>
     <build>
