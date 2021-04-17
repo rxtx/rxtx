@@ -157,6 +157,15 @@
             </modules>
         </profile>
         <profile>
+            <id>run-release-assembly</id>
+            <activation>
+                <property>
+                    <name>make.release</name>
+                </property>
+            </activation>
+            <!-- The presence of this profile prevents activation of profile failNoBinarySelected during release bundle mode. -->
+         </profile>
+        <profile>
             <id>failNoBinarySelected</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
