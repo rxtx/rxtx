@@ -15,6 +15,7 @@
                 <include>gnu.io.rxtx:rxtxSerial-windows-x86_64</include>
                 <include>gnu.io.rxtx:librxtxSerial-osx-x86_64</include>
             </includes>
+            <useStrictFiltering>true</useStrictFiltering>
             <useProjectArtifact>false</useProjectArtifact>
             <outputDirectory>/gnu/io/impl/serial/</outputDirectory>
             <unpack>false</unpack>
