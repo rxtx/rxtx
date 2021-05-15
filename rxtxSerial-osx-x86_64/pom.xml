@@ -33,7 +33,7 @@
                                 <compilerStartOption>-DHAVE_STDINT_H</compilerStartOption>
                                 <compilerStartOption>-DHAVE_SYS_FCNTL_H</compilerStartOption>
                                 <compilerStartOption>-DHAVE_SYS_SIGNAL_H</compilerStartOption>
-                                <compilerStartOption>-shared</compilerStartOption>
+                                <compilerStartOption>-DHAVE_SYS_TIME_H</compilerStartOption>
                                 <compilerStartOption>-fPIC</compilerStartOption>
                                 <compilerStartOption>-I${project.build.directory}/jni-headers</compilerStartOption>
                                 <compilerStartOption>-I/System/Library/Frameworks/JavaVM.framework/Headers</compilerStartOption>

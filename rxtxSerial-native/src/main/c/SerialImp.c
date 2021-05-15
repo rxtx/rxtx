@@ -100,6 +100,9 @@
 #   include <sys/signal.h>
 #endif /* HAVE_SYS_SIGNAL_H */
 #include <sys/types.h>
+#ifdef HAVE_SYSMACROS_H
+#   include <sys/sysmacros.h>
+#endif /* HAVE_SYSMACROS_H */
 #ifdef HAVE_SYS_TIME_H
 #   include <sys/time.h>
 #endif /* HAVE_SYS_TIME_H */
@@ -5503,6 +5506,7 @@ int fhs_lock( const char *filename, pid_t pid )
 		rather than an exercise, we will handle them.
 
 ----------------------------------------------------------*/
+#if 0
 int uucp_lock( const char *filename, pid_t pid )
 {
 	char lockfilename[80], lockinfo[12], message[80];
@@ -5566,6 +5570,7 @@ int uucp_lock( const char *filename, pid_t pid )
 	close( fd );
 	return 0;
 }
+#endif
 
 /*----------------------------------------------------------
  check_lock_status
@@ -5648,6 +5653,7 @@ void fhs_unlock( const char *filename, int openpid )
    exceptions: none
    comments:   http://docs.freebsd.org/info/uucp/uucp.info.UUCP_Lock_Files.html
 ----------------------------------------------------------*/
+#if 0
 void uucp_unlock( const char *filename, int openpid )
 {
 	struct stat buf;
@@ -5686,7 +5692,7 @@ void uucp_unlock( const char *filename, int openpid )
 		report( message );
 	}
 }
-
+#endif
 /*----------------------------------------------------------
  check_lock_pid
 

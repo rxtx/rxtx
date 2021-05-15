@@ -63,11 +63,6 @@
                 <property>
                     <name>make.release</name>
                 </property>
-                <os>
-                    <family>unix</family>
-                    <name>linux</name>
-                    <arch>i386</arch>
-                </os>
             </activation>
             <dependencies>
                 <dependency>
@@ -84,11 +79,6 @@
                 <property>
                     <name>make.release</name>
                 </property>
-                <os>
-                    <family>unix</family>
-                    <name>linux</name>
-                    <arch>amd64</arch>
-                </os>
             </activation>
             <dependencies>
                 <dependency>
@@ -159,10 +149,6 @@
                 <property>
                     <name>make.release</name>
                 </property>
-                <os>
-                    <family>mac</family>
-                    <arch>x86_64</arch>
-                </os>
             </activation>
             <dependencies>
                 <dependency>
