@@ -4,9 +4,13 @@ name: build rxtx-distribution
 
 on:
   push:
-    branches: [ development ]
+    branches:
+      - '*'
+    tags:
+      - '*'
   pull_request:
-    branches: [ development ]
+    branches:
+      - '*'
 
 jobs:
   build-osx-binaries:
@@ -61,3 +65,10 @@ jobs:
           rxtx-api/target/rxtx-api-*.jar
           rxtxSerial/target/rxtxSerial-*.jar
         if-no-files-found: error
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: |
+          rxtx-api/target/rxtx-api-*.jar
+          rxtxSerial/target/rxtxSerial-*.jar
