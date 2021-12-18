@@ -4,13 +4,13 @@
     <groupId>gnu.io.rxtx</groupId>
     <artifactId>rxtxSerial-native</artifactId>
     <packaging>pom</packaging>
-    <version>2.2-stabilize-SNAPSHOT</version>
+    <version>${project.version}<!-- version calculated by maven-git-versioning-extension based on git tags --></version>
     <name>rxtxSerial native</name>
     <url>http://rxtx.qbang.org</url>
     <parent>    
         <groupId>gnu.io.rxtx</groupId>
         <artifactId>rxtx-parent</artifactId>
-        <version>2.2-stabilize-SNAPSHOT</version>
+        <version>${project.version}<!-- version calculated by maven-git-versioning-extension based on git tags --></version>
     </parent>
     <build>
         <plugins>

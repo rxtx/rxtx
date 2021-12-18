@@ -4,13 +4,13 @@
     <groupId>gnu.io.rxtx</groupId>
     <artifactId>librxtxSerial-linux-x86</artifactId>
     <packaging>so</packaging>
-    <version>2.2-stabilize-SNAPSHOT</version>
+    <version>${project.version}<!-- version calculated by maven-git-versioning-extension based on git tags --></version>
     <name>[linux/x86] rxtxSerial</name>
     <url>http://rxtx.qbang.org</url>
     <parent>    
         <groupId>gnu.io.rxtx</groupId>
         <artifactId>rxtx-parent</artifactId>
-        <version>2.2-stabilize-SNAPSHOT</version>
+        <version>${project.version}<!-- version calculated by maven-git-versioning-extension based on git tags --></version>
     </parent>
     <profiles>
         <profile>
@@ -157,7 +157,7 @@
                                 <artifactItem>
                                     <groupId>gnu.io.rxtx</groupId>
                                     <artifactId>rxtxSerial-native</artifactId>
-                                    <version>2.2-stabilize-SNAPSHOT</version>
+                                    <version>${project.version}<!-- version calculated by maven-git-versioning-extension based on git tags --></version>
                                     <type>zip</type>
                                     <classifier>sources</classifier>
                                     <overWrite>true</overWrite>
@@ -178,7 +178,7 @@
                                 <artifactItem>
                                     <groupId>gnu.io.rxtx</groupId>
                                     <artifactId>rxtxSerial-java</artifactId>
-                                    <version>2.2-stabilize-SNAPSHOT</version>
+                                    <version>${project.version}<!-- version calculated by maven-git-versioning-extension based on git tags --></version>
                                     <type>zip</type>
                                     <classifier>jni-headers</classifier>
                                     <overWrite>true</overWrite>
