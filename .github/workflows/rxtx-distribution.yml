@@ -15,7 +15,7 @@ on:
 jobs:
   build-osx-binaries:
 
-    runs-on: macos-latest
+    runs-on: macos-11
 
     steps:
     - uses: actions/checkout@v2
