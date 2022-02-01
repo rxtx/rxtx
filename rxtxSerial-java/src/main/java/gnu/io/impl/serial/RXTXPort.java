@@ -177,7 +177,7 @@ final class RXTXPort extends SerialPort {
      * @throws PortInUseException
      * @see gnu.io.SerialPort
      */
-    public RXTXPort(DriverContext context, String name) throws PortInUseException {
+    public RXTXPort(DriverContext context, String name) throws PortInUseException, IOException {
         super(name);
         this.context = context;
         /*
@@ -205,7 +205,7 @@ final class RXTXPort extends SerialPort {
     }
 
     private synchronized native int open(String name)
-            throws PortInUseException;
+            throws PortInUseException, IOException;
 
     public OutputStream getOutputStream() {
         return out;

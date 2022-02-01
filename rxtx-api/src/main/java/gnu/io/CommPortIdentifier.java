@@ -59,6 +59,7 @@ package gnu.io;
 
 import gnu.io.spi.CommDriver;
 import java.io.FileDescriptor;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Vector;
 import java.util.Enumeration;
@@ -376,7 +377,6 @@ public final class CommPortIdentifier extends Object {
         throw new UnsupportedCommOperationException();
     }
 
-    private native String native_psmisc_report_owner(String PortName);
     private boolean HideOwnerEvents;
 
     /**
@@ -401,7 +401,7 @@ public final class CommPortIdentifier extends Object {
     // can reach applications outside of this virtual machine, probably not
     // not written in java? I can't see where this request is done.
     public CommPort open(String owner, int timeLimit)
-            throws gnu.io.PortInUseException {
+            throws gnu.io.PortInUseException, IOException {
         boolean isAvailable;
         synchronized (this) {
             isAvailable = this.available;
@@ -445,14 +445,7 @@ public final class CommPortIdentifier extends Object {
                 fireOwnershipEvent(CommPortOwnershipListener.PORT_OWNED);
                 return commPort;
             } else {
-                String errMsg;
-                try {
-                    errMsg = native_psmisc_report_owner(portName);
-                } catch (Throwable t) {
-                    errMsg = "Port " + portName
-                            + " already owned... unable to open.";
-                }
-                throw new gnu.io.PortInUseException(errMsg);
+                throw new gnu.io.PortInUseException();
             }
         } finally {
             if (commPort == null) {
