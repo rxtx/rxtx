@@ -1,5 +1,5 @@
 # This workflow will build a distribution bundle containing everything needed to run rxtx on supported platforms.
-
+  
 name: build rxtx-distribution
 
 on:
