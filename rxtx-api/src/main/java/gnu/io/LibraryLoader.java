@@ -322,7 +322,10 @@ public final class LibraryLoader {
                 || "Windows 8".equals(osName)
                 || "Windows 8.1".equals(osName)
                 || "Windows 10".equals(osName)
-				|| "Windows 11".equals(osName)) {  // new Windows version
+                || "Windows 11".equals(osName)) {  // new Windows version
+                LOGGER.log(Level.INFO,
+                    "The os.name value is {0}.",
+                    osName);
             return OS_WINDOWS;
         } else if ("Mac OS X".equals(osName)) {
             return OS_MACOSX;
