@@ -1,16 +1,8 @@
 # This workflow will build a distribution bundle containing everything needed to run rxtx on supported platforms.
   
-name: build rxtx-distribution
+name: build rxtx-distribution manually
 
-on:
-  push:
-    branches:
-      - '*'
-    tags:
-      - '*'
-  pull_request:
-    branches:
-      - '*'
+on: [workflow_dispatch]
 
 jobs:
   build-osx-binaries:
