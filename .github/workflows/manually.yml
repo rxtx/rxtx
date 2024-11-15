@@ -7,7 +7,7 @@ on: [workflow_dispatch]
 jobs:
   build-osx-binaries:
 
-    runs-on: macos-11
+    runs-on: macos-latest
 
     steps:
     - uses: actions/checkout@v2
