@@ -12,10 +12,12 @@ on:
     branches:
       - '*'
 
+  workflow_dispatch:
+
 jobs:
   build-osx-binaries:
 
-    runs-on: macos-11
+    runs-on: macos-latest
 
     steps:
     - uses: actions/checkout@v2
@@ -29,7 +31,7 @@ jobs:
     - name: Build with Maven
       run: mvn --batch-mode -Pwith-osx-x86_64 package --file pom.xml
     - name: upload rxtxSerial binaries built on osx
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: rxtxSerial-binaries-built-on-osx
         path: rxtxSerial-osx-*/target/librxtxSerial-osx-*.jnilib
@@ -52,7 +54,7 @@ jobs:
       with:
         java-version: '11'
         distribution: 'adopt'
-    - uses: actions/download-artifact@v2
+    - uses: actions/download-artifact@v4
       with:
         name: rxtxSerial-binaries-built-on-osx
     - name: determine version string
@@ -64,7 +66,7 @@ jobs:
     - name: Bundle rxtx Java and native libs
       run: mvn --batch-mode -Dmake.release package --file pom.xml
     - name: upload rxtx-distribution
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: rxtx-distribution
         path: |
